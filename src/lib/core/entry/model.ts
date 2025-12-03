@@ -6,6 +6,7 @@ export interface Entry {
 	y?: number;
 	width?: number;
 	height?: number;
+	focused?: boolean;
 	parentId?: string;
 	createdAt: Date;
 	updatedAt: Date;

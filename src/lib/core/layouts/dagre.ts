@@ -52,8 +52,7 @@ export function applyDagre(
 		}),
 		edges: edges.map((edge) => {
 			return {
-				...edge,
-				style: `stroke: ${edge.data?.color}; stroke-width: 3px;`
+				...edge
 			};
 		})
 	};

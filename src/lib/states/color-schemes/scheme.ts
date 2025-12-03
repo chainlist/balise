@@ -1,4 +1,4 @@
-
 export interface ColorScheme {
-    branches: string[];
+	branches: string[];
+	unfocusedOpacity: number;
 }

@@ -6,7 +6,14 @@
 	import Keybindings from '$lib/ui/components/Keybindings.svelte';
 	import Node from '$lib/ui/customs/node/Node.svelte';
 	import Root from '$lib/ui/customs/node/Root.svelte';
-	import { Background, Panel, SvelteFlow, useStore, useSvelteFlow } from '@xyflow/svelte';
+	import {
+		Background,
+		Panel,
+		SvelteFlow,
+		useStore,
+		useSvelteFlow,
+		type Node as NodeM
+	} from '@xyflow/svelte';
 	import { onMount } from 'svelte';
 
 	const { app, settings } = useState();
@@ -20,6 +27,14 @@
 		useRefresh({ fitView: true });
 	});
 
+	function onnodepointerenter({ node }: { node: NodeM }) {
+		app.hoveredNodeId = node.id;
+	}
+
+	function onnodepointerleave() {
+		app.hoveredNodeId = undefined;
+	}
+
 	$effect(() => {
 		app.flowStore = store;
 	});
@@ -30,8 +45,8 @@
 	bind:edges={getEdges, setEdges}
 	minZoom={settings.mindmap.minZoom}
 	{nodeTypes}
-	onnodepointerenter={() => console.log('Pointer entered SvelteFlow')}
-	onnodepointerleave={() => console.log('Pointer left SvelteFlow')}
+	{onnodepointerenter}
+	{onnodepointerleave}
 	elevateEdgesOnSelect={false}
 	disableKeyboardA11y={true}
 >

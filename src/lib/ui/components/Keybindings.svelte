@@ -3,13 +3,14 @@
 	import { useAddParent } from '$lib/core/commands/list/add-parent.command';
 	import { useAddSibling } from '$lib/core/commands/list/add-sibling.command';
 	import { useFitView } from '$lib/core/commands/list/fit-view.command';
+	import { useFocusBranch } from '$lib/core/commands/list/focus-branch.command';
 	import { useUpdateUISettings } from '$lib/core/commands/list/update-ui-settings.command';
 	import { useRedoCommand, useUndoCommand } from '$lib/core/commands/manager.svelte';
 	import { useState } from '$lib/states/index.svelte';
 	import { useStore } from '@xyflow/svelte';
 	import { tinykeys } from 'tinykeys';
 
-	const { settings } = useState();
+	const { app, settings } = useState();
 	const store = $derived(useStore());
 
 	const selectedNode = $derived(
@@ -36,6 +37,14 @@
 				if (!selectedNode) return;
 
 				useAddSibling({ entryId: selectedNode.id });
+			},
+			f: (e: KeyboardEvent) => {
+				e.preventDefault();
+				if (!selectedNode && !app.hoveredNodeId) {
+					return useFocusBranch({ id: undefined });
+				}
+
+				useFocusBranch({ id: selectedNode?.id || app.hoveredNodeId! });
 			},
 			'$mod+1': (event) => {
 				event.preventDefault();
