@@ -14,8 +14,10 @@
 		useSvelteFlow,
 		type Node as NodeM
 	} from '@xyflow/svelte';
+	import * as Resizable from '$lib/ui/components/shadcn/resizable/index.js';
 	import { onMount } from 'svelte';
 	import ListDrawer from '$lib/ui/components/List/ListDrawer.svelte';
+	import Lists from '$lib/ui/components/List/Lists.svelte';
 
 	const { app, settings } = useState();
 	const flow = useSvelteFlow();
@@ -41,28 +43,39 @@
 	});
 </script>
 
-<SvelteFlow
-	bind:nodes={getNodes, setNodes}
-	bind:edges={getEdges, setEdges}
-	minZoom={settings.mindmap.minZoom}
-	{nodeTypes}
-	{onnodepointerenter}
-	{onnodepointerleave}
-	elevateEdgesOnSelect={false}
-	disableKeyboardA11y={true}
->
-	{#if settings.mindmap.bgVariant}
-		<Background variant={settings.mindmap.bgVariant} />
+<Resizable.PaneGroup direction="horizontal">
+	{#if ['both', 'mindmap'].includes(settings.ui.displayMode)}
+		<Resizable.Pane defaultSize={70} order={1}>
+			<SvelteFlow
+				bind:nodes={getNodes, setNodes}
+				bind:edges={getEdges, setEdges}
+				minZoom={settings.mindmap.minZoom}
+				{nodeTypes}
+				{onnodepointerenter}
+				{onnodepointerleave}
+				elevateEdgesOnSelect={false}
+				disableKeyboardA11y={true}
+			>
+				{#if settings.mindmap.bgVariant}
+					<Background variant={settings.mindmap.bgVariant} />
+				{/if}
+
+				<Panel position="top-right">
+					<Debug />
+				</Panel>
+			</SvelteFlow>
+		</Resizable.Pane>
 	{/if}
 
-	<Panel position="top-right">
-		<Debug />
-	</Panel>
+	<Resizable.Handle withHandle={settings.ui.displayMode === 'both'} />
 
-	<Panel position="top-left">
-		<MenuBar />
-	</Panel>
-</SvelteFlow>
+	{#if ['both', 'list'].includes(settings.ui.displayMode)}
+		<Resizable.Pane defaultSize={30} order={2}>
+			<Lists />
+		</Resizable.Pane>
+	{/if}
+</Resizable.PaneGroup>
 
+<MenuBar />
 <Keybindings />
 <ListDrawer />

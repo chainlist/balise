@@ -34,7 +34,7 @@
 </script>
 
 <div
-	class="pl-2"
+	class="w-max pl-2"
 	class:ml-3={!!color}
 	class:border-l-2={!!color}
 	style:border-left-color={color && hasChildren ? color : 'transparent'}

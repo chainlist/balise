@@ -4,7 +4,9 @@
 	import * as MenuBar from '$lib/ui/components/shadcn/menubar/index.js';
 </script>
 
-<MenuBar.Root>
-	<Settings />
-	<Node />
-</MenuBar.Root>
+<div class="absolute top-2 left-2">
+	<MenuBar.Root>
+		<Settings />
+		<Node />
+	</MenuBar.Root>
+</div>

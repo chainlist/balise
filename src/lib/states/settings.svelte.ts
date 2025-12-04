@@ -9,6 +9,7 @@ export interface UISettings {
 	colorScheme: string;
 	colorSchemes: Record<string, ColorScheme>;
 	animationDuration: number;
+	displayMode: 'mindmap' | 'list' | 'both';
 }
 
 export type MindmapDirection = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -31,7 +32,8 @@ export class SettingsState {
 		debugMode: false,
 		colorScheme: 'balise',
 		colorSchemes: { balise, material },
-		animationDuration: 200
+		animationDuration: 200,
+		displayMode: 'mindmap'
 	});
 
 	mindmap = $state<MindmapSettings>({

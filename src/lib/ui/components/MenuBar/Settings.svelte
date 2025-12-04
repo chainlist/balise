@@ -13,6 +13,16 @@
 <MenuBar.Menu>
 	<MenuBar.Trigger>Settings</MenuBar.Trigger>
 	<MenuBar.Content class="w-56" align="start">
+		<MenuBar.Sub>
+			<MenuBar.SubTrigger>Display mode</MenuBar.SubTrigger>
+			<MenuBar.SubContent>
+				<MenuBar.RadioGroup bind:value={settings.ui.displayMode} {onValueChange}>
+					<MenuBar.RadioItem value="mindmap">Mindmap</MenuBar.RadioItem>
+					<MenuBar.RadioItem value="list">List</MenuBar.RadioItem>
+					<MenuBar.RadioItem value="both">Both</MenuBar.RadioItem>
+				</MenuBar.RadioGroup>
+			</MenuBar.SubContent>
+		</MenuBar.Sub>
 		<MenuBar.Label>Mindmap</MenuBar.Label>
 		<MenuBar.Sub>
 			<MenuBar.Item disabled>New Mindmap <MenuBar.Shortcut>Ctrl+N</MenuBar.Shortcut></MenuBar.Item>

@@ -2,6 +2,7 @@
 	import { useAddChild } from '$lib/core/commands/list/add-child.command';
 	import { useAddParent } from '$lib/core/commands/list/add-parent.command';
 	import { useAddSibling } from '$lib/core/commands/list/add-sibling.command';
+	import { useCollapsed } from '$lib/core/commands/list/collapse-entry.command';
 	import { useFitView } from '$lib/core/commands/list/fit-view.command';
 	import { useFocusBranch } from '$lib/core/commands/list/focus-branch.command';
 	import { useToggleListDrawer } from '$lib/core/commands/list/toggle-list-drawer.command';
@@ -47,6 +48,12 @@
 
 				useFocusBranch({ id: selectedNode?.id || app.hoveredNodeId! });
 			},
+			'$mod+.': (event) => {
+				event.preventDefault();
+				if (!selectedNode) return;
+
+				useCollapsed({ entryId: selectedNode.id });
+			},
 			'$mod+1': (event) => {
 				event.preventDefault();
 				if (!selectedNode) return;
@@ -55,6 +62,7 @@
 			},
 			'$mod+2': (event) => {
 				event.preventDefault();
+				if (['list', 'both'].includes(settings.ui.displayMode)) return;
 				useToggleListDrawer();
 			},
 			'$mod+z': (event) => {
