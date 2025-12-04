@@ -4,6 +4,7 @@
 	import { useAddSibling } from '$lib/core/commands/list/add-sibling.command';
 	import { useFitView } from '$lib/core/commands/list/fit-view.command';
 	import { useFocusBranch } from '$lib/core/commands/list/focus-branch.command';
+	import { useToggleListDrawer } from '$lib/core/commands/list/toggle-list-drawer.command';
 	import { useUpdateUISettings } from '$lib/core/commands/list/update-ui-settings.command';
 	import { useRedoCommand, useUndoCommand } from '$lib/core/commands/manager.svelte';
 	import { useState } from '$lib/states/index.svelte';
@@ -51,6 +52,10 @@
 				if (!selectedNode) return;
 
 				useFitView({ nodes: [{ id: selectedNode.id }], duration: settings.ui.animationDuration });
+			},
+			'$mod+2': (event) => {
+				event.preventDefault();
+				useToggleListDrawer();
 			},
 			'$mod+z': (event) => {
 				event.preventDefault();

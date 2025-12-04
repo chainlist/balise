@@ -82,6 +82,7 @@ export class AppState {
 	edges = $state.raw<Edge[]>([]);
 	focusedEntryId = $state<string>();
 	hoveredNodeId = $state<string>();
+	listDrawerOpened = $state<boolean>(false);
 
 	flowInstance: ReturnType<typeof useSvelteFlow> | null = null;
 	flowStore: ReturnType<typeof useStore> | null = null;

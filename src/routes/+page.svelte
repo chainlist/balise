@@ -15,6 +15,7 @@
 		type Node as NodeM
 	} from '@xyflow/svelte';
 	import { onMount } from 'svelte';
+	import ListDrawer from '$lib/ui/components/List/ListDrawer.svelte';
 
 	const { app, settings } = useState();
 	const flow = useSvelteFlow();
@@ -64,3 +65,4 @@
 </SvelteFlow>
 
 <Keybindings />
+<ListDrawer />

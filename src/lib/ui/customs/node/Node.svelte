@@ -11,10 +11,6 @@
 	const opacity = $derived(
 		!turnedOffOpacity ? settings.ui.colorSchemes[settings.ui.colorScheme].unfocusedOpacity : 1
 	);
-
-	onMount(() => {
-		console.log(id, selected);
-	});
 </script>
 
 <Handle type="target" position={targetPosition!} />

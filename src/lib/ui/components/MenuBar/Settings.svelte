@@ -15,7 +15,7 @@
 	<MenuBar.Content class="w-56" align="start">
 		<MenuBar.Label>Mindmap</MenuBar.Label>
 		<MenuBar.Sub>
-			<MenuBar.Item disabled>New Mindmap <MenuBar.Shortcut>ctrl N</MenuBar.Shortcut></MenuBar.Item>
+			<MenuBar.Item disabled>New Mindmap <MenuBar.Shortcut>Ctrl+N</MenuBar.Shortcut></MenuBar.Item>
 			<MenuBar.Separator />
 			<MenuBar.SubTrigger>Layouts</MenuBar.SubTrigger>
 			<MenuBar.SubContent>
@@ -41,7 +41,7 @@
 		<MenuBar.Label>List</MenuBar.Label>
 		<MenuBar.Item>Theme</MenuBar.Item>
 		<MenuBar.Separator />
-		<MenuBar.Item>Open Settings <MenuBar.Shortcut>ctrl ,</MenuBar.Shortcut></MenuBar.Item>
+		<MenuBar.Item>Open Settings <MenuBar.Shortcut>Ctrl+,</MenuBar.Shortcut></MenuBar.Item>
 		<MenuBar.Separator />
 		<MenuBar.Item variant="destructive">Delete Mindmap</MenuBar.Item>
 	</MenuBar.Content>

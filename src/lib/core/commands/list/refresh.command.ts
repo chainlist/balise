@@ -99,6 +99,8 @@ class RefreshCommand {
 
 			const isRoot = !entry.parentId;
 
+			if (entry.collapsed) return;
+
 			children.forEach((child) =>
 				walk(child, {
 					color: isRoot ? branchColors[branchesCount++ % branchColors.length] : params.color,

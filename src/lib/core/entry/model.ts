@@ -7,6 +7,7 @@ export interface Entry {
 	width?: number;
 	height?: number;
 	focused?: boolean;
+	collapsed?: boolean;
 	parentId?: string;
 	createdAt: Date;
 	updatedAt: Date;

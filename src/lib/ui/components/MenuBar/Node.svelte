@@ -4,9 +4,11 @@
 	import { useAddChild } from '$lib/core/commands/list/add-child.command';
 	import { useAddParent } from '$lib/core/commands/list/add-parent.command';
 	import { useAddSibling } from '$lib/core/commands/list/add-sibling.command';
-	import { Separator } from '../shadcn/dropdown-menu';
 	import { useFocusNodes } from '$lib/core/commands/list/focus-nodes.command';
 	import { useFocusBranch } from '$lib/core/commands/list/focus-branch.command';
+	import { ArrowBigUp } from '@lucide/svelte';
+	import { useCollapsed } from '$lib/core/commands/list/collapse-entry.command';
+	import { SubContent } from '../shadcn/dropdown-menu';
 
 	const store = $derived(useStore());
 
@@ -43,23 +45,31 @@
 
 		useFocusBranch({ id: selectedNode.id });
 	}
+
+	function collapse() {
+		if (!selectedNode) return;
+
+		useCollapsed({ entryId: selectedNode.id });
+	}
 </script>
 
 <MenuBar.Menu>
 	<MenuBar.Trigger disabled={!selectedNode}>
-		<span
-			class="transition-colors duration-200"
-			class:bg-muted={!selectedNode}
-			class:text-muted-foreground={!selectedNode}>Node</span
-		>
+		<span class="transition-colors duration-200" class:text-secondary={!selectedNode}> Node </span>
 	</MenuBar.Trigger>
 	<MenuBar.Content class="w-56" align="start">
-		<MenuBar.Label>Focus</MenuBar.Label>
-		<MenuBar.Item onclick={focusNode}>Node</MenuBar.Item>
-		<MenuBar.Item onclick={focusBranch}>Branch</MenuBar.Item>
+		<MenuBar.Label>Actions</MenuBar.Label>
+		<MenuBar.Sub>
+			<MenuBar.SubTrigger>Focus</MenuBar.SubTrigger>
+			<MenuBar.SubContent>
+				<MenuBar.Item onclick={focusNode}>Node</MenuBar.Item>
+				<MenuBar.Item onclick={focusBranch}>Branch</MenuBar.Item>
+			</MenuBar.SubContent>
+		</MenuBar.Sub>
+		<MenuBar.Item onclick={collapse}>Collapse</MenuBar.Item>
 		<MenuBar.Separator />
 		<MenuBar.Item onclick={addParent}>
-			Add new parent <MenuBar.Shortcut>Shift Tab</MenuBar.Shortcut>
+			Add new parent <MenuBar.Shortcut>Shift+Tab</MenuBar.Shortcut>
 		</MenuBar.Item>
 		<MenuBar.Item onclick={addSibling}>
 			Add sibling
