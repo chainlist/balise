@@ -1,0 +1,2 @@
+[env]
+SQLITE_ENABLE_FTS5 = "1"
