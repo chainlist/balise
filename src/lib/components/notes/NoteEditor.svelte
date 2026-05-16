@@ -8,11 +8,12 @@
 	import {
 		mdStylePlugin,
 		mdHidePlugin,
+		mdCodePlugin,
 		mdTagPlugin,
 		mdPairPlugin,
 		mdLinkPlugin,
 		noteEditorTheme
-	} from '$lib/utils/mdEditor';
+	} from '$lib/utils/cm';
 	import { updateNote, deleteNote, type Note } from '$lib/services/notes.svelte';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
@@ -41,6 +42,7 @@
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
 					mdStylePlugin,
 					mdHidePlugin,
+					mdCodePlugin,
 					mdLinkPlugin,
 					mdTagPlugin,
 					mdPairPlugin,
