@@ -81,7 +81,7 @@
 					{/each}
 				</div>
 			{/if}
-			{#if tagState.relatedTags.length > 0}
+			{#if tagState.relatedTags.length > 0 && noteState.notes.length > 1}
 				<div class="px-2 pb-1">
 					<DropdownMenu.Root
 						onOpenChange={(open) => {

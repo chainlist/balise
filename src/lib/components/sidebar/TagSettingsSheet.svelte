@@ -30,7 +30,7 @@
 		try {
 			await setTagSettings(tag.tag, {
 				color,
-				display_name: displayName.trim() || undefined
+				display_name: displayName.trim() || null
 			});
 			reset();
 			open = false;

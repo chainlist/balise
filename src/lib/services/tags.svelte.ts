@@ -36,7 +36,7 @@ export async function loadTags(): Promise<void> {
 
 export async function setTagSettings(
 	tag: string,
-	settings: Partial<{ color: string; display_name: string }>
+	settings: Partial<{ color: string; display_name: string | null }>
 ): Promise<void> {
 	const db = getDB();
 	await db.execute(
@@ -44,7 +44,7 @@ export async function setTagSettings(
        VALUES ($1, COALESCE($2, '#7F77DD'), $3)
        ON CONFLICT(tag) DO UPDATE SET
          color        = COALESCE($2, color),
-         display_name = COALESCE($3, display_name)`,
+         display_name = $3`,
 		[tag, settings.color ?? null, settings.display_name ?? null]
 	);
 	const updated = tagState.tags.find((t) => t.tag === tag);
