@@ -6,6 +6,7 @@ import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { mount, unmount } from 'svelte';
 import TagChip from '$lib/components/notes/TagChip.svelte';
+import LinkChip from '$lib/components/notes/LinkChip.svelte';
 import { tagState } from '$lib/services/tags.svelte';
 
 // --- Style marks (add CSS classes to formatted regions) -----------------------
@@ -77,6 +78,101 @@ class HrWidget extends WidgetType {
 
 const hrWidget = new HrWidget();
 
+// --- Link widget (render [text](url) and bare autolinks as <a> on non-cursor lines) ---
+
+class LinkWidget extends WidgetType {
+	constructor(
+		readonly href: string,
+		readonly label: string
+	) {
+		super();
+	}
+
+	eq(other: LinkWidget) {
+		return other.href === this.href && other.label === this.label;
+	}
+
+	toDOM(): HTMLElement {
+		const span = document.createElement('span');
+		const instance = mount(LinkChip, { target: span, props: { href: this.href, label: this.label } });
+		(span as any)._sv = instance;
+		return span;
+	}
+
+	destroy(dom: HTMLElement) {
+		const instance = (dom as any)._sv;
+		if (instance) unmount(instance);
+	}
+
+	ignoreEvent() {
+		return true;
+	}
+}
+
+const BARE_URL_RE = /https?:\/\/[^\s<>[\]()'"]+/g;
+
+function buildLinkDecos(view: EditorView): DecorationSet {
+	const { state } = view;
+	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+	const ranges: Range<Decoration>[] = [];
+	const tree = syntaxTree(state);
+
+	// [text](url) markdown links via syntax tree
+	tree.iterate({
+		enter(node) {
+			const { from, to, name } = node;
+			if (state.doc.lineAt(from).number === cursorLine) return false;
+
+			if (name === 'Link') {
+				let href = '';
+				let urlFrom = -1;
+				for (let child = node.node.firstChild; child; child = child.nextSibling) {
+					if (child.name === 'URL') {
+						href = state.doc.sliceString(child.from, child.to);
+						urlFrom = child.from;
+					}
+				}
+				if (href && urlFrom > 0) {
+					const label = state.doc.sliceString(from + 1, urlFrom - 2);
+					ranges.push(
+						Decoration.replace({ widget: new LinkWidget(href, label || href) }).range(from, to)
+					);
+				}
+				return false;
+			}
+		}
+	});
+
+	// Bare URLs via regex (GFM parser doesn't handle these without angle brackets)
+	for (const { from, to } of view.visibleRanges) {
+		BARE_URL_RE.lastIndex = 0;
+		const text = state.doc.sliceString(from, to);
+		let match: RegExpExecArray | null;
+		while ((match = BARE_URL_RE.exec(text)) !== null) {
+			const start = from + match.index;
+			const end = start + match[0].length;
+			if (state.doc.lineAt(start).number === cursorLine) continue;
+
+			// Skip if inside a Link or code node (already handled or should stay raw)
+			let skip = false;
+			for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
+				if (cur.name === 'Link' || cur.name === 'InlineCode' || cur.name === 'FencedCode' || cur.name === 'CodeBlock') {
+					skip = true;
+					break;
+				}
+			}
+			if (skip) continue;
+
+			ranges.push(
+				Decoration.replace({ widget: new LinkWidget(match[0], match[0]) }).range(start, end)
+			);
+		}
+	}
+
+	ranges.sort((a, b) => a.from - b.from);
+	return Decoration.set(ranges, true);
+}
+
 function buildHideDecos(view: EditorView): DecorationSet {
 	const { state } = view;
 	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
@@ -110,40 +206,12 @@ function buildHideDecos(view: EditorView): DecorationSet {
 	return Decoration.set(ranges);
 }
 
-// --- List line decorations (indent list items) --------------------------------
-
-function buildListLineDecos(view: EditorView): DecorationSet {
-	const { state } = view;
-	const seen = new Set<number>();
-	const ranges: Range<Decoration>[] = [];
-
-	syntaxTree(state).iterate({
-		enter(node) {
-			if (node.name !== 'ListItem') return;
-			let pos = node.from;
-			while (pos <= node.to) {
-				const line = state.doc.lineAt(pos);
-				if (!seen.has(line.from)) {
-					seen.add(line.from);
-					ranges.push(Decoration.line({ class: 'cm-md-list-item' }).range(line.from));
-				}
-				if (line.to >= node.to) break;
-				pos = line.to + 1;
-			}
-		}
-	});
-
-	ranges.sort((a, b) => a.from - b.from);
-	return Decoration.set(ranges);
-}
-
 // --- Tag decorations (#tag rendered as Svelte chip on non-cursor lines) -------
 
 const TAG_RE = /#[a-zA-Z0-9/]{2,}/g;
 
 class TagWidget extends WidgetType {
 	constructor(readonly tag: string) {
-		console.log('Creating TagWidget for', tag);
 		super();
 	}
 
@@ -260,8 +328,8 @@ export const mdPairPlugin = EditorView.inputHandler.of((view, _from, _to, text) 
 
 export const mdStylePlugin = makePlugin(buildStyleDecos);
 export const mdHidePlugin = makePlugin(buildHideDecos);
-export const mdListPlugin = makePlugin(buildListLineDecos);
 export const mdTagPlugin = makePlugin(buildTagDecos);
+export const mdLinkPlugin = makePlugin(buildLinkDecos);
 
 // --- Theme --------------------------------------------------------------------
 
@@ -317,6 +385,11 @@ export const noteEditorTheme = EditorView.theme({
 		height: '1px',
 		background: 'var(--border)',
 		verticalAlign: 'middle'
+	},
+	'.cm-md-link': {
+		color: 'var(--primary)',
+		textDecoration: 'underline',
+		textDecorationColor: 'color-mix(in oklch, var(--primary) 40%, transparent)'
 	},
 	'.cm-md-tag': {
 		color: 'var(--primary)',

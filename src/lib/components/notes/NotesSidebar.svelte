@@ -23,7 +23,7 @@
 	const selectedNote = $derived(noteState.notes.find((n) => n.id === selectedNoteId) ?? null);
 
 	async function handleCreateNote() {
-		const id = await createNote('### New Note');
+		const id = await createNote('### New Note\n\n' + `#${uiState.activeTag}\n\n`);
 		selection = { noteId: id, tag: uiState.activeTag, composedKey };
 	}
 

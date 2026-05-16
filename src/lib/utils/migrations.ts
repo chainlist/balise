@@ -94,8 +94,14 @@ const MIGRATIONS: Migration[] = [
         display_name TEXT
       );
     `
+	},
+	{
+		version: 3,
+		sql: `
+      ALTER TABLE tag_settings ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;
+    `
 	}
-	// add future migrations here as { version: 3, sql: '...' }
+	// add future migrations here as { version: 4, sql: '...' }
 ];
 
 export async function migrate(db: Database): Promise<void> {

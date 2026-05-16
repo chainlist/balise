@@ -5,6 +5,7 @@ export interface Tag {
 	tag: string;
 	color: string | null;
 	display_name: string | null;
+	pinned: boolean;
 	count: number;
 }
 
@@ -18,39 +19,47 @@ export const tagState = $state({ tags: [] as Tag[], untaggedCount: 0, relatedTag
 
 export async function loadTags(): Promise<void> {
 	const db = getDB();
-	const [tags, untagged] = await Promise.all([
-		db.select<Tag[]>(`
-      SELECT t.tag, ts.color, ts.display_name, COUNT(nt.note_id) AS count
+	type RawTag = Omit<Tag, 'pinned'> & { pinned: number };
+	const [rawTags, untagged] = await Promise.all([
+		db.select<RawTag[]>(`
+      SELECT t.tag, ts.color, ts.display_name, COALESCE(ts.pinned, 0) AS pinned, COUNT(nt.note_id) AS count
       FROM tags t
       LEFT JOIN note_tags nt ON LOWER(nt.tag) = LOWER(t.tag)
       LEFT JOIN tag_settings ts ON ts.tag = t.tag
       GROUP BY t.tag
+      ORDER BY COALESCE(ts.pinned, 0) DESC, t.tag
     `),
 		db.select<{ count: number }[]>(
 			`SELECT COUNT(*) AS count FROM notes WHERE id NOT IN (SELECT DISTINCT note_id FROM note_tags)`
 		)
 	]);
-	tagState.tags = tags;
+	tagState.tags = rawTags.map((t) => ({ ...t, pinned: t.pinned === 1 }));
 	tagState.untaggedCount = untagged[0]?.count ?? 0;
 }
 
 export async function setTagSettings(
 	tag: string,
-	settings: Partial<{ color: string; display_name: string | null }>
+	settings: Partial<{ color: string; display_name: string | null; pinned: boolean }>
 ): Promise<void> {
 	const db = getDB();
+	const pinnedVal = settings.pinned !== undefined ? (settings.pinned ? 1 : 0) : null;
 	await db.execute(
-		`INSERT INTO tag_settings (tag, color, display_name)
-       VALUES ($1, COALESCE($2, '#7F77DD'), $3)
+		`INSERT INTO tag_settings (tag, color, display_name, pinned)
+       VALUES ($1, COALESCE($2, '#7F77DD'), $3, COALESCE($4, 0))
        ON CONFLICT(tag) DO UPDATE SET
          color        = COALESCE($2, color),
-         display_name = $3`,
-		[tag, settings.color ?? null, settings.display_name ?? null]
+         display_name = $3,
+         pinned       = COALESCE($4, pinned)`,
+		[tag, settings.color ?? null, settings.display_name ?? null, pinnedVal]
 	);
 	const updated = tagState.tags.find((t) => t.tag === tag);
 	if (updated) {
 		if (settings.color) updated.color = settings.color;
 		if (settings.display_name !== undefined) updated.display_name = settings.display_name;
+		if (settings.pinned !== undefined) {
+			updated.pinned = settings.pinned;
+			tagState.tags.sort((a, b) => Number(b.pinned) - Number(a.pinned) || a.tag.localeCompare(b.tag));
+		}
 	}
 }
 

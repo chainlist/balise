@@ -2,26 +2,32 @@
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
+	import { Toggle } from '$lib/components/shadcn/toggle/index.js';
 	import { setTagSettings, type Tag } from '$lib/services/tags.svelte';
+	import { PinIcon, PinOffIcon } from '@lucide/svelte';
 
 	let { open = $bindable(false), tag }: { open?: boolean; tag: Tag | null } = $props();
 
 	// Base values derived from the prop — update automatically when tag changes
 	let baseDisplayName = $derived(tag?.display_name ?? '');
 	let baseColor = $derived(tag?.color ?? '#7F77DD');
+	let basePinned = $derived(tag?.pinned ?? false);
 
 	// User edits — null means "not yet edited, use the base value"
 	let draftDisplayName = $state<string | null>(null);
 	let draftColor = $state<string | null>(null);
+	let draftPinned = $state<boolean | null>(null);
 
 	let displayName = $derived(draftDisplayName ?? baseDisplayName);
 	let color = $derived(draftColor ?? baseColor);
+	let pinned = $derived(draftPinned ?? basePinned);
 
 	let saving = $state(false);
 
 	function reset() {
 		draftDisplayName = null;
 		draftColor = null;
+		draftPinned = null;
 	}
 
 	async function handleSave() {
@@ -30,7 +36,8 @@
 		try {
 			await setTagSettings(tag.tag, {
 				color,
-				display_name: displayName.trim() || null
+				display_name: displayName.trim() || null,
+				pinned
 			});
 			reset();
 			open = false;
@@ -88,6 +95,25 @@
 					/>
 					<span class="font-mono text-sm text-muted-foreground">{color}</span>
 				</div>
+			</div>
+
+			<div class="space-y-2">
+				<p class="text-sm font-medium">Pin to sidebar</p>
+				<Toggle
+					aria-label="Toggle bookmark"
+					pressed={pinned}
+					onPressedChange={(v) => (draftPinned = v)}
+					size="sm"
+					variant="outline"
+					class="data-[state=on]:bg-transparent data-[state=on]:*:[svg]:fill-blue-500 data-[state=on]:*:[svg]:stroke-blue-500"
+				>
+					{#if pinned}
+						<PinIcon />
+					{:else}
+						<PinOffIcon />
+					{/if}
+					Pin this tag
+				</Toggle>
 			</div>
 
 			<div class="mt-auto flex justify-end gap-2">

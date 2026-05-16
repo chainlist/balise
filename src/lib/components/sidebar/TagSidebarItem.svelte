@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { setActiveTag, uiState } from '$lib/services/ui-state.svelte';
 	import { tagDisplayName, type Tag } from '$lib/services/tags.svelte';
-	import { Settings2Icon } from '@lucide/svelte';
-	import { Button } from '../shadcn/button';
+	import { Settings2Icon, PinIcon } from '@lucide/svelte';
 
 	let { tag, onSettings }: { tag: Tag; onSettings: (tag: Tag) => void } = $props();
 
@@ -20,10 +19,13 @@
 	class="group inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10"
 >
 	<div class="flex items-center gap-2">
-		<span
-			class="size-2 shrink-0 rounded-full bg-accent-foreground/30"
-			style={tag.color ? `background: ${tag.color};` : ''}
-		></span>
+		{#if tag.pinned}
+			<PinIcon size="14" style="color: {tag.color ?? 'currentColor'};" class="shrink-0 text-muted-foreground/50" />
+		{:else if tag.color}
+			<span class="text-sm text-muted-foreground/50" style="color: {tag.color};">#</span>
+		{:else}
+			<span class="text-sm text-muted-foreground/50">#</span>
+		{/if}
 		<span>{tagDisplayName(tag)}</span>
 	</div>
 	<!-- svelte-ignore a11y_click_events_have_key_events -->

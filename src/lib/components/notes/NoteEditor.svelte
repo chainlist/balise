@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { EditorView, keymap } from '@codemirror/view';
 	import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
-	import { markdown } from '@codemirror/lang-markdown';
+	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
 	import { untrack } from 'svelte';
 	import {
 		mdStylePlugin,
 		mdHidePlugin,
-		mdListPlugin,
 		mdTagPlugin,
 		mdPairPlugin,
+		mdLinkPlugin,
 		noteEditorTheme
 	} from '$lib/utils/mdEditor';
 	import { updateNote, deleteNote, type Note } from '$lib/services/notes.svelte';
@@ -23,48 +24,49 @@
 	let { note }: { note: Note } = $props();
 
 	function mount(container: HTMLDivElement) {
-		const statusEl = container.querySelector<HTMLSpanElement>('[data-save-status]')!;
-		const editorEl = container.querySelector<HTMLDivElement>('[data-editor]')!;
-		let saveTimer: ReturnType<typeof setTimeout>;
+		return untrack(() => {
+			const statusEl = container.querySelector<HTMLSpanElement>('[data-save-status]')!;
+			const editorEl = container.querySelector<HTMLDivElement>('[data-editor]')!;
+			let saveTimer: ReturnType<typeof setTimeout>;
 
-		// Snapshot note values without tracking — prevents saves from triggering remount
-		const noteId = untrack(() => note.id);
-		const noteContent = untrack(() => note.content);
+			const noteId = note.id;
+			const noteContent = note.content;
 
-		const view = new EditorView({
-			doc: noteContent,
-			extensions: [
-				history(),
-				keymap.of([...defaultKeymap, ...historyKeymap]),
-				EditorView.lineWrapping,
-				markdown({ codeLanguages: languages }),
-				mdStylePlugin,
-				mdHidePlugin,
-				mdListPlugin,
-				mdTagPlugin,
-				mdPairPlugin,
-				noteEditorTheme,
-				EditorView.updateListener.of((u) => {
-					if (u.docChanged) {
-						clearTimeout(saveTimer);
-						statusEl.textContent = 'Saving…';
-						const val = u.state.doc.toString();
-						saveTimer = setTimeout(async () => {
-							await updateNote(noteId, val);
-							statusEl.textContent = 'Saved';
-						}, 500);
-					}
-				})
-			],
-			parent: editorEl
+			const view = new EditorView({
+				doc: noteContent,
+				extensions: [
+					history(),
+					keymap.of([...defaultKeymap, ...historyKeymap]),
+					EditorView.lineWrapping,
+					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
+					mdStylePlugin,
+					mdHidePlugin,
+					mdLinkPlugin,
+					mdTagPlugin,
+					mdPairPlugin,
+					noteEditorTheme,
+					EditorView.updateListener.of((u) => {
+						if (u.docChanged) {
+							clearTimeout(saveTimer);
+							statusEl.textContent = 'Saving…';
+							const val = u.state.doc.toString();
+							saveTimer = setTimeout(async () => {
+								await updateNote(noteId, val);
+								statusEl.textContent = 'Saved';
+							}, 500);
+						}
+					})
+				],
+				parent: editorEl
+			});
+
+			view.focus();
+
+			return () => {
+				clearTimeout(saveTimer);
+				view.destroy();
+			};
 		});
-
-		view.focus();
-
-		return () => {
-			clearTimeout(saveTimer);
-			view.destroy();
-		};
 	}
 </script>
 
@@ -103,11 +105,20 @@
 	<Sheet.Content side="right" class="w-full sm:max-w-md">
 		<Sheet.Header class="gap-2 border-b p-6">
 			<Sheet.Title>Delete note</Sheet.Title>
-			<Sheet.Description>This will permanently delete this note. This action cannot be undone.</Sheet.Description>
+			<Sheet.Description
+				>This will permanently delete this note. This action cannot be undone.</Sheet.Description
+			>
 		</Sheet.Header>
 		<div class="flex justify-end gap-2 p-6">
 			<Button type="button" variant="outline" onclick={() => (confirmOpen = false)}>Cancel</Button>
-			<Button type="button" variant="destructive" onclick={() => { deleteNote(note.id); confirmOpen = false; }}>Delete</Button>
+			<Button
+				type="button"
+				variant="destructive"
+				onclick={() => {
+					deleteNote(note.id);
+					confirmOpen = false;
+				}}>Delete</Button
+			>
 		</div>
 	</Sheet.Content>
 </Sheet.Root>

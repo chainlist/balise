@@ -11,34 +11,78 @@
 		"sql:allow-load",
 		"store:default",
 		"fs:default",
-
+		"opener:allow-default-urls",
 		{
 			"identifier": "fs:allow-exists",
-			"allow": [{ "path": "$APPDATA/**/*" }, { "path": "$DOCUMENT/**/*" }]
+			"allow": [
+				{
+					"path": "$APPDATA/**/*"
+				},
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
 		},
 		{
 			"identifier": "fs:allow-app-read",
-			"allow": [{ "path": "$APPDATA/**/*" }, { "path": "$DOCUMENT/**/*" }]
+			"allow": [
+				{
+					"path": "$APPDATA/**/*"
+				},
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
 		},
 		{
 			"identifier": "fs:allow-mkdir",
-			"allow": [{ "path": "$APPDATA/**/*" }, { "path": "$DOCUMENT/**/*" }]
+			"allow": [
+				{
+					"path": "$APPDATA/**/*"
+				},
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
 		},
 		{
 			"identifier": "fs:allow-app-write",
-			"allow": [{ "path": "$APPDATA/**/*" }, { "path": "$DOCUMENT/**/*" }]
+			"allow": [
+				{
+					"path": "$APPDATA/**/*"
+				},
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
 		},
 		{
 			"identifier": "fs:allow-remove",
-			"allow": [{ "path": "$APPDATA/**/*" }, { "path": "$DOCUMENT/**/*" }]
+			"allow": [
+				{
+					"path": "$APPDATA/**/*"
+				},
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
 		},
 		{
 			"identifier": "fs:allow-read-dir",
-			"allow": [{ "path": "$DOCUMENT/**/*" }]
+			"allow": [
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
 		},
 		{
 			"identifier": "fs:allow-stat",
-			"allow": [{ "path": "$DOCUMENT/**/*" }]
-		}
+			"allow": [
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
+		},
+		"opener:default"
 	]
 }
