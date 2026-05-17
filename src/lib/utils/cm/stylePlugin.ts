@@ -2,7 +2,7 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { makePlugin } from './shared';
+import { makePlugin, LENIENT_EMPHASIS } from './shared';
 
 const STYLE_NODES: Record<string, string> = {
 	StrongEmphasis: 'cm-md-bold',
@@ -16,13 +16,34 @@ const STYLE_NODES: Record<string, string> = {
 
 function buildStyleDecos(view: EditorView): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
+	const covered: [number, number][] = [];
 
 	syntaxTree(view.state).iterate({
 		enter(node) {
 			const cls = STYLE_NODES[node.name];
-			if (cls) ranges.push(Decoration.mark({ class: cls }).range(node.from, node.to));
+			if (cls) {
+				ranges.push(Decoration.mark({ class: cls }).range(node.from, node.to));
+				covered.push([node.from, node.to]);
+			}
 		}
 	});
+
+	const text = view.state.doc.toString();
+	const isCovered = (from: number, to: number) =>
+		covered.some(([f, t]) => from >= f && to <= t);
+
+	for (const [re, cls] of LENIENT_EMPHASIS) {
+		re.lastIndex = 0;
+		let m: RegExpExecArray | null;
+		while ((m = re.exec(text)) !== null) {
+			const from = m.index;
+			const to = from + m[0].length;
+			if (!isCovered(from, to)) {
+				ranges.push(Decoration.mark({ class: cls }).range(from, to));
+				covered.push([from, to]);
+			}
+		}
+	}
 
 	// Sort by start asc, end desc (outer ranges first). Skip nested overlaps.
 	ranges.sort((a, b) => a.from - b.from || b.to - a.to);

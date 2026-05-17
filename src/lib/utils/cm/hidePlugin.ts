@@ -2,7 +2,7 @@ import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { makePlugin, hideMark } from './shared';
+import { makePlugin, hideMark, LENIENT_EMPHASIS } from './shared';
 
 const HIDE_NODES = new Set(['EmphasisMark', 'InlineCodeMark', 'StrikethroughMark']);
 
@@ -37,10 +37,15 @@ function buildHideDecos(view: EditorView): DecorationSet {
 	const { state } = view;
 	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
 	const ranges: Range<Decoration>[] = [];
+	const parsedRanges: [number, number][] = [];
 
 	syntaxTree(state).iterate({
 		enter(node) {
 			const { from, to, name } = node;
+
+			if (['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode'].includes(name)) {
+				parsedRanges.push([from, to]);
+			}
 
 			if (name === 'ListMark') {
 				const isBullet = node.node.parent?.parent?.name === 'BulletList';
@@ -62,8 +67,38 @@ function buildHideDecos(view: EditorView): DecorationSet {
 		}
 	});
 
-	ranges.sort((a, b) => a.from - b.from);
-	return Decoration.set(ranges);
+	// Regex fallback: hide marks for emphasis patterns the parser rejected (e.g. trailing spaces).
+	const text = state.doc.toString();
+	const isCoveredByTree = (from: number, to: number) =>
+		parsedRanges.some(([f, t]) => from >= f && to <= t);
+	const lenientCovered: [number, number][] = [];
+
+	for (const [re, , markLen] of LENIENT_EMPHASIS) {
+		re.lastIndex = 0;
+		let m: RegExpExecArray | null;
+		while ((m = re.exec(text)) !== null) {
+			const from = m.index;
+			const to = from + m[0].length;
+			if (isCoveredByTree(from, to)) continue;
+			if (lenientCovered.some(([f, t]) => from >= f && to <= t)) continue;
+			lenientCovered.push([from, to]);
+
+			if (state.doc.lineAt(from).number === cursorLine) continue;
+			ranges.push(hideMark.range(from, from + markLen));
+			ranges.push(hideMark.range(to - markLen, to));
+		}
+	}
+
+	ranges.sort((a, b) => a.from - b.from || b.to - a.to);
+	const deduped: Range<Decoration>[] = [];
+	let lastTo = -1;
+	for (const r of ranges) {
+		if (r.from >= lastTo) {
+			deduped.push(r);
+			lastTo = r.to;
+		}
+	}
+	return Decoration.set(deduped);
 }
 
 export const mdHidePlugin = makePlugin(buildHideDecos);
