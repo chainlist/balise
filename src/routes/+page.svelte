@@ -12,7 +12,7 @@
 			{/key}
 		{:else}
 			<div class="flex flex-1 items-center justify-center">
-				<p class="text-muted-foreground text-sm">Select a note or create a new one.</p>
+				<p class="text-sm text-muted-foreground">Select a note or create a new one.</p>
 			</div>
 		{/if}
 	{/snippet}

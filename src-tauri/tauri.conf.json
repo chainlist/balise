@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "fil",
+  "productName": "Balise",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.balise.app",
   "build": {
     "frontendDist": "../build",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Fil",
+        "title": "Balise",
         "width": 800,
         "height": 600,
         "resizable": true,

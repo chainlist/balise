@@ -2,7 +2,7 @@ import { BaseDirectory, exists, mkdir, remove } from '@tauri-apps/plugin-fs';
 import type Database from '@tauri-apps/plugin-sql';
 import { closeDBIfMatches, loadDB } from '$lib/utils/db';
 
-const DESKS_ROOT_DIR = 'Fil';
+const DESKS_ROOT_DIR = 'Balise';
 
 export function sanitizeDeskName(desk: string): string {
 	const normalized = desk.trim();

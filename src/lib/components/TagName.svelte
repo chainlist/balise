@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { tagState, tagDisplayName } from '$lib/services/tags.svelte';
+	import { tagState, tagDisplayName, type Tag, type RelatedTag } from '$lib/services/tags.svelte';
 
-	type TagLike = { tag: string; display_name: string | null };
-
-	let { tag }: { tag: string | TagLike } = $props();
+	let { tag }: { tag: string | Tag | RelatedTag } = $props();
 
 	const tagObj = $derived(
 		typeof tag === 'string'
 			? (tagState.tags.find((t) => t.tag.toLowerCase() === tag.toLowerCase()) ?? {
 					tag,
-					display_name: null
+					display_name: null,
+					color: null
 				})
 			: tag
 	);
 </script>
 
-{tagDisplayName(tagObj)}
+<span style={tagObj.color ? `color: ${tagObj.color};` : ''}>
+	{tagDisplayName(tagObj)}
+</span>
