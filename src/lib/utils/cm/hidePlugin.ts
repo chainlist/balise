@@ -4,7 +4,7 @@ import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { makePlugin, hideMark, LENIENT_EMPHASIS } from './shared';
 
-const HIDE_NODES = new Set(['EmphasisMark', 'InlineCodeMark', 'StrikethroughMark']);
+const PARSED_EMPHASIS = new Set(['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode']);
 
 class BulletWidget extends WidgetType {
 	toDOM() {
@@ -43,7 +43,7 @@ function buildHideDecos(view: EditorView): DecorationSet {
 		enter(node) {
 			const { from, to, name } = node;
 
-			if (['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode'].includes(name)) {
+			if (PARSED_EMPHASIS.has(name)) {
 				parsedRanges.push([from, to]);
 			}
 
@@ -56,36 +56,38 @@ function buildHideDecos(view: EditorView): DecorationSet {
 			const onCursorLine = state.doc.lineAt(from).number === cursorLine;
 			if (onCursorLine) return;
 
-			if (HIDE_NODES.has(name)) {
-				ranges.push(hideMark.range(from, to));
-			} else if (name === 'HeaderMark') {
+			if (name === 'HeaderMark') {
 				const lineEnd = state.doc.lineAt(from).to;
 				ranges.push(hideMark.range(from, Math.min(to + 1, lineEnd)));
 			} else if (name === 'HorizontalRule') {
 				ranges.push(Decoration.replace({ widget: hrWidget }).range(from, to));
+			} else if (name.endsWith('Mark')) {
+				ranges.push(hideMark.range(from, to));
 			}
 		}
 	});
 
 	// Regex fallback: hide marks for emphasis patterns the parser rejected (e.g. trailing spaces).
-	const text = state.doc.toString();
 	const isCoveredByTree = (from: number, to: number) =>
 		parsedRanges.some(([f, t]) => from >= f && to <= t);
 	const lenientCovered: [number, number][] = [];
 
-	for (const [re, , markLen] of LENIENT_EMPHASIS) {
-		re.lastIndex = 0;
-		let m: RegExpExecArray | null;
-		while ((m = re.exec(text)) !== null) {
-			const from = m.index;
-			const to = from + m[0].length;
-			if (isCoveredByTree(from, to)) continue;
-			if (lenientCovered.some(([f, t]) => from >= f && to <= t)) continue;
-			lenientCovered.push([from, to]);
+	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
+		const text = state.doc.sliceString(vFrom, vTo);
+		for (const [re, , markLen] of LENIENT_EMPHASIS) {
+			re.lastIndex = 0;
+			let m: RegExpExecArray | null;
+			while ((m = re.exec(text)) !== null) {
+				const from = vFrom + m.index;
+				const to = from + m[0].length;
+				if (isCoveredByTree(from, to)) continue;
+				if (lenientCovered.some(([f, t]) => from >= f && to <= t)) continue;
+				lenientCovered.push([from, to]);
 
-			if (state.doc.lineAt(from).number === cursorLine) continue;
-			ranges.push(hideMark.range(from, from + markLen));
-			ranges.push(hideMark.range(to - markLen, to));
+				if (state.doc.lineAt(from).number === cursorLine) continue;
+				ranges.push(hideMark.range(from, from + markLen));
+				ranges.push(hideMark.range(to - markLen, to));
+			}
 		}
 	}
 

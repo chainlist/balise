@@ -40,6 +40,8 @@ function buildTagDecos(view: EditorView): DecorationSet {
 	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
 	const ranges: Range<Decoration>[] = [];
 
+	const tagColorMap = new Map(tagState.tags.map((t) => [t.tag.toLowerCase(), t.color]));
+
 	for (const { from, to } of view.visibleRanges) {
 		TAG_RE.lastIndex = 0;
 		const text = state.doc.sliceString(from, to);
@@ -49,9 +51,7 @@ function buildTagDecos(view: EditorView): DecorationSet {
 			const end = start + match[0].length;
 			if (state.doc.lineAt(start).number === cursorLine) {
 				const rawTag = match[0].slice(1);
-				const tagColor =
-					tagState.tags.find((t) => t.tag.toLowerCase() === rawTag.toLowerCase())?.color ??
-					'var(--primary)';
+				const tagColor = tagColorMap.get(rawTag.toLowerCase()) ?? 'var(--primary)';
 				ranges.push(
 					Decoration.mark({
 						class: 'cm-md-tag',

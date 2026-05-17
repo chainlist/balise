@@ -11,6 +11,7 @@
 		mdCodePlugin,
 		mdTagPlugin,
 		mdPairPlugin,
+		mdFormatPlugin,
 		mdLinkPlugin,
 		noteEditorTheme
 	} from '$lib/utils/cm';
@@ -37,6 +38,7 @@
 				doc: noteContent,
 				extensions: [
 					history(),
+					mdFormatPlugin,
 					keymap.of([...defaultKeymap, ...historyKeymap]),
 					EditorView.lineWrapping,
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),

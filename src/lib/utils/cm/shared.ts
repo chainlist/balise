@@ -14,7 +14,10 @@ export const LENIENT_EMPHASIS: [RegExp, string, number][] = [
 	[/~~([^\n~]+)~~/g, 'cm-md-strike', 2]
 ];
 
-export function makePlugin(build: (v: EditorView) => DecorationSet) {
+export function makePlugin(
+	build: (v: EditorView) => DecorationSet,
+	{ selection = true }: { selection?: boolean } = {}
+) {
 	return ViewPlugin.fromClass(
 		class {
 			decorations: DecorationSet;
@@ -22,7 +25,8 @@ export function makePlugin(build: (v: EditorView) => DecorationSet) {
 				this.decorations = build(view);
 			}
 			update(u: ViewUpdate) {
-				if (u.docChanged || u.selectionSet || u.viewportChanged) this.decorations = build(u.view);
+				if (u.docChanged || u.viewportChanged || (selection && u.selectionSet))
+					this.decorations = build(u.view);
 			}
 		},
 		{ decorations: (v) => v.decorations }

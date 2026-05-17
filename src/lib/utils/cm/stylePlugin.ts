@@ -17,6 +17,8 @@ const STYLE_NODES: Record<string, string> = {
 function buildStyleDecos(view: EditorView): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
 	const covered: [number, number][] = [];
+	const isCovered = (from: number, to: number) =>
+		covered.some(([f, t]) => from >= f && to <= t);
 
 	syntaxTree(view.state).iterate({
 		enter(node) {
@@ -28,19 +30,18 @@ function buildStyleDecos(view: EditorView): DecorationSet {
 		}
 	});
 
-	const text = view.state.doc.toString();
-	const isCovered = (from: number, to: number) =>
-		covered.some(([f, t]) => from >= f && to <= t);
-
-	for (const [re, cls] of LENIENT_EMPHASIS) {
-		re.lastIndex = 0;
-		let m: RegExpExecArray | null;
-		while ((m = re.exec(text)) !== null) {
-			const from = m.index;
-			const to = from + m[0].length;
-			if (!isCovered(from, to)) {
-				ranges.push(Decoration.mark({ class: cls }).range(from, to));
-				covered.push([from, to]);
+	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
+		const text = view.state.doc.sliceString(vFrom, vTo);
+		for (const [re, cls] of LENIENT_EMPHASIS) {
+			re.lastIndex = 0;
+			let m: RegExpExecArray | null;
+			while ((m = re.exec(text)) !== null) {
+				const from = vFrom + m.index;
+				const to = from + m[0].length;
+				if (!isCovered(from, to)) {
+					ranges.push(Decoration.mark({ class: cls }).range(from, to));
+					covered.push([from, to]);
+				}
 			}
 		}
 	}
@@ -59,4 +60,5 @@ function buildStyleDecos(view: EditorView): DecorationSet {
 	return Decoration.set(deduped);
 }
 
-export const mdStylePlugin = makePlugin(buildStyleDecos);
+// Styling doesn't depend on cursor position — skip selectionSet rebuilds.
+export const mdStylePlugin = makePlugin(buildStyleDecos, { selection: false });

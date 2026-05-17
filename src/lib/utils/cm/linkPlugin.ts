@@ -44,30 +44,34 @@ function buildLinkDecos(view: EditorView): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
 	const tree = syntaxTree(state);
 
-	tree.iterate({
-		enter(node) {
-			const { from, to, name } = node;
+	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
+		tree.iterate({
+			from: vFrom,
+			to: vTo,
+			enter(node) {
+				const { from, to, name } = node;
 
-			if (name === 'Link') {
-				if (state.doc.lineAt(from).number === cursorLine) return false;
-				let href = '';
-				let urlFrom = -1;
-				for (let child = node.node.firstChild; child; child = child.nextSibling) {
-					if (child.name === 'URL') {
-						href = state.doc.sliceString(child.from, child.to);
-						urlFrom = child.from;
+				if (name === 'Link') {
+					if (state.doc.lineAt(from).number === cursorLine) return false;
+					let href = '';
+					let urlFrom = -1;
+					for (let child = node.node.firstChild; child; child = child.nextSibling) {
+						if (child.name === 'URL') {
+							href = state.doc.sliceString(child.from, child.to);
+							urlFrom = child.from;
+						}
 					}
+					if (href && urlFrom > 0) {
+						const label = state.doc.sliceString(from + 1, urlFrom - 2);
+						ranges.push(
+							Decoration.replace({ widget: new LinkWidget(href, label || href) }).range(from, to)
+						);
+					}
+					return false;
 				}
-				if (href && urlFrom > 0) {
-					const label = state.doc.sliceString(from + 1, urlFrom - 2);
-					ranges.push(
-						Decoration.replace({ widget: new LinkWidget(href, label || href) }).range(from, to)
-					);
-				}
-				return false;
 			}
-		}
-	});
+		});
+	}
 
 	for (const { from, to } of view.visibleRanges) {
 		BARE_URL_RE.lastIndex = 0;
