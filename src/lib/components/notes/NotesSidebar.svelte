@@ -6,6 +6,7 @@
 	import { noteState, createNote, type Note } from '$lib/services/notes.svelte';
 	import { uiState, toggleComposedTag } from '$lib/services/ui-state.svelte';
 	import { tagState, tagDisplayName } from '$lib/services/tags.svelte';
+	import TagName from '$lib/components/TagName.svelte';
 	import { XIcon } from '@lucide/svelte';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
@@ -23,7 +24,9 @@
 	const selectedNote = $derived(noteState.notes.find((n) => n.id === selectedNoteId) ?? null);
 
 	async function handleCreateNote() {
-		const id = await createNote('### New Note\n\n' + `#${uiState.activeTag}\n\n`);
+		const id = await createNote(
+			'### New Note\n\n' + (uiState.activeTag ? `#${uiState.activeTag}\n\n` : '')
+		);
 		selection = { noteId: id, tag: uiState.activeTag, composedKey };
 	}
 
@@ -51,14 +54,15 @@
 		<Sidebar.Header>
 			<Sidebar.Menu>
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton size="lg" onclick={handleCreateNote}>
-						<div class="flex items-center justify-between px-1">
-							<span class="text-sm font-semibold">{uiState.activeTag}</span>
-							<Button variant="ghost" size="icon-sm">
-								<PlusIcon class="size-4" />
-							</Button>
-						</div>
-					</Sidebar.MenuButton>
+					<div class="flex items-center justify-between px-1">
+						<span class="text-sm font-semibold"
+							><TagName tag={uiState.activeTag || 'All Notes'} /></span
+						>
+
+						<Button variant="ghost" size="icon-sm" onclick={handleCreateNote}>
+							<PlusIcon class="size-4" />
+						</Button>
+					</div>
 				</Sidebar.MenuItem>
 			</Sidebar.Menu>
 			{#if uiState.composedTags.length > 0}
@@ -73,9 +77,7 @@
 								class="size-1.5 shrink-0 rounded-full bg-primary"
 								style={tagColor(t) ? `background: ${tagColor(t)};` : ''}
 							></span>
-							{tagDisplayName(
-								tagState.tags.find((tag) => tag.tag === t) ?? { tag: t, display_name: null }
-							)}
+							<TagName tag={t} />
 							<XIcon class="size-2.5 text-muted-foreground" />
 						</button>
 					{/each}
@@ -112,7 +114,7 @@
 										class="size-2 shrink-0 rounded-full bg-primary"
 										style={tag.color ? `background: ${tag.color};` : ''}
 									></span>
-									{tagDisplayName(tag)}
+									<TagName {tag} />
 								</DropdownMenu.Item>
 							{:else}
 								<p class="px-3 py-2 text-center text-xs text-muted-foreground">No tags found.</p>

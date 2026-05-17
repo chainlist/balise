@@ -69,9 +69,17 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 
 export function extractTags(content: string): string[] {
 	const tags = new SvelteSet<string>();
+
 	for (const [match] of content.matchAll(/#[a-zA-Z0-9/]{2,}/g)) {
 		tags.add(match.slice(1));
 	}
+
+	// Magic tags: infer #code and #<lang> from fenced code blocks (``` lang)
+	for (const [, lang] of content.matchAll(/^```([a-zA-Z][a-zA-Z0-9]*)/gm)) {
+		tags.add('code');
+		tags.add(lang.toLowerCase());
+	}
+
 	return [...tags];
 }
 

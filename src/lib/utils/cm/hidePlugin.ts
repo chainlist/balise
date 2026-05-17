@@ -35,7 +35,8 @@ const hrWidget = new HrWidget();
 
 function buildHideDecos(view: EditorView): DecorationSet {
 	const { state } = view;
-	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+	const cursorPos = state.selection.main.head;
+	const cursorLine = state.doc.lineAt(cursorPos).number;
 	const ranges: Range<Decoration>[] = [];
 	const parsedRanges: [number, number][] = [];
 
@@ -54,7 +55,9 @@ function buildHideDecos(view: EditorView): DecorationSet {
 			}
 
 			const onCursorLine = state.doc.lineAt(from).number === cursorLine;
-			if (onCursorLine) return;
+			const parent = node.node.parent;
+			const cursorInBlock = !!parent && cursorPos >= parent.from && cursorPos <= parent.to;
+			if (onCursorLine || cursorInBlock) return;
 
 			if (name === 'HeaderMark') {
 				const lineEnd = state.doc.lineAt(from).to;
