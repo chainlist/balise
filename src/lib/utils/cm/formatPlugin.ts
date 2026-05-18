@@ -93,5 +93,6 @@ function toggleMark(view: EditorView, mark: string): boolean {
 export const mdFormatPlugin = keymap.of([
 	{ key: 'Mod-b', run: (view) => toggleMark(view, '**') },
 	{ key: 'Mod-i', run: (view) => toggleMark(view, '*') },
-	{ key: 'Mod-Shift-s', run: (view) => toggleMark(view, '~~') }
+	{ key: 'Mod-Shift-s', run: (view) => toggleMark(view, '~~') },
+	{ key: 'Mod-Shift-h', run: (view) => toggleMark(view, '=') }
 ]);

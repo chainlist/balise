@@ -10,6 +10,7 @@
 		mdHidePlugin,
 		mdCodePlugin,
 		mdTagPlugin,
+		mdHighlightPlugin,
 		mdPairPlugin,
 		mdFormatPlugin,
 		mdLinkPlugin,
@@ -27,7 +28,6 @@
 
 	function mount(container: HTMLDivElement) {
 		return untrack(() => {
-			const statusEl = container.querySelector<HTMLSpanElement>('[data-save-status]')!;
 			const editorEl = container.querySelector<HTMLDivElement>('[data-editor]')!;
 			let saveTimer: ReturnType<typeof setTimeout>;
 
@@ -47,18 +47,16 @@
 					mdCodePlugin,
 					mdLinkPlugin,
 					mdTagPlugin,
+					mdHighlightPlugin,
 					mdPairPlugin,
 					noteEditorTheme,
 					EditorView.updateListener.of((u) => {
-						if (u.docChanged) {
-							clearTimeout(saveTimer);
-							statusEl.textContent = 'Saving…';
-							const val = u.state.doc.toString();
-							saveTimer = setTimeout(async () => {
-								await updateNote(noteId, val);
-								statusEl.textContent = 'Saved';
-							}, 500);
-						}
+						if (!u.docChanged) return;
+						clearTimeout(saveTimer);
+						const val = u.state.doc.toString();
+						saveTimer = setTimeout(async () => {
+							await updateNote(noteId, val);
+						}, 500);
 					})
 				],
 				parent: editorEl
@@ -75,9 +73,6 @@
 </script>
 
 <div {@attach mount} class="relative flex h-full flex-col overflow-hidden">
-	<div class="flex shrink-0 items-center border-b px-4 py-2">
-		<span data-save-status class="text-xs text-muted-foreground">Saved</span>
-	</div>
 	<div data-editor class="mx-auto w-full max-w-xl min-w-0 flex-1 overflow-hidden"></div>
 
 	<div class="absolute top-5 right-5 -translate-y-1/2">
@@ -109,9 +104,9 @@
 	<Sheet.Content side="right" class="w-full sm:max-w-md">
 		<Sheet.Header class="gap-2 border-b p-6">
 			<Sheet.Title>Delete note</Sheet.Title>
-			<Sheet.Description
-				>This will permanently delete this note. This action cannot be undone.</Sheet.Description
-			>
+			<Sheet.Description>
+				This will permanently delete this note. This action cannot be undone.
+			</Sheet.Description>
 		</Sheet.Header>
 		<div class="flex justify-end gap-2 p-6">
 			<Button type="button" variant="outline" onclick={() => (confirmOpen = false)}>Cancel</Button>
