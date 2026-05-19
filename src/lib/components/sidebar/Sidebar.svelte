@@ -3,7 +3,7 @@
 	import { useSidebar } from '$lib/components/shadcn/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon } from '@lucide/svelte';
+	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, Settings2Icon } from '@lucide/svelte';
 	import { switchDesk, uiState } from '$lib/services/ui-state.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import { tagState, type Tag } from '$lib/services/tags.svelte';
@@ -11,7 +11,7 @@
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
-	import { Root } from '../shadcn/input';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 
 	const sidebar = useSidebar();
 	const desks = $derived(uiState.desks);
@@ -123,12 +123,22 @@
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer>
+		<Button
+			variant="ghost"
+			size="sm"
+			class="w-full justify-start gap-2 text-muted-foreground"
+			onclick={() => (uiState.isSettingsOpen = true)}
+		>
+			<Settings2Icon class="size-4" />
+			Settings
+		</Button>
 	</Sidebar.Footer>
 </Sidebar.Root>
 
 <AddDeskSheet bind:open={isAddDeskOpen} />
 <DeleteDeskSheet bind:open={isDeleteConfirmOpen} bind:deskName={deskPendingDelete} />
 <TagSettingsSheet bind:open={isTagSettingsOpen} tag={tagPendingSettings} />
+<SettingsModal open={uiState.isSettingsOpen} />
 
 <style lang="postcss">
 	@reference "../../../routes/layout.css";

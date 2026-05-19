@@ -1,8 +1,13 @@
 <script lang="ts">
 	import './layout.css';
 	import { onMount } from 'svelte';
+	import { tinykeys } from 'tinykeys';
 	import { initApp } from '$lib/utils/init-app';
+	import { initTheme } from '$lib/services/theme.svelte';
+	import { initEditorSettings } from '$lib/services/editor.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import { buildTinykeysMap } from '$lib/services/shortcuts.svelte';
+	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
 	import { LoaderCircle } from '@lucide/svelte';
@@ -15,10 +20,22 @@
 	let ready = $derived(uiState.ready && initDone);
 
 	onMount(async () => {
+		initTheme();
+		initEditorSettings();
 		const { error: initError } = await initApp();
-		
 		error = initError;
 		initDone = true;
+	});
+
+	$effect(() => {
+		return tinykeys(
+			window,
+			buildTinykeysMap(
+				APP_SHORTCUTS,
+				() => !uiState.isSettingsOpen,
+				() => !uiState.isCapturingShortcut
+			)
+		);
 	});
 </script>
 

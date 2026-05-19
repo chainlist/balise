@@ -9,6 +9,7 @@ export const noteEditorTheme = EditorView.theme({
 	'&.cm-focused': { outline: 'none' },
 	'.cm-scroller': {
 		fontFamily: 'var(--font-sans)',
+		fontSize: 'var(--editor-font-size, 16px)',
 		overflow: 'auto',
 		padding: '1.5rem',
 		lineHeight: '1.75'

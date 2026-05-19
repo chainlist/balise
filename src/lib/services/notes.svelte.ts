@@ -28,6 +28,13 @@ export async function loadNotes(tag?: string | null, composedTags: string[] = []
 	noteState.notes = await queryNotesByTags(db, tag ? [tag, ...composedTags] : composedTags);
 }
 
+export function newNoteContent(activeTag: string | null): string {
+	return (
+		'### New Note\n\n' +
+		(activeTag && activeTag !== UNTAGGED_FILTER ? `#${activeTag}\n\n` : '')
+	);
+}
+
 export async function createNote(content = ''): Promise<string> {
 	const db = getDB();
 	const id = crypto.randomUUID();

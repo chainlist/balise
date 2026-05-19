@@ -16,7 +16,10 @@ export const uiState = $state({
 	desks: [defaultDesk] as string[],
 	activeTag: null as string | null,
 	composedTags: [] as string[],
-	ready: false
+	ready: false,
+	pendingNoteSelection: null as string | null,
+	isSettingsOpen: false,
+	isCapturingShortcut: false
 });
 
 export async function initUIState(): Promise<void> {
