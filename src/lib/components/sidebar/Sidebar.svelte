@@ -37,7 +37,7 @@
 </script>
 
 <div
-	class="flex h-full flex-col overflow-hidden border-r border-r-zinc-200 bg-zinc-100 text-neutral-900"
+	class="flex h-full flex-col overflow-hidden border-r border-r-zinc-200 bg-[oklch(0.327_0.037_284)] text-[#F9F9F9]"
 >
 	<header>
 		<DropdownMenu.Root>
@@ -91,15 +91,15 @@
 		</DropdownMenu.Root>
 	</header>
 	<div class="flex flex-1 scrollbar-none flex-col overflow-auto px-2 [&::-webkit-scrollbar]:hidden">
-		<Sidebar.MenuButton
-			isActive={uiState.activeTag === UNTAGGED_FILTER}
-			onclick={() => setActiveTag(UNTAGGED_FILTER)}
-		>
-			<span class="size-2 shrink-0 rounded-full border border-dashed border-muted-foreground"
-			></span>
-			<span class="text-muted-foreground">Untagged</span>
-			<span class="ml-auto text-xs text-muted-foreground">{tagState.untaggedCount}</span>
-		</Sidebar.MenuButton>
+		<TagSidebarItem
+			tag={{
+				tag: UNTAGGED_FILTER,
+				count: tagState.untaggedCount,
+				color: null,
+				display_name: 'Untagged',
+				pinned: false
+			}}
+		/>
 		{#each tagState.tags as tag (tag.tag)}
 			<TagSidebarItem {tag} onSettings={openTagSettings} />
 		{/each}
@@ -216,6 +216,6 @@
 	@reference "../../../routes/layout.css";
 
 	.active {
-		@apply bg-primary/20;
+		@apply bg-primary/80;
 	}
 </style>

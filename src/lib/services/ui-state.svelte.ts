@@ -71,20 +71,18 @@ export async function removeDesk(desk: string): Promise<void> {
 }
 
 export async function setActiveTag(tag: string | null): Promise<void> {
-	const next = uiState.activeTag === tag ? null : tag;
-	uiState.activeTag = next;
+	if (uiState.activeTag === tag) return;
+
+	uiState.activeTag = tag;
 	uiState.composedTags = [];
-	await Promise.all([loadNotes(next), loadRelatedTags(next)]);
+	await Promise.all([loadNotes(tag), loadRelatedTags(tag)]);
 }
 
 export async function toggleComposedTag(tag: string): Promise<void> {
 	const current = uiState.composedTags;
 	const next = current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag];
 	uiState.composedTags = next;
-	await Promise.all([
-		loadNotes(uiState.activeTag, next),
-		loadRelatedTags(uiState.activeTag, next)
-	]);
+	await Promise.all([loadNotes(uiState.activeTag, next), loadRelatedTags(uiState.activeTag, next)]);
 }
 
 export async function switchDesk(desk: string): Promise<void> {

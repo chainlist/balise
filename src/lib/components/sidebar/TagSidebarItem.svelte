@@ -2,25 +2,34 @@
 	import { setActiveTag, uiState } from '$lib/services/ui-state.svelte';
 	import { tagDisplayName, type Tag } from '$lib/services/tags.svelte';
 	import { Settings2Icon, PinIcon } from '@lucide/svelte';
+	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 
-	let { tag, onSettings }: { tag: Tag; onSettings: (tag: Tag) => void } = $props();
+	let { tag, onSettings }: { tag: Tag; onSettings?: (tag: Tag) => void } = $props();
 
 	let isActive = $derived(uiState.activeTag === tag.tag);
 
 	function handleSettingsClick(e: MouseEvent) {
 		e.stopPropagation();
-		onSettings(tag);
+		onSettings?.(tag);
 	}
 </script>
 
 <button
 	class:active={isActive}
 	onclick={() => setActiveTag(tag.tag)}
-	class="group inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10"
+	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10"
+	class:group={onSettings}
 >
 	<div class="flex items-center gap-2">
 		{#if tag.pinned}
-			<PinIcon size="14" style="color: {tag.color ?? 'currentColor'};" class="shrink-0 text-muted-foreground/50" />
+			<PinIcon
+				size="14"
+				style="color: {tag.color ?? 'currentColor'};"
+				class="shrink-0 text-muted-foreground/50"
+			/>
+		{:else if tag.tag === UNTAGGED_FILTER}
+			<span class="size-2 shrink-0 rounded-full border border-dashed border-muted-foreground"
+			></span>
 		{:else if tag.color}
 			<span class="text-sm text-muted-foreground/50" style="color: {tag.color};">#</span>
 		{:else}
@@ -32,9 +41,11 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="flex gap-2" onclick={handleSettingsClick}>
 		<span class="ml-auto text-xs text-muted-foreground group-hover:hidden">{tag.count}</span>
-		<div aria-label="Tag settings" class="hidden group-hover:inline-block">
-			<Settings2Icon size="16" />
-		</div>
+		{#if onSettings}
+			<div aria-label="Tag settings" class="hidden group-hover:inline-block">
+				<Settings2Icon size="16" />
+			</div>
+		{/if}
 	</div>
 </button>
 

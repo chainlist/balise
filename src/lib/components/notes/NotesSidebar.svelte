@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
-	import { noteState, createNote, type Note } from '$lib/services/notes.svelte';
+	import { noteState, createNote, type Note, UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import NotesSidebarHeader from '$lib/components/notes/NotesSidebarHeader.svelte';
 	import NotesSidebarContent from '$lib/components/notes/NotesSidebarContent.svelte';
@@ -19,7 +19,10 @@
 
 	async function handleCreateNote() {
 		const id = await createNote(
-			'### New Note\n\n' + (uiState.activeTag ? `#${uiState.activeTag}\n\n` : '')
+			'### New Note\n\n' +
+				(uiState.activeTag && uiState.activeTag !== UNTAGGED_FILTER
+					? `#${uiState.activeTag}\n\n`
+					: '')
 		);
 		selection = { noteId: id, tag: uiState.activeTag, composedKey };
 	}
