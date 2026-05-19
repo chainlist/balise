@@ -11,6 +11,7 @@
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
+	import { Root } from '../shadcn/input';
 
 	const sidebar = useSidebar();
 	const desks = $derived(uiState.desks);
@@ -36,87 +37,22 @@
 	}
 </script>
 
-<div
-	class="flex h-full flex-col overflow-hidden border-r border-r-zinc-200 bg-[oklch(0.327_0.037_284)] text-[#F9F9F9]"
->
-	<header>
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				{#snippet child({ props })}
-					<Sidebar.MenuButton
-						{...props}
-						size="lg"
-						class="data-[state=open]:bg-sidebar-primary data-[state=open]:text-sidebar-accent-foreground hover:bg-sidebar-primary/80"
-					>
-						<div class="flex w-full items-center justify-between">
-							<span>{selectedDesk}</span>
-							<ChevronsUpDownIcon />
-						</div>
-					</Sidebar.MenuButton>
-				{/snippet}
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content
-				class="w-(--bits-dropdown-menu-anchor-width)"
-				side={sidebar.isMobile ? 'bottom' : 'right'}
-				align="start"
-			>
-				{#each desks as desk (desk)}
-					<DropdownMenu.Item class="group" onclick={() => handleSelectDesk(desk)}>
-						<span class="truncate">{desk}</span>
-						<Button
-							type="button"
-							variant="ghost"
-							size="icon-xs"
-							class="ml-auto h-6 w-6 text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
-							onclick={(event) => {
-								event.preventDefault();
-								event.stopPropagation();
-								promptDeleteDesk(desk);
-							}}
-						>
-							<Trash2Icon class="size-3.5" />
-							<span class="sr-only">Delete desk</span>
-						</Button>
-					</DropdownMenu.Item>
-				{/each}
-				<DropdownMenu.Separator />
-
-				<DropdownMenu.Item class="gap-2 p-2" onclick={() => (isAddDeskOpen = true)}>
-					<div class="flex size-6 items-center justify-center rounded-md border">
-						<PlusIcon class="size-4" />
-					</div>
-					Add a new desk
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
-	</header>
-	<div class="flex flex-1 scrollbar-none flex-col overflow-auto px-2 [&::-webkit-scrollbar]:hidden">
-		<TagSidebarItem
-			tag={{
-				tag: UNTAGGED_FILTER,
-				count: tagState.untaggedCount,
-				color: null,
-				display_name: 'Untagged',
-				pinned: false
-			}}
-		/>
-		{#each tagState.tags as tag (tag.tag)}
-			<TagSidebarItem {tag} onSettings={openTagSettings} />
-		{/each}
-	</div>
-</div>
-<!-- 
-<Sidebar.Root collapsible="icon">
+<Sidebar.Root>
 	<Sidebar.Header>
-		<Sidebar.SidebarMenu>
+		<Sidebar.Menu>
+			<Sidebar.MenuItem>
+				<dir class="px-4 py-1">
+					<h1 class="text-primary text-2xl font-bold">Balise</h1>
+				</dir>
+			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
 						{#snippet child({ props })}
 							<Sidebar.MenuButton
 								{...props}
-								size="lg"
-								class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+								size="sm"
+								class="bg-surface-container-highest text-on-surface-variant data-[state=open]:bg-surface-container-highest/50 data-[state=open]:text-on-surface-variant hover:bg-surface-container-highest/80 "
 							>
 								<div class="flex w-full items-center justify-between">
 									<span>{selectedDesk}</span>
@@ -160,53 +96,35 @@
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
 			</Sidebar.MenuItem>
-		</Sidebar.SidebarMenu>
+		</Sidebar.Menu>
 	</Sidebar.Header>
-
 	<Sidebar.Content>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel>Tags</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					<Sidebar.MenuItem>
-						<Sidebar.MenuButton
-							isActive={uiState.activeTag === UNTAGGED_FILTER}
-							onclick={() => setActiveTag(UNTAGGED_FILTER)}
-						>
-							<span
-								class="size-2 shrink-0 rounded-full border border-dashed border-muted-foreground"
-							></span>
-							<span class="text-muted-foreground">Untagged</span>
-							<span class="ml-auto text-xs text-muted-foreground">{tagState.untaggedCount}</span>
-						</Sidebar.MenuButton>
+						<TagSidebarItem
+								tag={{
+									tag: UNTAGGED_FILTER,
+									count: tagState.untaggedCount,
+									color: null,
+									display_name: 'Untagged',
+									pinned: false
+								}}
+							/>
 					</Sidebar.MenuItem>
 					{#each tagState.tags as tag (tag.tag)}
 						<Sidebar.MenuItem>
-							<Sidebar.MenuButton
-								isActive={uiState.activeTag === tag.tag}
-								onclick={() => setActiveTag(tag.tag)}
-							>
-								<span
-									class="size-2 shrink-0 rounded-full bg-primary"
-									style={tag.color ? `background: ${tag.color};` : ''}
-								></span>
-								<span>{tagDisplayName(tag)}</span>
-								<span class="ml-auto text-xs text-muted-foreground">{tag.count}</span>
-							</Sidebar.MenuButton>
-							<Sidebar.MenuAction
-								showOnHover
-								onclick={() => openTagSettings(tag)}
-								aria-label="Tag settings"
-							>
-								<Settings2Icon />
-							</Sidebar.MenuAction>
+							<TagSidebarItem {tag} onSettings={openTagSettings} />
 						</Sidebar.MenuItem>
 					{/each}
 				</Sidebar.Menu>
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>
-</Sidebar.Root> -->
+	<Sidebar.Footer>
+	</Sidebar.Footer>
+</Sidebar.Root>
 
 <AddDeskSheet bind:open={isAddDeskOpen} />
 <DeleteDeskSheet bind:open={isDeleteConfirmOpen} bind:deskName={deskPendingDelete} />
