@@ -1,6 +1,6 @@
-import { IsMobile } from "$lib/hooks/is-mobile.svelte.js";
-import { getContext, setContext } from "svelte";
-import { SIDEBAR_KEYBOARD_SHORTCUT } from "./constants.js";
+import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+import { getContext, setContext } from 'svelte';
+import { SIDEBAR_KEYBOARD_SHORTCUT } from './constants.js';
 
 type Getter<T> = () => T;
 
@@ -24,9 +24,9 @@ class SidebarState {
 	readonly props: SidebarStateProps;
 	open = $derived.by(() => this.props.open());
 	openMobile = $state(false);
-	setOpen: SidebarStateProps["setOpen"];
+	setOpen: SidebarStateProps['setOpen'];
 	#isMobile: IsMobile;
-	state = $derived.by(() => (this.open ? "expanded" : "collapsed"));
+	state = $derived.by(() => (this.open ? 'expanded' : 'collapsed'));
 
 	constructor(props: SidebarStateProps) {
 		this.setOpen = props.setOpen;
@@ -53,13 +53,11 @@ class SidebarState {
 	};
 
 	toggle = () => {
-		return this.#isMobile.current
-			? (this.openMobile = !this.openMobile)
-			: this.setOpen(!this.open);
+		return this.#isMobile.current ? (this.openMobile = !this.openMobile) : this.setOpen(!this.open);
 	};
 }
 
-const SYMBOL_KEY = "scn-sidebar";
+const SYMBOL_KEY = 'scn-sidebar';
 
 /**
  * Instantiates a new `SidebarState` instance and sets it in the context.
@@ -67,8 +65,8 @@ const SYMBOL_KEY = "scn-sidebar";
  * @param props The constructor props for the `SidebarState` class.
  * @returns  The `SidebarState` instance.
  */
-export function setSidebar(props: SidebarStateProps): SidebarState {
-	return setContext(Symbol.for(SYMBOL_KEY), new SidebarState(props));
+export function setSidebar(props: SidebarStateProps, symbolKey: string = SYMBOL_KEY): SidebarState {
+	return setContext(Symbol.for(symbolKey), new SidebarState(props));
 }
 
 /**
@@ -76,6 +74,6 @@ export function setSidebar(props: SidebarStateProps): SidebarState {
  * so you cannot destructure it.
  * @returns The `SidebarState` instance.
  */
-export function useSidebar(): SidebarState {
-	return getContext(Symbol.for(SYMBOL_KEY));
+export function useSidebar(symbolKey: string = SYMBOL_KEY): SidebarState {
+	return getContext(Symbol.for(symbolKey));
 }

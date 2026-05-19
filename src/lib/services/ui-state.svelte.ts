@@ -25,13 +25,15 @@ export async function initUIState(): Promise<void> {
 		defaults
 	});
 
-	const [activeDesk, desks] = await Promise.all([
+	const [activeDesk, desks, activeTag] = await Promise.all([
 		store.get<string>('activeDesk'),
-		store.get<string[]>('desks')
+		store.get<string[]>('desks'),
+		store.get<string>('activeTag')
 	]);
 
 	uiState.activeDesk = activeDesk ?? defaultDesk;
 	uiState.desks = desks ?? [defaultDesk];
+	uiState.activeTag = activeTag ?? null;
 
 	if (!uiState.desks.includes(uiState.activeDesk)) {
 		uiState.desks = [...uiState.desks, uiState.activeDesk];
@@ -75,7 +77,11 @@ export async function setActiveTag(tag: string | null): Promise<void> {
 
 	uiState.activeTag = tag;
 	uiState.composedTags = [];
-	await Promise.all([loadNotes(tag), loadRelatedTags(tag)]);
+	await Promise.all([
+		store?.set('activeTag', tag),
+		loadNotes(tag),
+		loadRelatedTags(tag)
+	]);
 }
 
 export async function toggleComposedTag(tag: string): Promise<void> {
@@ -85,10 +91,13 @@ export async function toggleComposedTag(tag: string): Promise<void> {
 	await Promise.all([loadNotes(uiState.activeTag, next), loadRelatedTags(uiState.activeTag, next)]);
 }
 
-export async function switchDesk(desk: string): Promise<void> {
-	uiState.activeTag = null;
+export async function switchDesk(desk: string, activeTag: string | null = null): Promise<void> {
+	if (uiState.activeTag !== activeTag) {
+		uiState.activeTag = activeTag;
+	}
+
 	uiState.composedTags = [];
 	await openDesk(desk);
-	await Promise.all([loadTags(), loadNotes(), loadRelatedTags(null)]);
+	await Promise.all([loadTags(), loadNotes(activeTag), loadRelatedTags(null)]);
 	await setActiveDesk(desk);
 }

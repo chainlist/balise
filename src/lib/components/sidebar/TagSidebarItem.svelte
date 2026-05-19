@@ -17,7 +17,7 @@
 <button
 	class:active={isActive}
 	onclick={() => setActiveTag(tag.tag)}
-	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10"
+	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10 select-none"
 	class:group={onSettings}
 >
 	<div class="flex items-center gap-2">
@@ -53,6 +53,6 @@
 	@reference '../../../routes/layout.css';
 
 	.active {
-		@apply bg-primary/20;
+		@apply bg-primary/50;
 	}
 </style>

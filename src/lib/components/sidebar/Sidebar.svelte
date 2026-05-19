@@ -4,7 +4,7 @@
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon } from '@lucide/svelte';
-	import { switchDesk, setActiveTag, uiState } from '$lib/services/ui-state.svelte';
+	import { switchDesk, uiState } from '$lib/services/ui-state.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import { tagState, type Tag } from '$lib/services/tags.svelte';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
@@ -46,7 +46,7 @@
 					<Sidebar.MenuButton
 						{...props}
 						size="lg"
-						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+						class="data-[state=open]:bg-sidebar-primary data-[state=open]:text-sidebar-accent-foreground hover:bg-sidebar-primary/80"
 					>
 						<div class="flex w-full items-center justify-between">
 							<span>{selectedDesk}</span>
