@@ -11,8 +11,8 @@ function makeMockDB(appliedVersions: number[] = []) {
 }
 
 function insertCalls(db: ReturnType<typeof makeMockDB>) {
-	return db.execute.mock.calls.filter(([sql]: [string]) =>
-		sql.includes('INSERT INTO migrations')
+	return db.execute.mock.calls.filter((args) =>
+		(args[0] as string).includes('INSERT INTO migrations')
 	);
 }
 
@@ -53,7 +53,7 @@ describe('migrate', () => {
 		const db = makeMockDB([1]);
 		await migrate(db as never);
 		// v2 migration should drop old tables
-		const sqlCalls = db.execute.mock.calls.map(([sql]: [string]) => sql);
+		const sqlCalls = db.execute.mock.calls.map((args) => args[0] as string);
 		expect(sqlCalls.some((s: string) => s.includes('DROP TABLE'))).toBe(true);
 	});
 
@@ -61,7 +61,7 @@ describe('migrate', () => {
 		const db = makeMockDB([]);
 		await migrate(db as never);
 		const calls = insertCalls(db);
-		const versions = calls.map(([, params]: [string, number[]]) => params[0]);
+		const versions = calls.map((args) => (args[1] as number[])[0]);
 		expect(versions).toEqual([1, 2, 3]);
 	});
 });
