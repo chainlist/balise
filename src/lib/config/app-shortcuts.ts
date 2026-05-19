@@ -1,5 +1,5 @@
 import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
-import { createNote, newNoteContent } from '$lib/services/notes.svelte';
+import { createNote, newNoteContent, noteState } from '$lib/services/notes.svelte';
 import { uiState } from '$lib/services/ui-state.svelte';
 
 export const APP_SHORTCUTS: ShortcutDefinition[] = [
@@ -21,6 +21,37 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		run: async () => {
 			const id = await createNote(newNoteContent(uiState.activeTag));
 			uiState.pendingNoteSelection = id;
+		}
+	},
+	{
+		id: 'delete-note',
+		name: 'Delete Note',
+		description: 'Delete the currently selected note',
+		defaultBinding: '$mod+Delete',
+		run: () => {
+			if (uiState.activeNoteId) uiState.pendingDeleteNoteId = uiState.activeNoteId;
+		}
+	},
+	{
+		id: 'prev-note',
+		name: 'Previous Note',
+		description: 'Select the note above in the list',
+		defaultBinding: 'Alt+ArrowUp',
+		run: () => {
+			const notes = noteState.notes;
+			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
+			if (idx > 0) uiState.pendingNoteSelection = notes[idx - 1].id;
+		}
+	},
+	{
+		id: 'next-note',
+		name: 'Next Note',
+		description: 'Select the note below in the list',
+		defaultBinding: 'Alt+ArrowDown',
+		run: () => {
+			const notes = noteState.notes;
+			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
+			if (idx !== -1 && idx < notes.length - 1) uiState.pendingNoteSelection = notes[idx + 1].id;
 		}
 	}
 ];

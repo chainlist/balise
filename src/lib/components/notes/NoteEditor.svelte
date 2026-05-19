@@ -17,12 +17,20 @@
 		noteEditorTheme
 	} from '$lib/utils/cm';
 	import { updateNote, deleteNote, type Note } from '$lib/services/notes.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon } from '@lucide/svelte';
 
 	let confirmOpen = $state(false);
+
+	$effect(() => {
+		if (uiState.pendingDeleteNoteId === note.id) {
+			confirmOpen = true;
+			uiState.pendingDeleteNoteId = null;
+		}
+	});
 
 	let { note }: { note: Note } = $props();
 

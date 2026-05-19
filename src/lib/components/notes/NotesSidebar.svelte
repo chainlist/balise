@@ -24,6 +24,10 @@
 		}
 	});
 
+	$effect(() => {
+		uiState.activeNoteId = selectedNoteId;
+	});
+
 	async function handleCreateNote() {
 		const id = await createNote(newNoteContent(uiState.activeTag));
 		selection = { noteId: id, tag: uiState.activeTag, composedKey };
