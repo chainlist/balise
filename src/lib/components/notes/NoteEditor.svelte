@@ -23,6 +23,8 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon } from '@lucide/svelte';
 
+	let { note }: { note: Note } = $props();
+
 	let confirmOpen = $state(false);
 
 	$effect(() => {
@@ -31,8 +33,6 @@
 			uiState.pendingDeleteNoteId = null;
 		}
 	});
-
-	let { note }: { note: Note } = $props();
 
 	function mount(container: HTMLDivElement) {
 		return untrack(() => {
@@ -121,8 +121,8 @@
 			<Button
 				type="button"
 				variant="destructive"
-				onclick={() => {
-					deleteNote(note.id);
+				onclick={async () => {
+					await deleteNote(note.id);
 					confirmOpen = false;
 				}}>Delete</Button
 			>
