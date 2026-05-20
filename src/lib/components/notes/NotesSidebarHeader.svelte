@@ -26,18 +26,14 @@
 </script>
 
 <Sidebar.Header>
-	<Sidebar.Menu>
-		<Sidebar.MenuItem>
-			<div class="flex items-center justify-between px-1">
-				<span class="text-lg font-semibold">
-					<TagName tag={uiState.activeTag || 'All Notes'} />
-				</span>
-				<Button variant="ghost" size="icon-sm" onclick={onCreate}>
-					<PlusIcon class="size-4" />
-				</Button>
-			</div>
-		</Sidebar.MenuItem>
-	</Sidebar.Menu>
+	<div class="flex items-center justify-between px-2">
+		<span class="text-lg font-semibold">
+			<TagName tag={uiState.activeTag || 'All Notes'} />
+		</span>
+		<Button variant="ghost" size="icon-sm" onclick={onCreate}>
+			<PlusIcon class="size-4" />
+		</Button>
+	</div>
 	{#if tagState.relatedTags.length > 0 && noteState.notes.length > 1}
 		<div class="px-2 pb-1">
 			<DropdownMenu.Root
