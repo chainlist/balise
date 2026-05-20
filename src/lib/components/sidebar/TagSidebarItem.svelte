@@ -57,10 +57,3 @@
 	</div>
 </Sidebar.MenuButton>
 
-<style>
-	@reference '../../../routes/layout.css';
-
-	.active {
-		@apply bg-primary/50;
-	}
-</style>

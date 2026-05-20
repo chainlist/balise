@@ -140,10 +140,3 @@
 <TagSettingsSheet bind:open={isTagSettingsOpen} tag={tagPendingSettings} />
 <SettingsModal open={uiState.isSettingsOpen} />
 
-<style lang="postcss">
-	@reference "../../../routes/layout.css";
-
-	.active {
-		@apply bg-primary/80;
-	}
-</style>
