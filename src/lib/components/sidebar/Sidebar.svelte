@@ -52,7 +52,7 @@
 							<Sidebar.MenuButton
 								{...props}
 								size="sm"
-								class="bg-surface-container-highest text-on-surface-variant data-[state=open]:bg-surface-container-highest/50 data-[state=open]:text-on-surface-variant hover:bg-surface-container-highest/80 "
+								class="bg-muted text-muted-foreground data-[state=open]:bg-muted/50 data-[state=open]:text-muted-foreground hover:bg-muted/80"
 							>
 								<div class="flex w-full items-center justify-between">
 									<span>{selectedDesk}</span>
