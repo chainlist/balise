@@ -43,7 +43,7 @@
 		onCreate={handleCreateNote}
 		onSelect={handleSelect}
 	/>
-	<Sidebar.Inset class="h-full min-h-0 w-full">
+	<Sidebar.Inset class="h-full min-h-0 w-full bg-card">
 		{#if selectedNote}
 			{#key selectedNote.id}
 				<NoteEditor note={selectedNote} />
