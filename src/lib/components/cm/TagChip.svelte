@@ -15,12 +15,15 @@
 	}
 </script>
 
-<span
-	class="cursor-default rounded-full px-1.5 select-none"
+<svelte:element
+	this={navigate ? 'button' : 'span'}
+	{...(navigate ? { type: 'button' } : {})}
+	class="rounded-full px-1.5 select-none"
+	class:cursor-pointer={navigate}
+	class:cursor-default={!navigate}
 	style="color: {color ?? 'var(--primary)'}; background: color-mix(in oklch, {color ??
 		'var(--primary)'} 12%, transparent);"
-	onclick={nav}
-	class:cursor-pointer={navigate}
+	onclick={navigate ? nav : undefined}
 >
 	#{label}
-</span>
+</svelte:element>
