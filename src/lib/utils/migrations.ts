@@ -100,8 +100,14 @@ const MIGRATIONS: Migration[] = [
 		sql: `
       ALTER TABLE tag_settings ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;
     `
+	},
+	{
+		version: 4,
+		sql: `
+      DROP TABLE IF EXISTS note_links;
+    `
 	}
-	// add future migrations here as { version: 4, sql: '...' }
+	// add future migrations here as { version: 5, sql: '...' }
 ];
 
 export async function migrate(db: Database): Promise<void> {
