@@ -16,15 +16,13 @@
 	let { children } = $props();
 
 	let error = $state<string | null>(null);
-	let initDone = $state(true);
-	let ready = $derived(uiState.ready && initDone);
+	let ready = $derived(uiState.ready);
 
 	onMount(async () => {
 		initTheme();
 		initEditorSettings();
 		const { error: initError } = await initApp();
 		error = initError;
-		initDone = true;
 	});
 
 	$effect(() => {
