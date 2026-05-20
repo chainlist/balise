@@ -27,7 +27,14 @@
 			class="fixed inset-0 z-50 bg-black/40 supports-backdrop-filter:backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
 		/>
 		<Dialog.Content
-			class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[85vh] max-w-275 max-h-250 bg-background rounded-xl shadow-2xl border flex overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+			class={cn(
+				'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
+				'w-[90vw] h-[85vh] max-w-275 max-h-250',
+				'flex overflow-hidden rounded-xl border bg-background shadow-2xl',
+				'data-[state=open]:animate-in data-[state=closed]:animate-out',
+				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+				'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95'
+			)}
 		>
 			<!-- Left sidebar -->
 			<div class="w-48 shrink-0 border-r bg-muted/30 flex flex-col p-3 gap-1">
