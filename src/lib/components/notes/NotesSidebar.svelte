@@ -24,6 +24,7 @@
 		}
 	});
 
+	// Publish the derived selection into shared state so shortcuts can reference it.
 	$effect(() => {
 		uiState.activeNoteId = selectedNoteId;
 	});
