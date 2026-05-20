@@ -3,6 +3,7 @@
 	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
 	import { noteState, createNote, newNoteContent, type Note } from '$lib/services/notes.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import { onSelectNote } from '$lib/services/note-signals';
 	import NotesSidebarHeader from '$lib/components/notes/NotesSidebarHeader.svelte';
 	import NotesSidebarContent from '$lib/components/notes/NotesSidebarContent.svelte';
 
@@ -17,12 +18,9 @@
 	);
 	const selectedNote = $derived(noteState.notes.find((n) => n.id === selectedNoteId) ?? null);
 
-	$effect(() => {
-		if (uiState.pendingNoteSelection) {
-			selection = { noteId: uiState.pendingNoteSelection, tag: uiState.activeTag, composedKey };
-			uiState.pendingNoteSelection = null;
-		}
-	});
+	$effect(() => onSelectNote((id) => {
+		selection = { noteId: id, tag: uiState.activeTag, composedKey };
+	}));
 
 	// Publish the derived selection into shared state so shortcuts can reference it.
 	$effect(() => {

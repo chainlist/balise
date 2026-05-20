@@ -17,7 +17,7 @@
 		noteEditorTheme
 	} from '$lib/utils/cm';
 	import { updateNote, deleteNote, type Note } from '$lib/services/notes.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { onDeleteNote } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
@@ -27,12 +27,9 @@
 
 	let confirmOpen = $state(false);
 
-	$effect(() => {
-		if (uiState.pendingDeleteNoteId === note.id) {
-			confirmOpen = true;
-			uiState.pendingDeleteNoteId = null;
-		}
-	});
+	$effect(() => onDeleteNote((id) => {
+		if (id === note.id) confirmOpen = true;
+	}));
 
 	function mount(container: HTMLDivElement) {
 		return untrack(() => {

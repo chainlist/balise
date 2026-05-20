@@ -17,11 +17,9 @@ export const uiState = $state({
 	activeTag: null as string | null,
 	composedTags: [] as string[],
 	ready: false,
-	pendingNoteSelection: null as string | null,
 	isSettingsOpen: false,
 	isCapturingShortcut: false,
-	activeNoteId: null as string | null,
-	pendingDeleteNoteId: null as string | null
+	activeNoteId: null as string | null
 });
 
 export async function initUIState(): Promise<void> {
