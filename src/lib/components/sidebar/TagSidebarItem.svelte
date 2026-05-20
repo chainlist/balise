@@ -19,7 +19,7 @@
 <Sidebar.MenuButton
 	{isActive}
 	onclick={() => setActiveTag(tag.tag)}
-	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10 select-none "
+	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors select-none text-sidebar-foreground/80"
 >
 	<div class={cn(onSettings ? 'group/tag-item' : '', "flex items-center gap-2 justify-between w-full")}>
 		<div class="flex items-center gap-2 ">
@@ -30,12 +30,12 @@
 					class="shrink-0 text-muted-foreground/50"
 				/>
 			{:else if tag.tag === UNTAGGED_FILTER}
-				<span class="size-2 shrink-0 rounded-full border border-dashed border-muted-foreground"
+				<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"
 				></span>
 			{:else if tag.color}
-				<span class="text-sm text-muted-foreground/50" style="color: {tag.color};">#</span>
+				<span class="text-sm text-sidebar-foreground/40" style="color: {tag.color};">#</span>
 			{:else}
-				<span class="text-sm text-muted-foreground/50">#</span>
+				<span class="text-sm text-sidebar-foreground/40">#</span>
 			{/if}
 			<span>{tagDisplayName(tag)}</span>
 		</div>
@@ -47,7 +47,7 @@
 			onclick={handleSettingsClick}
 			onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSettingsClick(e); } }}
 		>
-			<span class="ml-auto text-xs text-muted-foreground group-hover/tag-item:hidden">{tag.count}</span>
+			<span class="ml-auto text-xs text-sidebar-foreground/40 group-hover/tag-item:hidden">{tag.count}</span>
 			{#if onSettings}
 				<div class="hidden group-hover/tag-item:inline-block">
 					<Settings2Icon size="16" />

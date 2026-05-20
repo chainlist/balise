@@ -17,7 +17,7 @@
 	} = $props();
 </script>
 
-<Sidebar.Root collapsible="none">
+<Sidebar.Root collapsible="none" class="bg-background text-foreground">
 	<NotesSidebarHeader {onCreate} />
 	<NotesSidebarContent {notes} {selectedNoteId} {onSelect} />
 </Sidebar.Root>

@@ -25,8 +25,8 @@
 
 <Sidebar.Content>
 	<Sidebar.Group>
-		<Sidebar.GroupContent>
-			<Sidebar.Menu>
+		<Sidebar.GroupContent class="px-2">
+			<Sidebar.Menu class="gap-2">
 				{#if notes.length === 0}
 					<p class="px-2 py-6 text-center text-sm text-muted-foreground">No notes yet.</p>
 				{:else}
@@ -35,10 +35,10 @@
 							<Sidebar.MenuButton
 								isActive={selectedNoteId === note.id}
 								onclick={() => onSelect(note.id)}
-								class="h-auto py-2"
+								class="h-auto rounded-xl border border-border bg-card px-3 py-3 data-active:border-primary/30 data-active:bg-primary/5 data-active:text-foreground hover:bg-muted/60 hover:text-foreground"
 							>
-								<div class="flex min-w-0 flex-col items-start gap-0.5">
-									<span class="w-full truncate text-sm font-medium">
+								<div class="flex min-w-0 flex-col items-start gap-1">
+									<span class="w-full truncate text-sm font-semibold text-foreground">
 										{noteTitle(note.content)}
 									</span>
 									<span class="text-xs text-muted-foreground">

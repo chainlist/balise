@@ -25,7 +25,7 @@
 	);
 </script>
 
-<Sidebar.Header>
+<Sidebar.Header class="border-b border-border pb-3">
 	<div class="flex items-center justify-between px-2">
 		<span class="text-lg font-semibold">
 			<TagName tag={uiState.activeTag || 'All Notes'} />

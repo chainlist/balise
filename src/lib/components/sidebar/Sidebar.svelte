@@ -41,8 +41,9 @@
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<div class="px-4 py-1">
-					<h1 class="text-primary text-2xl font-bold">Balise</h1>
+				<div class="px-4 py-2">
+					<h1 class="text-xl font-bold text-sidebar-foreground">Balise</h1>
+					<p class="text-xs text-sidebar-foreground/50">Note Management</p>
 				</div>
 			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
@@ -52,7 +53,7 @@
 							<Sidebar.MenuButton
 								{...props}
 								size="sm"
-								class="bg-muted text-muted-foreground data-[state=open]:bg-muted/50 data-[state=open]:text-muted-foreground hover:bg-muted/80"
+								class="bg-sidebar-accent/60 text-sidebar-foreground/80 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
 							>
 								<div class="flex w-full items-center justify-between">
 									<span>{selectedDesk}</span>
@@ -100,6 +101,9 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<Sidebar.Group>
+			<Sidebar.GroupLabel class="px-4 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+				Navigation Tags
+			</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					<Sidebar.MenuItem>
@@ -122,11 +126,11 @@
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>
-	<Sidebar.Footer>
+	<Sidebar.Footer class="pb-4">
 		<Button
 			variant="ghost"
 			size="sm"
-			class="w-full justify-start gap-2 text-muted-foreground"
+			class="w-full justify-start gap-2 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
 			onclick={() => (uiState.isSettingsOpen = true)}
 		>
 			<Settings2Icon class="size-4" />
