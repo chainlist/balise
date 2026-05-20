@@ -39,7 +39,6 @@
 </script>
 
 <SidebarProvider>
-	<!-- <svelte:head><link rel="icon" href={favicon} /></svelte:head> -->
 	{#if error}
 		<div class="error">
 			<h1>Error</h1>
