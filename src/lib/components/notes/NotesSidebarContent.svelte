@@ -5,11 +5,11 @@
 	let {
 		notes,
 		selectedNoteId,
-		onselect
+		onSelect
 	}: {
 		notes: Note[];
 		selectedNoteId: string | null;
-		onselect: (noteId: string) => void;
+		onSelect: (noteId: string) => void;
 	} = $props();
 
 	const intl = new Intl.DateTimeFormat(navigator.language, {
@@ -29,7 +29,7 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton
 								isActive={selectedNoteId === note.id}
-								onclick={() => onselect(note.id)}
+								onclick={() => onSelect(note.id)}
 								class="h-auto py-2"
 							>
 								<div class="flex min-w-0 flex-col items-start gap-0.5">

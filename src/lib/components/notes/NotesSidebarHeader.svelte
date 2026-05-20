@@ -9,7 +9,7 @@
 	import { tagState, tagDisplayName } from '$lib/services/tags.svelte';
 	import TagName from '$lib/components/TagName.svelte';
 
-	let { oncreate }: { oncreate: () => void } = $props();
+	let { onCreate }: { onCreate: () => void } = $props();
 
 	function tagColor(t: string): string | null {
 		return tagState.tags.find((tag) => tag.tag === t)?.color ?? null;
@@ -32,7 +32,7 @@
 				<span class="text-lg font-semibold">
 					<TagName tag={uiState.activeTag || 'All Notes'} />
 				</span>
-				<Button variant="ghost" size="icon-sm" onclick={oncreate}>
+				<Button variant="ghost" size="icon-sm" onclick={onCreate}>
 					<PlusIcon class="size-4" />
 				</Button>
 			</div>

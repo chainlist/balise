@@ -36,12 +36,12 @@
 
 <Sidebar.Provider class="h-full min-h-0">
 	<Sidebar.Root collapsible="none">
-		<NotesSidebarHeader oncreate={handleCreateNote} />
+		<NotesSidebarHeader onCreate={handleCreateNote} />
 
 		<NotesSidebarContent
 			notes={noteState.notes}
 			{selectedNoteId}
-			onselect={(noteId) => (selection = { noteId, tag: uiState.activeTag, composedKey })}
+			onSelect={(noteId) => (selection = { noteId, tag: uiState.activeTag, composedKey })}
 		/>
 	</Sidebar.Root>
 
