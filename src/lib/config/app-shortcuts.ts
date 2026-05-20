@@ -1,7 +1,7 @@
 import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
-import { createNote, newNoteContent, noteState } from '$lib/services/notes.svelte';
+import { notesService, newNoteContent } from '$lib/services/notes.svelte';
 import { uiState } from '$lib/services/ui-state.svelte';
-import { signalSelectNote, signalDeleteNote } from '$lib/services/note-signals';
+import { noteSignals } from '$lib/services/note-signals';
 
 export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	{
@@ -20,8 +20,8 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: 'Create a new note in the active tag',
 		defaultBinding: '$mod+n',
 		run: async () => {
-			const id = await createNote(newNoteContent(uiState.activeTag));
-			signalSelectNote(id);
+			const id = await notesService.create(newNoteContent(uiState.activeTag));
+			noteSignals.signalSelectNote(id);
 		}
 	},
 	{
@@ -30,7 +30,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: 'Delete the currently selected note',
 		defaultBinding: '$mod+Delete',
 		run: () => {
-			if (uiState.activeNoteId) signalDeleteNote(uiState.activeNoteId);
+			if (uiState.activeNoteId) noteSignals.signalDeleteNote(uiState.activeNoteId);
 		}
 	},
 	{
@@ -39,9 +39,9 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: 'Select the note above in the list',
 		defaultBinding: 'Alt+ArrowUp',
 		run: () => {
-			const notes = noteState.notes;
+			const notes = notesService.notes;
 			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
-			if (idx > 0) signalSelectNote(notes[idx - 1].id);
+			if (idx > 0) noteSignals.signalSelectNote(notes[idx - 1].id);
 		}
 	},
 	{
@@ -50,9 +50,9 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: 'Select the note below in the list',
 		defaultBinding: 'Alt+ArrowDown',
 		run: () => {
-			const notes = noteState.notes;
+			const notes = notesService.notes;
 			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
-			if (idx !== -1 && idx < notes.length - 1) signalSelectNote(notes[idx + 1].id);
+			if (idx !== -1 && idx < notes.length - 1) noteSignals.signalSelectNote(notes[idx + 1].id);
 		}
 	}
 ];

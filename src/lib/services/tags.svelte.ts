@@ -21,31 +21,6 @@ export interface Tag {
 	count: number;
 }
 
-export const tagState = $state({ tags: [] as Tag[], untaggedCount: 0, relatedTags: [] as RelatedTag[] });
-
-export async function loadTags(): Promise<void> {
-	const db = getDB();
-	const [raw, count] = await Promise.all([queryTagsWithCounts(db), queryUntaggedCount(db)]);
-	tagState.tags = raw.map((t) => ({ ...t, pinned: t.pinned === 1 }));
-	tagState.untaggedCount = count;
-}
-
-export async function setTagSettings(
-	tag: string,
-	settings: Partial<{ color: string; display_name: string | null; pinned: boolean }>
-): Promise<void> {
-	await dbUpsertTagSettings(getDB(), tag, settings);
-	const updated = tagState.tags.find((t) => t.tag === tag);
-	if (updated) {
-		if (settings.color) updated.color = settings.color;
-		if (settings.display_name !== undefined) updated.display_name = settings.display_name;
-		if (settings.pinned !== undefined) {
-			updated.pinned = settings.pinned;
-			tagState.tags.sort((a, b) => Number(b.pinned) - Number(a.pinned) || a.tag.localeCompare(b.tag));
-		}
-	}
-}
-
 export function tagDisplayName(tag: { display_name: string | null; tag: string }): string {
 	return tag.display_name ?? tag.tag;
 }
@@ -66,27 +41,55 @@ export function extractTags(content: string): string[] {
 	return [...tags];
 }
 
-export async function loadRelatedTags(
-	activeTag: string | null,
-	composedTags: string[] = []
-): Promise<void> {
-	if (activeTag === '__untagged__') {
-		tagState.relatedTags = [];
-		return;
+class TagsService {
+	tags = $state<Tag[]>([]);
+	untaggedCount = $state(0);
+	relatedTags = $state<RelatedTag[]>([]);
+
+	async load(): Promise<void> {
+		const db = getDB();
+		const [raw, count] = await Promise.all([queryTagsWithCounts(db), queryUntaggedCount(db)]);
+		this.tags = raw.map((t) => ({ ...t, pinned: t.pinned === 1 }));
+		this.untaggedCount = count;
 	}
 
-	const allCurrentTags = activeTag ? [activeTag, ...composedTags] : composedTags;
-	tagState.relatedTags = await queryRelatedTags(getDB(), allCurrentTags);
+	async setSettings(
+		tag: string,
+		settings: Partial<{ color: string; display_name: string | null; pinned: boolean }>
+	): Promise<void> {
+		await dbUpsertTagSettings(getDB(), tag, settings);
+		const updated = this.tags.find((t) => t.tag === tag);
+		if (updated) {
+			if (settings.color) updated.color = settings.color;
+			if (settings.display_name !== undefined) updated.display_name = settings.display_name;
+			if (settings.pinned !== undefined) {
+				updated.pinned = settings.pinned;
+				this.tags.sort((a, b) => Number(b.pinned) - Number(a.pinned) || a.tag.localeCompare(b.tag));
+			}
+		}
+	}
+
+	async loadRelated(activeTag: string | null, composedTags: string[] = []): Promise<void> {
+		if (activeTag === '__untagged__') {
+			this.relatedTags = [];
+			return;
+		}
+
+		const allCurrentTags = activeTag ? [activeTag, ...composedTags] : composedTags;
+		this.relatedTags = await queryRelatedTags(getDB(), allCurrentTags);
+	}
+
+	async syncNoteTags(noteId: string, content: string): Promise<void> {
+		const db = getDB();
+		const rawNames = extractTags(content);
+
+		// Canonical resolution MUST happen before DELETE — it reads existing rows to preserve casing
+		const names = rawNames.length > 0 ? await resolveCanonicalTags(db, rawNames) : [];
+		await deleteNoteTags(db, noteId);
+		if (names.length > 0) await insertNoteTags(db, noteId, names);
+
+		await this.load();
+	}
 }
 
-export async function syncNoteTags(noteId: string, content: string): Promise<void> {
-	const db = getDB();
-	const rawNames = extractTags(content);
-
-	// Canonical resolution MUST happen before DELETE — it reads existing rows to preserve casing
-	const names = rawNames.length > 0 ? await resolveCanonicalTags(db, rawNames) : [];
-	await deleteNoteTags(db, noteId);
-	if (names.length > 0) await insertNoteTags(db, noteId, names);
-
-	await loadTags();
-}
+export const tagsService = new TagsService();

@@ -9,23 +9,27 @@ vi.mock('$lib/services/desk', () => ({
 	openDesk: vi.fn().mockResolvedValue(undefined)
 }));
 vi.mock('$lib/services/notes.svelte', () => ({
-	loadNotes: vi.fn().mockResolvedValue(undefined)
+	notesService: {
+		load: vi.fn().mockResolvedValue(undefined)
+	}
 }));
 vi.mock('$lib/services/tags.svelte', () => ({
-	loadTags: vi.fn().mockResolvedValue(undefined),
-	loadRelatedTags: vi.fn().mockResolvedValue(undefined)
+	tagsService: {
+		load: vi.fn().mockResolvedValue(undefined),
+		loadRelated: vi.fn().mockResolvedValue(undefined)
+	}
 }));
 
-import { uiState, addDesk, removeDesk, setActiveTag, toggleComposedTag, switchDesk, initUIState } from './ui-state.svelte';
+import { uiState } from './ui-state.svelte';
 import { openDesk } from '$lib/services/desk';
-import { loadNotes } from '$lib/services/notes.svelte';
-import { loadTags, loadRelatedTags } from '$lib/services/tags.svelte';
+import { notesService } from '$lib/services/notes.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
 
-// Initialise the store once so the module-level `store` variable is non-null,
+// Initialise the store once so the #store field is non-null,
 // making store?.set(...) calls observable in every test.
 beforeAll(async () => {
 	mockStore.get.mockResolvedValue(null); // use built-in defaults
-	await initUIState();
+	await uiState.init();
 });
 
 beforeEach(() => {
@@ -44,17 +48,17 @@ beforeEach(() => {
 
 describe('addDesk', () => {
 	it('adds a new desk to the list', async () => {
-		await addDesk('Work');
+		await uiState.addDesk('Work');
 		expect(uiState.desks).toContain('Work');
 	});
 
 	it('does not add a duplicate desk', async () => {
-		await addDesk('Personal');
+		await uiState.addDesk('Personal');
 		expect(uiState.desks.filter((d) => d === 'Personal')).toHaveLength(1);
 	});
 
 	it('persists the updated desks list to the store', async () => {
-		await addDesk('Work');
+		await uiState.addDesk('Work');
 		expect(mockStore.set).toHaveBeenCalledWith('desks', expect.arrayContaining(['Work']));
 	});
 });
@@ -68,32 +72,32 @@ describe('removeDesk', () => {
 	});
 
 	it('removes the desk from the list', async () => {
-		await removeDesk('Work');
+		await uiState.removeDesk('Work');
 		expect(uiState.desks).not.toContain('Work');
 	});
 
 	it('throws when attempting to remove the last desk', async () => {
 		uiState.desks = ['Personal'];
-		await expect(removeDesk('Personal')).rejects.toThrow('You must keep at least one desk.');
+		await expect(uiState.removeDesk('Personal')).rejects.toThrow('You must keep at least one desk.');
 	});
 
 	it('does not throw for a non-existent desk', async () => {
-		await expect(removeDesk('Ghost')).resolves.not.toThrow();
+		await expect(uiState.removeDesk('Ghost')).resolves.not.toThrow();
 	});
 
 	it('does not change active desk when removing a non-active desk', async () => {
-		await removeDesk('Work');
+		await uiState.removeDesk('Work');
 		expect(uiState.activeDesk).toBe('Personal');
 	});
 
 	it('switches active desk to the first remaining desk when the active one is removed', async () => {
 		uiState.activeDesk = 'Work';
-		await removeDesk('Work');
+		await uiState.removeDesk('Work');
 		expect(uiState.activeDesk).toBe('Personal');
 	});
 
 	it('persists the updated desks list to the store', async () => {
-		await removeDesk('Work');
+		await uiState.removeDesk('Work');
 		expect(mockStore.set).toHaveBeenCalledWith('desks', ['Personal']);
 	});
 });
@@ -102,43 +106,43 @@ describe('removeDesk', () => {
 
 describe('setActiveTag', () => {
 	it('sets the active tag', async () => {
-		await setActiveTag('work');
+		await uiState.setActiveTag('work');
 		expect(uiState.activeTag).toBe('work');
 	});
 
 	it('toggles the tag off when the same tag is passed twice', async () => {
 		uiState.activeTag = 'work';
-		await setActiveTag('work');
+		await uiState.setActiveTag('work');
 		expect(uiState.activeTag).toBeNull();
 	});
 
 	it('switches to a new tag without toggling', async () => {
 		uiState.activeTag = 'work';
-		await setActiveTag('todo');
+		await uiState.setActiveTag('todo');
 		expect(uiState.activeTag).toBe('todo');
 	});
 
 	it('clears composedTags when the active tag changes', async () => {
 		uiState.composedTags = ['urgent', 'todo'];
-		await setActiveTag('work');
+		await uiState.setActiveTag('work');
 		expect(uiState.composedTags).toHaveLength(0);
 	});
 
 	it('clears composedTags when the active tag is toggled off', async () => {
 		uiState.activeTag = 'work';
 		uiState.composedTags = ['urgent'];
-		await setActiveTag('work');
+		await uiState.setActiveTag('work');
 		expect(uiState.composedTags).toHaveLength(0);
 	});
 
-	it('calls loadNotes with the new active tag', async () => {
-		await setActiveTag('work');
-		expect(loadNotes).toHaveBeenCalledWith('work');
+	it('calls notesService.load with the new active tag', async () => {
+		await uiState.setActiveTag('work');
+		expect(notesService.load).toHaveBeenCalledWith('work');
 	});
 
-	it('calls loadRelatedTags with the new active tag', async () => {
-		await setActiveTag('work');
-		expect(loadRelatedTags).toHaveBeenCalledWith('work');
+	it('calls tagsService.loadRelated with the new active tag', async () => {
+		await uiState.setActiveTag('work');
+		expect(tagsService.loadRelated).toHaveBeenCalledWith('work');
 	});
 });
 
@@ -150,31 +154,31 @@ describe('toggleComposedTag', () => {
 	});
 
 	it('adds the tag to composedTags when not present', async () => {
-		await toggleComposedTag('urgent');
+		await uiState.toggleComposedTag('urgent');
 		expect(uiState.composedTags).toContain('urgent');
 	});
 
 	it('removes the tag from composedTags when already present', async () => {
 		uiState.composedTags = ['urgent'];
-		await toggleComposedTag('urgent');
+		await uiState.toggleComposedTag('urgent');
 		expect(uiState.composedTags).not.toContain('urgent');
 	});
 
 	it('can hold multiple composed tags simultaneously', async () => {
-		await toggleComposedTag('urgent');
-		await toggleComposedTag('todo');
+		await uiState.toggleComposedTag('urgent');
+		await uiState.toggleComposedTag('todo');
 		expect(uiState.composedTags).toContain('urgent');
 		expect(uiState.composedTags).toContain('todo');
 	});
 
-	it('calls loadNotes with activeTag and the updated composedTags', async () => {
-		await toggleComposedTag('urgent');
-		expect(loadNotes).toHaveBeenCalledWith('work', ['urgent']);
+	it('calls notesService.load with activeTag and the updated composedTags', async () => {
+		await uiState.toggleComposedTag('urgent');
+		expect(notesService.load).toHaveBeenCalledWith('work', ['urgent']);
 	});
 
-	it('calls loadRelatedTags with activeTag and the updated composedTags', async () => {
-		await toggleComposedTag('urgent');
-		expect(loadRelatedTags).toHaveBeenCalledWith('work', ['urgent']);
+	it('calls tagsService.loadRelated with activeTag and the updated composedTags', async () => {
+		await uiState.toggleComposedTag('urgent');
+		expect(tagsService.loadRelated).toHaveBeenCalledWith('work', ['urgent']);
 	});
 });
 
@@ -188,37 +192,37 @@ describe('switchDesk', () => {
 	});
 
 	it('resets activeTag to null', async () => {
-		await switchDesk('Work');
+		await uiState.switchDesk('Work');
 		expect(uiState.activeTag).toBeNull();
 	});
 
 	it('resets composedTags to an empty array', async () => {
-		await switchDesk('Work');
+		await uiState.switchDesk('Work');
 		expect(uiState.composedTags).toHaveLength(0);
 	});
 
 	it('calls openDesk with the new desk name', async () => {
-		await switchDesk('Work');
+		await uiState.switchDesk('Work');
 		expect(openDesk).toHaveBeenCalledWith('Work');
 	});
 
 	it('sets activeDesk to the new desk', async () => {
-		await switchDesk('Work');
+		await uiState.switchDesk('Work');
 		expect(uiState.activeDesk).toBe('Work');
 	});
 
-	it('calls loadTags after switching', async () => {
-		await switchDesk('Work');
-		expect(loadTags).toHaveBeenCalled();
+	it('calls tagsService.load after switching', async () => {
+		await uiState.switchDesk('Work');
+		expect(tagsService.load).toHaveBeenCalled();
 	});
 
-	it('calls loadNotes after switching', async () => {
-		await switchDesk('Work');
-		expect(loadNotes).toHaveBeenCalled();
+	it('calls notesService.load after switching', async () => {
+		await uiState.switchDesk('Work');
+		expect(notesService.load).toHaveBeenCalled();
 	});
 
-	it('calls loadRelatedTags with null after switching', async () => {
-		await switchDesk('Work');
-		expect(loadRelatedTags).toHaveBeenCalledWith(null);
+	it('calls tagsService.loadRelated with null after switching', async () => {
+		await uiState.switchDesk('Work');
+		expect(tagsService.loadRelated).toHaveBeenCalledWith(null);
 	});
 });

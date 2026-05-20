@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { Toggle } from '$lib/components/shadcn/toggle/index.js';
-	import { setTagSettings, type Tag } from '$lib/services/tags.svelte';
+	import { tagsService, type Tag } from '$lib/services/tags.svelte';
 	import { PinIcon, PinOffIcon } from '@lucide/svelte';
 
 	let { open = $bindable(false), tag }: { open?: boolean; tag: Tag | null } = $props();
@@ -34,7 +34,7 @@
 		if (!tag) return;
 		saving = true;
 		try {
-			await setTagSettings(tag.tag, {
+			await tagsService.setSettings(tag.tag, {
 				color,
 				display_name: displayName.trim() || null,
 				pinned

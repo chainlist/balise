@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { editorState, setFontSize } from '$lib/services/editor.svelte';
+	import { editorService } from '$lib/services/editor.svelte';
 
 	const MIN = 12;
 	const MAX = 24;
@@ -19,7 +19,7 @@
 					<p class="text-xs text-muted-foreground">Size of text in the editor.</p>
 				</div>
 				<span class="text-sm font-mono tabular-nums text-muted-foreground w-12 text-right">
-					{editorState.fontSize}px
+					{editorService.fontSize}px
 				</span>
 			</div>
 			<div class="flex items-center gap-3">
@@ -29,8 +29,8 @@
 					min={MIN}
 					max={MAX}
 					step="1"
-					value={editorState.fontSize}
-					oninput={(e) => setFontSize(Number(e.currentTarget.value))}
+					value={editorService.fontSize}
+					oninput={(e) => editorService.setFontSize(Number(e.currentTarget.value))}
 					class="flex-1 accent-primary"
 				/>
 				<span class="text-xs text-muted-foreground w-6">{MAX}</span>

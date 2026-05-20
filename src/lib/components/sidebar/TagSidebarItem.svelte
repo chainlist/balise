@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setActiveTag, uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagDisplayName, type Tag } from '$lib/services/tags.svelte';
 	import { Settings2Icon, PinIcon } from '@lucide/svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
@@ -17,7 +17,7 @@
 
 <Sidebar.MenuButton
 	{isActive}
-	onclick={() => setActiveTag(tag.tag)}
+	onclick={() => uiState.setActiveTag(tag.tag)}
 	class="group/tag-item inline-flex w-full items-center justify-between rounded-lg px-3 py-1.5 transition-all select-none text-on-surface-variant hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:text-on-surface data-active:font-medium"
 >
 	<div class="flex items-center gap-2 min-w-0">

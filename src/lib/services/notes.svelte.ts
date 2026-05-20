@@ -1,5 +1,5 @@
 import { getDB } from '$lib/utils/db';
-import { syncNoteTags, loadTags } from '$lib/services/tags.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
 import {
 	queryNotesByTags,
 	queryUntaggedNotes,
@@ -15,19 +15,6 @@ export type { Note };
 
 export const UNTAGGED_FILTER = '__untagged__' as const;
 
-export const noteState = $state({ notes: [] as Note[] });
-
-export async function loadNotes(tag?: string | null, composedTags: string[] = []): Promise<void> {
-	const db = getDB();
-
-	if (tag === UNTAGGED_FILTER) {
-		noteState.notes = await queryUntaggedNotes(db);
-		return;
-	}
-
-	noteState.notes = await queryNotesByTags(db, tag ? [tag, ...composedTags] : composedTags);
-}
-
 export function newNoteContent(activeTag: string | null): string {
 	return (
 		'### New Note\n\n' +
@@ -35,29 +22,46 @@ export function newNoteContent(activeTag: string | null): string {
 	);
 }
 
-export async function createNote(content = ''): Promise<string> {
-	const db = getDB();
-	const id = crypto.randomUUID();
-	await insertNote(db, id, content);
-	const note = await queryNoteById(db, id);
-	if (note) noteState.notes = [note, ...noteState.notes];
-	return id;
-}
+class NotesService {
+	notes = $state<Note[]>([]);
 
-export async function updateNote(id: string, content: string): Promise<void> {
-	const db = getDB();
-	await updateNoteContent(db, id, content);
-	await syncNoteTags(id, content);
-	const note = noteState.notes.find((n) => n.id === id);
-	if (note) {
-		note.content = content;
-		const ts = await queryNoteUpdatedAt(db, id);
-		if (ts) note.updated_at = ts;
+	async load(tag?: string | null, composedTags: string[] = []): Promise<void> {
+		const db = getDB();
+
+		if (tag === UNTAGGED_FILTER) {
+			this.notes = await queryUntaggedNotes(db);
+			return;
+		}
+
+		this.notes = await queryNotesByTags(db, tag ? [tag, ...composedTags] : composedTags);
+	}
+
+	async create(content = ''): Promise<string> {
+		const db = getDB();
+		const id = crypto.randomUUID();
+		await insertNote(db, id, content);
+		const note = await queryNoteById(db, id);
+		if (note) this.notes = [note, ...this.notes];
+		return id;
+	}
+
+	async update(id: string, content: string): Promise<void> {
+		const db = getDB();
+		await updateNoteContent(db, id, content);
+		await tagsService.syncNoteTags(id, content);
+		const note = this.notes.find((n) => n.id === id);
+		if (note) {
+			note.content = content;
+			const ts = await queryNoteUpdatedAt(db, id);
+			if (ts) note.updated_at = ts;
+		}
+	}
+
+	async delete(id: string): Promise<void> {
+		await deleteNoteById(getDB(), id);
+		this.notes = this.notes.filter((n) => n.id !== id);
+		await tagsService.load();
 	}
 }
 
-export async function deleteNote(id: string): Promise<void> {
-	await deleteNoteById(getDB(), id);
-	noteState.notes = noteState.notes.filter((n) => n.id !== id);
-	await loadTags();
-}
+export const notesService = new NotesService();

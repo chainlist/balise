@@ -4,7 +4,7 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { mount, unmount } from 'svelte';
 import TagChip from '$lib/components/cm/TagChip.svelte';
-import { tagState } from '$lib/services/tags.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
 import { makePlugin } from './shared';
 
 class TagWidget extends WidgetType {
@@ -40,7 +40,7 @@ function buildTagDecos(view: EditorView): DecorationSet {
 	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
 	const ranges: Range<Decoration>[] = [];
 
-	const tagColorMap = new Map(tagState.tags.map((t) => [t.tag.toLowerCase(), t.color]));
+	const tagColorMap = new Map(tagsService.tags.map((t) => [t.tag.toLowerCase(), t.color]));
 
 	for (const { from, to } of view.visibleRanges) {
 		TAG_RE.lastIndex = 0;

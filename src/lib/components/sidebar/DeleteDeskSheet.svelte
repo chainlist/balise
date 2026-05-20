@@ -2,7 +2,7 @@
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { deleteDeskFiles } from '$lib/services/desk';
-	import { removeDesk, switchDesk, uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let {
 		open = $bindable(false),
@@ -26,11 +26,11 @@
 					throw new Error('You must keep at least one desk.');
 				}
 
-				await switchDesk(fallbackDesk);
+				await uiState.switchDesk(fallbackDesk);
 			}
 
 			await deleteDeskFiles(desk);
-			await removeDesk(desk);
+			await uiState.removeDesk(desk);
 			deskName = null;
 			open = false;
 		} catch (error) {

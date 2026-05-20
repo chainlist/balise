@@ -1,8 +1,8 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
-	import { noteState, createNote, newNoteContent, type Note } from '$lib/services/notes.svelte';
+	import { notesService, newNoteContent, type Note } from '$lib/services/notes.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { onSelectNote } from '$lib/services/note-signals';
+	import { noteSignals } from '$lib/services/note-signals';
 	import NotesSidebar from '$lib/components/notes/NotesSidebar.svelte';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 
@@ -11,12 +11,12 @@
 	const selectedNoteId = $derived(
 		selection?.tag === uiState.activeTag && selection?.composedKey === composedKey
 			? selection.noteId
-			: (noteState.notes[0]?.id ?? null)
+			: (notesService.notes[0]?.id ?? null)
 	);
-	const selectedNote = $derived(noteState.notes.find((n) => n.id === selectedNoteId) ?? null);
+	const selectedNote = $derived(notesService.notes.find((n) => n.id === selectedNoteId) ?? null);
 
 	// Register external signal handler — assignment happens on signal fire, not during effect body.
-	$effect(() => onSelectNote((id) => {
+	$effect(() => noteSignals.onSelectNote((id) => {
 		selection = { noteId: id, tag: uiState.activeTag, composedKey };
 	}));
 
@@ -26,7 +26,7 @@
 	});
 
 	async function handleCreateNote() {
-		const id = await createNote(newNoteContent(uiState.activeTag));
+		const id = await notesService.create(newNoteContent(uiState.activeTag));
 		selection = { noteId: id, tag: uiState.activeTag, composedKey };
 	}
 
@@ -38,7 +38,7 @@
 <!-- Isolated from the outer app navigation SidebarProvider — owns its own open/close state. -->
 <Sidebar.Provider class="h-full min-h-0">
 	<NotesSidebar
-		notes={noteState.notes}
+		notes={notesService.notes}
 		{selectedNoteId}
 		onCreate={handleCreateNote}
 		onSelect={handleSelect}

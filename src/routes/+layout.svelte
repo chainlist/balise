@@ -4,7 +4,7 @@
 	import { tinykeys } from 'tinykeys';
 	import { initApp } from '$lib/utils/init-app';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { buildTinykeysMap } from '$lib/services/shortcuts.svelte';
+	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
@@ -24,7 +24,7 @@
 	$effect(() => {
 		return tinykeys(
 			window,
-			buildTinykeysMap(
+			shortcutsService.buildTinykeysMap(
 				APP_SHORTCUTS,
 				() => !uiState.isSettingsOpen,
 				() => !uiState.isCapturingShortcut

@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { sanitizeDeskName } from '$lib/services/desk';
-	import { addDesk, switchDesk, uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();
 
@@ -28,8 +28,8 @@
 
 		isCreatingDesk = true;
 		try {
-			await addDesk(deskName);
-			await switchDesk(deskName);
+			await uiState.addDesk(deskName);
+			await uiState.switchDesk(deskName);
 			newDeskName = '';
 			open = false;
 		} catch (error) {

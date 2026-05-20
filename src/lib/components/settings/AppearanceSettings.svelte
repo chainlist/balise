@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { themeState, setTheme, type Theme } from '$lib/services/theme.svelte';
+	import { themeService, type Theme } from '$lib/services/theme.svelte';
 	import { SunIcon, MoonIcon, MonitorIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 
@@ -24,9 +24,9 @@
 
 		<div class="flex gap-3">
 			{#each options as option (option.value)}
-				{@const isActive = themeState.theme === option.value}
+				{@const isActive = themeService.theme === option.value}
 				<button
-					onclick={() => setTheme(option.value)}
+					onclick={() => themeService.setTheme(option.value)}
 					class={cn(
 						'flex flex-col items-center gap-2.5 rounded-lg border-2 p-4 w-28 transition-all',
 						isActive

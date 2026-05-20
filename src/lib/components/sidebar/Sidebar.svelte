@@ -11,9 +11,9 @@
 		SquarePenIcon,
 		LayoutListIcon
 	} from '@lucide/svelte';
-	import { switchDesk, uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
-	import { tagState, type Tag } from '$lib/services/tags.svelte';
+	import { tagsService, type Tag } from '$lib/services/tags.svelte';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
@@ -35,7 +35,7 @@
 	}
 
 	async function handleSelectDesk(desk: string) {
-		await switchDesk(desk);
+		await uiState.switchDesk(desk);
 	}
 
 	function promptDeleteDesk(desk: string) {
@@ -126,14 +126,14 @@
 						<TagSidebarItem
 							tag={{
 								tag: UNTAGGED_FILTER,
-								count: tagState.untaggedCount,
+								count: tagsService.untaggedCount,
 								color: null,
 								display_name: 'Untagged',
 								pinned: false
 							}}
 						/>
 					</Sidebar.MenuItem>
-					{#each tagState.tags as tag (tag.tag)}
+					{#each tagsService.tags as tag (tag.tag)}
 						<Sidebar.MenuItem>
 							<TagSidebarItem {tag} onSettings={openTagSettings} />
 						</Sidebar.MenuItem>

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { tagState, tagDisplayName, type Tag, type RelatedTag } from '$lib/services/tags.svelte';
+	import { tagsService, tagDisplayName, type Tag, type RelatedTag } from '$lib/services/tags.svelte';
 
 	let { tag }: { tag: string | Tag | RelatedTag } = $props();
 
 	const tagObj = $derived(
 		typeof tag === 'string'
-			? (tagState.tags.find((t) => t.tag.toLowerCase() === tag.toLowerCase()) ?? {
+			? (tagsService.tags.find((t) => t.tag.toLowerCase() === tag.toLowerCase()) ?? {
 					tag,
 					display_name: null,
 					color: null

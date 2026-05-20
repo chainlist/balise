@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getBinding, setBinding, resetBinding } from '$lib/services/shortcuts.svelte';
+	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
@@ -62,7 +62,7 @@
 		if (!binding) return;
 
 		const conflict = APP_SHORTCUTS.find(
-			(def) => def.id !== listeningFor && getBinding(def) === binding
+			(def) => def.id !== listeningFor && shortcutsService.getBinding(def) === binding
 		);
 
 		if (conflict) {
@@ -71,7 +71,7 @@
 		}
 
 		conflictName = null;
-		setBinding(listeningFor, binding);
+		shortcutsService.setBinding(listeningFor, binding);
 		listeningFor = null;
 	}
 </script>
@@ -96,7 +96,7 @@
 			</thead>
 			<tbody>
 				{#each APP_SHORTCUTS as def (def.id)}
-					{@const binding = getBinding(def)}
+					{@const binding = shortcutsService.getBinding(def)}
 					{@const isListening = listeningFor === def.id}
 					{@const hasConflict = isListening && conflictName !== null}
 					<tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
@@ -126,7 +126,7 @@
 						<td class="pr-4 py-3">
 							{#if binding !== def.defaultBinding}
 								<button
-									onclick={() => resetBinding(def.id)}
+									onclick={() => shortcutsService.resetBinding(def.id)}
 									title="Reset to default"
 									class="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
 								>

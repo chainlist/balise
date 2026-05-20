@@ -13,13 +13,7 @@ vi.mock('$lib/repositories/tags.repo', () => ({
 }));
 vi.mock('$lib/utils/db', () => ({ getDB: vi.fn(() => ({})) }));
 
-import {
-	tagState,
-	loadTags,
-	setTagSettings,
-	syncNoteTags,
-	loadRelatedTags
-} from './tags.svelte';
+import { tagsService, extractTags, tagDisplayName } from './tags.svelte';
 import * as repo from '$lib/repositories/tags.repo';
 
 const RAW_TAG = (tag = 'work', pinned = 0) => ({
@@ -32,49 +26,49 @@ const RAW_TAG = (tag = 'work', pinned = 0) => ({
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	tagState.tags = [];
-	tagState.untaggedCount = 0;
-	tagState.relatedTags = [];
+	tagsService.tags = [];
+	tagsService.untaggedCount = 0;
+	tagsService.relatedTags = [];
 });
 
-// ─── loadTags ─────────────────────────────────────────────────────────────────
+// ─── load ─────────────────────────────────────────────────────────────────────
 
-describe('loadTags', () => {
-	it('populates tagState.tags', async () => {
+describe('load', () => {
+	it('populates tags', async () => {
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([RAW_TAG('work')]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await loadTags();
-		expect(tagState.tags).toHaveLength(1);
-		expect(tagState.tags[0].tag).toBe('work');
+		await tagsService.load();
+		expect(tagsService.tags).toHaveLength(1);
+		expect(tagsService.tags[0].tag).toBe('work');
 	});
 
 	it('converts pinned 1 to boolean true', async () => {
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([RAW_TAG('work', 1)]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await loadTags();
-		expect(tagState.tags[0].pinned).toBe(true);
+		await tagsService.load();
+		expect(tagsService.tags[0].pinned).toBe(true);
 	});
 
 	it('converts pinned 0 to boolean false', async () => {
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([RAW_TAG('work', 0)]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await loadTags();
-		expect(tagState.tags[0].pinned).toBe(false);
+		await tagsService.load();
+		expect(tagsService.tags[0].pinned).toBe(false);
 	});
 
 	it('sets untaggedCount from the repo', async () => {
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(7);
-		await loadTags();
-		expect(tagState.untaggedCount).toBe(7);
+		await tagsService.load();
+		expect(tagsService.untaggedCount).toBe(7);
 	});
 });
 
-// ─── setTagSettings ───────────────────────────────────────────────────────────
+// ─── setSettings ──────────────────────────────────────────────────────────────
 
-describe('setTagSettings', () => {
+describe('setSettings', () => {
 	it('calls upsertTagSettings with the tag and settings', async () => {
-		await setTagSettings('work', { color: '#ff0000' });
+		await tagsService.setSettings('work', { color: '#ff0000' });
 		expect(repo.upsertTagSettings).toHaveBeenCalledWith(
 			expect.anything(),
 			'work',
@@ -83,29 +77,29 @@ describe('setTagSettings', () => {
 	});
 
 	it('updates color in-memory', async () => {
-		tagState.tags = [{ tag: 'work', color: '#aaa', display_name: null, pinned: false, count: 1 }];
-		await setTagSettings('work', { color: '#ff0000' });
-		expect(tagState.tags[0].color).toBe('#ff0000');
+		tagsService.tags = [{ tag: 'work', color: '#aaa', display_name: null, pinned: false, count: 1 }];
+		await tagsService.setSettings('work', { color: '#ff0000' });
+		expect(tagsService.tags[0].color).toBe('#ff0000');
 	});
 
 	it('updates display_name in-memory', async () => {
-		tagState.tags = [{ tag: 'work', color: null, display_name: null, pinned: false, count: 1 }];
-		await setTagSettings('work', { display_name: 'Work Tasks' });
-		expect(tagState.tags[0].display_name).toBe('Work Tasks');
+		tagsService.tags = [{ tag: 'work', color: null, display_name: null, pinned: false, count: 1 }];
+		await tagsService.setSettings('work', { display_name: 'Work Tasks' });
+		expect(tagsService.tags[0].display_name).toBe('Work Tasks');
 	});
 
 	it('moves a pinned tag to the front', async () => {
-		tagState.tags = [
+		tagsService.tags = [
 			{ tag: 'aaa', color: null, display_name: null, pinned: false, count: 1 },
 			{ tag: 'zzz', color: null, display_name: null, pinned: false, count: 1 }
 		];
-		await setTagSettings('zzz', { pinned: true });
-		expect(tagState.tags[0].tag).toBe('zzz');
+		await tagsService.setSettings('zzz', { pinned: true });
+		expect(tagsService.tags[0].tag).toBe('zzz');
 	});
 
 	it('does not throw when the tag is not in state', async () => {
-		tagState.tags = [];
-		await expect(setTagSettings('ghost', { color: '#fff' })).resolves.not.toThrow();
+		tagsService.tags = [];
+		await expect(tagsService.setSettings('ghost', { color: '#fff' })).resolves.not.toThrow();
 	});
 });
 
@@ -115,7 +109,7 @@ describe('syncNoteTags', () => {
 	it('deletes note tags and skips insert when content has no hashtags', async () => {
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await syncNoteTags('note-1', 'plain text');
+		await tagsService.syncNoteTags('note-1', 'plain text');
 		expect(repo.deleteNoteTags).toHaveBeenCalledWith(expect.anything(), 'note-1');
 		expect(repo.insertNoteTags).not.toHaveBeenCalled();
 	});
@@ -124,55 +118,53 @@ describe('syncNoteTags', () => {
 		vi.mocked(repo.resolveCanonicalTags).mockResolvedValue(['work']);
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await syncNoteTags('note-1', '#work');
+		await tagsService.syncNoteTags('note-1', '#work');
 		expect(repo.resolveCanonicalTags).toHaveBeenCalledWith(expect.anything(), ['work']);
 		expect(repo.deleteNoteTags).toHaveBeenCalled();
 		expect(repo.insertNoteTags).toHaveBeenCalledWith(expect.anything(), 'note-1', ['work']);
 	});
 
-	it('calls loadTags at the end', async () => {
+	it('calls load at the end', async () => {
 		vi.mocked(repo.resolveCanonicalTags).mockResolvedValue(['work']);
 		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
 		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await syncNoteTags('note-1', '#work');
-		// loadTags internally calls queryTagsWithCounts + queryUntaggedCount
+		await tagsService.syncNoteTags('note-1', '#work');
+		// load internally calls queryTagsWithCounts + queryUntaggedCount
 		expect(repo.queryTagsWithCounts).toHaveBeenCalled();
 	});
 });
 
-// ─── loadRelatedTags ──────────────────────────────────────────────────────────
+// ─── loadRelated ──────────────────────────────────────────────────────────────
 
-describe('loadRelatedTags', () => {
+describe('loadRelated', () => {
 	it('sets relatedTags to empty for __untagged__ without calling the repo', async () => {
-		tagState.relatedTags = [{ tag: 'stale', color: null, display_name: null }];
-		await loadRelatedTags('__untagged__');
-		expect(tagState.relatedTags).toHaveLength(0);
+		tagsService.relatedTags = [{ tag: 'stale', color: null, display_name: null }];
+		await tagsService.loadRelated('__untagged__');
+		expect(tagsService.relatedTags).toHaveLength(0);
 		expect(repo.queryRelatedTags).not.toHaveBeenCalled();
 	});
 
 	it('calls queryRelatedTags with empty array when no tags active', async () => {
 		vi.mocked(repo.queryRelatedTags).mockResolvedValue([]);
-		await loadRelatedTags(null, []);
+		await tagsService.loadRelated(null, []);
 		expect(repo.queryRelatedTags).toHaveBeenCalledWith(expect.anything(), []);
 	});
 
 	it('passes activeTag + composedTags merged to queryRelatedTags', async () => {
 		vi.mocked(repo.queryRelatedTags).mockResolvedValue([]);
-		await loadRelatedTags('work', ['urgent']);
+		await tagsService.loadRelated('work', ['urgent']);
 		expect(repo.queryRelatedTags).toHaveBeenCalledWith(expect.anything(), ['work', 'urgent']);
 	});
 
 	it('sets relatedTags to the returned rows', async () => {
 		const tags = [{ tag: 'todo', color: null, display_name: null }];
 		vi.mocked(repo.queryRelatedTags).mockResolvedValue(tags);
-		await loadRelatedTags('work', []);
-		expect(tagState.relatedTags).toEqual(tags);
+		await tagsService.loadRelated('work', []);
+		expect(tagsService.relatedTags).toEqual(tags);
 	});
 });
 
 // ─── extractTags (pure) ───────────────────────────────────────────────────────
-
-import { extractTags, tagDisplayName } from './tags.svelte';
 
 describe('extractTags', () => {
 	it('returns an empty array for plain text', () => {

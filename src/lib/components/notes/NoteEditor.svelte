@@ -16,8 +16,8 @@
 		mdLinkPlugin,
 		noteEditorTheme
 	} from '$lib/utils/cm';
-	import { updateNote, deleteNote, type Note } from '$lib/services/notes.svelte';
-	import { onDeleteNote } from '$lib/services/note-signals';
+	import { notesService, type Note } from '$lib/services/notes.svelte';
+	import { noteSignals } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
@@ -27,7 +27,7 @@
 
 	let confirmOpen = $state(false);
 
-	$effect(() => onDeleteNote((id) => {
+	$effect(() => noteSignals.onDeleteNote((id) => {
 		if (id === note.id) confirmOpen = true;
 	}));
 
@@ -60,7 +60,7 @@
 						clearTimeout(saveTimer);
 						const val = u.state.doc.toString();
 						saveTimer = setTimeout(async () => {
-							await updateNote(noteId, val);
+							await notesService.update(noteId, val);
 						}, 500);
 					})
 				],
@@ -119,7 +119,7 @@
 				type="button"
 				variant="destructive"
 				onclick={async () => {
-					await deleteNote(note.id);
+					await notesService.delete(note.id);
 					confirmOpen = false;
 				}}>Delete</Button
 			>
