@@ -10,7 +10,7 @@
 
 	let isActive = $derived(uiState.activeTag === tag.tag);
 
-	function handleSettingsClick(e: MouseEvent) {
+	function handleSettingsClick(e: Event) {
 		e.stopPropagation();
 		onSettings?.(tag);
 	}
@@ -39,12 +39,17 @@
 			{/if}
 			<span>{tagDisplayName(tag)}</span>
 		</div>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="flex gap-2" onclick={handleSettingsClick}>
+		<div
+			role="button"
+			tabindex="0"
+			aria-label="Open tag settings"
+			class="flex gap-2"
+			onclick={handleSettingsClick}
+			onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSettingsClick(e); } }}
+		>
 			<span class="ml-auto text-xs text-muted-foreground group-hover/tag-item:hidden">{tag.count}</span>
 			{#if onSettings}
-				<div aria-label="Tag settings" class="hidden group-hover/tag-item:inline-block">
+				<div class="hidden group-hover/tag-item:inline-block">
 					<Settings2Icon size="16" />
 				</div>
 			{/if}
