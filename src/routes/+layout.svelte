@@ -6,7 +6,7 @@
 	import { initTheme } from '$lib/services/theme.svelte';
 	import { initEditorSettings } from '$lib/services/editor.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { buildTinykeysMap } from '$lib/services/shortcuts.svelte';
+	import { buildTinykeysMap, initShortcuts } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
@@ -21,6 +21,7 @@
 	onMount(async () => {
 		initTheme();
 		initEditorSettings();
+		initShortcuts();
 		const { error: initError } = await initApp();
 		error = initError;
 	});

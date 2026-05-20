@@ -19,8 +19,12 @@ function loadBindings(): Record<string, string> {
 }
 
 export const shortcutState = $state({
-	customBindings: loadBindings() as Record<string, string>
+	customBindings: {} as Record<string, string>
 });
+
+export function initShortcuts(): void {
+	shortcutState.customBindings = loadBindings();
+}
 
 export function getBinding(def: ShortcutDefinition): string {
 	return shortcutState.customBindings[def.id] ?? def.defaultBinding;
