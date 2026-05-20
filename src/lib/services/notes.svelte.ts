@@ -10,8 +10,8 @@ import {
 	deleteNoteById
 } from '$lib/repositories/notes.repo';
 
-export type { Note } from '$lib/repositories/notes.repo';
 import type { Note } from '$lib/repositories/notes.repo';
+export type { Note };
 
 export const UNTAGGED_FILTER = '__untagged__' as const;
 

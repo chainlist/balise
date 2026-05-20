@@ -10,8 +10,8 @@ import {
 	queryRelatedTags
 } from '$lib/repositories/tags.repo';
 
-export type { RelatedTag } from '$lib/repositories/tags.repo';
 import type { RelatedTag } from '$lib/repositories/tags.repo';
+export type { RelatedTag };
 
 export interface Tag {
 	tag: string;
