@@ -19,23 +19,25 @@
 <Sidebar.MenuButton
 	{isActive}
 	onclick={() => setActiveTag(tag.tag)}
-	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors select-none text-sidebar-foreground/80"
+	class={cn(
+		"inline-flex w-full items-center justify-between rounded-lg px-3 py-1.5 transition-colors select-none text-sidebar-foreground/70 hover:text-sidebar-foreground",
+		isActive && "border-l-2 border-secondary rounded-l-none bg-secondary/10 text-sidebar-foreground font-medium"
+	)}
 >
 	<div class={cn(onSettings ? 'group/tag-item' : '', "flex items-center gap-2 justify-between w-full")}>
-		<div class="flex items-center gap-2 ">
+		<div class="flex items-center gap-2">
 			{#if tag.pinned}
 				<PinIcon
 					size="14"
 					style="color: {tag.color ?? 'currentColor'};"
-					class="shrink-0 text-muted-foreground/50"
+					class="shrink-0 text-sidebar-foreground/30"
 				/>
 			{:else if tag.tag === UNTAGGED_FILTER}
-				<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"
-				></span>
+				<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"></span>
 			{:else if tag.color}
-				<span class="text-sm text-sidebar-foreground/40" style="color: {tag.color};">#</span>
+				<span class="text-sm" style="color: {tag.color};">#</span>
 			{:else}
-				<span class="text-sm text-sidebar-foreground/40">#</span>
+				<span class="text-sm text-sidebar-foreground/30">#</span>
 			{/if}
 			<span>{tagDisplayName(tag)}</span>
 		</div>
@@ -47,13 +49,12 @@
 			onclick={handleSettingsClick}
 			onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSettingsClick(e); } }}
 		>
-			<span class="ml-auto text-xs text-sidebar-foreground/40 group-hover/tag-item:hidden">{tag.count}</span>
+			<span class="ml-auto text-xs text-sidebar-foreground/30 group-hover/tag-item:hidden">{tag.count}</span>
 			{#if onSettings}
-				<div class="hidden group-hover/tag-item:inline-block">
+				<div class="hidden group-hover/tag-item:inline-block text-sidebar-foreground/40">
 					<Settings2Icon size="16" />
 				</div>
 			{/if}
 		</div>
 	</div>
 </Sidebar.MenuButton>
-

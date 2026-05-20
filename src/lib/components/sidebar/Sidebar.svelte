@@ -3,7 +3,7 @@
 	import { useSidebar } from '$lib/components/shadcn/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, Settings2Icon } from '@lucide/svelte';
+	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, Settings2Icon, SquarePenIcon } from '@lucide/svelte';
 	import { switchDesk, uiState } from '$lib/services/ui-state.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import { tagState, type Tag } from '$lib/services/tags.svelte';
@@ -38,12 +38,17 @@
 </script>
 
 <Sidebar.Root>
-	<Sidebar.Header>
+	<Sidebar.Header class="border-b border-sidebar-border pb-3">
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<div class="px-4 py-2">
-					<h1 class="text-xl font-bold text-sidebar-foreground">Balise</h1>
-					<p class="text-xs text-sidebar-foreground/50">Note Management</p>
+				<div class="flex items-center gap-3 px-3 py-1">
+					<div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-base font-bold">
+						B
+					</div>
+					<div>
+						<h1 class="text-base font-semibold text-sidebar-foreground leading-tight">Balise</h1>
+						<p class="text-xs text-sidebar-foreground/50 leading-tight">Note Management</p>
+					</div>
 				</div>
 			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
@@ -53,11 +58,11 @@
 							<Sidebar.MenuButton
 								{...props}
 								size="sm"
-								class="bg-sidebar-accent/60 text-sidebar-foreground/80 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+								class="border border-sidebar-border bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-foreground"
 							>
 								<div class="flex w-full items-center justify-between">
-									<span>{selectedDesk}</span>
-									<ChevronsUpDownIcon />
+									<span class="font-medium">{selectedDesk}</span>
+									<ChevronsUpDownIcon class="text-sidebar-foreground/40" />
 								</div>
 							</Sidebar.MenuButton>
 						{/snippet}
@@ -87,7 +92,6 @@
 							</DropdownMenu.Item>
 						{/each}
 						<DropdownMenu.Separator />
-
 						<DropdownMenu.Item class="gap-2 p-2" onclick={() => (isAddDeskOpen = true)}>
 							<div class="flex size-6 items-center justify-center rounded-md border">
 								<PlusIcon class="size-4" />
@@ -101,7 +105,7 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel class="px-4 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+			<Sidebar.GroupLabel class="px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
 				Navigation Tags
 			</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
@@ -126,11 +130,18 @@
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>
-	<Sidebar.Footer class="pb-4">
+	<Sidebar.Footer class="border-t border-sidebar-border pt-3 pb-4 gap-2">
+		<Button
+			class="w-full gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+			onclick={() => (uiState.isSettingsOpen = true)}
+		>
+			<SquarePenIcon class="size-4" />
+			New Note
+		</Button>
 		<Button
 			variant="ghost"
 			size="sm"
-			class="w-full justify-start gap-2 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+			class="w-full justify-start gap-2 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
 			onclick={() => (uiState.isSettingsOpen = true)}
 		>
 			<Settings2Icon class="size-4" />
@@ -143,4 +154,3 @@
 <DeleteDeskSheet bind:open={isDeleteConfirmOpen} bind:deskName={deskPendingDelete} />
 <TagSettingsSheet bind:open={isTagSettingsOpen} tag={tagPendingSettings} />
 <SettingsModal open={uiState.isSettingsOpen} />
-

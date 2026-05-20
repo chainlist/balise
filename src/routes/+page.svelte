@@ -36,10 +36,7 @@
 </script>
 
 <!-- Isolated from the outer app navigation SidebarProvider — owns its own open/close state. -->
-<Sidebar.Provider
-	class="h-full min-h-0"
-	style="--sidebar-accent: oklch(0.93 0.012 258); --sidebar-accent-foreground: oklch(0.20 0.025 249);"
->
+<Sidebar.Provider class="h-full min-h-0">
 	<NotesSidebar
 		notes={noteState.notes}
 		{selectedNoteId}
