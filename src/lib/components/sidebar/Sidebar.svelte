@@ -41,9 +41,9 @@
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<dir class="px-4 py-1">
+				<div class="px-4 py-1">
 					<h1 class="text-primary text-2xl font-bold">Balise</h1>
-				</dir>
+				</div>
 			</Sidebar.MenuItem>
 			<Sidebar.MenuItem>
 				<DropdownMenu.Root>
