@@ -17,7 +17,7 @@
 </script>
 
 <Sidebar.MenuButton
-	isActive={isActive}
+	{isActive}
 	onclick={() => setActiveTag(tag.tag)}
 	class="inline-flex w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/10 select-none "
 >
