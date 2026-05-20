@@ -18,7 +18,7 @@
 <Sidebar.MenuButton
 	{isActive}
 	onclick={() => setActiveTag(tag.tag)}
-	class="group/tag-item inline-flex w-full items-center justify-between rounded-lg px-3 py-1.5 transition-all select-none text-sidebar-foreground/70 hover:text-sidebar-foreground data-active:rounded-l-none data-active:border-l-[3px] data-active:border-secondary data-active:bg-secondary/10 data-active:text-sidebar-foreground data-active:font-medium"
+	class="group/tag-item inline-flex w-full items-center justify-between rounded-lg px-3 py-1.5 transition-all select-none text-on-surface-variant hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:text-on-surface data-active:font-medium"
 >
 	<div class="flex items-center gap-2 min-w-0">
 		{#if tag.pinned}

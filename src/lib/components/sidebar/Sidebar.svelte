@@ -3,7 +3,14 @@
 	import { useSidebar } from '$lib/components/shadcn/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, Settings2Icon, SquarePenIcon, LayoutListIcon } from '@lucide/svelte';
+	import {
+		ChevronsUpDownIcon,
+		PlusIcon,
+		Trash2Icon,
+		Settings2Icon,
+		SquarePenIcon,
+		LayoutListIcon
+	} from '@lucide/svelte';
 	import { switchDesk, uiState } from '$lib/services/ui-state.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import { tagState, type Tag } from '$lib/services/tags.svelte';
@@ -42,12 +49,14 @@
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
 				<div class="flex items-center gap-3 px-3 py-1">
-					<div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-base font-bold">
+					<div
+						class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground"
+					>
 						B
 					</div>
 					<div>
-						<h1 class="text-base font-semibold text-sidebar-foreground leading-tight">Balise</h1>
-						<p class="text-xs text-sidebar-foreground/50 leading-tight">Note Management</p>
+						<h1 class="text-base leading-tight font-semibold text-sidebar-foreground">Balise</h1>
+						<p class="text-xs leading-tight text-sidebar-foreground/50">Note Management</p>
 					</div>
 				</div>
 			</Sidebar.MenuItem>
@@ -106,21 +115,23 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel class="px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+			<Sidebar.GroupLabel
+				class="px-3 text-[10px] font-semibold tracking-widest text-sidebar-foreground/40 uppercase"
+			>
 				Navigation Tags
 			</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					<Sidebar.MenuItem>
 						<TagSidebarItem
-								tag={{
-									tag: UNTAGGED_FILTER,
-									count: tagState.untaggedCount,
-									color: null,
-									display_name: 'Untagged',
-									pinned: false
-								}}
-							/>
+							tag={{
+								tag: UNTAGGED_FILTER,
+								count: tagState.untaggedCount,
+								color: null,
+								display_name: 'Untagged',
+								pinned: false
+							}}
+						/>
 					</Sidebar.MenuItem>
 					{#each tagState.tags as tag (tag.tag)}
 						<Sidebar.MenuItem>
@@ -131,9 +142,9 @@
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>
-	<Sidebar.Footer class="border-t border-sidebar-border pt-3 pb-4 gap-2">
+	<Sidebar.Footer class="gap-2 border-t border-sidebar-border pt-3 pb-4">
 		<Button
-			class="w-full gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+			class="w-full gap-2 rounded-xl bg-primary font-medium text-primary-foreground hover:bg-primary/90"
 			onclick={() => (uiState.isSettingsOpen = true)}
 		>
 			<SquarePenIcon class="size-4" />

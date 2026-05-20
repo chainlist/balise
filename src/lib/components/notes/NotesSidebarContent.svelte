@@ -35,13 +35,13 @@
 							<Sidebar.MenuButton
 								isActive={selectedNoteId === note.id}
 								onclick={() => onSelect(note.id)}
-								class="h-auto rounded-xl border border-border/60 bg-transparent px-3 py-3 hover:border-border data-active:border-border data-active:bg-card data-active:text-foreground data-active:shadow-sm"
+								class="h-auto rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-3 py-3 hover:border-outline-variant data-active:border-primary/40 data-active:bg-surface-container-lowest data-active:text-on-surface data-active:shadow-sm"
 							>
 								<div class="flex min-w-0 flex-col items-start gap-1">
-									<span class="w-full truncate text-sm font-semibold text-foreground">
+									<span class="w-full truncate text-sm font-semibold text-on-surface">
 										{noteTitle(note.content)}
 									</span>
-									<span class="text-xs text-muted-foreground">
+									<span class="text-xs text-on-surface-variant">
 										{intl.format(new Date(note.updated_at))}
 									</span>
 								</div>

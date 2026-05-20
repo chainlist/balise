@@ -27,7 +27,7 @@
 
 <Sidebar.Header class="border-b border-border pb-3">
 	<div class="flex items-center justify-between px-2">
-		<span class="text-lg font-semibold">
+		<span class="text-lg font-semibold text-primary-container">
 			<TagName tag={uiState.activeTag || 'All Notes'} />
 		</span>
 		<Button variant="ghost" size="icon-sm" onclick={onCreate}>
