@@ -16,6 +16,11 @@
 		dateStyle: 'short',
 		timeStyle: 'short'
 	});
+
+	function noteTitle(content: string): string {
+		const first = content.split('\n')[0] ?? '';
+		return first.replace(/^#{1,6}\s+/, '').trim() || 'Empty note';
+	}
 </script>
 
 <Sidebar.Content>
@@ -34,7 +39,7 @@
 							>
 								<div class="flex min-w-0 flex-col items-start gap-0.5">
 									<span class="w-full truncate text-sm font-medium">
-										{note.content.split('\n')[0] || 'Empty note'}
+										{noteTitle(note.content)}
 									</span>
 									<span class="text-xs text-muted-foreground">
 										{intl.format(new Date(note.updated_at))}
