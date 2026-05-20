@@ -119,7 +119,14 @@ export async function migrate(db: Database): Promise<void> {
 
 	for (const migration of MIGRATIONS) {
 		if (appliedVersions.has(migration.version)) continue;
-		await db.execute(migration.sql);
-		await db.execute('INSERT INTO migrations (version) VALUES ($1)', [migration.version]);
+		await db.execute('BEGIN');
+		try {
+			await db.execute(migration.sql);
+			await db.execute('INSERT INTO migrations (version) VALUES ($1)', [migration.version]);
+			await db.execute('COMMIT');
+		} catch (err) {
+			await db.execute('ROLLBACK');
+			throw err;
+		}
 	}
 }
