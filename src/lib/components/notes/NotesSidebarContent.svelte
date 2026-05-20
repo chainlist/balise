@@ -35,7 +35,7 @@
 							<Sidebar.MenuButton
 								isActive={selectedNoteId === note.id}
 								onclick={() => onSelect(note.id)}
-								class="h-auto rounded-xl border border-border bg-card px-3 py-3 hover:border-primary/20 hover:bg-card data-active:border-primary/40 data-active:bg-primary/8 data-active:text-foreground"
+								class="h-auto rounded-xl border border-transparent bg-transparent px-3 py-3 hover:border-border hover:bg-card/60 data-active:border-border data-active:bg-card data-active:text-foreground data-active:shadow-xs"
 							>
 								<div class="flex min-w-0 flex-col items-start gap-1">
 									<span class="w-full truncate text-sm font-semibold text-foreground">
