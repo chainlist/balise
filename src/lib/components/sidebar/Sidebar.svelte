@@ -3,7 +3,7 @@
 	import { useSidebar } from '$lib/components/shadcn/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, Settings2Icon, SquarePenIcon } from '@lucide/svelte';
+	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, Settings2Icon, SquarePenIcon, LayoutListIcon } from '@lucide/svelte';
 	import { switchDesk, uiState } from '$lib/services/ui-state.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import { tagState, type Tag } from '$lib/services/tags.svelte';
@@ -60,9 +60,10 @@
 								size="sm"
 								class="border border-sidebar-border bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-foreground"
 							>
-								<div class="flex w-full items-center justify-between">
-									<span class="font-medium">{selectedDesk}</span>
-									<ChevronsUpDownIcon class="text-sidebar-foreground/40" />
+								<div class="flex w-full items-center justify-between gap-2">
+									<LayoutListIcon class="size-4 shrink-0 text-primary" />
+									<span class="flex-1 font-medium">{selectedDesk}</span>
+									<ChevronsUpDownIcon class="size-4 shrink-0 text-sidebar-foreground/40" />
 								</div>
 							</Sidebar.MenuButton>
 						{/snippet}
