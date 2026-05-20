@@ -33,6 +33,8 @@
 	}
 </script>
 
+<!-- Intentionally a second independent SidebarProvider — this sidebar owns its own
+     collapsed/open state, isolated from the outer app navigation sidebar. -->
 <Sidebar.Provider class="h-full min-h-0">
 	<Sidebar.Root collapsible="none">
 		<NotesSidebarHeader onCreate={handleCreateNote} />
