@@ -3,7 +3,7 @@ import { openDesk } from './desk';
 import { loadTags, loadRelatedTags } from './tags.svelte';
 import { loadNotes } from './notes.svelte';
 
-const defaultDesk = 'Personnal';
+const defaultDesk = 'Personal';
 const defaults = {
 	activeDesk: defaultDesk,
 	desks: [defaultDesk]
