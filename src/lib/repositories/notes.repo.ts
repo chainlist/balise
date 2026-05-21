@@ -1,4 +1,5 @@
 import type Database from '@tauri-apps/plugin-sql';
+import { extractTitle } from '$lib/utils/note-title';
 
 export interface Note {
 	id: string;
@@ -44,28 +45,18 @@ export async function queryNoteById(db: Database, id: string): Promise<Note | nu
 	return rows[0] ?? null;
 }
 
-export async function insertNote(
-	db: Database,
-	id: string,
-	content: string,
-	title: string
-): Promise<void> {
+export async function insertNote(db: Database, id: string, content: string): Promise<void> {
 	await db.execute('INSERT INTO notes (id, content, title) VALUES ($1, $2, $3)', [
 		id,
 		content,
-		title
+		extractTitle(content)
 	]);
 }
 
-export async function updateNoteContent(
-	db: Database,
-	id: string,
-	content: string,
-	title: string
-): Promise<void> {
+export async function updateNoteContent(db: Database, id: string, content: string): Promise<void> {
 	await db.execute(
 		"UPDATE notes SET content = $1, title = $2, updated_at = datetime('now') WHERE id = $3",
-		[content, title, id]
+		[content, extractTitle(content), id]
 	);
 }
 

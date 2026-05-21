@@ -40,7 +40,7 @@ class NotesService {
 	async create(content = ''): Promise<string> {
 		const db = getDB();
 		const id = crypto.randomUUID();
-		await insertNote(db, id, content, extractTitle(content));
+		await insertNote(db, id, content);
 		const note = await queryNoteById(db, id);
 		if (note) this.notes = [note, ...this.notes];
 		return id;
@@ -48,7 +48,7 @@ class NotesService {
 
 	async update(id: string, content: string): Promise<void> {
 		const db = getDB();
-		await updateNoteContent(db, id, content, extractTitle(content));
+		await updateNoteContent(db, id, content);
 		await tagsService.syncNoteTags(id, content);
 		const note = this.notes.find((n) => n.id === id);
 		if (note) {
