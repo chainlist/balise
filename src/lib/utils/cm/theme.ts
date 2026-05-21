@@ -12,7 +12,7 @@ export const noteEditorTheme = EditorView.theme({
 		fontSize: 'var(--editor-font-size, 16px)',
 		overflow: 'auto',
 		padding: '1.5rem',
-		lineHeight: '1.75'
+		lineHeight: 'var(--editor-line-height, 1.75)'
 	},
 	'.cm-content': { padding: '0', caretColor: 'var(--foreground)' },
 	'.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--foreground)' },

@@ -4,8 +4,10 @@
 	import { EyeIcon, EyeOffIcon, MousePointerIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 
-	const MIN = 12;
-	const MAX = 24;
+	const FONT_MIN = 12;
+	const FONT_MAX = 24;
+	const LH_MIN = 1.2;
+	const LH_MAX = 2.5;
 
 	const markOptions: { value: MarkMode; label: string; icon: typeof EyeIcon }[] = [
 		{ value: 'always', label: 'Always', icon: EyeIcon },
@@ -32,17 +34,42 @@
 				</span>
 			</div>
 			<div class="flex items-center gap-3">
-				<span class="text-xs text-muted-foreground w-6 text-right">{MIN}</span>
+				<span class="text-xs text-muted-foreground w-6 text-right">{FONT_MIN}</span>
 				<input
 					type="range"
-					min={MIN}
-					max={MAX}
+					min={FONT_MIN}
+					max={FONT_MAX}
 					step="1"
 					value={settingsService.fontSize}
 					oninput={(e) => settingsService.setFontSize(Number(e.currentTarget.value))}
 					class="flex-1 accent-primary"
 				/>
-				<span class="text-xs text-muted-foreground w-6">{MAX}</span>
+				<span class="text-xs text-muted-foreground w-6">{FONT_MAX}</span>
+			</div>
+		</div>
+
+		<div class="space-y-3">
+			<div class="flex items-center justify-between">
+				<div class="space-y-0.5">
+					<p class="text-sm font-medium">Line height</p>
+					<p class="text-xs text-muted-foreground">Spacing between lines of text.</p>
+				</div>
+				<span class="text-sm font-mono tabular-nums text-muted-foreground w-12 text-right">
+					{settingsService.lineHeight.toFixed(2)}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<span class="text-xs text-muted-foreground w-6 text-right">{LH_MIN}</span>
+				<input
+					type="range"
+					min={LH_MIN}
+					max={LH_MAX}
+					step="0.05"
+					value={settingsService.lineHeight}
+					oninput={(e) => settingsService.setLineHeight(Number(e.currentTarget.value))}
+					class="flex-1 accent-primary"
+				/>
+				<span class="text-xs text-muted-foreground w-6">{LH_MAX}</span>
 			</div>
 		</div>
 

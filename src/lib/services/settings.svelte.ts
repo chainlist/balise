@@ -5,6 +5,7 @@ import type { Theme } from './theme.svelte';
 class SettingsService {
 	theme = $state<Theme>('system');
 	fontSize = $state(16);
+	lineHeight = $state(1.75);
 	markdownMarks = $state<MarkMode>('cursor');
 	customBindings = $state<Record<string, string>>({});
 
@@ -13,22 +14,25 @@ class SettingsService {
 	async init(): Promise<void> {
 		this.#store = await load('settings.json', { autoSave: 100 });
 
-		const [theme, fontSize, markdownMarks, customBindings] = await Promise.all([
+		const [theme, fontSize, lineHeight, markdownMarks, customBindings] = await Promise.all([
 			this.#store.get<Theme>('theme'),
 			this.#store.get<number>('fontSize'),
+			this.#store.get<number>('lineHeight'),
 			this.#store.get<MarkMode>('markdownMarks'),
 			this.#store.get<Record<string, string>>('customBindings')
 		]);
 
 		this.theme = theme ?? 'system';
 		this.fontSize = fontSize ?? 16;
+		this.lineHeight = lineHeight ?? 1.75;
 		this.markdownMarks = markdownMarks ?? 'cursor';
 		this.customBindings = customBindings ?? {};
-		this.#applyFontSize();
+		this.#applyEditorVars();
 	}
 
-	#applyFontSize(): void {
+	#applyEditorVars(): void {
 		document.documentElement.style.setProperty('--editor-font-size', `${this.fontSize}px`);
+		document.documentElement.style.setProperty('--editor-line-height', `${this.lineHeight}`);
 	}
 
 	setTheme(theme: Theme): void {
@@ -38,8 +42,14 @@ class SettingsService {
 
 	setFontSize(size: number): void {
 		this.fontSize = size;
-		this.#applyFontSize();
+		this.#applyEditorVars();
 		this.#store?.set('fontSize', size);
+	}
+
+	setLineHeight(value: number): void {
+		this.lineHeight = value;
+		this.#applyEditorVars();
+		this.#store?.set('lineHeight', value);
 	}
 
 	setMarkdownMarks(value: MarkMode): void {
