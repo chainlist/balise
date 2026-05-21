@@ -1,6 +1,8 @@
 import { ViewPlugin, Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet, ViewUpdate } from '@codemirror/view';
 
+export type MarkMode = 'always' | 'cursor' | 'never';
+
 export const hideMark = Decoration.replace({});
 
 // Lenient emphasis patterns: match even when the parser rejects them (e.g. trailing spaces).

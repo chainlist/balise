@@ -1,3 +1,5 @@
+import { settingsService } from './settings.svelte';
+
 export interface ShortcutDefinition {
 	id: string;
 	name: string;
@@ -7,34 +9,21 @@ export interface ShortcutDefinition {
 	run: () => void | Promise<void>;
 }
 
-const STORAGE_KEY = 'fil-shortcut-bindings';
-
 class ShortcutsService {
-	customBindings = $state<Record<string, string>>({});
-
-	init(): void {
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			this.customBindings = stored ? JSON.parse(stored) : {};
-		} catch {
-			this.customBindings = {};
-		}
+	get customBindings(): Record<string, string> {
+		return settingsService.customBindings;
 	}
 
 	getBinding(def: ShortcutDefinition): string {
-		return this.customBindings[def.id] ?? def.defaultBinding;
+		return settingsService.customBindings[def.id] ?? def.defaultBinding;
 	}
 
 	setBinding(id: string, binding: string): void {
-		this.customBindings = { ...this.customBindings, [id]: binding };
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(this.customBindings));
+		settingsService.setBinding(id, binding);
 	}
 
 	resetBinding(id: string): void {
-		const next = { ...this.customBindings };
-		delete next[id];
-		this.customBindings = next;
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(this.customBindings));
+		settingsService.resetBinding(id);
 	}
 
 	buildTinykeysMap(

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { EditorView, keymap } from '@codemirror/view';
+	import { Compartment } from '@codemirror/state';
 	import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
 	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 	import { GFM } from '@lezer/markdown';
@@ -14,9 +15,11 @@
 		mdPairPlugin,
 		mdFormatPlugin,
 		mdLinkPlugin,
-		noteEditorTheme
+		noteEditorTheme,
+		type MarkMode
 	} from '$lib/utils/cm';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
+	import { settingsService } from '$lib/services/settings.svelte';
 	import { noteSignals } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
@@ -26,10 +29,28 @@
 	let { note }: { note: Note } = $props();
 
 	let confirmOpen = $state(false);
+	let editorView = $state<EditorView | null>(null);
+	const markCompartment = new Compartment();
+
+	function makeMarkPlugins(mode: MarkMode) {
+		return [
+			mdHidePlugin(mode),
+			mdHighlightPlugin(mode),
+			mdLinkPlugin(mode),
+			mdTagPlugin(mode)
+		];
+	}
 
 	$effect(() => noteSignals.onDeleteNote((id) => {
 		if (id === note.id) confirmOpen = true;
 	}));
+
+	$effect(() => {
+		const mode = settingsService.markdownMarks;
+		if (editorView) {
+			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(mode)) });
+		}
+	});
 
 	function mount(container: HTMLDivElement) {
 		return untrack(() => {
@@ -48,12 +69,9 @@
 					EditorView.lineWrapping,
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
 					mdStylePlugin,
-					mdHidePlugin,
 					mdCodePlugin,
-					mdLinkPlugin,
-					mdTagPlugin,
-					mdHighlightPlugin,
 					mdPairPlugin,
+					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
 					EditorView.updateListener.of((u) => {
 						if (!u.docChanged) return;
@@ -67,10 +85,12 @@
 				parent: editorEl
 			});
 
+			editorView = view;
 			view.focus();
 
 			return () => {
 				clearTimeout(saveTimer);
+				editorView = null;
 				view.destroy();
 			};
 		});

@@ -8,7 +8,6 @@
 		PlusIcon,
 		Trash2Icon,
 		Settings2Icon,
-		SquarePenIcon,
 		LayoutListIcon
 	} from '@lucide/svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
@@ -48,11 +47,11 @@
 	<Sidebar.Header class="border-b border-sidebar-border pb-3">
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<div class="flex items-center gap-3 px-3 py-1">
+				<div class="flex items-center gap-3 px-3 py-4">
 					<div
 						class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground"
 					>
-						B
+						#
 					</div>
 					<div>
 						<h1 class="text-base leading-tight font-semibold text-sidebar-foreground">Balise</h1>
@@ -67,7 +66,7 @@
 							<Sidebar.MenuButton
 								{...props}
 								size="sm"
-								class="border border-sidebar-border bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-foreground"
+								class="rounded border border-sidebar-border bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-foreground"
 							>
 								<div class="flex w-full items-center justify-between gap-2">
 									<LayoutListIcon class="size-4 shrink-0 text-primary" />
@@ -78,18 +77,18 @@
 						{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content
-						class="w-(--bits-dropdown-menu-anchor-width)"
+						class="w-(--bits-dropdown-menu-anchor-width) rounded"
 						side={sidebar.isMobile ? 'bottom' : 'right'}
 						align="start"
 					>
 						{#each desks as desk (desk)}
-							<DropdownMenu.Item class="group" onclick={() => handleSelectDesk(desk)}>
-								<span class="truncate">{desk}</span>
+							<DropdownMenu.Item class="group rounded" onclick={() => handleSelectDesk(desk)}>
+								<span class="truncate rounded">{desk}</span>
 								<Button
 									type="button"
 									variant="ghost"
 									size="icon-xs"
-									class="ml-auto h-6 w-6 text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+									class="ml-auto h-6 w-6 rounded text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
 									onclick={(event) => {
 										event.preventDefault();
 										event.stopPropagation();
@@ -102,7 +101,7 @@
 							</DropdownMenu.Item>
 						{/each}
 						<DropdownMenu.Separator />
-						<DropdownMenu.Item class="gap-2 p-2" onclick={() => (isAddDeskOpen = true)}>
+						<DropdownMenu.Item class="gap-2 rounded p-2" onclick={() => (isAddDeskOpen = true)}>
 							<div class="flex size-6 items-center justify-center rounded-md border">
 								<PlusIcon class="size-4" />
 							</div>
@@ -143,22 +142,19 @@
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="gap-2 border-t border-sidebar-border pt-3 pb-4">
-		<Button
-			class="w-full gap-2 rounded-xl bg-primary font-medium text-primary-foreground hover:bg-primary/90"
-			onclick={() => (uiState.isSettingsOpen = true)}
-		>
-			<SquarePenIcon class="size-4" />
-			New Note
-		</Button>
-		<Button
-			variant="ghost"
-			size="sm"
-			class="w-full justify-start gap-2 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-			onclick={() => (uiState.isSettingsOpen = true)}
-		>
-			<Settings2Icon class="size-4" />
-			Settings
-		</Button>
+		<Sidebar.Menu>
+			<Sidebar.MenuItem>
+				<Button
+					variant="ghost"
+					size="sm"
+					class="w-full justify-start gap-2 text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+					onclick={() => (uiState.isSettingsOpen = true)}
+				>
+					<Settings2Icon class="size-4" />
+					Settings
+				</Button>
+			</Sidebar.MenuItem>
+		</Sidebar.Menu>
 	</Sidebar.Footer>
 </Sidebar.Root>
 

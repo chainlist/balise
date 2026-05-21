@@ -5,7 +5,7 @@ import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { mount, unmount } from 'svelte';
 import LinkChip from '$lib/components/cm/LinkChip.svelte';
-import { makePlugin } from './shared';
+import { makePlugin, type MarkMode } from './shared';
 
 class LinkWidget extends WidgetType {
 	constructor(
@@ -38,21 +38,21 @@ class LinkWidget extends WidgetType {
 
 const BARE_URL_RE = /https?:\/\/[^\s<>[\]()'"]+/g;
 
-function buildLinkDecos(view: EditorView): DecorationSet {
-	const { state } = view;
-	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
-	const ranges: Range<Decoration>[] = [];
-	const tree = syntaxTree(state);
+function buildLinkDecos(mode: MarkMode) {
+	return (view: EditorView): DecorationSet => {
+		const { state } = view;
+		const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+		const ranges: Range<Decoration>[] = [];
+		const tree = syntaxTree(state);
 
-	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
-		tree.iterate({
-			from: vFrom,
-			to: vTo,
-			enter(node) {
-				const { from, to, name } = node;
-
-				if (name === 'Link') {
-					if (state.doc.lineAt(from).number === cursorLine) return false;
+		for (const { from: vFrom, to: vTo } of view.visibleRanges) {
+			tree.iterate({
+				from: vFrom,
+				to: vTo,
+				enter(node) {
+					const { from, to, name } = node;
+					if (name !== 'Link') return;
+					if (mode === 'always' || (mode === 'cursor' && state.doc.lineAt(from).number === cursorLine)) return false;
 					let href = '';
 					let urlFrom = -1;
 					for (let child = node.node.firstChild; child; child = child.nextSibling) {
@@ -69,41 +69,41 @@ function buildLinkDecos(view: EditorView): DecorationSet {
 					}
 					return false;
 				}
-			}
-		});
-	}
-
-	for (const { from, to } of view.visibleRanges) {
-		BARE_URL_RE.lastIndex = 0;
-		const text = state.doc.sliceString(from, to);
-		let match: RegExpExecArray | null;
-		while ((match = BARE_URL_RE.exec(text)) !== null) {
-			const start = from + match.index;
-			const end = start + match[0].length;
-			if (state.doc.lineAt(start).number === cursorLine) continue;
-
-			let skip = false;
-			for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
-				if (
-					cur.name === 'Link' ||
-					cur.name === 'InlineCode' ||
-					cur.name === 'FencedCode' ||
-					cur.name === 'CodeBlock'
-				) {
-					skip = true;
-					break;
-				}
-			}
-			if (skip) continue;
-
-			ranges.push(
-				Decoration.replace({ widget: new LinkWidget(match[0], match[0]) }).range(start, end)
-			);
+			});
 		}
-	}
 
-	ranges.sort((a, b) => a.from - b.from);
-	return Decoration.set(ranges, true);
+		for (const { from, to } of view.visibleRanges) {
+			BARE_URL_RE.lastIndex = 0;
+			const text = state.doc.sliceString(from, to);
+			let match: RegExpExecArray | null;
+			while ((match = BARE_URL_RE.exec(text)) !== null) {
+				const start = from + match.index;
+				const end = start + match[0].length;
+				if (mode === 'always' || (mode === 'cursor' && state.doc.lineAt(start).number === cursorLine)) continue;
+
+				let skip = false;
+				for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
+					if (
+						cur.name === 'Link' ||
+						cur.name === 'InlineCode' ||
+						cur.name === 'FencedCode' ||
+						cur.name === 'CodeBlock'
+					) {
+						skip = true;
+						break;
+					}
+				}
+				if (skip) continue;
+
+				ranges.push(
+					Decoration.replace({ widget: new LinkWidget(match[0], match[0]) }).range(start, end)
+				);
+			}
+		}
+
+		ranges.sort((a, b) => a.from - b.from);
+		return Decoration.set(ranges, true);
+	};
 }
 
-export const mdLinkPlugin = makePlugin(buildLinkDecos);
+export const mdLinkPlugin = (mode: MarkMode) => makePlugin(buildLinkDecos(mode));

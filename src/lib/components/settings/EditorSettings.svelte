@@ -1,8 +1,17 @@
 <script lang="ts">
-	import { editorService } from '$lib/services/editor.svelte';
+	import { settingsService } from '$lib/services/settings.svelte';
+	import type { MarkMode } from '$lib/utils/cm';
+	import { EyeIcon, EyeOffIcon, MousePointerIcon } from '@lucide/svelte';
+	import { cn } from '$lib/utils.js';
 
 	const MIN = 12;
 	const MAX = 24;
+
+	const markOptions: { value: MarkMode; label: string; icon: typeof EyeIcon }[] = [
+		{ value: 'always', label: 'Always', icon: EyeIcon },
+		{ value: 'cursor', label: 'On focused line', icon: MousePointerIcon },
+		{ value: 'never', label: 'Never', icon: EyeOffIcon }
+	];
 </script>
 
 <div class="flex flex-col h-full">
@@ -19,7 +28,7 @@
 					<p class="text-xs text-muted-foreground">Size of text in the editor.</p>
 				</div>
 				<span class="text-sm font-mono tabular-nums text-muted-foreground w-12 text-right">
-					{editorService.fontSize}px
+					{settingsService.fontSize}px
 				</span>
 			</div>
 			<div class="flex items-center gap-3">
@@ -29,11 +38,44 @@
 					min={MIN}
 					max={MAX}
 					step="1"
-					value={editorService.fontSize}
-					oninput={(e) => editorService.setFontSize(Number(e.currentTarget.value))}
+					value={settingsService.fontSize}
+					oninput={(e) => settingsService.setFontSize(Number(e.currentTarget.value))}
 					class="flex-1 accent-primary"
 				/>
 				<span class="text-xs text-muted-foreground w-6">{MAX}</span>
+			</div>
+		</div>
+
+		<div class="space-y-3">
+			<div class="space-y-0.5">
+				<p class="text-sm font-medium">Markdown marks</p>
+				<p class="text-xs text-muted-foreground">When to show raw markdown syntax.</p>
+			</div>
+			<div class="flex gap-3">
+				{#each markOptions as option (option.value)}
+					{@const isActive = settingsService.markdownMarks === option.value}
+					<button
+						onclick={() => settingsService.setMarkdownMarks(option.value)}
+						class={cn(
+							'flex flex-col items-center gap-2.5 rounded-lg border-2 p-4 flex-1 transition-all',
+							isActive
+								? 'border-primary bg-primary/5'
+								: 'border-border hover:border-muted-foreground/40 hover:bg-muted/50'
+						)}
+					>
+						<div
+							class={cn(
+								'flex size-9 items-center justify-center rounded-md',
+								isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+							)}
+						>
+							<option.icon size={18} />
+						</div>
+						<span class={cn('text-sm font-medium', isActive ? 'text-primary' : 'text-foreground')}>
+							{option.label}
+						</span>
+					</button>
+				{/each}
 			</div>
 		</div>
 	</div>

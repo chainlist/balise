@@ -1,12 +1,14 @@
+import { settingsService } from './settings.svelte';
+
 export type Theme = 'light' | 'dark' | 'system';
 
-const STORAGE_KEY = 'fil-theme';
-
 class ThemeService {
-	theme = $state<Theme>('system');
+	get theme(): Theme {
+		return settingsService.theme;
+	}
 
 	#resolve(): 'light' | 'dark' {
-		if (this.theme !== 'system') return this.theme;
+		if (settingsService.theme !== 'system') return settingsService.theme;
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	}
 
@@ -15,24 +17,14 @@ class ThemeService {
 	}
 
 	setTheme(theme: Theme): void {
-		this.theme = theme;
-		localStorage.setItem(STORAGE_KEY, theme);
+		settingsService.setTheme(theme);
 		this.applyTheme();
 	}
 
 	init(): void {
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			if (stored === 'light' || stored === 'dark' || stored === 'system') {
-				this.theme = stored;
-			}
-		} catch {
-			// ignore
-		}
 		this.applyTheme();
-
 		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-			if (this.theme === 'system') this.applyTheme();
+			if (settingsService.theme === 'system') this.applyTheme();
 		});
 	}
 }

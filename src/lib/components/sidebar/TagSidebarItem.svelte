@@ -18,9 +18,9 @@
 <Sidebar.MenuButton
 	{isActive}
 	onclick={() => uiState.setActiveTag(tag.tag)}
-	class="group/tag-item inline-flex w-full items-center justify-between rounded-lg px-3 py-1.5 transition-all select-none text-on-surface-variant hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:text-on-surface data-active:font-medium"
+	class="group/tag-item inline-flex w-full items-center justify-between rounded px-3 py-1.5 text-on-surface-variant transition-all select-none hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
 >
-	<div class="flex items-center gap-2 min-w-0">
+	<div class="flex min-w-0 items-center gap-2">
 		{#if tag.pinned}
 			<PinIcon
 				size="14"
@@ -28,7 +28,8 @@
 				class="shrink-0 text-sidebar-foreground/30"
 			/>
 		{:else if tag.tag === UNTAGGED_FILTER}
-			<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"></span>
+			<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"
+			></span>
 		{:else if tag.color}
 			<span class="shrink-0 text-sm" style="color: {tag.color};">#</span>
 		{:else}
@@ -42,11 +43,16 @@
 		aria-label="Open tag settings"
 		class="flex shrink-0 gap-2"
 		onclick={handleSettingsClick}
-		onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSettingsClick(e); } }}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				handleSettingsClick(e);
+			}
+		}}
 	>
 		<span class="text-xs text-sidebar-foreground/30 group-hover/tag-item:hidden">{tag.count}</span>
 		{#if onSettings}
-			<div class="hidden group-hover/tag-item:inline-block text-sidebar-foreground/40">
+			<div class="hidden text-sidebar-foreground/40 group-hover/tag-item:inline-block">
 				<Settings2Icon size="16" />
 			</div>
 		{/if}

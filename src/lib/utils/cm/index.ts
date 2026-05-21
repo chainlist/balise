@@ -7,3 +7,4 @@ export { mdHighlightPlugin } from './highlightPlugin';
 export { mdPairPlugin } from './pairPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { noteEditorTheme } from './theme';
+export type { MarkMode } from './shared';
