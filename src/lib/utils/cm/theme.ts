@@ -98,7 +98,7 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-tag': {
 		color: 'var(--primary)',
 		background: 'color-mix(in oklch, var(--primary) 12%, transparent)',
-		borderRadius: 'calc(infinity * 1px)',
+		borderRadius: '0.5rem',
 		padding: '0 calc(var(--spacing) * 1.5)'
 	},
 	'.cm-md-highlight': {

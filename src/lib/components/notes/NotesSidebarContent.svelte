@@ -13,8 +13,7 @@
 	} = $props();
 
 	const intl = new Intl.DateTimeFormat(navigator.language, {
-		dateStyle: 'short',
-		timeStyle: 'short'
+		dateStyle: 'short'
 	});
 
 	function noteTitle(content: string): string {
@@ -35,13 +34,13 @@
 							<Sidebar.MenuButton
 								isActive={selectedNoteId === note.id}
 								onclick={() => onSelect(note.id)}
-								class="h-auto rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-3 py-3 hover:border-outline-variant data-active:border-primary/40 data-active:bg-surface-container-lowest data-active:text-on-surface data-active:shadow-sm"
+								class="h-auto rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-3 hover:border-outline-variant data-active:border-primary/40 data-active:bg-surface-container-lowest data-active:text-on-surface data-active:shadow-sm"
 							>
-								<div class="flex min-w-0 flex-col items-start gap-1">
+								<div class="flex min-w-0 flex-col items-start gap-2">
 									<span class="w-full truncate text-sm font-semibold text-on-surface">
 										{noteTitle(note.content)}
 									</span>
-									<span class="text-xs text-on-surface-variant">
+									<span class="text-xs text-neutral-400">
 										{intl.format(new Date(note.updated_at))}
 									</span>
 								</div>

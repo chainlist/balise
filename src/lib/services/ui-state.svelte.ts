@@ -101,7 +101,7 @@ class UIState {
 
 		this.composedTags = [];
 		await openDesk(desk);
-		await Promise.all([tagsService.load(), notesService.load(activeTag), tagsService.loadRelated(null)]);
+		await Promise.all([tagsService.load(), notesService.load(activeTag), tagsService.loadRelated(activeTag)]);
 		await this.setActiveDesk(desk);
 	}
 }
