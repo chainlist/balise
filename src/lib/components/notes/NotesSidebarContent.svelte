@@ -15,11 +15,6 @@
 	const intl = new Intl.DateTimeFormat(navigator.language, {
 		dateStyle: 'short'
 	});
-
-	function noteTitle(content: string): string {
-		const first = content.split('\n')[0] ?? '';
-		return first.replace(/^#{1,6}\s+/, '').trim() || 'Empty note';
-	}
 </script>
 
 <Sidebar.Content>
@@ -38,7 +33,7 @@
 							>
 								<div class="flex min-w-0 flex-col items-start gap-2">
 									<span class="w-full truncate text-sm font-semibold text-on-surface">
-										{noteTitle(note.content)}
+										{note.title || 'Untitled'}
 									</span>
 									<span class="text-xs text-neutral-400">
 										{intl.format(new Date(note.updated_at))}

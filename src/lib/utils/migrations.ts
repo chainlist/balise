@@ -106,8 +106,18 @@ const MIGRATIONS: Migration[] = [
 		sql: `
       DROP TABLE IF EXISTS note_links;
     `
+	},
+	{
+		version: 5,
+		sql: `
+      ALTER TABLE notes ADD COLUMN title TEXT NOT NULL DEFAULT '';
+
+      UPDATE notes
+      SET title = TRIM(LTRIM(TRIM(SUBSTR(content || char(10), 1, INSTR(content || char(10), char(10)) - 1)), '#'))
+      WHERE content != '';
+    `
 	}
-	// add future migrations here as { version: 5, sql: '...' }
+	// add future migrations here as { version: 6, sql: '...' }
 ];
 
 export async function migrate(db: Database): Promise<void> {
@@ -135,4 +145,5 @@ export async function migrate(db: Database): Promise<void> {
 			throw err;
 		}
 	}
+
 }

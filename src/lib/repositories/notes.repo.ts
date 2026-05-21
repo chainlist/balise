@@ -2,6 +2,7 @@ import type Database from '@tauri-apps/plugin-sql';
 
 export interface Note {
 	id: string;
+	title: string;
 	content: string;
 	pinned: number;
 	archived: number;
@@ -43,19 +44,29 @@ export async function queryNoteById(db: Database, id: string): Promise<Note | nu
 	return rows[0] ?? null;
 }
 
-export async function insertNote(db: Database, id: string, content: string): Promise<void> {
-	await db.execute('INSERT INTO notes (id, content) VALUES ($1, $2)', [id, content]);
+export async function insertNote(
+	db: Database,
+	id: string,
+	content: string,
+	title: string
+): Promise<void> {
+	await db.execute('INSERT INTO notes (id, content, title) VALUES ($1, $2, $3)', [
+		id,
+		content,
+		title
+	]);
 }
 
 export async function updateNoteContent(
 	db: Database,
 	id: string,
-	content: string
+	content: string,
+	title: string
 ): Promise<void> {
-	await db.execute("UPDATE notes SET content = $1, updated_at = datetime('now') WHERE id = $2", [
-		content,
-		id
-	]);
+	await db.execute(
+		"UPDATE notes SET content = $1, title = $2, updated_at = datetime('now') WHERE id = $3",
+		[content, title, id]
+	);
 }
 
 export async function queryNoteUpdatedAt(db: Database, id: string): Promise<string | null> {
