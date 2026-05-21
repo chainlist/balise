@@ -14,6 +14,9 @@
 		{ value: 'cursor', label: 'On focused line', icon: MousePointerIcon },
 		{ value: 'never', label: 'Never', icon: EyeOffIcon }
 	];
+
+	const inputClass =
+		'w-20 rounded-md border border-input bg-background px-2 py-1 text-sm font-mono tabular-nums text-right focus:outline-none focus:ring-1 focus:ring-primary';
 </script>
 
 <div class="flex flex-col h-full">
@@ -23,54 +26,42 @@
 	</div>
 
 	<div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-		<div class="space-y-3">
-			<div class="flex items-center justify-between">
-				<div class="space-y-0.5">
-					<p class="text-sm font-medium">Font size</p>
-					<p class="text-xs text-muted-foreground">Size of text in the editor.</p>
-				</div>
-				<span class="text-sm font-mono tabular-nums text-muted-foreground w-12 text-right">
-					{settingsService.fontSize}px
-				</span>
+		<div class="flex items-center justify-between">
+			<div class="space-y-0.5">
+				<p class="text-sm font-medium">Font size</p>
+				<p class="text-xs text-muted-foreground">Size of text in the editor.</p>
 			</div>
-			<div class="flex items-center gap-3">
-				<span class="text-xs text-muted-foreground w-6 text-right">{FONT_MIN}</span>
-				<input
-					type="range"
-					min={FONT_MIN}
-					max={FONT_MAX}
-					step="1"
-					value={settingsService.fontSize}
-					oninput={(e) => settingsService.setFontSize(Number(e.currentTarget.value))}
-					class="flex-1 accent-primary"
-				/>
-				<span class="text-xs text-muted-foreground w-6">{FONT_MAX}</span>
-			</div>
+			<input
+				type="number"
+				min={FONT_MIN}
+				max={FONT_MAX}
+				step="1"
+				value={settingsService.fontSize}
+				oninput={(e) => {
+					const v = Number(e.currentTarget.value);
+					if (v >= FONT_MIN && v <= FONT_MAX) settingsService.setFontSize(v);
+				}}
+				class={inputClass}
+			/>
 		</div>
 
-		<div class="space-y-3">
-			<div class="flex items-center justify-between">
-				<div class="space-y-0.5">
-					<p class="text-sm font-medium">Line height</p>
-					<p class="text-xs text-muted-foreground">Spacing between lines of text.</p>
-				</div>
-				<span class="text-sm font-mono tabular-nums text-muted-foreground w-12 text-right">
-					{settingsService.lineHeight.toFixed(2)}
-				</span>
+		<div class="flex items-center justify-between">
+			<div class="space-y-0.5">
+				<p class="text-sm font-medium">Line height</p>
+				<p class="text-xs text-muted-foreground">Spacing between lines of text.</p>
 			</div>
-			<div class="flex items-center gap-3">
-				<span class="text-xs text-muted-foreground w-6 text-right">{LH_MIN}</span>
-				<input
-					type="range"
-					min={LH_MIN}
-					max={LH_MAX}
-					step="0.05"
-					value={settingsService.lineHeight}
-					oninput={(e) => settingsService.setLineHeight(Number(e.currentTarget.value))}
-					class="flex-1 accent-primary"
-				/>
-				<span class="text-xs text-muted-foreground w-6">{LH_MAX}</span>
-			</div>
+			<input
+				type="number"
+				min={LH_MIN}
+				max={LH_MAX}
+				step="0.05"
+				value={settingsService.lineHeight}
+				oninput={(e) => {
+					const v = Number(e.currentTarget.value);
+					if (v >= LH_MIN && v <= LH_MAX) settingsService.setLineHeight(v);
+				}}
+				class={inputClass}
+			/>
 		</div>
 
 		<div class="space-y-3">
@@ -101,6 +92,23 @@
 						<span class={cn('text-sm font-medium', isActive ? 'text-primary' : 'text-foreground')}>
 							{option.label}
 						</span>
+
+						{#if option.value === 'always'}
+							<div class="w-full rounded bg-muted px-2 py-1.5 text-left font-mono text-[10px] leading-relaxed text-muted-foreground">
+								<div>## Heading</div>
+								<div>**bold** _italic_</div>
+							</div>
+						{:else if option.value === 'cursor'}
+							<div class="w-full rounded bg-muted px-2 py-1.5 text-left text-[10px] leading-relaxed">
+								<div class="font-semibold text-foreground">Heading</div>
+								<div class="rounded bg-primary/10 px-1 font-mono text-muted-foreground">**bold** _italic_</div>
+							</div>
+						{:else}
+							<div class="w-full rounded bg-muted px-2 py-1.5 text-left text-[10px] leading-relaxed">
+								<div class="font-semibold text-foreground">Heading</div>
+								<div class="text-foreground"><strong>bold</strong> <em>italic</em></div>
+							</div>
+						{/if}
 					</button>
 				{/each}
 			</div>
