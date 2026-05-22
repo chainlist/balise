@@ -41,8 +41,6 @@ class UIState {
 		if (!this.desks.includes(this.activeDesk)) {
 			this.desks = [...this.desks, this.activeDesk];
 		}
-
-		this.ready = true;
 	}
 
 	async setActiveDesk(desk: string): Promise<void> {

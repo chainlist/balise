@@ -6,10 +6,9 @@ export async function initApp() {
 	try {
 		await settingsService.init();
 		themeService.init();
-		const minDelay = new Promise<void>((resolve) => setTimeout(resolve, 100));
 		await uiState.init();
 		await uiState.switchDesk(uiState.activeDesk, uiState.activeTag);
-		await minDelay;
+		uiState.ready = true;
 	} catch (e) {
 		return { error: e instanceof Error ? e.message : String(e) };
 	}

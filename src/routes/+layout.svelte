@@ -40,7 +40,10 @@
 			<p>{error}</p>
 		</div>
 	{:else if !ready}
-		<div class="flex h-screen w-screen items-center justify-center gap-4 absolute top-0 left-0" out:fade={{ duration: 250}}>
+		<div
+			class="absolute top-0 left-0 flex h-screen w-screen items-center justify-center gap-4"
+			out:fade={{ duration: 250 }}
+		>
 			<span>Loading...</span>
 			<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
 		</div>

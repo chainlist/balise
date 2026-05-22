@@ -72,6 +72,11 @@ export async function deleteNoteById(db: Database, id: string): Promise<void> {
 	await db.execute('DELETE FROM notes WHERE id = $1', [id]);
 }
 
+export async function queryTotalNotesCount(db: Database): Promise<number> {
+	const result = await db.select<[{ count: number }]>('SELECT COUNT(*) as count FROM notes');
+	return result[0]?.count ?? 0;
+}
+
 export async function queryAllNotesMeta(
 	db: Database
 ): Promise<{ id: string; updated_at: string }[]> {

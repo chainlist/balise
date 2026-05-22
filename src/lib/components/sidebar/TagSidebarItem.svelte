@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagDisplayName, type Tag } from '$lib/services/tags.svelte';
 	import { Settings2Icon, PinIcon } from '@lucide/svelte';
@@ -13,11 +15,17 @@
 		e.stopPropagation();
 		onSettings?.(tag);
 	}
+
+	function handleTagClick(event: Event) {
+		event.preventDefault();
+		uiState.setActiveTag(tag.tag);
+		goto(resolve('/'));
+	}
 </script>
 
 <Sidebar.MenuButton
 	{isActive}
-	onclick={() => uiState.setActiveTag(tag.tag)}
+	onclick={handleTagClick}
 	class="group/tag-item inline-flex w-full items-center justify-between rounded px-3 py-1.5 text-on-surface-variant transition-all select-none hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
 >
 	<div class="flex min-w-0 items-center gap-2">
