@@ -38,6 +38,11 @@ export function extractTags(content: string): string[] {
 		tags.add(lang.toLowerCase());
 	}
 
+	// Magic tags: infer task state tags from task list items
+	if (/^[ \t]*- \[ \]/m.test(content)) tags.add('todo');
+	if (/^[ \t]*- \[[xX]\]/m.test(content)) tags.add('done');
+	if (/^[ \t]*- \[~\]/m.test(content)) tags.add('inprogress');
+
 	return [...tags];
 }
 

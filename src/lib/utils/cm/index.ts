@@ -3,6 +3,7 @@ export { mdHidePlugin } from './hidePlugin';
 export { mdCodePlugin } from './codePlugin';
 export { mdLinkPlugin } from './linkPlugin';
 export { mdTagPlugin } from './tagPlugin';
+export { mdTaskPlugin } from './taskPlugin';
 export { mdHighlightPlugin } from './highlightPlugin';
 export { mdPairPlugin } from './pairPlugin';
 export { mdFormatPlugin } from './formatPlugin';
