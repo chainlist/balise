@@ -11,8 +11,6 @@
 		onToggle: () => void;
 	} = $props();
 
-	const canToggle = $derived(status === 'todo' || status === 'done');
-
 	const styles: Record<TaskStatus, { bg: string; border: string; label: string }> = {
 		todo: {
 			bg: 'color-mix(in oklch, oklch(0.65 0.18 240) 10%, transparent)',
@@ -34,20 +32,17 @@
 	const { bg, border, label } = $derived(styles[status]);
 </script>
 
-<div
-	role="listitem"
+<button
 	class="my-1 flex w-full items-center gap-3 rounded border px-3 py-2 text-sm"
 	style="background: {bg}; border-color: {border};"
+	onclick={onToggle}
 >
-	<button
-		type="button"
+	<div
 		role="checkbox"
 		aria-checked={status === 'done'}
 		aria-label={label}
 		class="flex size-4 shrink-0 items-center justify-center rounded border-2 transition-colors"
 		style="border-color: {border}; background: {status === 'done' ? border : 'transparent'};"
-		onclick={canToggle ? onToggle : undefined}
-		disabled={!canToggle}
 	>
 		{#if status === 'done'}
 			<svg class="size-2.5 text-white" viewBox="0 0 10 10" fill="none">
@@ -64,7 +59,7 @@
 				<circle cx="4" cy="4" r="3" />
 			</svg>
 		{/if}
-	</button>
+	</div>
 
 	<span
 		class="flex-1 leading-snug"
@@ -80,4 +75,4 @@
 	>
 		{label}
 	</span>
-</div>
+</button>

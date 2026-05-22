@@ -16,9 +16,6 @@ const TASK_CHECKBOX_RE = /^[ \t]*- \[([xX~]?)\] (.+)$/;
 const TASK_TAG_RE = /#(todo|done|inprogress)\b/i;
 const TASK_TAG_STRIP_RE = /#(todo|done|inprogress)\b\s*/gi;
 
-// Custom DOM event fired by the widget; caught by taskToggleHandler below
-const TOGGLE_EVENT = 'cm-task-toggle';
-
 function checkboxMarkerToStatus(marker: string): TaskStatus {
 	if (marker === 'x' || marker === 'X') return 'done';
 	if (marker === '~') return 'inprogress';
@@ -36,7 +33,6 @@ class TaskWidget extends WidgetType {
 	constructor(
 		readonly status: TaskStatus,
 		readonly text: string,
-		// Position of the toggleable marker in the document; -1 = not toggleable
 		readonly markerFrom: number,
 		readonly markerTo: number,
 		readonly nextInsert: string
@@ -45,24 +41,39 @@ class TaskWidget extends WidgetType {
 	}
 
 	eq(other: TaskWidget) {
-		return other.status === this.status && other.text === this.text;
+		return (
+			other.status === this.status &&
+			other.text === this.text &&
+			other.markerFrom === this.markerFrom &&
+			other.markerTo === this.markerTo &&
+			other.nextInsert === this.nextInsert
+		);
 	}
 
-	toDOM(): HTMLElement {
+	toDOM(view: EditorView): HTMLElement {
 		const div = document.createElement('div');
-		// Store toggle coordinates as data attributes so the event handler can read them
-		div.dataset.cmTaskFrom = String(this.markerFrom);
-		div.dataset.cmTaskTo = String(this.markerTo);
-		div.dataset.cmTaskInsert = this.nextInsert;
+		// inline-block keeps cm-line in an inline formatting context, preventing the
+		// browser from creating anonymous block boxes around cm-widgetBuffer siblings,
+		// which would otherwise add a full line-height of empty space above the card.
+		div.style.cssText = 'display:inline-block;width:100%;vertical-align:top';
+
+		// Prevent CM from placing the cursor on mousedown within the toggle button.
+		// Without this, CM moves the cursor to the task line on mousedown, which
+		// destroys the widget before onclick fires (Chrome won't fire click on detached nodes).
+		// Non-button clicks still propagate so clicking the task text enters edit mode.
+		div.addEventListener('mousedown', (e) => {
+			if ((e.target as Element).closest('button')) e.stopPropagation();
+		});
 
 		const instance = mount(TaskCard, {
 			target: div,
 			props: {
 				status: this.status,
 				text: this.text,
-				onToggle: this.nextInsert
-					? () => div.dispatchEvent(new CustomEvent(TOGGLE_EVENT, { bubbles: true }))
-					: () => {}
+				onToggle: () =>
+					view.dispatch({
+						changes: { from: this.markerFrom, to: this.markerTo, insert: this.nextInsert }
+					})
 			}
 		});
 		(div as any)._sv = instance;
@@ -78,23 +89,6 @@ class TaskWidget extends WidgetType {
 		return true;
 	}
 }
-
-// Reads toggle coordinates from the widget DOM and dispatches the CM transaction.
-// Must be included alongside the StateField (returned together from mdTaskPlugin).
-const taskToggleHandler = EditorView.domEventHandlers({
-	'cm-task-toggle'(event, view) {
-		const el = (event.target as Element).closest('[data-cm-task-from]') as HTMLElement | null;
-		if (!el || !el.dataset.cmTaskInsert) return false;
-		view.dispatch({
-			changes: {
-				from: parseInt(el.dataset.cmTaskFrom!),
-				to: parseInt(el.dataset.cmTaskTo!),
-				insert: el.dataset.cmTaskInsert
-			}
-		});
-		return true;
-	}
-});
 
 function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 	if (mode === 'always') return Decoration.none;
@@ -117,12 +111,12 @@ function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 			const bracketOffset = line.text.indexOf('[');
 			const markerFrom = line.from + bracketOffset;
 			const markerTo = markerFrom + 3; // "[ ]" / "[x]" / "[~]" are always 3 chars
-			const nextInsert = status !== 'inprogress' ? (status === 'todo' ? '[x]' : '[ ]') : '';
+			const cycleCheckbox: Record<TaskStatus, string> = { todo: '[~]', inprogress: '[x]', done: '[ ]' };
+			const nextInsert = cycleCheckbox[status];
 
 			ranges.push(
 				Decoration.replace({
-					widget: new TaskWidget(status, taskText, markerFrom, markerTo, nextInsert),
-					block: true
+					widget: new TaskWidget(status, taskText, markerFrom, markerTo, nextInsert)
 				}).range(line.from, line.to)
 			);
 		} else {
@@ -133,12 +127,12 @@ function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 				const tagFrom = line.from + tagMatch.index;
 				const tagTo = tagFrom + tagMatch[0].length;
 				const displayText = line.text.replace(TASK_TAG_STRIP_RE, '').trim();
-				const nextInsert = status !== 'inprogress' ? (status === 'todo' ? '#done' : '#todo') : '';
+				const cycleTag: Record<TaskStatus, string> = { todo: '#inprogress', inprogress: '#done', done: '#todo' };
+				const nextInsert = cycleTag[status];
 
 				ranges.push(
 					Decoration.replace({
-						widget: new TaskWidget(status, displayText, tagFrom, tagTo, nextInsert),
-						block: true
+						widget: new TaskWidget(status, displayText, tagFrom, tagTo, nextInsert)
 					}).range(line.from, line.to)
 				);
 			}
@@ -165,5 +159,5 @@ function buildTaskStateField(mode: MarkMode) {
 }
 
 export function mdTaskPlugin(mode: MarkMode): Extension {
-	return [buildTaskStateField(mode), taskToggleHandler];
+	return buildTaskStateField(mode);
 }
