@@ -2,6 +2,7 @@ import { load, type Store } from '@tauri-apps/plugin-store';
 import { openDesk } from './desk';
 import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
+import { fsSyncService } from './fs-sync';
 
 const defaultDesk = 'Personal';
 const defaults = {
@@ -101,7 +102,13 @@ class UIState {
 
 		this.composedTags = [];
 		await openDesk(desk);
-		await Promise.all([tagsService.load(), notesService.load(activeTag), tagsService.loadRelated(activeTag)]);
+		fsSyncService.setCurrentDesk(desk);
+		await fsSyncService.syncDeskFiles();
+		await Promise.all([
+			tagsService.load(),
+			notesService.load(activeTag),
+			tagsService.loadRelated(activeTag)
+		]);
 		await this.setActiveDesk(desk);
 	}
 }

@@ -71,3 +71,15 @@ export async function queryNoteUpdatedAt(db: Database, id: string): Promise<stri
 export async function deleteNoteById(db: Database, id: string): Promise<void> {
 	await db.execute('DELETE FROM notes WHERE id = $1', [id]);
 }
+
+export async function queryAllNotesMeta(
+	db: Database
+): Promise<{ id: string; updated_at: string }[]> {
+	return db.select('SELECT id, updated_at FROM notes');
+}
+
+export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note[]> {
+	if (ids.length === 0) return [];
+	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+	return db.select<Note[]>(`SELECT * FROM notes WHERE id IN (${placeholders})`, ids);
+}

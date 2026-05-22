@@ -1,6 +1,7 @@
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
 import { extractTitle } from '$lib/utils/note-title';
+import { fsSyncService } from '$lib/services/fs-sync';
 import {
 	queryNotesByTags,
 	queryUntaggedNotes,
@@ -42,7 +43,10 @@ class NotesService {
 		const id = crypto.randomUUID();
 		await insertNote(db, id, content);
 		const note = await queryNoteById(db, id);
-		if (note) this.notes = [note, ...this.notes];
+		if (note) {
+			this.notes = [note, ...this.notes];
+			await fsSyncService.syncNoteFile(note);
+		}
 		return id;
 	}
 
@@ -56,13 +60,14 @@ class NotesService {
 			note.title = extractTitle(content);
 			const ts = await queryNoteUpdatedAt(db, id);
 			if (ts) note.updated_at = ts;
+			await fsSyncService.syncNoteFile(note);
 		}
 	}
 
 	async delete(id: string): Promise<void> {
 		await deleteNoteById(getDB(), id);
 		this.notes = this.notes.filter((n) => n.id !== id);
-		await tagsService.load();
+		await Promise.all([tagsService.load(), fsSyncService.deleteNoteFile(id)]);
 	}
 }
 
