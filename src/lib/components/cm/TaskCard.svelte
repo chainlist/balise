@@ -69,10 +69,5 @@
 		{text}
 	</span>
 
-	<!-- <span
-		class="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium"
-		style="color: {border}; background: {bg}; border: 1px solid {border};"
-	>
-		{label}
-	</span> -->
+
 </button>

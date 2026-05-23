@@ -1,5 +1,5 @@
 import { getDB } from '$lib/utils/db';
-import { SvelteSet } from 'svelte/reactivity';
+
 import {
 	queryTagsWithCounts,
 	queryUntaggedCount,
@@ -28,7 +28,8 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 }
 
 export function extractTags(content: string): string[] {
-	const tags = new SvelteSet<string>();
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	const tags = new Set<string>();
 
 	for (const [match] of content.matchAll(/#[a-zA-Z0-9/]{2,}/g)) {
 		tags.add(match.slice(1));
