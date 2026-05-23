@@ -10,14 +10,19 @@ vi.mock('$lib/repositories/notes.repo', () => ({
 	deleteNoteById: vi.fn()
 }));
 vi.mock('$lib/utils/db', () => ({ getDB: vi.fn(() => ({})) }));
-vi.mock('$lib/services/tags.svelte', () => ({
-	tagsService: {
-		syncNoteTags: vi.fn().mockResolvedValue(undefined),
-		load: vi.fn().mockResolvedValue(undefined)
-	}
-}));
+vi.mock('$lib/services/tags.svelte', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('$lib/services/tags.svelte')>();
+	return {
+		...actual,
+		tagsService: {
+			syncNoteTags: vi.fn().mockResolvedValue(undefined),
+			load: vi.fn().mockResolvedValue(undefined)
+		}
+	};
+});
 
-import { notesService, UNTAGGED_FILTER } from './notes.svelte';
+import { notesService } from './notes.svelte';
+import { UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 import * as repo from '$lib/repositories/notes.repo';
 import { tagsService } from '$lib/services/tags.svelte';
 

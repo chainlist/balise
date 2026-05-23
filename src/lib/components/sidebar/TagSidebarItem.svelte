@@ -2,9 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { tagDisplayName, type Tag } from '$lib/services/tags.svelte';
+	import { tagDisplayName, UNTAGGED_FILTER, type Tag } from '$lib/services/tags.svelte';
 	import { Settings2Icon, PinIcon } from '@lucide/svelte';
-	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
 	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
 
 	let { tag, onSettings }: { tag: Tag; onSettings?: (tag: Tag) => void } = $props();

@@ -1,5 +1,5 @@
 import { getDB } from '$lib/utils/db';
-import { tagsService } from '$lib/services/tags.svelte';
+import { tagsService, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 import { extractTitle } from '$lib/utils/note-title';
 import { fsSyncService } from '$lib/services/fs-sync';
 import {
@@ -14,8 +14,6 @@ import {
 
 import type { Note } from '$lib/repositories/notes.repo';
 export type { Note };
-
-export const UNTAGGED_FILTER = '__untagged__' as const;
 
 export function newNoteContent(activeTag: string | null): string {
 	return (

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
 	import { tagsService, type Tag } from '$lib/services/tags.svelte';
-	import { UNTAGGED_FILTER } from '$lib/services/notes.svelte';
+	import { UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
 

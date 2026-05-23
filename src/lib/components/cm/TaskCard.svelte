@@ -33,7 +33,7 @@
 </script>
 
 <button
-	class="my-1 flex w-full items-center gap-3 rounded border px-3 py-2 text-sm"
+	class="my-1 flex w-full items-center gap-3 rounded border px-3 py-2 text-left text-sm"
 	style="background: {bg}; border-color: {border};"
 	onclick={onToggle}
 >
@@ -69,10 +69,10 @@
 		{text}
 	</span>
 
-	<span
+	<!-- <span
 		class="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium"
 		style="color: {border}; background: {bg}; border: 1px solid {border};"
 	>
 		{label}
-	</span>
+	</span> -->
 </button>

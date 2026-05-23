@@ -8,6 +8,7 @@ import {
 } from '@tauri-apps/plugin-fs';
 import { sanitizeDeskName } from './desk';
 import { getDB } from '$lib/utils/db';
+import { tagsService } from '$lib/services/tags.svelte';
 import {
 	queryAllNotesMeta,
 	queryNotesByIds,
@@ -120,9 +121,14 @@ class FsSyncService {
 				})
 		);
 
-		// Import external edits into DB
+		// Import external edits into DB and sync tags
 		if (filesToImport.length > 0) {
-			await Promise.all(filesToImport.map(({ id, content }) => updateNoteContent(db, id, content)));
+			await Promise.all(
+				filesToImport.flatMap(({ id, content }) => [
+					updateNoteContent(db, id, content),
+					tagsService.syncNoteTags(id, content)
+				])
+			);
 		}
 
 		// Write files for DB notes that have no file yet → DB → FS

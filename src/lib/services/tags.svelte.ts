@@ -13,6 +13,8 @@ import {
 import type { RelatedTag } from '$lib/repositories/tags.repo';
 export type { RelatedTag };
 
+export const UNTAGGED_FILTER = '__untagged__' as const;
+
 export interface Tag {
 	tag: string;
 	color: string | null;
@@ -75,7 +77,7 @@ class TagsService {
 	}
 
 	async loadRelated(activeTag: string | null, composedTags: string[] = []): Promise<void> {
-		if (activeTag === '__untagged__') {
+		if (activeTag === UNTAGGED_FILTER) {
 			this.relatedTags = [];
 			return;
 		}
