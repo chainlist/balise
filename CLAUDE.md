@@ -121,7 +121,7 @@ src/lib/
 
 ### Key Conventions
 
-- **Use a class when a module has state.** Services that hold mutable state must be implemented as a class and exported as a singleton (e.g. `export const fsSyncService = new FsSyncService()`). Plain modules with no state (e.g. `desk.ts`, `notes.repo.ts`) export functions directly.
+- **Services are classes, utilities are plain functions.** Any module that acts as a service (has side effects, wraps other services, or is an abstraction layer) must be a class exported as a singleton (e.g. `export const fsSyncService = new FsSyncService()`). Pure utilities with no service dependencies (e.g. `desk.ts`, `notes.repo.ts`) export functions directly.
 - **Repositories** are thin SQL wrappers — no business logic, no state, no Svelte reactivity.
 - **Services** own business logic and reactive state (`$state` runes). They may import repositories and other services, but never create circular dependencies.
 - **`ui-state`** is the top-level orchestrator: it imports `notesService`, `tagsService`, and `fsSyncService`. Nothing imports `uiState` to avoid circular deps.

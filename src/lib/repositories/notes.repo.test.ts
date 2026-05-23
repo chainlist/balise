@@ -137,12 +137,12 @@ describe('updateNoteContent', () => {
 		expect(sql).toContain('UPDATE notes SET content');
 	});
 
-	it('passes the content before the id', async () => {
+	it('passes content, title, then id as params', async () => {
 		const db = makeDB();
 		await updateNoteContent(db as never, '1', 'new content');
 		const [, params] = db.execute.mock.calls[0] as [string, unknown[]];
 		expect(params[0]).toBe('new content');
-		expect(params[1]).toBe('1');
+		expect(params[2]).toBe('1');
 	});
 });
 

@@ -1,7 +1,7 @@
 import type Database from '@tauri-apps/plugin-sql';
 import { extractTitle } from '$lib/utils/note-title';
 
-export interface Note {
+interface RawNote {
 	id: string;
 	title: string;
 	content: string;
@@ -11,9 +11,24 @@ export interface Note {
 	updated_at: string;
 }
 
+export interface Note {
+	id: string;
+	title: string;
+	content: string;
+	pinned: boolean;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
+function mapNote(raw: RawNote): Note {
+	return { ...raw, pinned: raw.pinned === 1, archived: raw.archived === 1 };
+}
+
 export async function queryNotesByTags(db: Database, tags: string[]): Promise<Note[]> {
 	if (tags.length === 0) {
-		return db.select<Note[]>('SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC');
+		const rows = await db.select<RawNote[]>('SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC');
+		return rows.map(mapNote);
 	}
 
 	const existsClauses = tags
@@ -23,26 +38,28 @@ export async function queryNotesByTags(db: Database, tags: string[]): Promise<No
 		)
 		.join('\n     ');
 
-	return db.select<Note[]>(
+	const rows = await db.select<RawNote[]>(
 		`SELECT n.* FROM notes n
      WHERE 1=1
      ${existsClauses}
      ORDER BY n.pinned DESC, n.updated_at DESC`,
 		tags
 	);
+	return rows.map(mapNote);
 }
 
 export async function queryUntaggedNotes(db: Database): Promise<Note[]> {
-	return db.select<Note[]>(
+	const rows = await db.select<RawNote[]>(
 		`SELECT * FROM notes
        WHERE id NOT IN (SELECT DISTINCT note_id FROM note_tags)
        ORDER BY pinned DESC, updated_at DESC`
 	);
+	return rows.map(mapNote);
 }
 
 export async function queryNoteById(db: Database, id: string): Promise<Note | null> {
-	const rows = await db.select<Note[]>('SELECT * FROM notes WHERE id = $1', [id]);
-	return rows[0] ?? null;
+	const rows = await db.select<RawNote[]>('SELECT * FROM notes WHERE id = $1', [id]);
+	return rows[0] ? mapNote(rows[0]) : null;
 }
 
 export async function insertNote(db: Database, id: string, content: string): Promise<void> {
@@ -86,5 +103,6 @@ export async function queryAllNotesMeta(
 export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note[]> {
 	if (ids.length === 0) return [];
 	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
-	return db.select<Note[]>(`SELECT * FROM notes WHERE id IN (${placeholders})`, ids);
+	const rows = await db.select<RawNote[]>(`SELECT * FROM notes WHERE id IN (${placeholders})`, ids);
+	return rows.map(mapNote);
 }

@@ -28,9 +28,10 @@ import { tagsService } from '$lib/services/tags.svelte';
 
 const NOTE = (id = '1') => ({
 	id,
+	title: 'Note title',
 	content: 'hello',
-	pinned: 0,
-	archived: 0,
+	pinned: false,
+	archived: false,
 	created_at: '2025-01-01',
 	updated_at: '2025-01-01'
 });
@@ -65,7 +66,11 @@ describe('load', () => {
 	it('calls queryNotesByTags with activeTag + composedTags merged', async () => {
 		vi.mocked(repo.queryNotesByTags).mockResolvedValue([]);
 		await notesService.load('work', ['urgent', 'todo']);
-		expect(repo.queryNotesByTags).toHaveBeenCalledWith(expect.anything(), ['work', 'urgent', 'todo']);
+		expect(repo.queryNotesByTags).toHaveBeenCalledWith(expect.anything(), [
+			'work',
+			'urgent',
+			'todo'
+		]);
 	});
 
 	it('sets notes to the returned rows', async () => {

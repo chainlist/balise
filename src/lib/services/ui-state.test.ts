@@ -19,6 +19,12 @@ vi.mock('$lib/services/tags.svelte', () => ({
 		loadRelated: vi.fn().mockResolvedValue(undefined)
 	}
 }));
+vi.mock('$lib/services/fs-sync', () => ({
+	fsSyncService: {
+		setCurrentDesk: vi.fn(),
+		syncDeskFiles: vi.fn().mockResolvedValue(undefined)
+	}
+}));
 
 import { uiState } from './ui-state.svelte';
 import { openDesk } from '$lib/services/desk';

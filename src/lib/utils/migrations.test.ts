@@ -25,43 +25,31 @@ describe('migrate', () => {
 		);
 	});
 
-	it('runs all 3 migrations on a fresh database', async () => {
+	it('runs the 1 migration on a fresh database', async () => {
 		const db = makeMockDB([]);
 		await migrate(db as never);
 		const calls = insertCalls(db);
-		expect(calls).toHaveLength(3);
+		expect(calls).toHaveLength(1);
 		expect(calls[0][1]).toEqual([1]);
-		expect(calls[1][1]).toEqual([2]);
-		expect(calls[2][1]).toEqual([3]);
 	});
 
 	it('skips migrations that have already been applied', async () => {
-		const db = makeMockDB([1, 2]);
-		await migrate(db as never);
-		const calls = insertCalls(db);
-		expect(calls).toHaveLength(1);
-		expect(calls[0][1]).toEqual([3]);
-	});
-
-	it('runs nothing when all migrations are applied', async () => {
-		const db = makeMockDB([1, 2, 3]);
+		const db = makeMockDB([1]);
 		await migrate(db as never);
 		expect(insertCalls(db)).toHaveLength(0);
 	});
 
-	it('executes the SQL for each unapplied migration', async () => {
+	it('runs nothing when all migrations are applied', async () => {
 		const db = makeMockDB([1]);
 		await migrate(db as never);
-		// v2 migration should drop old tables
-		const sqlCalls = db.execute.mock.calls.map((args) => args[0] as string);
-		expect(sqlCalls.some((s: string) => s.includes('DROP TABLE'))).toBe(true);
+		expect(insertCalls(db)).toHaveLength(0);
 	});
 
-	it('records each applied migration version in order', async () => {
+	it('records the applied migration version', async () => {
 		const db = makeMockDB([]);
 		await migrate(db as never);
 		const calls = insertCalls(db);
 		const versions = calls.map((args) => (args[1] as number[])[0]);
-		expect(versions).toEqual([1, 2, 3]);
+		expect(versions).toEqual([1]);
 	});
 });

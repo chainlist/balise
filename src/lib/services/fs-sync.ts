@@ -55,8 +55,8 @@ class FsSyncService {
 		return {
 			meta: {
 				id: raw.id,
-				pinned: Number(raw.pinned),
-				archived: Number(raw.archived),
+				pinned: raw.pinned === '1' || raw.pinned === 'true',
+				archived: raw.archived === '1' || raw.archived === 'true',
 				created_at: raw.created_at,
 				updated_at: raw.updated_at
 			},
