@@ -5,8 +5,8 @@
 	import SidebarFooter from '$lib/components/sidebar/SidebarFooter.svelte';
 </script>
 
-<Sidebar.Root>
+<div class="flex h-screen flex-col">
 	<SidebarHeader />
 	<SidebarContent />
 	<SidebarFooter />
-</Sidebar.Root>
+</div>
