@@ -30,21 +30,21 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 export function extractTags(content: string): string[] {
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	const tags = new Set<string>();
+	// Group 1: code fence lang; Group 2: task state char ( , x/X, ~)
+	const pattern = /#[a-zA-Z0-9/]{2,}|^```([a-zA-Z][a-zA-Z0-9]*)|^[ \t]*- \[( |[xX]|~)\]/gm;
 
-	for (const [match] of content.matchAll(/#[a-zA-Z0-9/]{2,}/g)) {
-		tags.add(match.slice(1));
+	for (const match of content.matchAll(pattern)) {
+		if (match[1] !== undefined) {
+			tags.add('code');
+			tags.add(match[1].toLowerCase());
+		} else if (match[2] !== undefined) {
+			if (match[2] === ' ') tags.add('todo');
+			else if (match[2] === '~') tags.add('inprogress');
+			else tags.add('done');
+		} else {
+			tags.add(match[0].slice(1));
+		}
 	}
-
-	// Magic tags: infer #code and #<lang> from fenced code blocks (``` lang)
-	for (const [, lang] of content.matchAll(/^```([a-zA-Z][a-zA-Z0-9]*)/gm)) {
-		tags.add('code');
-		tags.add(lang.toLowerCase());
-	}
-
-	// Magic tags: infer task state tags from task list items
-	if (/^[ \t]*- \[ \]/m.test(content)) tags.add('todo');
-	if (/^[ \t]*- \[[xX]\]/m.test(content)) tags.add('done');
-	if (/^[ \t]*- \[~\]/m.test(content)) tags.add('inprogress');
 
 	return [...tags];
 }
