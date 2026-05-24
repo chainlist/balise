@@ -1,19 +1,17 @@
 <script lang="ts">
-	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
+	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { Toggle } from '$lib/components/shadcn/toggle/index.js';
-	import { tagsService, type Tag } from '$lib/services/tags.svelte';
+	import { tagDisplayName, tagsService, type Tag } from '$lib/services/tags.svelte';
 	import { PinIcon, PinOffIcon } from '@lucide/svelte';
 
 	let { open = $bindable(false), tag }: { open?: boolean; tag: Tag | null } = $props();
 
-	// Base values derived from the prop — update automatically when tag changes
 	let baseDisplayName = $derived(tag?.display_name ?? '');
 	let baseColor = $derived(tag?.color ?? '#7F77DD');
 	let basePinned = $derived(tag?.pinned ?? false);
 
-	// User edits — null means "not yet edited, use the base value"
 	let draftDisplayName = $state<string | null>(null);
 	let draftColor = $state<string | null>(null);
 	let draftPinned = $state<boolean | null>(null);
@@ -52,15 +50,17 @@
 	}
 </script>
 
-<Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-md">
-		<Sheet.Header class="gap-2 border-b p-6">
-			<Sheet.Title>#{tag?.tag}</Sheet.Title>
-			<Sheet.Description>Customise how this tag appears.</Sheet.Description>
-		</Sheet.Header>
+<Dialog.Root bind:open>
+	<Dialog.Content>
+		<Dialog.Header>
+			{#if tag}
+				<Dialog.Title>{tagDisplayName(tag)}</Dialog.Title>
+			{/if}
+			<Dialog.Description>Customise how this tag appears.</Dialog.Description>
+		</Dialog.Header>
 
 		<form
-			class="flex flex-1 flex-col gap-6 p-6"
+			class="flex flex-col gap-6 p-6"
 			onsubmit={(e) => {
 				e.preventDefault();
 				handleSave();
@@ -75,6 +75,7 @@
 				<label class="text-sm font-medium" for="display-name">Display name</label>
 				<Input
 					id="display-name"
+					class="rounded"
 					value={displayName}
 					oninput={(e) => (draftDisplayName = e.currentTarget.value)}
 					placeholder={tag?.tag ?? ''}
@@ -116,10 +117,10 @@
 				</Toggle>
 			</div>
 
-			<div class="mt-auto flex justify-end gap-2">
+			<div class="flex justify-end gap-2">
 				<Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
 				<Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 			</div>
 		</form>
-	</Sheet.Content>
-</Sheet.Root>
+	</Dialog.Content>
+</Dialog.Root>

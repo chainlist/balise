@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
+	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { sanitizeDeskName } from '$lib/services/desk';
@@ -45,34 +45,34 @@
 	}
 </script>
 
-<Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-md">
-		<Sheet.Header class="gap-2 border-b p-6">
-			<Sheet.Title>Create a new desk</Sheet.Title>
-			<Sheet.Description>Enter a name for your desk. It will be saved locally.</Sheet.Description>
-		</Sheet.Header>
+<Dialog.Root bind:open>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Create a new desk</Dialog.Title>
+			<Dialog.Description>Enter a name for your desk.</Dialog.Description>
+		</Dialog.Header>
 
 		<form
-			class="flex flex-1 flex-col gap-4 p-6"
+			class="flex flex-col gap-4 p-6"
 			onsubmit={(event) => {
 				event.preventDefault();
 				handleCreateDesk();
 			}}
 		>
-			<div class="space-y-2">
+			<div class="flex flex-col gap-2">
 				<label class="text-sm font-medium" for="desk-name">Desk name</label>
-				<Input id="desk-name" bind:value={newDeskName} placeholder="ex: axon-work" autofocus />
+				<Input id="desk-name" bind:value={newDeskName} placeholder="ex: Work" autofocus />
 				{#if createDeskError}
 					<p class="text-sm text-destructive">{createDeskError}</p>
 				{/if}
 			</div>
 
-			<div class="mt-auto flex justify-end gap-2">
+			<div class="flex justify-end gap-2">
 				<Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
 				<Button type="submit" disabled={isCreatingDesk}>
 					{isCreatingDesk ? 'Creating...' : 'Create desk'}
 				</Button>
 			</div>
 		</form>
-	</Sheet.Content>
-</Sheet.Root>
+	</Dialog.Content>
+</Dialog.Root>

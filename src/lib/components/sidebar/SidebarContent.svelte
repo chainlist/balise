@@ -1,5 +1,4 @@
 <script lang="ts">
-	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
 	import { tagsService, type Tag } from '$lib/services/tags.svelte';
 	import { UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
@@ -25,7 +24,7 @@
 		}}
 	/>
 	{#each tagsService.tags as tag, i (tag.tag)}
-		<TagSidebarItem {tag} onSettings={openTagSettings} delay={i * 25} />
+		<TagSidebarItem {tag} onSettings={openTagSettings} delay={i * 15} />
 	{/each}
 </div>
 

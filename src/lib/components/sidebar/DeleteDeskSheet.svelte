@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
+	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { deleteDeskFiles } from '$lib/services/desk';
 	import { uiState } from '$lib/services/ui-state.svelte';
@@ -47,21 +47,21 @@
 	}
 </script>
 
-<Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-md">
-		<Sheet.Header class="gap-2 border-b p-6">
-			<Sheet.Title>Delete desk</Sheet.Title>
-			<Sheet.Description>
+<Dialog.Root bind:open>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Delete desk</Dialog.Title>
+			<Dialog.Description>
 				This will permanently delete <strong>{deskName ?? 'this desk'}</strong> and all related files.
-			</Sheet.Description>
-		</Sheet.Header>
+			</Dialog.Description>
+		</Dialog.Header>
 
 		<div class="flex flex-col gap-4 p-6">
 			{#if deleteDeskError}
 				<p class="text-sm text-destructive">{deleteDeskError}</p>
 			{/if}
 
-			<div class="mt-auto flex justify-end gap-2">
+			<div class="flex justify-end gap-2">
 				<Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
 				<Button
 					type="button"
@@ -73,5 +73,5 @@
 				</Button>
 			</div>
 		</div>
-	</Sheet.Content>
-</Sheet.Root>
+	</Dialog.Content>
+</Dialog.Root>

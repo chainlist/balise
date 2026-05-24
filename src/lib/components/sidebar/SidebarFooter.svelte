@@ -1,5 +1,4 @@
 <script lang="ts">
-	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { Settings2Icon, LayoutDashboardIcon } from '@lucide/svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
@@ -9,7 +8,8 @@
 	const isDashboard = $derived(page.url.pathname === '/dashboard');
 </script>
 
-<div class="flex flex-col gap-1 p-4">
+<hr />
+<div class="flex flex-col gap-1 p-2">
 	<Button
 		variant="ghost"
 		size="sm"
