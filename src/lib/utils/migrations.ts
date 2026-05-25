@@ -36,10 +36,11 @@ const MIGRATIONS: Migration[] = [
       CREATE VIEW IF NOT EXISTS tags AS
         SELECT DISTINCT tag FROM note_tags ORDER BY tag;
 
-      CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
-        id UNINDEXED,
+      CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(
+        id   UNINDEXED,
+        type UNINDEXED,
         content,
-        tokenize='trigram'
+        tokenize='unicode61'
       );
 
       CREATE INDEX IF NOT EXISTS idx_notes_updated_at ON notes(updated_at);
@@ -47,16 +48,16 @@ const MIGRATIONS: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_notes_archived   ON notes(archived);
       CREATE INDEX IF NOT EXISTS idx_note_tags_tag    ON note_tags(tag);
 
-      CREATE TRIGGER IF NOT EXISTS notes_fts_insert AFTER INSERT ON notes BEGIN
-        INSERT INTO notes_fts(id, content) VALUES (new.id, new.content);
+      CREATE TRIGGER IF NOT EXISTS search_index_note_insert AFTER INSERT ON notes BEGIN
+        INSERT INTO search_index(id, type, content) VALUES (new.id, 'note', new.content);
       END;
 
-      CREATE TRIGGER IF NOT EXISTS notes_fts_update AFTER UPDATE OF content ON notes BEGIN
-        UPDATE notes_fts SET content = new.content WHERE id = new.id;
+      CREATE TRIGGER IF NOT EXISTS search_index_note_update AFTER UPDATE OF content ON notes BEGIN
+        UPDATE search_index SET content = new.content WHERE id = new.id AND type = 'note';
       END;
 
-      CREATE TRIGGER IF NOT EXISTS notes_fts_delete AFTER DELETE ON notes BEGIN
-        DELETE FROM notes_fts WHERE id = old.id;
+      CREATE TRIGGER IF NOT EXISTS search_index_note_delete AFTER DELETE ON notes BEGIN
+        DELETE FROM search_index WHERE id = old.id AND type = 'note';
       END;
     `
 	}

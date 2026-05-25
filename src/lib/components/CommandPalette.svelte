@@ -3,7 +3,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { searchNotes } from '$lib/repositories/notes.repo';
+	import { searchNotes, type NoteSearchResult } from '$lib/repositories/notes.repo';
 	import { noteSignals } from '$lib/services/note-signals';
 	import { getDB } from '$lib/utils/db';
 	import { goto } from '$app/navigation';
@@ -12,7 +12,7 @@
 	import { tick } from 'svelte';
 
 	let query = $state('');
-	let noteResults = $state<{ id: string; title: string }[]>([]);
+	let noteResults = $state<NoteSearchResult[]>([]);
 	let inputRef = $state<HTMLInputElement | null>(null);
 
 	let filteredCommands = $derived(
@@ -80,8 +80,16 @@
 			<Command.Group heading="Notes">
 				{#each noteResults as note (note.id)}
 					<Command.Item value={note.id} onSelect={() => selectNote(note.id)}>
-						<FileTextIcon />
-						{note.title || 'Untitled'}
+						<FileTextIcon class="shrink-0" />
+						<div class="flex min-w-0 flex-col">
+							<span>{note.title || 'Untitled'}</span>
+							{#if note.excerpt}
+								<span class="fts-excerpt truncate text-xs text-muted-foreground">
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+									{@html note.excerpt}
+								</span>
+							{/if}
+						</div>
 					</Command.Item>
 				{/each}
 			</Command.Group>

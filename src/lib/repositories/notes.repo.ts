@@ -27,7 +27,9 @@ function mapNote(raw: RawNote): Note {
 
 export async function queryNotesByTags(db: Database, tags: string[]): Promise<Note[]> {
 	if (tags.length === 0) {
-		const rows = await db.select<RawNote[]>('SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC');
+		const rows = await db.select<RawNote[]>(
+			'SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC'
+		);
 		return rows.map(mapNote);
 	}
 
@@ -107,19 +109,31 @@ export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note
 	return rows.map(mapNote);
 }
 
-export async function searchNotes(
-	db: Database,
-	query: string
-): Promise<Pick<Note, 'id' | 'title'>[]> {
+export type NoteSearchResult = { id: string; title: string; excerpt: string | null };
+
+export async function searchNotes(db: Database, query: string): Promise<NoteSearchResult[]> {
 	const q = query.trim();
-	if (q.length < 3) return [];
-	return db.select<{ id: string; title: string }[]>(
-		`SELECT n.id, n.title
-		 FROM notes_fts
-		 JOIN notes n ON n.id = notes_fts.id
-		 WHERE notes_fts MATCH $1
+	if (q.length < 1) return [];
+	if (q.length < 3) {
+		const rows = await db.select<{ id: string; title: string }[]>(
+			`SELECT id, title FROM notes
+			 WHERE LOWER(title) LIKE LOWER($1)
+			 ORDER BY updated_at DESC
+			 LIMIT 3`,
+			[`%${q}%`]
+		);
+		return rows.map((r) => ({ ...r, excerpt: null }));
+	}
+	return db.select<NoteSearchResult[]>(
+		`SELECT
+		   n.id,
+		   n.title,
+		   snippet(search_index, 2, '<mark>', '</mark>', '...', 10) AS excerpt
+		 FROM search_index
+		 JOIN notes n ON n.id = search_index.id
+		 WHERE search_index MATCH $1 AND search_index.type = 'note'
 		 ORDER BY rank
 		 LIMIT 3`,
-		[q]
+		[q + '*']
 	);
 }

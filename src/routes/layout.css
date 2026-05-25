@@ -273,3 +273,12 @@
 		@apply h-full font-sans;
 	}
 }
+
+@layer utilities {
+	.fts-excerpt mark {
+		background: color-mix(in oklch, oklch(0.88 0.18 85) 50%, transparent);
+		border-radius: 2px;
+		color: var(--on-surface);
+		font-weight: normal;
+	}
+}
