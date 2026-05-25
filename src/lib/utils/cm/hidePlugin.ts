@@ -39,7 +39,6 @@ function buildHideDecos(mode: MarkMode) {
 
 		const { state } = view;
 		const cursorPos = state.selection.main.head;
-		const cursorLine = state.doc.lineAt(cursorPos).number;
 		const ranges: Range<Decoration>[] = [];
 		const parsedRanges: [number, number][] = [];
 
@@ -58,10 +57,9 @@ function buildHideDecos(mode: MarkMode) {
 				}
 
 				if (mode === 'cursor') {
-					const onCursorLine = state.doc.lineAt(from).number === cursorLine;
 					const parent = node.node.parent;
-					const cursorInBlock = !!parent && cursorPos >= parent.from && cursorPos <= parent.to;
-					if (onCursorLine || cursorInBlock) return;
+					const cursorOnNode = !!parent && cursorPos >= parent.from && cursorPos <= parent.to;
+					if (cursorOnNode) return;
 				}
 
 				if (name === 'HeaderMark') {
@@ -92,7 +90,7 @@ function buildHideDecos(mode: MarkMode) {
 					if (lenientCovered.some(([f, t]) => from >= f && to <= t)) continue;
 					lenientCovered.push([from, to]);
 
-					if (mode === 'cursor' && state.doc.lineAt(from).number === cursorLine) continue;
+					if (mode === 'cursor' && cursorPos >= from && cursorPos <= to) continue;
 					ranges.push(hideMark.range(from, from + markLen));
 					ranges.push(hideMark.range(to - markLen, to));
 				}

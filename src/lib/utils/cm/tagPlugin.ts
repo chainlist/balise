@@ -38,7 +38,7 @@ const TAG_RE = /#[a-zA-Z0-9/]{2,}/g;
 function buildTagDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {
 		const { state } = view;
-		const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+		const cursorPos = state.selection.main.head;
 		const ranges: Range<Decoration>[] = [];
 
 		const tagColorMap = new Map(tagsService.tags.map((t) => [t.tag.toLowerCase(), t.color]));
@@ -50,7 +50,7 @@ function buildTagDecos(mode: MarkMode) {
 			while ((match = TAG_RE.exec(text)) !== null) {
 				const start = from + match.index;
 				const end = start + match[0].length;
-				if (mode === 'always' || (mode === 'cursor' && state.doc.lineAt(start).number === cursorLine)) {
+				if (mode === 'always' || (mode === 'cursor' && cursorPos >= start && cursorPos <= end)) {
 					const rawTag = match[0].slice(1);
 					const tagColor = tagColorMap.get(rawTag.toLowerCase()) ?? 'var(--primary)';
 					ranges.push(
