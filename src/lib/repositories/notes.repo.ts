@@ -106,3 +106,20 @@ export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note
 	const rows = await db.select<RawNote[]>(`SELECT * FROM notes WHERE id IN (${placeholders})`, ids);
 	return rows.map(mapNote);
 }
+
+export async function searchNotes(
+	db: Database,
+	query: string
+): Promise<Pick<Note, 'id' | 'title'>[]> {
+	const q = query.trim();
+	if (q.length < 3) return [];
+	return db.select<{ id: string; title: string }[]>(
+		`SELECT n.id, n.title
+		 FROM notes_fts
+		 JOIN notes n ON n.id = notes_fts.id
+		 WHERE notes_fts MATCH $1
+		 ORDER BY rank
+		 LIMIT 3`,
+		[q]
+	);
+}

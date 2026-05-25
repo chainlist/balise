@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { marked } from 'marked';
+
 	export type TaskStatus = 'todo' | 'done' | 'inprogress';
 
 	let {
@@ -10,6 +12,8 @@
 		text: string;
 		onToggle: () => void;
 	} = $props();
+
+	let renderedText = $derived(marked.parseInline(text) as string);
 
 	const styles: Record<TaskStatus, { bg: string; border: string; label: string }> = {
 		todo: {
@@ -66,7 +70,7 @@
 		class:line-through={status === 'done'}
 		class:opacity-60={status === 'done'}
 	>
-		{text}
+		{@html renderedText}
 	</span>
 
 

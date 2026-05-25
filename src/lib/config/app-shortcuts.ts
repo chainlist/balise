@@ -2,8 +2,28 @@ import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
 import { notesService, newNoteContent } from '$lib/services/notes.svelte';
 import { uiState } from '$lib/services/ui-state.svelte';
 import { noteSignals } from '$lib/services/note-signals';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 
 export const APP_SHORTCUTS: ShortcutDefinition[] = [
+	{
+		id: 'open-command-palette',
+		name: 'Open Command Palette',
+		description: 'Open the command palette to search notes, tags, and commands',
+		defaultBinding: '$mod+k',
+		bypassGuard: true,
+		run: () => {
+			uiState.isCommandPaletteOpen = !uiState.isCommandPaletteOpen;
+		}
+	},
+	{
+		id: 'goto-dashboard',
+		name: 'Go to Dashboard',
+		description: 'Navigate to the dashboard',
+		defaultBinding: '$mod+g',
+		bypassGuard: true,
+		run: () => goto(resolve('/dashboard'))
+	},
 	{
 		id: 'open-settings',
 		name: 'Open Settings',

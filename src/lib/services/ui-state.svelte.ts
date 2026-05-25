@@ -17,6 +17,7 @@ class UIState {
 	composedTags = $state<string[]>([]);
 	ready = $state(false);
 	isSettingsOpen = $state(false);
+	isCommandPaletteOpen = $state(false);
 	isCapturingShortcut = $state(false);
 	activeNoteId = $state<string | null>(null);
 
@@ -73,13 +74,14 @@ class UIState {
 	}
 
 	async setActiveTag(tag: string | null): Promise<void> {
-		const next = this.activeTag === tag ? null : tag;
-		this.activeTag = next;
+		if (this.activeTag === tag) return;
+
+		this.activeTag = tag;
 		this.composedTags = [];
 		await Promise.all([
-			this.#store?.set('activeTag', next),
-			notesService.load(next),
-			tagsService.loadRelated(next)
+			this.#store?.set('activeTag', tag),
+			notesService.load(tag),
+			tagsService.loadRelated(tag)
 		]);
 	}
 

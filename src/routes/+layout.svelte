@@ -8,6 +8,7 @@
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
+	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import { LoaderCircle } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 
@@ -54,5 +55,6 @@
 				{@render children()}
 			</div>
 		</div>
+		<CommandPalette />
 	{/if}
 </SidebarProvider>
