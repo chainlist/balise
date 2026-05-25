@@ -76,12 +76,9 @@
 		"@tauri-apps/plugin-store": "~2.4.3",
 		"@tauri-apps/plugin-updater": "~2.10.1",
 		"@tauri-apps/plugin-window-state": "~2.4.1",
-		"@tiptap/core": "^3.23.4",
-		"@tiptap/starter-kit": "^3.23.4",
 		"codemirror": "^6.0.2",
 		"marked": "^18.0.3",
 		"nanoid": "^5.1.11",
-		"tinykeys": "^3.1.0",
-		"tiptap-markdown": "^0.9.0"
+		"tinykeys": "^3.1.0"
 	}
 }

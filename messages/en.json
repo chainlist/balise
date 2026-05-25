@@ -117,6 +117,7 @@
 
 	"settings_about_heading": "About",
 	"settings_about_description": "App information and updates.",
+	"settings_about_thanks_heading": "Built with",
 	"settings_about_version": "Version",
 	"settings_about_updates_label": "Updates",
 	"settings_about_check_updates": "Check for updates",

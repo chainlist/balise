@@ -70,5 +70,29 @@
 				<p class="text-xs text-muted-foreground mt-1">{m.updater_restarting()}</p>
 			{/if}
 		</div>
+
+		<!-- Thanks to -->
+		<div>
+			<p class="text-sm font-medium mb-3">{m.settings_about_thanks_heading()}</p>
+			<ul class="space-y-2">
+				{#each [
+					{ name: 'Tauri', desc: 'Desktop application framework' },
+					{ name: 'SvelteKit', desc: 'Web application framework' },
+					{ name: 'Tailwind CSS', desc: 'Utility-first CSS framework' },
+					{ name: 'CodeMirror', desc: 'Extensible code editor' },
+					{ name: 'Shiki', desc: 'Syntax highlighting' },
+					{ name: 'Lucide', desc: 'Icon library' },
+					{ name: 'Paraglide', desc: 'Internationalization' },
+					{ name: 'nanoid', desc: 'Unique ID generation' },
+					{ name: 'tinykeys', desc: 'Keyboard shortcuts' },
+					{ name: 'marked', desc: 'Markdown parser' },
+				] as dep (dep.name)}
+					<li class="flex items-baseline gap-2">
+						<span class="text-sm font-medium">{dep.name}</span>
+						<span class="text-xs text-muted-foreground">{dep.desc}</span>
+					</li>
+				{/each}
+			</ul>
+		</div>
 	</div>
 </div>

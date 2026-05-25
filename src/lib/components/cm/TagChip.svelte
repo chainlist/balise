@@ -10,8 +10,6 @@
 
 	const isActive = $derived(uiState.activeTag === (tagData?.tag ?? tag));
 
-	$inspect(isActive, 'isActive');
-
 	function nav() {
 		if (navigate) {
 			uiState.setActiveTag(tagData?.tag ?? tag);
