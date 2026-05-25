@@ -2,6 +2,15 @@
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "example_message": "Guten Tag {username}",
 
+  "settings_about_heading": "Info",
+  "settings_about_description": "App-Informationen und Updates.",
+  "settings_about_version": "Version",
+  "settings_about_updates_label": "Updates",
+  "settings_about_check_updates": "Nach Updates suchen",
+  "settings_about_checking": "Wird geprüft…",
+  "settings_about_up_to_date": "Bereits aktuell.",
+  "settings_about_check_failed": "Update-Prüfung fehlgeschlagen.",
+
   "updater_available_title": "Update verfügbar",
   "updater_dismiss": "Schließen",
   "updater_action_install": "Aktualisieren & Neu starten",

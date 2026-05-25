@@ -110,6 +110,15 @@
 	"shortcut_next_note_name": "Nota siguiente",
 	"shortcut_next_note_desc": "Seleccionar la nota de abajo en la lista",
 
+	"settings_about_heading": "Acerca de",
+	"settings_about_description": "Información de la aplicación y actualizaciones.",
+	"settings_about_version": "Versión",
+	"settings_about_updates_label": "Actualizaciones",
+	"settings_about_check_updates": "Buscar actualizaciones",
+	"settings_about_checking": "Comprobando…",
+	"settings_about_up_to_date": "Ya está actualizado.",
+	"settings_about_check_failed": "Error al buscar actualizaciones.",
+
 	"updater_available_title": "Actualización disponible",
 	"updater_dismiss": "Ignorar",
 	"updater_action_install": "Actualizar y reiniciar",

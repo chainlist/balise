@@ -110,6 +110,15 @@
 	"shortcut_next_note_name": "Next Note",
 	"shortcut_next_note_desc": "Select the note below in the list",
 
+	"settings_about_heading": "About",
+	"settings_about_description": "App information and updates.",
+	"settings_about_version": "Version",
+	"settings_about_updates_label": "Updates",
+	"settings_about_check_updates": "Check for updates",
+	"settings_about_checking": "Checking…",
+	"settings_about_up_to_date": "Already up to date.",
+	"settings_about_check_failed": "Failed to check for updates.",
+
 	"updater_available_title": "Update available",
 	"updater_dismiss": "Dismiss",
 	"updater_action_install": "Update & Restart",

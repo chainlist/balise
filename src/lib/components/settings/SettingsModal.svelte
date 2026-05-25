@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Dialog } from 'bits-ui';
-	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon } from '@lucide/svelte';
+	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
 	import AppearanceSettings from './AppearanceSettings.svelte';
 	import EditorSettings from './EditorSettings.svelte';
+	import AboutSettings from './AboutSettings.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -35,6 +36,12 @@
 			label: m.settings_shortcuts_heading(),
 			icon: KeyboardIcon,
 			component: ShortcutsSettings
+		},
+		{
+			id: 'about',
+			label: m.settings_about_heading(),
+			icon: InfoIcon,
+			component: AboutSettings
 		}
 	];
 
