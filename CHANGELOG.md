@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/chainlist/balise/compare/v0.3.1...v0.3.2) (2026-05-25)
+
+
+### Bug Fixes
+
+* failing release job ([cbf298e](https://github.com/chainlist/balise/commit/cbf298e9c0190c5a5852ecbc1c6bdb6ce88caca6))
+
 ## [0.3.1](https://github.com/chainlist/balise/compare/v0.3.0...v0.3.1) (2026-05-25)
 
 
