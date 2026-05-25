@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/chainlist/balise/compare/v0.5.0...v0.6.0) (2026-05-25)
+
+
+### Features
+
+* add Checklists widget ([ae46a4c](https://github.com/chainlist/balise/commit/ae46a4cb9237146aa9e63b7ce2e47bcccb8245fa))
+* add slash command menu to editor ([4c726a5](https://github.com/chainlist/balise/commit/4c726a588a617f20e4adbd59704f24320a5926d3))
+
 ## [0.5.0](https://github.com/chainlist/balise/compare/v0.4.0...v0.5.0) (2026-05-25)
 
 
