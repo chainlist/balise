@@ -16,6 +16,7 @@
 		mdPairPlugin,
 		mdFormatPlugin,
 		mdLinkPlugin,
+		mdSlashPlugin,
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
@@ -74,6 +75,7 @@
 					mdStylePlugin,
 					mdCodePlugin,
 					mdPairPlugin,
+					mdSlashPlugin,
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
 					EditorView.updateListener.of((u) => {
