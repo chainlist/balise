@@ -1,9 +1,8 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [created]
 
 jobs:
   release:
@@ -52,10 +51,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: Balise ${{ github.ref_name }}
-          releaseBody: See the assets to download and install this version.
-          releaseDraft: true
-          prerelease: false
+          releaseId: ${{ github.event.release.id }}
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
