@@ -143,8 +143,8 @@ function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 	for (let i = 1; i <= state.doc.lines; i++) {
 		const line = state.doc.line(i);
 
-		// Cursor on this line → show raw markdown for editing
-		if (line.number === cursorLine) continue;
+		// Cursor on this line → show raw markdown for editing (cursor mode only)
+		if (mode === 'cursor' && line.number === cursorLine) continue;
 
 		const checkboxMatch = TASK_CHECKBOX_RE.exec(line.text);
 
