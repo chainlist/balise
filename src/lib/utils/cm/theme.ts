@@ -3,14 +3,13 @@ import { EditorView } from '@codemirror/view';
 export const noteEditorTheme = EditorView.theme({
 	'&': {
 		color: 'var(--foreground)',
-		background: 'transparent',
-		height: '100%'
+		background: 'transparent'
 	},
 	'&.cm-focused': { outline: 'none' },
 	'.cm-scroller': {
 		fontFamily: 'var(--font-sans)',
 		fontSize: 'var(--editor-font-size, 16px)',
-		overflow: 'auto',
+		overflow: 'visible',
 		padding: '1.5rem',
 		lineHeight: 'var(--editor-line-height, 1.75)'
 	},

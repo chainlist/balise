@@ -102,8 +102,8 @@
 	}
 </script>
 
-<div {@attach mount} class="relative flex h-full flex-col overflow-hidden">
-	<div data-editor class="mx-auto w-full max-w-xl min-w-0 flex-1 overflow-hidden"></div>
+<div {@attach mount} class="relative h-full overflow-y-auto">
+	<div data-editor class="mx-auto w-full max-w-175"></div>
 
 	<div class="absolute top-5 right-5 -translate-y-1/2">
 		<DropdownMenu.Root>
