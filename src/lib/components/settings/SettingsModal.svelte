@@ -8,13 +8,34 @@
 	import EditorSettings from './EditorSettings.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let { open = false }: { open?: boolean } = $props();
 
-	const navItems: { label: string; icon: typeof KeyboardIcon; component: Component }[] = [
-		{ label: 'Appearance', icon: PaletteIcon, component: AppearanceSettings },
-		{ label: 'Editor', icon: TypeIcon, component: EditorSettings },
-		{ label: 'Shortcuts', icon: KeyboardIcon, component: ShortcutsSettings }
+	const navItems: {
+		id: string;
+		label: string;
+		icon: typeof KeyboardIcon;
+		component: Component;
+	}[] = [
+		{
+			id: 'appearance',
+			label: m.settings_appearance_heading(),
+			icon: PaletteIcon,
+			component: AppearanceSettings
+		},
+		{
+			id: 'editor',
+			label: m.settings_editor_heading(),
+			icon: TypeIcon,
+			component: EditorSettings
+		},
+		{
+			id: 'shortcuts',
+			label: m.settings_shortcuts_heading(),
+			icon: KeyboardIcon,
+			component: ShortcutsSettings
+		}
 	];
 
 	let activeSection = $state(navItems[0]);
@@ -41,7 +62,7 @@
 				<Dialog.Title
 					class="mb-1 px-2 py-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
 				>
-					Settings
+					{m.nav_settings()}
 				</Dialog.Title>
 				{#each navItems as item (item.label)}
 					<button

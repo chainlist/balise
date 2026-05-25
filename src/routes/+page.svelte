@@ -3,6 +3,7 @@
 	import { notesService, newNoteContent, type Note } from '$lib/services/notes.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { noteSignals } from '$lib/services/note-signals';
+	import * as m from '$paraglide/messages.js';
 	import NotesSidebar from '$lib/components/notes/NotesSidebar.svelte';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 
@@ -50,7 +51,7 @@
 			{/key}
 		{:else}
 			<div class="flex flex-1 items-center justify-center">
-				<p class="text-sm text-muted-foreground">Select a note or create a new one.</p>
+				<p class="text-sm text-muted-foreground">{m.note_empty_state()}</p>
 			</div>
 		{/if}
 	</Sidebar.Inset>

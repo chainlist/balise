@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { deleteDeskFiles } from '$lib/services/desk';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let {
 		open = $bindable(false),
@@ -23,7 +24,9 @@
 			if (desk === uiState.activeDesk) {
 				const fallbackDesk = uiState.desks.find((value) => value !== desk);
 				if (!fallbackDesk) {
-					throw new Error('You must keep at least one desk.');
+					deleteDeskError = m.desk_delete_error_min();
+					isDeletingDesk = false;
+					return;
 				}
 
 				await uiState.switchDesk(fallbackDesk);
@@ -33,8 +36,8 @@
 			await uiState.removeDesk(desk);
 			deskName = null;
 			open = false;
-		} catch (error) {
-			deleteDeskError = error instanceof Error ? error.message : 'Failed to delete desk.';
+		} catch {
+			deleteDeskError = m.desk_delete_error_failed();
 		} finally {
 			isDeletingDesk = false;
 		}
@@ -50,9 +53,10 @@
 <Dialog.Root bind:open>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>Delete desk</Dialog.Title>
+			<Dialog.Title>{m.desk_delete_title()}</Dialog.Title>
 			<Dialog.Description>
-				This will permanently delete <strong>{deskName ?? 'this desk'}</strong> and all related files.
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html m.desk_delete_description({ deskName: `<strong>${deskName ?? ''}</strong>` })}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -62,14 +66,14 @@
 			{/if}
 
 			<div class="flex justify-end gap-2">
-				<Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
+				<Button type="button" variant="outline" onclick={handleCancel}>{m.action_cancel()}</Button>
 				<Button
 					type="button"
 					variant="destructive"
 					disabled={isDeletingDesk}
 					onclick={handleDeleteDeskConfirm}
 				>
-					{isDeletingDesk ? 'Deleting...' : 'Delete desk'}
+					{isDeletingDesk ? m.desk_delete_deleting() : m.desk_delete_title()}
 				</Button>
 			</div>
 		</div>

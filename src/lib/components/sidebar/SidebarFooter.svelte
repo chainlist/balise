@@ -4,6 +4,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { page } from '$app/state';
+	import * as m from '$paraglide/messages.js';
 
 	const isDashboard = $derived(page.url.pathname === '/dashboard');
 </script>
@@ -19,7 +20,7 @@
 			: 'text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground'}"
 	>
 		<LayoutDashboardIcon class="size-4" />
-		Dashboard
+		{m.nav_dashboard()}
 	</Button>
 	<Button
 		variant="ghost"
@@ -28,7 +29,7 @@
 		onclick={() => (uiState.isSettingsOpen = true)}
 	>
 		<Settings2Icon class="size-4" />
-		Settings
+		{m.nav_settings()}
 	</Button>
 </div>
 

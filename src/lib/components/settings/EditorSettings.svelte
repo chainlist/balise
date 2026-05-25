@@ -3,16 +3,17 @@
 	import type { MarkMode } from '$lib/utils/cm';
 	import { EyeIcon, EyeOffIcon, MousePointerIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
+	import * as m from '$paraglide/messages.js';
 
 	const FONT_MIN = 12;
 	const FONT_MAX = 24;
 	const LH_MIN = 1.2;
 	const LH_MAX = 2.5;
 
-	const markOptions: { value: MarkMode; label: string; icon: typeof EyeIcon }[] = [
-		{ value: 'always', label: 'Always', icon: EyeIcon },
-		{ value: 'cursor', label: 'On focused line', icon: MousePointerIcon },
-		{ value: 'never', label: 'Never', icon: EyeOffIcon }
+	const markOptions: { value: MarkMode; label: () => string; icon: typeof EyeIcon }[] = [
+		{ value: 'always', label: m.settings_marks_always, icon: EyeIcon },
+		{ value: 'cursor', label: m.settings_marks_cursor, icon: MousePointerIcon },
+		{ value: 'never', label: m.settings_marks_never, icon: EyeOffIcon }
 	];
 
 	const inputClass =
@@ -21,15 +22,15 @@
 
 <div class="flex flex-col h-full">
 	<div class="px-6 py-4 border-b">
-		<h2 class="text-base font-semibold">Editor</h2>
-		<p class="text-sm text-muted-foreground mt-0.5">Customize the writing experience.</p>
+		<h2 class="text-base font-semibold">{m.settings_editor_heading()}</h2>
+		<p class="text-sm text-muted-foreground mt-0.5">{m.settings_editor_description()}</p>
 	</div>
 
 	<div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
 		<div class="flex items-center justify-between">
 			<div class="space-y-0.5">
-				<p class="text-sm font-medium">Font size</p>
-				<p class="text-xs text-muted-foreground">Size of text in the editor.</p>
+				<p class="text-sm font-medium">{m.settings_font_size_label()}</p>
+				<p class="text-xs text-muted-foreground">{m.settings_font_size_helper()}</p>
 			</div>
 			<input
 				type="number"
@@ -47,8 +48,8 @@
 
 		<div class="flex items-center justify-between">
 			<div class="space-y-0.5">
-				<p class="text-sm font-medium">Line height</p>
-				<p class="text-xs text-muted-foreground">Spacing between lines of text.</p>
+				<p class="text-sm font-medium">{m.settings_line_height_label()}</p>
+				<p class="text-xs text-muted-foreground">{m.settings_line_height_helper()}</p>
 			</div>
 			<input
 				type="number"
@@ -66,8 +67,8 @@
 
 		<div class="space-y-3">
 			<div class="space-y-0.5">
-				<p class="text-sm font-medium">Markdown marks</p>
-				<p class="text-xs text-muted-foreground">When to show raw markdown syntax.</p>
+				<p class="text-sm font-medium">{m.settings_marks_label()}</p>
+				<p class="text-xs text-muted-foreground">{m.settings_marks_helper()}</p>
 			</div>
 			<div class="flex gap-3">
 				{#each markOptions as option (option.value)}
@@ -90,7 +91,7 @@
 							<option.icon size={18} />
 						</div>
 						<span class={cn('text-sm font-medium', isActive ? 'text-primary' : 'text-foreground')}>
-							{option.label}
+							{option.label()}
 						</span>
 
 						{#if option.value === 'always'}

@@ -10,6 +10,7 @@
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import { LoaderCircle } from '@lucide/svelte';
+	import * as m from '$paraglide/messages.js';
 	import { fade } from 'svelte/transition';
 
 	let { children } = $props();
@@ -37,7 +38,7 @@
 <SidebarProvider>
 	{#if error}
 		<div class="error">
-			<h1>Error</h1>
+			<h1>{m.error_heading()}</h1>
 			<p>{error}</p>
 		</div>
 	{:else if !ready}
@@ -45,7 +46,7 @@
 			class="absolute top-0 left-0 flex h-screen w-screen items-center justify-center gap-4"
 			out:fade={{ duration: 250 }}
 		>
-			<span>Loading...</span>
+			<span>{m.loading()}</span>
 			<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
 		</div>
 	{:else}

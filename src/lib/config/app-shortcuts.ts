@@ -4,12 +4,13 @@ import { uiState } from '$lib/services/ui-state.svelte';
 import { noteSignals } from '$lib/services/note-signals';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import * as m from '$paraglide/messages.js';
 
 export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	{
 		id: 'open-command-palette',
-		name: 'Open Command Palette',
-		description: 'Open the command palette to search notes, tags, and commands',
+		name: m.shortcut_open_command_palette_name,
+		description: m.shortcut_open_command_palette_desc,
 		defaultBinding: '$mod+k',
 		bypassGuard: true,
 		run: () => {
@@ -18,16 +19,16 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	},
 	{
 		id: 'goto-dashboard',
-		name: 'Go to Dashboard',
-		description: 'Navigate to the dashboard',
+		name: m.shortcut_goto_dashboard_name,
+		description: m.shortcut_goto_dashboard_desc,
 		defaultBinding: '$mod+g',
 		bypassGuard: true,
 		run: () => goto(resolve('/dashboard'))
 	},
 	{
 		id: 'open-settings',
-		name: 'Open Settings',
-		description: 'Open or close the settings modal',
+		name: m.shortcut_open_settings_name,
+		description: m.shortcut_open_settings_desc,
 		defaultBinding: '$mod+,',
 		bypassGuard: true,
 		run: () => {
@@ -36,8 +37,8 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	},
 	{
 		id: 'new-note',
-		name: 'New Note',
-		description: 'Create a new note in the active tag',
+		name: m.shortcut_new_note_name,
+		description: m.shortcut_new_note_desc,
 		defaultBinding: '$mod+n',
 		run: async () => {
 			const id = await notesService.create(newNoteContent(uiState.activeTag));
@@ -46,8 +47,8 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	},
 	{
 		id: 'delete-note',
-		name: 'Delete Note',
-		description: 'Delete the currently selected note',
+		name: m.shortcut_delete_note_name,
+		description: m.shortcut_delete_note_desc,
 		defaultBinding: '$mod+Delete',
 		run: () => {
 			if (uiState.activeNoteId) noteSignals.signalDeleteNote(uiState.activeNoteId);
@@ -55,8 +56,8 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	},
 	{
 		id: 'prev-note',
-		name: 'Previous Note',
-		description: 'Select the note above in the list',
+		name: m.shortcut_prev_note_name,
+		description: m.shortcut_prev_note_desc,
 		defaultBinding: 'Alt+ArrowUp',
 		run: () => {
 			const notes = notesService.notes;
@@ -66,8 +67,8 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	},
 	{
 		id: 'next-note',
-		name: 'Next Note',
-		description: 'Select the note below in the list',
+		name: m.shortcut_next_note_name,
+		description: m.shortcut_next_note_desc,
 		defaultBinding: 'Alt+ArrowDown',
 		run: () => {
 			const notes = notesService.notes;

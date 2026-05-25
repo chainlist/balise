@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { sanitizeDeskName } from '$lib/services/desk';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();
 
@@ -16,13 +17,13 @@
 
 		const rawName = newDeskName.trim();
 		if (!rawName) {
-			createDeskError = 'Please enter a desk name.';
+			createDeskError = m.desk_create_error_empty();
 			return;
 		}
 
 		const deskName = sanitizeDeskName(rawName);
 		if (uiState.desks.includes(deskName)) {
-			createDeskError = 'A desk with this name already exists.';
+			createDeskError = m.desk_create_error_exists();
 			return;
 		}
 
@@ -32,8 +33,8 @@
 			await uiState.switchDesk(deskName);
 			newDeskName = '';
 			open = false;
-		} catch (error) {
-			createDeskError = error instanceof Error ? error.message : 'Failed to create desk.';
+		} catch {
+			createDeskError = m.desk_create_error_failed();
 		} finally {
 			isCreatingDesk = false;
 		}
@@ -48,8 +49,8 @@
 <Dialog.Root bind:open>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>Create a new desk</Dialog.Title>
-			<Dialog.Description>Enter a name for your desk.</Dialog.Description>
+			<Dialog.Title>{m.desk_create_title()}</Dialog.Title>
+			<Dialog.Description>{m.desk_create_description()}</Dialog.Description>
 		</Dialog.Header>
 
 		<form
@@ -60,17 +61,17 @@
 			}}
 		>
 			<div class="flex flex-col gap-2">
-				<label class="text-sm font-medium" for="desk-name">Desk name</label>
-				<Input id="desk-name" bind:value={newDeskName} placeholder="ex: Work" autofocus />
+				<label class="text-sm font-medium" for="desk-name">{m.desk_name_label()}</label>
+				<Input id="desk-name" bind:value={newDeskName} placeholder={m.desk_name_placeholder()} autofocus />
 				{#if createDeskError}
 					<p class="text-sm text-destructive">{createDeskError}</p>
 				{/if}
 			</div>
 
 			<div class="flex justify-end gap-2">
-				<Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
+				<Button type="button" variant="outline" onclick={handleCancel}>{m.action_cancel()}</Button>
 				<Button type="submit" disabled={isCreatingDesk}>
-					{isCreatingDesk ? 'Creating...' : 'Create desk'}
+					{isCreatingDesk ? m.desk_create_creating() : m.desk_create_submit()}
 				</Button>
 			</div>
 		</form>

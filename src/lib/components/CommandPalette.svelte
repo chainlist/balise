@@ -10,6 +10,7 @@
 	import { resolve } from '$app/paths';
 	import { FileTextIcon, TagIcon, ZapIcon } from '@lucide/svelte';
 	import { tick } from 'svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let query = $state('');
 	let noteResults = $state<NoteSearchResult[]>([]);
@@ -19,8 +20,8 @@
 		(query.trim()
 			? APP_SHORTCUTS.filter(
 					(s) =>
-						s.name.toLowerCase().includes(query.toLowerCase()) ||
-						s.description.toLowerCase().includes(query.toLowerCase())
+						s.name().toLowerCase().includes(query.toLowerCase()) ||
+						s.description().toLowerCase().includes(query.toLowerCase())
 				)
 			: APP_SHORTCUTS
 		).slice(0, 3)
@@ -69,20 +70,20 @@
 	<Command.Input
 		bind:ref={inputRef}
 		class="rounded-xs"
-		placeholder="Search notes, tags, commands..."
+		placeholder={m.command_palette_placeholder()}
 		value={query}
 		oninput={(e) => handleInput(e.currentTarget.value)}
 	/>
 	<Command.List>
-		<Command.Empty>No results found.</Command.Empty>
+		<Command.Empty>{m.command_palette_no_results()}</Command.Empty>
 
 		{#if noteResults.length > 0}
-			<Command.Group heading="Notes">
+			<Command.Group heading={m.command_palette_group_notes()}>
 				{#each noteResults as note (note.id)}
 					<Command.Item value={note.id} onSelect={() => selectNote(note.id)}>
 						<FileTextIcon class="shrink-0" />
 						<div class="flex min-w-0 flex-col">
-							<span>{note.title || 'Untitled'}</span>
+							<span>{note.title || m.note_untitled()}</span>
 							{#if note.excerpt}
 								<span class="fts-excerpt truncate text-xs text-muted-foreground">
 									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -96,7 +97,7 @@
 		{/if}
 
 		{#if filteredTags.length > 0}
-			<Command.Group heading="Tags">
+			<Command.Group heading={m.command_palette_group_tags()}>
 				{#each filteredTags as tag (tag.tag)}
 					<Command.Item value={tag.tag} onSelect={() => selectTag(tag.tag)}>
 						<TagIcon />
@@ -107,11 +108,11 @@
 		{/if}
 
 		{#if filteredCommands.length > 0}
-			<Command.Group heading="Commands">
+			<Command.Group heading={m.command_palette_group_commands()}>
 				{#each filteredCommands as cmd (cmd.id)}
 					<Command.Item value={cmd.id} onSelect={() => runCommand(cmd.run)}>
 						<ZapIcon />
-						{cmd.name}
+						{cmd.name()}
 					</Command.Item>
 				{/each}
 			</Command.Group>

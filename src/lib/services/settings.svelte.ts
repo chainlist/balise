@@ -1,6 +1,9 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
 import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
+import { setLocale, locales } from '$paraglide/runtime.js';
+
+export const SUPPORTED_LOCALES = locales;
 
 class SettingsService {
 	theme = $state<Theme>('system');
@@ -8,25 +11,31 @@ class SettingsService {
 	lineHeight = $state(1.75);
 	markdownMarks = $state<MarkMode>('cursor');
 	customBindings = $state<Record<string, string>>({});
+	language = $state<'fr' | 'es' | 'en'>('en');
 
 	#store: Store | null = null;
 
 	async init(): Promise<void> {
 		this.#store = await load('settings.json', { autoSave: 100 });
 
-		const [theme, fontSize, lineHeight, markdownMarks, customBindings] = await Promise.all([
-			this.#store.get<Theme>('theme'),
-			this.#store.get<number>('fontSize'),
-			this.#store.get<number>('lineHeight'),
-			this.#store.get<MarkMode>('markdownMarks'),
-			this.#store.get<Record<string, string>>('customBindings')
-		]);
+		const [theme, fontSize, lineHeight, markdownMarks, customBindings, language] =
+			await Promise.all([
+				this.#store.get<Theme>('theme'),
+				this.#store.get<number>('fontSize'),
+				this.#store.get<number>('lineHeight'),
+				this.#store.get<MarkMode>('markdownMarks'),
+				this.#store.get<Record<string, string>>('customBindings'),
+				this.#store.get<'fr' | 'es' | 'en'>('language')
+			]);
 
 		this.theme = theme ?? 'system';
 		this.fontSize = fontSize ?? 16;
 		this.lineHeight = lineHeight ?? 1.75;
 		this.markdownMarks = markdownMarks ?? 'cursor';
 		this.customBindings = customBindings ?? {};
+		this.language = language ?? 'en';
+
+		setLocale(this.language);
 		this.#applyEditorVars();
 	}
 
@@ -55,6 +64,15 @@ class SettingsService {
 	setMarkdownMarks(value: MarkMode): void {
 		this.markdownMarks = value;
 		this.#store?.set('markdownMarks', value);
+	}
+
+	async setLanguage(lang: string): Promise<void> {
+		this.language = lang;
+		if (this.#store) {
+			await this.#store.set('language', lang);
+			await this.#store.save();
+		}
+		window.location.reload();
 	}
 
 	setBinding(id: string, binding: string): void {

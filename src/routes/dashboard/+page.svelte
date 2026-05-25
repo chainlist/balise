@@ -6,6 +6,7 @@
 	import { FileTextIcon, HashIcon, MergeIcon, TrendingUpIcon, ArrowRightIcon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import TagChip from '$lib/components/cm/TagChip.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let totalNotes = $state(0);
 
@@ -41,15 +42,15 @@
 <div class="h-full overflow-y-auto p-8">
 	<div class="mx-auto max-w-3xl space-y-6">
 		<div>
-			<h1 class="text-2xl font-semibold text-foreground">Dashboard</h1>
-			<p class="mt-1 text-sm text-muted-foreground">Overview of your notes and tags</p>
+			<h1 class="text-2xl font-semibold text-foreground">{m.dashboard_heading()}</h1>
+			<p class="mt-1 text-sm text-muted-foreground">{m.dashboard_description()}</p>
 		</div>
 
 		<!-- Stats row -->
 		<div class="grid grid-cols-2 gap-4">
 			<div class="rounded-lg border bg-card p-5">
 				<div class="flex items-center justify-between">
-					<p class="text-sm font-medium text-muted-foreground">Total Notes</p>
+					<p class="text-sm font-medium text-muted-foreground">{m.dashboard_total_notes()}</p>
 					<FileTextIcon class="size-4 text-muted-foreground" />
 				</div>
 				<p class="mt-3 text-3xl font-bold text-foreground">{totalNotes}</p>
@@ -57,7 +58,7 @@
 
 			<div class="rounded-lg border bg-card p-5">
 				<div class="flex items-center justify-between">
-					<p class="text-sm font-medium text-muted-foreground">Total Tags</p>
+					<p class="text-sm font-medium text-muted-foreground">{m.dashboard_total_tags()}</p>
 					<HashIcon class="size-4 text-muted-foreground" />
 				</div>
 				<p class="mt-3 text-3xl font-bold text-foreground">{totalTags}</p>
@@ -68,10 +69,10 @@
 		<div class="rounded-lg border bg-card p-5">
 			<div class="mb-4 flex items-center gap-2">
 				<TrendingUpIcon class="size-4 text-muted-foreground" />
-				<h2 class="text-sm font-semibold text-foreground">Top 5 Most Used Tags</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.dashboard_top_tags()}</h2>
 			</div>
 			{#if topTags.length === 0}
-				<p class="text-sm text-muted-foreground">No tags yet.</p>
+				<p class="text-sm text-muted-foreground">{m.dashboard_no_tags()}</p>
 			{:else}
 				<div class="space-y-3">
 					{#each topTags as tag (tag.tag)}
@@ -104,13 +105,13 @@
 		<div class="rounded-lg border bg-card p-5">
 			<div class="mb-1 flex items-center gap-2">
 				<MergeIcon class="size-4 text-muted-foreground" />
-				<h2 class="text-sm font-semibold text-foreground">Suggested Tag Merges</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.dashboard_merge_title()}</h2>
 			</div>
 			<p class="mb-4 text-xs text-muted-foreground">
-				Tags that look similar and might be duplicates.
+				{m.dashboard_merge_description()}
 			</p>
 			{#if mergeSuggestions.length === 0}
-				<p class="text-sm text-muted-foreground">No merge suggestions at the moment.</p>
+				<p class="text-sm text-muted-foreground">{m.dashboard_no_merges()}</p>
 			{:else}
 				<div class="space-y-2">
 					{#each mergeSuggestions as { a, b } (`${a.tag}-${b.tag}`)}
@@ -119,8 +120,8 @@
 							<ArrowRightIcon class="size-3 shrink-0 text-muted-foreground" />
 							<TagChip tag={b.tag} navigate={false} />
 							<div class="ml-auto flex items-center gap-2">
-								<span class="text-xs text-muted-foreground">{a.count + b.count} notes total</span>
-								<Button variant="outline" size="sm" disabled>Merge</Button>
+								<span class="text-xs text-muted-foreground">{m.dashboard_merge_count({ count: a.count + b.count })}</span>
+								<Button variant="outline" size="sm" disabled>{m.action_merge()}</Button>
 							</div>
 						</div>
 					{/each}

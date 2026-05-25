@@ -26,6 +26,7 @@
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon } from '@lucide/svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let { note }: { note: Note } = $props();
 
@@ -120,7 +121,7 @@
 					onclick={() => (confirmOpen = true)}
 				>
 					<Trash2Icon class="size-4" />
-					Delete
+					{m.action_delete()}
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
@@ -130,20 +131,20 @@
 <Sheet.Root bind:open={confirmOpen}>
 	<Sheet.Content side="right" class="w-full sm:max-w-md">
 		<Sheet.Header class="gap-2 border-b p-6">
-			<Sheet.Title>Delete note</Sheet.Title>
+			<Sheet.Title>{m.note_delete_title()}</Sheet.Title>
 			<Sheet.Description>
-				This will permanently delete this note. This action cannot be undone.
+				{m.note_delete_description()}
 			</Sheet.Description>
 		</Sheet.Header>
 		<div class="flex justify-end gap-2 p-6">
-			<Button type="button" variant="outline" onclick={() => (confirmOpen = false)}>Cancel</Button>
+			<Button type="button" variant="outline" onclick={() => (confirmOpen = false)}>{m.action_cancel()}</Button>
 			<Button
 				type="button"
 				variant="destructive"
 				onclick={async () => {
 					await notesService.delete(note.id);
 					confirmOpen = false;
-				}}>Delete</Button
+				}}>{m.action_delete()}</Button
 			>
 		</div>
 	</Sheet.Content>

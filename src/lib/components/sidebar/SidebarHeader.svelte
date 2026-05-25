@@ -7,6 +7,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	const sidebar = useSidebar();
 	const desks = $derived(uiState.desks);
@@ -63,7 +64,7 @@
 						}}
 					>
 						<Trash2Icon class="size-3.5" />
-						<span class="sr-only">Delete desk</span>
+						<span class="sr-only">{m.desk_delete_title()}</span>
 					</Button>
 				</DropdownMenu.Item>
 			{/each}
@@ -72,7 +73,7 @@
 				<div class="flex size-6 items-center justify-center rounded-md border">
 					<PlusIcon class="size-4" />
 				</div>
-				Add a new desk
+				{m.sidebar_add_desk()}
 			</DropdownMenu.Item>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/shadcn/sidebar/index.js';
 	import type { Note } from '$lib/services/notes.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let {
 		notes,
@@ -22,7 +23,7 @@
 		<Sidebar.GroupContent class="px-2">
 			<Sidebar.Menu class="gap-2">
 				{#if notes.length === 0}
-					<p class="px-2 py-6 text-center text-sm text-muted-foreground">No notes yet.</p>
+					<p class="px-2 py-6 text-center text-sm text-muted-foreground">{m.no_notes_yet()}</p>
 				{:else}
 					{#each notes as note (note.id)}
 						<Sidebar.MenuItem>
@@ -33,7 +34,7 @@
 							>
 								<div class="flex min-w-0 flex-col items-start gap-2">
 									<span class="w-full truncate text-sm font-semibold text-on-surface">
-										{note.title || 'Untitled'}
+										{note.title || m.note_untitled()}
 									</span>
 									<span class="text-xs text-neutral-400">
 										{intl.format(new Date(note.updated_at))}

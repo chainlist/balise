@@ -7,6 +7,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
 	import TagName from '$lib/components/TagName.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let { onCreate }: { onCreate: () => void } = $props();
 
@@ -27,7 +28,7 @@
 <Sidebar.Header class="border-b border-border pb-3">
 	<div class="flex items-center justify-between px-2">
 		<span class="text-lg font-semibold text-primary-container">
-			<TagName tag={uiState.activeTag || 'All Notes'} />
+			<TagName tag={uiState.activeTag || m.all_notes()} />
 		</span>
 
 		<div class="flex items-center">
@@ -46,7 +47,7 @@
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content class="w-(--bits-dropdown-menu-anchor-width) rounded" align="end">
 					<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
-						<Input bind:value={tagSearch} placeholder="Search tags…" class="h-7 text-xs" />
+						<Input bind:value={tagSearch} placeholder={m.search_tags_placeholder()} class="h-7 text-xs" />
 					</div>
 					<DropdownMenu.Separator />
 					<div class="max-h-60 overflow-auto">
@@ -55,7 +56,7 @@
 								<TagName {tag} />
 							</DropdownMenu.Item>
 						{:else}
-							<p class="px-3 py-2 text-center text-xs text-muted-foreground">No tags found.</p>
+							<p class="px-3 py-2 text-center text-xs text-muted-foreground">{m.no_tags_found()}</p>
 						{/each}
 					</div>
 				</DropdownMenu.Content>

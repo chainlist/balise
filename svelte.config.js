@@ -9,7 +9,10 @@ const config = {
 	kit: {
 		adapter: adapter({
 			fallback: 'index.html'
-		})
+		}),
+		alias: {
+			$paraglide: './src/paraglide'
+		}
 	}
 };
 

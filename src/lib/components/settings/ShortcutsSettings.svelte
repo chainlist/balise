@@ -4,6 +4,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
+	import * as m from '$paraglide/messages.js';
 
 	let listeningFor = $state<string | null>(null);
 	let conflictName = $state<string | null>(null);
@@ -66,7 +67,7 @@
 		);
 
 		if (conflict) {
-			conflictName = conflict.name;
+			conflictName = conflict.name();
 			return;
 		}
 
@@ -80,17 +81,17 @@
 
 <div class="flex flex-col h-full">
 	<div class="px-6 py-4 border-b">
-		<h2 class="text-base font-semibold">Shortcuts</h2>
-		<p class="text-sm text-muted-foreground mt-0.5">Click a shortcut to reassign it.</p>
+		<h2 class="text-base font-semibold">{m.settings_shortcuts_heading()}</h2>
+		<p class="text-sm text-muted-foreground mt-0.5">{m.settings_shortcuts_description()}</p>
 	</div>
 
 	<div class="flex-1 overflow-y-auto">
 		<table class="w-full">
 			<thead>
 				<tr class="border-b">
-					<th class="text-left text-xs font-medium text-muted-foreground px-6 py-2.5 w-40">Name</th>
-					<th class="text-left text-xs font-medium text-muted-foreground px-3 py-2.5">Description</th>
-					<th class="text-left text-xs font-medium text-muted-foreground px-3 py-2.5 w-44">Shortcut</th>
+					<th class="text-left text-xs font-medium text-muted-foreground px-6 py-2.5 w-40">{m.settings_shortcuts_col_name()}</th>
+					<th class="text-left text-xs font-medium text-muted-foreground px-3 py-2.5">{m.settings_shortcuts_col_description()}</th>
+					<th class="text-left text-xs font-medium text-muted-foreground px-3 py-2.5 w-44">{m.settings_shortcuts_col_shortcut()}</th>
 					<th class="w-10"></th>
 				</tr>
 			</thead>
@@ -100,8 +101,8 @@
 					{@const isListening = listeningFor === def.id}
 					{@const hasConflict = isListening && conflictName !== null}
 					<tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
-						<td class="px-6 py-3 text-sm font-medium">{def.name}</td>
-						<td class="px-3 py-3 text-sm text-muted-foreground">{def.description}</td>
+						<td class="px-6 py-3 text-sm font-medium">{def.name()}</td>
+						<td class="px-3 py-3 text-sm text-muted-foreground">{def.description()}</td>
 						<td class="px-3 py-3">
 							<button
 								onclick={() => { listeningFor = def.id; conflictName = null; }}
@@ -115,9 +116,9 @@
 								)}
 							>
 								{#if hasConflict}
-									<span class="text-xs">Used by {conflictName}</span>
+									<span class="text-xs">{m.settings_shortcuts_conflict({ conflictName: conflictName! })}</span>
 								{:else if isListening}
-									<span class="text-xs">Press shortcut…</span>
+									<span class="text-xs">{m.settings_shortcuts_listening()}</span>
 								{:else}
 									{formatBinding(binding)}
 								{/if}
@@ -127,7 +128,7 @@
 							{#if binding !== def.defaultBinding}
 								<button
 									onclick={() => shortcutsService.resetBinding(def.id)}
-									title="Reset to default"
+									title={m.settings_shortcuts_reset()}
 									class="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
 								>
 									<RotateCcwIcon size="13" />

@@ -2,8 +2,8 @@ import { settingsService } from './settings.svelte';
 
 export interface ShortcutDefinition {
 	id: string;
-	name: string;
-	description: string;
+	name: () => string;
+	description: () => string;
 	defaultBinding: string;
 	bypassGuard?: boolean;
 	run: () => void | Promise<void>;

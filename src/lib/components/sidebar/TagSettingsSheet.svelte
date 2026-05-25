@@ -5,6 +5,7 @@
 	import { Toggle } from '$lib/components/shadcn/toggle/index.js';
 	import { tagDisplayName, tagsService, type Tag } from '$lib/services/tags.svelte';
 	import { PinIcon, PinOffIcon } from '@lucide/svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let { open = $bindable(false), tag }: { open?: boolean; tag: Tag | null } = $props();
 
@@ -56,7 +57,7 @@
 			{#if tag}
 				<Dialog.Title>{tagDisplayName(tag)}</Dialog.Title>
 			{/if}
-			<Dialog.Description>Customise how this tag appears.</Dialog.Description>
+			<Dialog.Description>{m.tag_settings_description()}</Dialog.Description>
 		</Dialog.Header>
 
 		<form
@@ -67,12 +68,12 @@
 			}}
 		>
 			<div class="space-y-2">
-				<p class="text-xs font-medium text-muted-foreground">Tag</p>
+				<p class="text-xs font-medium text-muted-foreground">{m.tag_label()}</p>
 				<p class="font-mono text-sm">#{tag?.tag}</p>
 			</div>
 
 			<div class="space-y-2">
-				<label class="text-sm font-medium" for="display-name">Display name</label>
+				<label class="text-sm font-medium" for="display-name">{m.tag_display_name_label()}</label>
 				<Input
 					id="display-name"
 					class="rounded"
@@ -81,11 +82,11 @@
 					placeholder={tag?.tag ?? ''}
 					autofocus
 				/>
-				<p class="text-xs text-muted-foreground">Leave empty to use the tag name as-is.</p>
+				<p class="text-xs text-muted-foreground">{m.tag_display_name_helper()}</p>
 			</div>
 
 			<div class="space-y-2">
-				<label class="text-sm font-medium" for="tag-color">Color</label>
+				<label class="text-sm font-medium" for="tag-color">{m.tag_color_label()}</label>
 				<div class="flex items-center gap-3">
 					<input
 						id="tag-color"
@@ -99,7 +100,7 @@
 			</div>
 
 			<div class="space-y-2">
-				<p class="text-sm font-medium">Pin to sidebar</p>
+				<p class="text-sm font-medium">{m.tag_pin_label()}</p>
 				<Toggle
 					aria-label="Toggle bookmark"
 					pressed={pinned}
@@ -113,13 +114,13 @@
 					{:else}
 						<PinOffIcon />
 					{/if}
-					Pin this tag
+					{m.tag_pin_toggle()}
 				</Toggle>
 			</div>
 
 			<div class="flex justify-end gap-2">
-				<Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
-				<Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+				<Button type="button" variant="outline" onclick={handleCancel}>{m.action_cancel()}</Button>
+				<Button type="submit" disabled={saving}>{saving ? m.action_saving() : m.action_save()}</Button>
 			</div>
 		</form>
 	</Dialog.Content>
