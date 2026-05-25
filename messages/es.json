@@ -108,5 +108,12 @@
 	"shortcut_prev_note_name": "Nota anterior",
 	"shortcut_prev_note_desc": "Seleccionar la nota de arriba en la lista",
 	"shortcut_next_note_name": "Nota siguiente",
-	"shortcut_next_note_desc": "Seleccionar la nota de abajo en la lista"
+	"shortcut_next_note_desc": "Seleccionar la nota de abajo en la lista",
+
+	"updater_available_title": "Actualización disponible",
+	"updater_dismiss": "Ignorar",
+	"updater_action_install": "Actualizar y reiniciar",
+	"updater_downloading": "Descargando actualización…",
+	"updater_installed": "Actualización instalada",
+	"updater_restarting": "Reiniciando…"
 }

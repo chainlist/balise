@@ -108,5 +108,12 @@
 	"shortcut_prev_note_name": "Note précédente",
 	"shortcut_prev_note_desc": "Sélectionner la note au-dessus dans la liste",
 	"shortcut_next_note_name": "Note suivante",
-	"shortcut_next_note_desc": "Sélectionner la note en-dessous dans la liste"
+	"shortcut_next_note_desc": "Sélectionner la note en-dessous dans la liste",
+
+	"updater_available_title": "Mise à jour disponible",
+	"updater_dismiss": "Ignorer",
+	"updater_action_install": "Mettre à jour et redémarrer",
+	"updater_downloading": "Téléchargement de la mise à jour…",
+	"updater_installed": "Mise à jour installée",
+	"updater_restarting": "Redémarrage…"
 }

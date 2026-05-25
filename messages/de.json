@@ -1,4 +1,11 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "example_message": "Guten Tag {username}"
+  "example_message": "Guten Tag {username}",
+
+  "updater_available_title": "Update verfügbar",
+  "updater_dismiss": "Schließen",
+  "updater_action_install": "Aktualisieren & Neu starten",
+  "updater_downloading": "Update wird heruntergeladen…",
+  "updater_installed": "Update installiert",
+  "updater_restarting": "Neustart…"
 }

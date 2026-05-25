@@ -108,5 +108,12 @@
 	"shortcut_prev_note_name": "Previous Note",
 	"shortcut_prev_note_desc": "Select the note above in the list",
 	"shortcut_next_note_name": "Next Note",
-	"shortcut_next_note_desc": "Select the note below in the list"
+	"shortcut_next_note_desc": "Select the note below in the list",
+
+	"updater_available_title": "Update available",
+	"updater_dismiss": "Dismiss",
+	"updater_action_install": "Update & Restart",
+	"updater_downloading": "Downloading update…",
+	"updater_installed": "Update installed",
+	"updater_restarting": "Restarting…"
 }
