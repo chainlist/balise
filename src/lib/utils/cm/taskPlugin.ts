@@ -1,26 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { StateField } from '@codemirror/state';
+import { StateField, Prec } from '@codemirror/state';
 import type { EditorState, Extension } from '@codemirror/state';
 import type { Range } from '@codemirror/state';
 import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { mount, unmount } from 'svelte';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
+import Checkbox from '$lib/components/cm/Checkbox.svelte';
 import type { MarkMode } from './shared';
 
-// Checkbox syntax: "- [ ]", "- [x]", "- [~]"
-// Group 1: marker char, Group 2: task text
-const TASK_CHECKBOX_RE = /^[ \t]*- \[([xX~]?)\] (.+)$/;
+// Checkbox syntax: "- [ ]" (unchecked) or "- [x]" (checked)
+// Group 1: exactly one char — space for unchecked, x/X for checked. Group 2: task text
+const TASK_CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.+)$/;
 
 // Hashtag syntax: a line containing #todo / #done / #inprogress
 const TASK_TAG_RE = /#(todo|done|inprogress)\b/i;
 const TASK_TAG_STRIP_RE = /#(todo|done|inprogress)\b\s*/gi;
-
-function checkboxMarkerToStatus(marker: string): TaskStatus {
-	if (marker === 'x' || marker === 'X') return 'done';
-	if (marker === '~') return 'inprogress';
-	return 'todo';
-}
 
 function tagToStatus(tag: string): TaskStatus {
 	const lower = tag.toLowerCase();
@@ -90,6 +85,55 @@ class TaskWidget extends WidgetType {
 	}
 }
 
+class CheckboxWidget extends WidgetType {
+	constructor(
+		readonly checked: boolean,
+		readonly markerFrom: number,
+		readonly markerTo: number
+	) {
+		super();
+	}
+
+	eq(other: CheckboxWidget) {
+		return (
+			other.checked === this.checked &&
+			other.markerFrom === this.markerFrom &&
+			other.markerTo === this.markerTo
+		);
+	}
+
+	toDOM(view: EditorView): HTMLElement {
+		const span = document.createElement('span');
+		// Stop mousedown from reaching CM so the cursor doesn't move to this line
+		// before onclick fires — if CM repositions on mousedown the widget is destroyed
+		// and Chrome won't fire click on a detached node.
+		span.addEventListener('mousedown', (e) => e.stopPropagation());
+
+		const nextInsert = this.checked ? '[ ]' : '[x]';
+		const instance = mount(Checkbox, {
+			target: span,
+			props: {
+				checked: this.checked,
+				onToggle: () =>
+					view.dispatch({
+						changes: { from: this.markerFrom, to: this.markerTo, insert: nextInsert }
+					})
+			}
+		});
+		(span as any)._sv = instance;
+		return span;
+	}
+
+	destroy(dom: HTMLElement) {
+		const instance = (dom as any)._sv;
+		if (instance) unmount(instance);
+	}
+
+	ignoreEvent() {
+		return true;
+	}
+}
+
 function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 	if (mode === 'always') return Decoration.none;
 
@@ -106,19 +150,27 @@ function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 
 		if (checkboxMatch) {
 			// --- Checkbox syntax: "- [ ] text" ---
-			const status = checkboxMarkerToStatus(checkboxMatch[1]);
-			const taskText = checkboxMatch[2];
+			const checked = checkboxMatch[1] !== ' ';
 			const bracketOffset = line.text.indexOf('[');
 			const markerFrom = line.from + bracketOffset;
-			const markerTo = markerFrom + 3; // "[ ]" / "[x]" / "[~]" are always 3 chars
-			const cycleCheckbox: Record<TaskStatus, string> = { todo: '[~]', inprogress: '[x]', done: '[ ]' };
-			const nextInsert = cycleCheckbox[status];
+			const markerTo = markerFrom + 3; // "[ ]" / "[x]" are always 3 chars
+			const textStart = markerTo + 1; // skip the space after "]"
 
+			// Replace only the "- [ ] " prefix with the checkbox button
 			ranges.push(
 				Decoration.replace({
-					widget: new TaskWidget(status, taskText, markerFrom, markerTo, nextInsert)
-				}).range(line.from, line.to)
+					widget: new CheckboxWidget(checked, markerFrom, markerTo)
+				}).range(line.from, textStart)
 			);
+
+			// Strike through the text content when checked
+			if (checked) {
+				ranges.push(
+					Decoration.mark({
+						attributes: { style: 'opacity:0.6;text-decoration:line-through' }
+					}).range(textStart, line.to)
+				);
+			}
 		} else {
 			// --- Hashtag syntax: any line containing #todo / #done / #inprogress ---
 			const tagMatch = TASK_TAG_RE.exec(line.text);
@@ -159,5 +211,5 @@ function buildTaskStateField(mode: MarkMode) {
 }
 
 export function mdTaskPlugin(mode: MarkMode): Extension {
-	return buildTaskStateField(mode);
+	return Prec.high(buildTaskStateField(mode));
 }
