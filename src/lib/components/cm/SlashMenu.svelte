@@ -169,13 +169,13 @@
 {#if filtered.length > 0}
 	<div
 		role="menu"
-		class="fixed z-50 min-w-48 overflow-hidden rounded-3xl border bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
+		class="fixed z-50 min-w-48 overflow-hidden rounded border bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
 		style="left: {x}px; top: {y}px;"
 	>
 		{#each filtered as action, i (action.id)}
 			<button
 				role="menuitem"
-				class="relative flex w-full cursor-default items-center gap-2.5 rounded-2xl px-3 py-2 text-left text-sm font-medium outline-none select-none hover:bg-accent hover:text-accent-foreground"
+				class="relative flex w-full cursor-default items-center gap-2.5 rounded px-3 py-2 text-left text-sm font-medium outline-none select-none hover:bg-accent hover:text-accent-foreground"
 				class:bg-accent={i === selectedIndex}
 				class:text-accent-foreground={i === selectedIndex}
 				onmouseenter={() => {

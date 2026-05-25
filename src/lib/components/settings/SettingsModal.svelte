@@ -77,7 +77,7 @@
 						class={cn(
 							'flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
 							activeSection.component === item.component
-								? 'bg-primary/10 font-medium text-primary'
+								? 'bg-sidebar-accent font-medium text-on-surface'
 								: 'text-muted-foreground hover:bg-muted hover:text-foreground'
 						)}
 					>

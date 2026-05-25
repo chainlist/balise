@@ -72,6 +72,6 @@
 	@reference "../../../routes/layout.css";
 
 	.active {
-		@apply bg-blue-100 px-2;
+		@apply bg-sidebar-accent px-2;
 	}
 </style>

@@ -1,7 +1,15 @@
 import { EditorView } from '@codemirror/view';
 import { EditorSelection } from '@codemirror/state';
 
-const PAIRS: Record<string, string> = { '*': '*', _: '_', '(': ')', '[': ']' };
+const PAIRS: Record<string, string> = {
+	'*': '*',
+	_: '_',
+	'(': ')',
+	'[': ']',
+	'{': '}',
+	'"': '"',
+	"'": "'"
+};
 
 export const mdPairPlugin = EditorView.inputHandler.of((view, _from, _to, text) => {
 	const close = PAIRS[text];

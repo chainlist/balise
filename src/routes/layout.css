@@ -215,11 +215,11 @@
 	--color-input: var(--outline-variant);
 	--color-ring: var(--primary);
 
-	--color-sidebar: var(--color-primary-100);
+	--color-sidebar: var(--surface-container-low);
 	--color-sidebar-foreground: var(--on-surface);
 	--color-sidebar-primary: var(--primary);
 	--color-sidebar-primary-foreground: var(--on-primary);
-	--color-sidebar-accent: var(--surface-dim);
+	--color-sidebar-accent: color-mix(in oklab, var(--primary) 10%, transparent);
 	--color-sidebar-accent-foreground: var(--on-surface);
 	--color-sidebar-border: var(--outline-variant);
 	--color-sidebar-ring: var(--primary);
