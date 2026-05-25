@@ -27,7 +27,7 @@
 
 <Sidebar.Header class="border-b border-border pb-3">
 	<div class="flex items-center justify-between px-2">
-		<span class="text-lg font-semibold text-primary-container">
+		<span class="text-lg font-semibold text-on-primary-container">
 			<TagName tag={uiState.activeTag || m.all_notes()} />
 		</span>
 
@@ -47,7 +47,11 @@
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content class="w-(--bits-dropdown-menu-anchor-width) rounded" align="end">
 					<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
-						<Input bind:value={tagSearch} placeholder={m.search_tags_placeholder()} class="h-7 text-xs" />
+						<Input
+							bind:value={tagSearch}
+							placeholder={m.search_tags_placeholder()}
+							class="h-7 text-xs"
+						/>
 					</div>
 					<DropdownMenu.Separator />
 					<div class="max-h-60 overflow-auto">

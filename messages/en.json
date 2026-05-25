@@ -50,7 +50,12 @@
 	"tag_pin_label": "Pin to sidebar",
 	"tag_pin_toggle": "Pin this tag",
 
+	"nav_browse": "Browse",
 	"nav_dashboard": "Dashboard",
+	"nav_all_notes": "All Notes",
+	"nav_journaling": "Journaling",
+	"nav_tasks": "Tasks",
+	"nav_tags": "Tags",
 	"nav_settings": "Settings",
 
 	"settings_appearance_heading": "Appearance",

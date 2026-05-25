@@ -41,5 +41,12 @@
   "slash_code_label": "Codeblock",
   "slash_code_desc": "Eingezäunter Codeblock",
   "slash_divider_label": "Trennlinie",
-  "slash_divider_desc": "Horizontaler Trenner"
+  "slash_divider_desc": "Horizontaler Trenner",
+
+  "nav_browse": "Durchsuchen",
+  "nav_dashboard": "Dashboard",
+  "nav_all_notes": "Alle Notizen",
+  "nav_journaling": "Journaling",
+  "nav_tasks": "Aufgaben",
+  "nav_tags": "Tags"
 }

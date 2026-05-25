@@ -50,7 +50,12 @@
 	"tag_pin_label": "Fijar en la barra lateral",
 	"tag_pin_toggle": "Fijar esta etiqueta",
 
+	"nav_browse": "Explorar",
 	"nav_dashboard": "Panel",
+	"nav_all_notes": "Todas las notas",
+	"nav_journaling": "Diario",
+	"nav_tasks": "Tareas",
+	"nav_tags": "Tags",
 	"nav_settings": "Ajustes",
 
 	"settings_appearance_heading": "Apariencia",

@@ -50,7 +50,12 @@
 	"tag_pin_label": "Épingler à la barre latérale",
 	"tag_pin_toggle": "Épingler ce tag",
 
+	"nav_browse": "Parcourir",
 	"nav_dashboard": "Tableau de bord",
+	"nav_all_notes": "Toutes les notes",
+	"nav_journaling": "Journal",
+	"nav_tasks": "Tâches",
+	"nav_tags": "Tags",
 	"nav_settings": "Paramètres",
 
 	"settings_appearance_heading": "Apparence",
