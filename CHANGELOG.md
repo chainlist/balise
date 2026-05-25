@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/chainlist/balise/compare/v0.4.0...v0.5.0) (2026-05-25)
+
+
+### Features
+
+* add manual auto update check ([7283a32](https://github.com/chainlist/balise/commit/7283a32c39e0037ae109fa5d45a15e9a6d3f662e))
+
 ## [0.4.0](https://github.com/chainlist/balise/compare/v0.3.2...v0.4.0) (2026-05-25)
 
 
