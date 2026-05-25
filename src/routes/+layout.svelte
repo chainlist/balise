@@ -9,6 +9,7 @@
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import UpdateNotifier from '$lib/components/UpdateNotifier.svelte';
 	import { LoaderCircle } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import { fade } from 'svelte/transition';
@@ -57,5 +58,6 @@
 			</div>
 		</div>
 		<CommandPalette />
+		<UpdateNotifier />
 	{/if}
 </SidebarProvider>
