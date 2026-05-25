@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/chainlist/balise/compare/v0.6.1...v0.7.0) (2026-05-25)
+
+
+### Features
+
+* tidy sidebar + add groups ([c5ab71d](https://github.com/chainlist/balise/commit/c5ab71dc421654cd0696cdcf82be540150183c7c))
+
+
+### Bug Fixes
+
+* dark mode ([4d54e64](https://github.com/chainlist/balise/commit/4d54e645eb73548951c469fb92e1779c333cfcab))
+* notes not syncing from FS correctly ([5a639bb](https://github.com/chainlist/balise/commit/5a639bbf3c0a4efc517fad17edeaec759d7c858a))
+* scroller not taking full editor width ([ebaf1a7](https://github.com/chainlist/balise/commit/ebaf1a7063d8d4cb85061f61f1c05394b0b594f5))
+
 ## [0.6.1](https://github.com/chainlist/balise/compare/v0.6.0...v0.6.1) (2026-05-25)
 
 
