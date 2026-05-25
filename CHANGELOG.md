@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/chainlist/balise/compare/v0.3.0...v0.3.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* use PAT in release-please to allow triggering release workflow ([54e2980](https://github.com/chainlist/balise/commit/54e2980873199fbbf863e05584bed69f5d7b2eff))
+
 ## [0.3.0](https://github.com/chainlist/balise/compare/v0.2.0...v0.3.0) (2026-05-25)
 
 
