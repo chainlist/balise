@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/chainlist/balise/compare/v0.6.0...v0.6.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* checkbox mark shown even with markMode setting set to ([8534bc5](https://github.com/chainlist/balise/commit/8534bc5de7433ba7158236632fb6e2d65757487e))
+
 ## [0.6.0](https://github.com/chainlist/balise/compare/v0.5.0...v0.6.0) (2026-05-25)
 
 
