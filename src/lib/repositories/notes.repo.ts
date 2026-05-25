@@ -72,6 +72,31 @@ export async function insertNote(db: Database, id: string, content: string): Pro
 	]);
 }
 
+export async function insertNoteWithMeta(
+	db: Database,
+	note: {
+		id: string;
+		content: string;
+		pinned: boolean;
+		archived: boolean;
+		created_at: string;
+		updated_at: string;
+	}
+): Promise<void> {
+	await db.execute(
+		'INSERT INTO notes (id, content, title, pinned, archived, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+		[
+			note.id,
+			note.content,
+			extractTitle(note.content),
+			note.pinned ? 1 : 0,
+			note.archived ? 1 : 0,
+			note.created_at,
+			note.updated_at
+		]
+	);
+}
+
 export async function updateNoteContent(db: Database, id: string, content: string): Promise<void> {
 	await db.execute(
 		"UPDATE notes SET content = $1, title = $2, updated_at = datetime('now') WHERE id = $3",

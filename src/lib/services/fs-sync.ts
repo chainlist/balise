@@ -12,7 +12,8 @@ import { tagsService } from '$lib/services/tags.svelte';
 import {
 	queryAllNotesMeta,
 	queryNotesByIds,
-	updateNoteContent
+	updateNoteContent,
+	insertNoteWithMeta
 } from '$lib/repositories/notes.repo';
 import type { Note } from '$lib/repositories/notes.repo';
 
@@ -94,8 +95,9 @@ class FsSyncService {
 		const dbMap = new Map(dbNotes.map((n) => [n.id, n.updated_at]));
 		const syncedIds = new Set<string>();
 		const filesToImport: { id: string; content: string }[] = [];
+		const filesToCreate: { meta: NoteMeta; content: string }[] = [];
 
-		// Detect externally edited files (mtime > DB updated_at) → FS → DB
+		// Detect externally edited or new files → FS → DB
 		await Promise.all(
 			entries
 				.filter((e) => e.name.endsWith('.md'))
@@ -113,13 +115,24 @@ class FsSyncService {
 					syncedIds.add(meta.id);
 
 					const dbUpdatedAt = dbMap.get(meta.id);
-					if (!dbUpdatedAt || !fileStat.mtime) return;
+					if (!dbUpdatedAt) {
+						filesToCreate.push({ meta, content });
+						return;
+					}
+
+					if (!fileStat.mtime) return;
 
 					if (fileStat.mtime.getTime() > new Date(dbUpdatedAt).getTime()) {
 						filesToImport.push({ id: meta.id, content });
 					}
 				})
 		);
+
+		// Insert FS-only notes into DB, then sync tags
+		if (filesToCreate.length > 0) {
+			await Promise.all(filesToCreate.map(({ meta, content }) => insertNoteWithMeta(db, { ...meta, content })));
+			await Promise.all(filesToCreate.map(({ meta, content }) => tagsService.syncNoteTags(meta.id, content)));
+		}
 
 		// Import external edits into DB and sync tags
 		if (filesToImport.length > 0) {
