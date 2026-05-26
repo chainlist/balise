@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/chainlist/balise/compare/v0.7.0...v0.8.0) (2026-05-26)
+
+
+### Features
+
+* added built with section in About settings ([ae1bde7](https://github.com/chainlist/balise/commit/ae1bde7be0e2be1e748919d2da7d2dde9616c7a5))
+* Added Wizzard on first launch ([a411089](https://github.com/chainlist/balise/commit/a411089faf69378ff701a68b2b8fb12449ffcfcd))
+
 ## [0.7.0](https://github.com/chainlist/balise/compare/v0.6.1...v0.7.0) (2026-05-25)
 
 
