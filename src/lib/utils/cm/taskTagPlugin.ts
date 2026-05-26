@@ -3,7 +3,7 @@ import type { EditorState, Extension, Range } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
-import { SvelteWidget, isRevealed, type MarkMode } from './shared';
+import { SvelteWidget, type MarkMode } from './shared';
 
 const TASK_TAG_RE = /#(todo|done|inprogress)\b/i;
 const TASK_TAG_STRIP_RE = /#(todo|done|inprogress)\b\s*/gi;
@@ -26,6 +26,7 @@ type TaskProps = { status: TaskStatus; text: string; onToggle: () => void };
 class TaskWidget extends SvelteWidget<TaskProps> {
 	protected component = TaskCard;
 	protected override tagName = 'div' as const;
+	protected override ignoreEvents = false;
 	constructor(
 		readonly status: TaskStatus,
 		readonly text: string,
@@ -81,7 +82,9 @@ function buildTaskTagDecos(mode: MarkMode, state: EditorState): DecorationSet {
 
 	for (let i = 1; i <= state.doc.lines; i++) {
 		const line = state.doc.line(i);
-		if (isRevealed(mode, line.number, cursorLine)) continue;
+		// Always reveal on the cursor line so the raw markdown is editable
+		// even in 'never' mode — button clicks are guarded by stopPropagation.
+		if (line.number === cursorLine) continue;
 
 		const match = TASK_TAG_RE.exec(line.text);
 		if (!match) continue;
