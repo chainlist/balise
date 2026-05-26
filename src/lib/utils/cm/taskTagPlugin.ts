@@ -3,7 +3,7 @@ import type { EditorState, Extension, Range } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
-import { SvelteWidget, type MarkMode } from './shared';
+import { SvelteWidget, isRevealed, type MarkMode } from './shared';
 
 const TASK_TAG_RE = /#(todo|done|inprogress)\b/i;
 const TASK_TAG_STRIP_RE = /#(todo|done|inprogress)\b\s*/gi;
@@ -81,7 +81,7 @@ function buildTaskTagDecos(mode: MarkMode, state: EditorState): DecorationSet {
 
 	for (let i = 1; i <= state.doc.lines; i++) {
 		const line = state.doc.line(i);
-		if (mode === 'cursor' && line.number === cursorLine) continue;
+		if (isRevealed(mode, line.number, cursorLine)) continue;
 
 		const match = TASK_TAG_RE.exec(line.text);
 		if (!match) continue;

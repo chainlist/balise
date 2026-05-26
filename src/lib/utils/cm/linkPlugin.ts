@@ -3,7 +3,7 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import LinkChip from '$lib/components/cm/LinkChip.svelte';
-import { makePlugin, SvelteWidget, type MarkMode } from './shared';
+import { makePlugin, SvelteWidget, isRevealed, type MarkMode } from './shared';
 
 class LinkWidget extends SvelteWidget<{ href: string; label: string }> {
 	protected component = LinkChip;
@@ -37,7 +37,7 @@ function buildLinkDecos(mode: MarkMode) {
 				enter(node) {
 					const { from, to, name } = node;
 					if (name !== 'Link') return;
-					if (mode === 'always' || (mode === 'cursor' && state.doc.lineAt(from).number === cursorLine)) return false;
+					if (isRevealed(mode, state.doc.lineAt(from).number, cursorLine)) return false;
 					let href = '';
 					let urlFrom = -1;
 					for (let child = node.node.firstChild; child; child = child.nextSibling) {
@@ -64,7 +64,7 @@ function buildLinkDecos(mode: MarkMode) {
 			while ((match = BARE_URL_RE.exec(text)) !== null) {
 				const start = from + match.index;
 				const end = start + match[0].length;
-				if (mode === 'always' || (mode === 'cursor' && state.doc.lineAt(start).number === cursorLine)) continue;
+				if (isRevealed(mode, state.doc.lineAt(start).number, cursorLine)) continue;
 
 				let skip = false;
 				for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {

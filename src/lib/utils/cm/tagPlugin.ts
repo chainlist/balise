@@ -4,7 +4,7 @@ import type { Range } from '@codemirror/state';
 import TagChip from '$lib/components/cm/TagChip.svelte';
 import { tagsService } from '$lib/services/tags.svelte';
 import { parseAllHashtags } from '$lib/utils/tag-parser';
-import { makePlugin, SvelteWidget, type MarkMode } from './shared';
+import { makePlugin, SvelteWidget, isMarkRevealed, type MarkMode } from './shared';
 
 class TagWidget extends SvelteWidget<{ tag: string; navigate: boolean }> {
 	protected component = TagChip;
@@ -32,7 +32,7 @@ function buildTagDecos(mode: MarkMode) {
 			for (const m of parseAllHashtags(text)) {
 				const start = from + m.index;
 				const end = start + m.length;
-				if (mode === 'always' || (mode === 'cursor' && cursorPos >= start && cursorPos <= end)) {
+				if (isMarkRevealed(mode, start, end, cursorPos)) {
 					const tagColor = tagColorMap.get(m.name.toLowerCase()) ?? 'var(--primary)';
 					ranges.push(
 						Decoration.mark({

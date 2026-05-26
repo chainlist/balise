@@ -7,6 +7,30 @@ export type MarkMode = 'always' | 'cursor' | 'never';
 
 export const hideMark = Decoration.replace({});
 
+// Should the raw markdown be visible (mark shown / widget skipped)?
+// Line-based rule: cursor anywhere on the element's line reveals it. Used by
+// link, tag, highlight, checkbox, taskTag — all inline/block widgets that
+// occupy whole tokens or whole lines.
+export function isRevealed(mode: MarkMode, line: number, cursorLine: number): boolean {
+	if (mode === 'always') return true;
+	if (mode === 'never') return false;
+	return line === cursorLine;
+}
+
+// Token-based rule for emphasis marks: cursor must be within the parent
+// node's bounds (the wrapping Emphasis / StrongEmphasis / etc.). Only used
+// by hidePlugin where revealing all marks on a line would be visually noisy.
+export function isMarkRevealed(
+	mode: MarkMode,
+	parentFrom: number,
+	parentTo: number,
+	cursorPos: number
+): boolean {
+	if (mode === 'always') return true;
+	if (mode === 'never') return false;
+	return cursorPos >= parentFrom && cursorPos <= parentTo;
+}
+
 // Lenient emphasis patterns: match even when the parser rejects them (e.g. trailing spaces).
 // Bold must come before italic to avoid partial matches inside ** delimiters.
 // [regex, cssClass, markLength]

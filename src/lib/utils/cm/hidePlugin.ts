@@ -2,7 +2,14 @@ import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { makePlugin, hideMark, LENIENT_EMPHASIS, dedupeOverlapping, type MarkMode } from './shared';
+import {
+	makePlugin,
+	hideMark,
+	LENIENT_EMPHASIS,
+	dedupeOverlapping,
+	isMarkRevealed,
+	type MarkMode
+} from './shared';
 
 const PARSED_EMPHASIS = new Set(['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode']);
 
@@ -56,11 +63,8 @@ function buildHideDecos(mode: MarkMode) {
 					return;
 				}
 
-				if (mode === 'cursor') {
-					const parent = node.node.parent;
-					const cursorOnNode = !!parent && cursorPos >= parent.from && cursorPos <= parent.to;
-					if (cursorOnNode) return;
-				}
+				const parent = node.node.parent;
+				if (parent && isMarkRevealed(mode, parent.from, parent.to, cursorPos)) return;
 
 				if (name === 'HeaderMark') {
 					const lineEnd = state.doc.lineAt(from).to;
@@ -90,7 +94,7 @@ function buildHideDecos(mode: MarkMode) {
 					if (lenientCovered.some(([f, t]) => from >= f && to <= t)) continue;
 					lenientCovered.push([from, to]);
 
-					if (mode === 'cursor' && cursorPos >= from && cursorPos <= to) continue;
+					if (isMarkRevealed(mode, from, to, cursorPos)) continue;
 					ranges.push(hideMark.range(from, from + markLen));
 					ranges.push(hideMark.range(to - markLen, to));
 				}

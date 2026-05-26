@@ -1,7 +1,7 @@
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
-import { makePlugin, hideMark, type MarkMode } from './shared';
+import { makePlugin, hideMark, isRevealed, type MarkMode } from './shared';
 
 const HIGHLIGHT_RE = /=([^=\n]+)=/g;
 
@@ -21,7 +21,7 @@ function buildHighlightDecos(mode: MarkMode) {
 				const innerFrom = from + 1;
 				const innerTo = to - 1;
 
-				if (mode === 'always' || (mode === 'cursor' && state.doc.lineAt(from).number === cursorLine)) {
+				if (isRevealed(mode, state.doc.lineAt(from).number, cursorLine)) {
 					ranges.push(Decoration.mark({ class: 'cm-md-highlight' }).range(from, to));
 				} else {
 					ranges.push(hideMark.range(from, innerFrom));

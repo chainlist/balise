@@ -3,7 +3,7 @@ import type { EditorState, Extension, Range } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import Checkbox from '$lib/components/cm/Checkbox.svelte';
-import { SvelteWidget, type MarkMode } from './shared';
+import { SvelteWidget, isRevealed, type MarkMode } from './shared';
 
 // "- [ ]" (unchecked) or "- [x]" (checked) at start of line
 const CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.+)$/;
@@ -55,7 +55,7 @@ function buildCheckboxDecos(mode: MarkMode, state: EditorState): DecorationSet {
 
 	for (let i = 1; i <= state.doc.lines; i++) {
 		const line = state.doc.line(i);
-		if (mode === 'cursor' && line.number === cursorLine) continue;
+		if (isRevealed(mode, line.number, cursorLine)) continue;
 
 		const match = CHECKBOX_RE.exec(line.text);
 		if (!match) continue;
