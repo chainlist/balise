@@ -5,6 +5,7 @@ import type { Range } from '@codemirror/state';
 import { mount, unmount } from 'svelte';
 import TagChip from '$lib/components/cm/TagChip.svelte';
 import { tagsService } from '$lib/services/tags.svelte';
+import { parseAllHashtags } from '$lib/utils/tag-parser';
 import { makePlugin, type MarkMode } from './shared';
 
 class TagWidget extends WidgetType {
@@ -33,8 +34,6 @@ class TagWidget extends WidgetType {
 	}
 }
 
-const TAG_RE = /#[a-zA-Z0-9/]{2,}/g;
-
 function buildTagDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {
 		const { state } = view;
@@ -44,15 +43,12 @@ function buildTagDecos(mode: MarkMode) {
 		const tagColorMap = new Map(tagsService.tags.map((t) => [t.tag.toLowerCase(), t.color]));
 
 		for (const { from, to } of view.visibleRanges) {
-			TAG_RE.lastIndex = 0;
 			const text = state.doc.sliceString(from, to);
-			let match: RegExpExecArray | null;
-			while ((match = TAG_RE.exec(text)) !== null) {
-				const start = from + match.index;
-				const end = start + match[0].length;
+			for (const m of parseAllHashtags(text)) {
+				const start = from + m.index;
+				const end = start + m.length;
 				if (mode === 'always' || (mode === 'cursor' && cursorPos >= start && cursorPos <= end)) {
-					const rawTag = match[0].slice(1);
-					const tagColor = tagColorMap.get(rawTag.toLowerCase()) ?? 'var(--primary)';
+					const tagColor = tagColorMap.get(m.name.toLowerCase()) ?? 'var(--primary)';
 					ranges.push(
 						Decoration.mark({
 							class: 'cm-md-tag',
@@ -62,9 +58,7 @@ function buildTagDecos(mode: MarkMode) {
 						}).range(start, end)
 					);
 				} else {
-					ranges.push(
-						Decoration.replace({ widget: new TagWidget(match[0].slice(1)) }).range(start, end)
-					);
+					ranges.push(Decoration.replace({ widget: new TagWidget(m.name) }).range(start, end));
 				}
 			}
 		}

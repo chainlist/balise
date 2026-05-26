@@ -1,4 +1,5 @@
 import { getDB } from '$lib/utils/db';
+import { TAG_PATTERN_SOURCE } from '$lib/utils/tag-parser';
 
 import {
 	queryTagsWithCounts,
@@ -30,19 +31,22 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 export function extractTags(content: string): string[] {
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	const tags = new Set<string>();
-	// Group 1: code fence lang; Group 2: task state char ( , x/X, ~)
-	const pattern = /#[a-zA-Z0-9/]{2,}|^```([a-zA-Z][a-zA-Z0-9]*)|^[ \t]*- \[( |[xX]|~)\]/gm;
+	// Group 1: hashtag name; Group 2: hashtag param (unused); Group 3: code fence lang; Group 4: task state char ( , x/X, ~)
+	const pattern = new RegExp(
+		TAG_PATTERN_SOURCE + '|^```([a-zA-Z][a-zA-Z0-9]*)|^[ \\t]*- \\[( |[xX]|~)\\]',
+		'gm'
+	);
 
 	for (const match of content.matchAll(pattern)) {
 		if (match[1] !== undefined) {
+			tags.add(match[1]);
+		} else if (match[3] !== undefined) {
 			tags.add('code');
-			tags.add(match[1].toLowerCase());
-		} else if (match[2] !== undefined) {
-			if (match[2] === ' ') tags.add('todo');
-			else if (match[2] === '~') tags.add('inprogress');
+			tags.add(match[3].toLowerCase());
+		} else if (match[4] !== undefined) {
+			if (match[4] === ' ') tags.add('todo');
+			else if (match[4] === '~') tags.add('inprogress');
 			else tags.add('done');
-		} else {
-			tags.add(match[0].slice(1));
 		}
 	}
 
