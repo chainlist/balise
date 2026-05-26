@@ -26,7 +26,6 @@ type TaskProps = { status: TaskStatus; text: string; onToggle: () => void; onEdi
 class TaskWidget extends SvelteWidget<TaskProps> {
 	protected component = TaskCard;
 	protected override tagName = 'div' as const;
-	protected override ignoreEvents = false;
 	constructor(
 		readonly status: TaskStatus,
 		readonly text: string,
@@ -41,12 +40,10 @@ class TaskWidget extends SvelteWidget<TaskProps> {
 
 	protected override setup(div: HTMLElement) {
 		div.style.cssText = 'display:inline-block;width:100%;vertical-align:top';
-		// Stop mousedown on buttons only — prevents CM from destroying the widget
-		// before onclick fires (Chrome won't fire click on detached nodes).
-		// Non-button clicks propagate so CM can process them normally.
-		div.addEventListener('mousedown', (e) => {
-			if ((e.target as Element).closest('button')) e.stopPropagation();
-		});
+		// Stop all mousedown propagation so CM never places the cursor on this line.
+		// Cursor placement (mousedown) and click events are independent — onclick
+		// on the card and its buttons still fires normally after stopPropagation.
+		div.addEventListener('mousedown', (e) => e.stopPropagation());
 	}
 
 	protected getProps(view: EditorView): TaskProps {
