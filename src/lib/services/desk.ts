@@ -1,8 +1,13 @@
 import { BaseDirectory, exists, mkdir, remove } from '@tauri-apps/plugin-fs';
 import type Database from '@tauri-apps/plugin-sql';
 import { closeDBIfMatches, loadDB } from '$lib/utils/db';
+import { documentDir, join } from '@tauri-apps/api/path';
 
-const DESKS_ROOT_DIR = 'Balise';
+export const DESKS_ROOT_DIR = 'Balise';
+
+export async function getBaseDir(): Promise<string> {
+	return join(await documentDir(), DESKS_ROOT_DIR);
+}
 
 export function sanitizeDeskName(desk: string): string {
 	const normalized = desk.trim();

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-// SvelteSet used by extractTags — replace with native Set for Node compatibility
+// SvelteSet used by extractTags - replace with native Set for Node compatibility
 vi.mock('svelte/reactivity', () => ({ SvelteSet: Set }));
 
 vi.mock('$lib/repositories/tags.repo', () => ({
@@ -69,15 +69,15 @@ describe('load', () => {
 describe('setSettings', () => {
 	it('calls upsertTagSettings with the tag and settings', async () => {
 		await tagsService.setSettings('work', { color: '#ff0000' });
-		expect(repo.upsertTagSettings).toHaveBeenCalledWith(
-			expect.anything(),
-			'work',
-			{ color: '#ff0000' }
-		);
+		expect(repo.upsertTagSettings).toHaveBeenCalledWith(expect.anything(), 'work', {
+			color: '#ff0000'
+		});
 	});
 
 	it('updates color in-memory', async () => {
-		tagsService.tags = [{ tag: 'work', color: '#aaa', display_name: null, pinned: false, count: 1 }];
+		tagsService.tags = [
+			{ tag: 'work', color: '#aaa', display_name: null, pinned: false, count: 1 }
+		];
 		await tagsService.setSettings('work', { color: '#ff0000' });
 		expect(tagsService.tags[0].color).toBe('#ff0000');
 	});

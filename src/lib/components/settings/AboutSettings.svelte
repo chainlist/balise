@@ -11,22 +11,22 @@
 	});
 </script>
 
-<div class="flex flex-col h-full">
-	<div class="px-6 py-4 border-b">
+<div class="flex h-full flex-col">
+	<div class="border-b px-6 py-4">
 		<h2 class="text-base font-semibold">{m.settings_about_heading()}</h2>
-		<p class="text-sm text-muted-foreground mt-0.5">{m.settings_about_description()}</p>
+		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_about_description()}</p>
 	</div>
 
-	<div class="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+	<div class="flex-1 space-y-8 overflow-y-auto px-6 py-6">
 		<!-- App info -->
 		<div>
 			<p class="text-sm font-semibold">Balise</p>
-			<p class="text-xs text-muted-foreground mt-1">{m.settings_about_version()} {version}</p>
+			<p class="mt-1 text-xs text-muted-foreground">{m.settings_about_version()} {version}</p>
 		</div>
 
 		<!-- Updates -->
 		<div>
-			<div class="space-y-1.5 mb-4">
+			<div class="mb-4 space-y-1.5">
 				<p class="text-sm font-medium">{m.settings_about_updates_label()}</p>
 			</div>
 
@@ -46,7 +46,9 @@
 				<p class="text-sm text-muted-foreground">{m.settings_about_checking()}</p>
 			{:else if updaterService.status === 'available'}
 				<div class="space-y-2">
-					<p class="text-sm">{m.updater_available_title()} — v{updaterService.updateInfo?.version}</p>
+					<p class="text-sm">
+						{m.updater_available_title()} - v{updaterService.updateInfo?.version}
+					</p>
 					<button
 						onclick={() => updaterService.install()}
 						class="rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
@@ -67,26 +69,15 @@
 				</div>
 			{:else if updaterService.status === 'done'}
 				<p class="text-sm font-medium">{m.updater_installed()}</p>
-				<p class="text-xs text-muted-foreground mt-1">{m.updater_restarting()}</p>
+				<p class="mt-1 text-xs text-muted-foreground">{m.updater_restarting()}</p>
 			{/if}
 		</div>
 
 		<!-- Thanks to -->
 		<div>
-			<p class="text-sm font-medium mb-3">{m.settings_about_thanks_heading()}</p>
+			<p class="mb-3 text-sm font-medium">{m.settings_about_thanks_heading()}</p>
 			<ul class="space-y-2">
-				{#each [
-					{ name: 'Tauri', desc: 'Desktop application framework' },
-					{ name: 'SvelteKit', desc: 'Web application framework' },
-					{ name: 'Tailwind CSS', desc: 'Utility-first CSS framework' },
-					{ name: 'CodeMirror', desc: 'Extensible code editor' },
-					{ name: 'Shiki', desc: 'Syntax highlighting' },
-					{ name: 'Lucide', desc: 'Icon library' },
-					{ name: 'Paraglide', desc: 'Internationalization' },
-					{ name: 'nanoid', desc: 'Unique ID generation' },
-					{ name: 'tinykeys', desc: 'Keyboard shortcuts' },
-					{ name: 'marked', desc: 'Markdown parser' },
-				] as dep (dep.name)}
+				{#each [{ name: 'Tauri', desc: 'Desktop application framework' }, { name: 'SvelteKit', desc: 'Web application framework' }, { name: 'Tailwind CSS', desc: 'Utility-first CSS framework' }, { name: 'CodeMirror', desc: 'Extensible code editor' }, { name: 'Shiki', desc: 'Syntax highlighting' }, { name: 'Lucide', desc: 'Icon library' }, { name: 'Paraglide', desc: 'Internationalization' }, { name: 'nanoid', desc: 'Unique ID generation' }, { name: 'tinykeys', desc: 'Keyboard shortcuts' }, { name: 'marked', desc: 'Markdown parser' }] as dep (dep.name)}
 					<li class="flex items-baseline gap-2">
 						<span class="text-sm font-medium">{dep.name}</span>
 						<span class="text-xs text-muted-foreground">{dep.desc}</span>

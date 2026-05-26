@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog } from 'bits-ui';
-	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon } from '@lucide/svelte';
+	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
@@ -10,6 +10,12 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
+
+	function runWizard() {
+		localStorage.removeItem('balise_onboarding_done');
+		uiState.isSettingsOpen = false;
+		uiState.isWizardOpen = true;
+	}
 
 	let { open = false }: { open?: boolean } = $props();
 
@@ -85,6 +91,14 @@
 						{item.label}
 					</button>
 				{/each}
+				<div class="flex-1"></div>
+				<button
+					onclick={runWizard}
+					class="flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+				>
+					<WandSparklesIcon size="15" />
+					{m.wizard_run_again()}
+				</button>
 			</div>
 
 			<!-- Right content -->

@@ -6,7 +6,7 @@ import {
 	readTextFile,
 	stat
 } from '@tauri-apps/plugin-fs';
-import { sanitizeDeskName } from './desk';
+import { sanitizeDeskName, DESKS_ROOT_DIR } from './desk';
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
 import {
@@ -69,7 +69,7 @@ class FsSyncService {
 		if (!this.#currentDesk) return;
 		const safeDesk = sanitizeDeskName(this.#currentDesk);
 		const { meta, content } = this.toFrontmatter(note);
-		await writeTextFile(`Balise/${safeDesk}/${note.id}.md`, meta + content, {
+		await writeTextFile(`${DESKS_ROOT_DIR}/${safeDesk}/${note.id}.md`, meta + content, {
 			baseDir: BaseDirectory.Document
 		});
 	}
@@ -77,13 +77,13 @@ class FsSyncService {
 	async deleteNoteFile(noteId: string): Promise<void> {
 		if (!this.#currentDesk) return;
 		const safeDesk = sanitizeDeskName(this.#currentDesk);
-		await remove(`Balise/${safeDesk}/${noteId}.md`, { baseDir: BaseDirectory.Document });
+		await remove(`${DESKS_ROOT_DIR}/${safeDesk}/${noteId}.md`, { baseDir: BaseDirectory.Document });
 	}
 
 	async syncDeskFiles(): Promise<void> {
 		if (!this.#currentDesk) return;
 		const safeDesk = sanitizeDeskName(this.#currentDesk);
-		const dir = `Balise/${safeDesk}`;
+		const dir = `${DESKS_ROOT_DIR}/${safeDesk}`;
 		const baseDir = BaseDirectory.Document;
 		const db = getDB();
 

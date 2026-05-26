@@ -19,6 +19,7 @@ class UIState {
 	isSettingsOpen = $state(false);
 	isCommandPaletteOpen = $state(false);
 	isCapturingShortcut = $state(false);
+	isWizardOpen = $state(false);
 	activeNoteId = $state<string | null>(null);
 
 	#store: Store | null = null;

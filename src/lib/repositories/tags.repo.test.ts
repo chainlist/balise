@@ -93,7 +93,7 @@ describe('upsertTagSettings', () => {
 		const db = makeDB();
 		await upsertTagSettings(db as never, 'work', { color: '#aaa' });
 		const [, params] = db.execute.mock.calls[0] as [string, unknown[]];
-		// 4th param is pinnedVal — should be null
+		// 4th param is pinnedVal, should be null
 		expect(params[3]).toBeNull();
 	});
 });

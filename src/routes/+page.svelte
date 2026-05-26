@@ -16,10 +16,12 @@
 	);
 	const selectedNote = $derived(notesService.notes.find((n) => n.id === selectedNoteId) ?? null);
 
-	// Register external signal handler — assignment happens on signal fire, not during effect body.
-	$effect(() => noteSignals.onSelectNote((id) => {
-		selection = { noteId: id, tag: uiState.activeTag, composedKey };
-	}));
+	// Register external signal handler - assignment happens on signal fire, not during effect body.
+	$effect(() =>
+		noteSignals.onSelectNote((id) => {
+			selection = { noteId: id, tag: uiState.activeTag, composedKey };
+		})
+	);
 
 	// Publish the derived selection into shared state so shortcuts can reference it.
 	$effect(() => {
@@ -36,7 +38,7 @@
 	}
 </script>
 
-<!-- Isolated from the outer app navigation SidebarProvider — owns its own open/close state. -->
+<!-- Isolated from the outer app navigation SidebarProvider - owns its own open/close state. -->
 <Sidebar.Provider class="h-full min-h-0">
 	<NotesSidebar
 		notes={notesService.notes}

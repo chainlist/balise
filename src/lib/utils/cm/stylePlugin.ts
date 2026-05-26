@@ -17,8 +17,7 @@ const STYLE_NODES: Record<string, string> = {
 function buildStyleDecos(view: EditorView): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
 	const covered: [number, number][] = [];
-	const isCovered = (from: number, to: number) =>
-		covered.some(([f, t]) => from >= f && to <= t);
+	const isCovered = (from: number, to: number) => covered.some(([f, t]) => from >= f && to <= t);
 
 	syntaxTree(view.state).iterate({
 		enter(node) {
@@ -60,5 +59,5 @@ function buildStyleDecos(view: EditorView): DecorationSet {
 	return Decoration.set(deduped);
 }
 
-// Styling doesn't depend on cursor position — skip selectionSet rebuilds.
+// Styling doesn't depend on cursor position - skip selectionSet rebuilds.
 export const mdStylePlugin = makePlugin(buildStyleDecos, { selection: false });

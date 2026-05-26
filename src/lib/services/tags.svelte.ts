@@ -91,7 +91,7 @@ class TagsService {
 		const db = getDB();
 		const rawNames = extractTags(content);
 
-		// Canonical resolution MUST happen before DELETE — it reads existing rows to preserve casing
+		// Canonical resolution MUST happen before DELETE - it reads existing rows to preserve casing
 		const names = rawNames.length > 0 ? await resolveCanonicalTags(db, rawNames) : [];
 		await deleteNoteTags(db, noteId);
 		if (names.length > 0) await insertNoteTags(db, noteId, names);

@@ -10,7 +10,7 @@ import Checkbox from '$lib/components/cm/Checkbox.svelte';
 import type { MarkMode } from './shared';
 
 // Checkbox syntax: "- [ ]" (unchecked) or "- [x]" (checked)
-// Group 1: exactly one char — space for unchecked, x/X for checked. Group 2: task text
+// Group 1: exactly one char - space for unchecked, x/X for checked. Group 2: task text
 const TASK_CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.+)$/;
 
 // Hashtag syntax: a line containing #todo / #done / #inprogress
@@ -105,7 +105,7 @@ class CheckboxWidget extends WidgetType {
 	toDOM(view: EditorView): HTMLElement {
 		const span = document.createElement('span');
 		// Stop mousedown from reaching CM so the cursor doesn't move to this line
-		// before onclick fires — if CM repositions on mousedown the widget is destroyed
+		// before onclick fires - if CM repositions on mousedown the widget is destroyed
 		// and Chrome won't fire click on a detached node.
 		span.addEventListener('mousedown', (e) => e.stopPropagation());
 
@@ -179,7 +179,11 @@ function buildTaskDecos(mode: MarkMode, state: EditorState): DecorationSet {
 				const tagFrom = line.from + tagMatch.index;
 				const tagTo = tagFrom + tagMatch[0].length;
 				const displayText = line.text.replace(TASK_TAG_STRIP_RE, '').trim();
-				const cycleTag: Record<TaskStatus, string> = { todo: '#inprogress', inprogress: '#done', done: '#todo' };
+				const cycleTag: Record<TaskStatus, string> = {
+					todo: '#inprogress',
+					inprogress: '#done',
+					done: '#todo'
+				};
 				const nextInsert = cycleTag[status];
 
 				ranges.push(
