@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StateField, Prec } from '@codemirror/state';
 import type { EditorState, Extension } from '@codemirror/state';
 import type { Range } from '@codemirror/state';
-import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
-import { mount, unmount } from 'svelte';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
 import Checkbox from '$lib/components/cm/Checkbox.svelte';
-import type { MarkMode } from './shared';
+import { SvelteWidget, type MarkMode } from './shared';
 
 // Checkbox syntax: "- [ ]" (unchecked) or "- [x]" (checked)
 // Group 1: exactly one char - space for unchecked, x/X for checked. Group 2: task text
@@ -24,7 +22,11 @@ function tagToStatus(tag: string): TaskStatus {
 	return 'todo';
 }
 
-class TaskWidget extends WidgetType {
+type TaskProps = { status: TaskStatus; text: string; onToggle: () => void };
+
+class TaskWidget extends SvelteWidget<TaskProps> {
+	protected component = TaskCard;
+	protected override tagName = 'div' as const;
 	constructor(
 		readonly status: TaskStatus,
 		readonly text: string,
@@ -35,18 +37,7 @@ class TaskWidget extends WidgetType {
 		super();
 	}
 
-	eq(other: TaskWidget) {
-		return (
-			other.status === this.status &&
-			other.text === this.text &&
-			other.markerFrom === this.markerFrom &&
-			other.markerTo === this.markerTo &&
-			other.nextInsert === this.nextInsert
-		);
-	}
-
-	toDOM(view: EditorView): HTMLElement {
-		const div = document.createElement('div');
+	protected override setup(div: HTMLElement) {
 		// inline-block keeps cm-line in an inline formatting context, preventing the
 		// browser from creating anonymous block boxes around cm-widgetBuffer siblings,
 		// which would otherwise add a full line-height of empty space above the card.
@@ -59,33 +50,34 @@ class TaskWidget extends WidgetType {
 		div.addEventListener('mousedown', (e) => {
 			if ((e.target as Element).closest('button')) e.stopPropagation();
 		});
-
-		const instance = mount(TaskCard, {
-			target: div,
-			props: {
-				status: this.status,
-				text: this.text,
-				onToggle: () =>
-					view.dispatch({
-						changes: { from: this.markerFrom, to: this.markerTo, insert: this.nextInsert }
-					})
-			}
-		});
-		(div as any)._sv = instance;
-		return div;
 	}
 
-	destroy(dom: HTMLElement) {
-		const instance = (dom as any)._sv;
-		if (instance) unmount(instance);
+	protected getProps(view: EditorView): TaskProps {
+		return {
+			status: this.status,
+			text: this.text,
+			onToggle: () =>
+				view.dispatch({
+					changes: { from: this.markerFrom, to: this.markerTo, insert: this.nextInsert }
+				})
+		};
 	}
 
-	ignoreEvent() {
-		return true;
+	eq(other: TaskWidget) {
+		return (
+			other.status === this.status &&
+			other.text === this.text &&
+			other.markerFrom === this.markerFrom &&
+			other.markerTo === this.markerTo &&
+			other.nextInsert === this.nextInsert
+		);
 	}
 }
 
-class CheckboxWidget extends WidgetType {
+type CheckboxProps = { checked: boolean; onToggle: () => void };
+
+class CheckboxWidget extends SvelteWidget<CheckboxProps> {
+	protected component = Checkbox;
 	constructor(
 		readonly checked: boolean,
 		readonly markerFrom: number,
@@ -94,43 +86,30 @@ class CheckboxWidget extends WidgetType {
 		super();
 	}
 
+	protected override setup(span: HTMLElement) {
+		// Stop mousedown from reaching CM so the cursor doesn't move to this line
+		// before onclick fires - if CM repositions on mousedown the widget is destroyed
+		// and Chrome won't fire click on a detached node.
+		span.addEventListener('mousedown', (e) => e.stopPropagation());
+	}
+
+	protected getProps(view: EditorView): CheckboxProps {
+		const nextInsert = this.checked ? '[ ]' : '[x]';
+		return {
+			checked: this.checked,
+			onToggle: () =>
+				view.dispatch({
+					changes: { from: this.markerFrom, to: this.markerTo, insert: nextInsert }
+				})
+		};
+	}
+
 	eq(other: CheckboxWidget) {
 		return (
 			other.checked === this.checked &&
 			other.markerFrom === this.markerFrom &&
 			other.markerTo === this.markerTo
 		);
-	}
-
-	toDOM(view: EditorView): HTMLElement {
-		const span = document.createElement('span');
-		// Stop mousedown from reaching CM so the cursor doesn't move to this line
-		// before onclick fires - if CM repositions on mousedown the widget is destroyed
-		// and Chrome won't fire click on a detached node.
-		span.addEventListener('mousedown', (e) => e.stopPropagation());
-
-		const nextInsert = this.checked ? '[ ]' : '[x]';
-		const instance = mount(Checkbox, {
-			target: span,
-			props: {
-				checked: this.checked,
-				onToggle: () =>
-					view.dispatch({
-						changes: { from: this.markerFrom, to: this.markerTo, insert: nextInsert }
-					})
-			}
-		});
-		(span as any)._sv = instance;
-		return span;
-	}
-
-	destroy(dom: HTMLElement) {
-		const instance = (dom as any)._sv;
-		if (instance) unmount(instance);
-	}
-
-	ignoreEvent() {
-		return true;
 	}
 }
 

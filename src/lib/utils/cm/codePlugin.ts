@@ -1,40 +1,28 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StateField } from '@codemirror/state';
 import type { EditorState } from '@codemirror/state';
 import type { Range } from '@codemirror/state';
-import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { syntaxTree } from '@codemirror/language';
-import { mount, unmount } from 'svelte';
 import CodeBlock from '$lib/components/cm/CodeBlock.svelte';
+import { SvelteWidget } from './shared';
 
-class CodeBlockWidget extends WidgetType {
+class CodeBlockWidget extends SvelteWidget<{ lang: string; code: string }> {
+	protected component = CodeBlock;
+	protected override tagName = 'div' as const;
+	// Allow clicks through so CodeMirror places the cursor and triggers edit mode
+	protected override ignoreEvents = false;
 	constructor(
 		readonly lang: string,
 		readonly code: string
 	) {
 		super();
 	}
-
+	protected getProps() {
+		return { lang: this.lang, code: this.code };
+	}
 	eq(other: CodeBlockWidget) {
 		return other.lang === this.lang && other.code === this.code;
-	}
-
-	toDOM(): HTMLElement {
-		const div = document.createElement('div');
-		const instance = mount(CodeBlock, { target: div, props: { lang: this.lang, code: this.code } });
-		(div as any)._sv = instance;
-		return div;
-	}
-
-	destroy(dom: HTMLElement) {
-		const instance = (dom as any)._sv;
-		if (instance) unmount(instance);
-	}
-
-	// Allow clicks through so CodeMirror places the cursor and triggers edit mode
-	ignoreEvent() {
-		return false;
 	}
 }
 

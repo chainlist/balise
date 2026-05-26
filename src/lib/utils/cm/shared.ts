@@ -1,5 +1,6 @@
-import { ViewPlugin, Decoration, EditorView } from '@codemirror/view';
+import { ViewPlugin, Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet, ViewUpdate } from '@codemirror/view';
+import { mount, unmount, type Component } from 'svelte';
 
 export type MarkMode = 'always' | 'cursor' | 'never';
 
@@ -33,4 +34,35 @@ export function makePlugin(
 		},
 		{ decorations: (v) => v.decorations }
 	);
+}
+
+const widgetInstances = new WeakMap<HTMLElement, ReturnType<typeof mount>>();
+
+export abstract class SvelteWidget<P extends Record<string, unknown>> extends WidgetType {
+	protected abstract component: Component<P>;
+	protected abstract getProps(view: EditorView): P;
+	protected tagName: 'span' | 'div' = 'span';
+	protected ignoreEvents = true;
+
+	protected setup(_el: HTMLElement, _view: EditorView): void {}
+
+	toDOM(view: EditorView): HTMLElement {
+		const el = document.createElement(this.tagName);
+		this.setup(el, view);
+		const instance = mount(this.component, { target: el, props: this.getProps(view) });
+		widgetInstances.set(el, instance);
+		return el;
+	}
+
+	destroy(dom: HTMLElement): void {
+		const instance = widgetInstances.get(dom);
+		if (instance) {
+			unmount(instance);
+			widgetInstances.delete(dom);
+		}
+	}
+
+	ignoreEvent(): boolean {
+		return this.ignoreEvents;
+	}
 }

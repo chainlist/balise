@@ -1,36 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
-import { mount, unmount } from 'svelte';
 import TagChip from '$lib/components/cm/TagChip.svelte';
 import { tagsService } from '$lib/services/tags.svelte';
 import { parseAllHashtags } from '$lib/utils/tag-parser';
-import { makePlugin, type MarkMode } from './shared';
+import { makePlugin, SvelteWidget, type MarkMode } from './shared';
 
-class TagWidget extends WidgetType {
+class TagWidget extends SvelteWidget<{ tag: string; navigate: boolean }> {
+	protected component = TagChip;
 	constructor(readonly tag: string) {
 		super();
 	}
-
+	protected getProps() {
+		return { tag: this.tag, navigate: true };
+	}
 	eq(other: TagWidget) {
 		return other.tag === this.tag;
-	}
-
-	toDOM(): HTMLElement {
-		const span = document.createElement('span');
-		const instance = mount(TagChip, { target: span, props: { tag: this.tag, navigate: true } });
-		(span as any)._sv = instance;
-		return span;
-	}
-
-	destroy(dom: HTMLElement) {
-		const instance = (dom as any)._sv;
-		if (instance) unmount(instance);
-	}
-
-	ignoreEvent() {
-		return true;
 	}
 }
 
