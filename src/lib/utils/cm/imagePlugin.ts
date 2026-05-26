@@ -139,7 +139,7 @@ function buildDecos(view: EditorView, mode: MarkMode, deskName: string): Decorat
 // --- Plugin ---
 
 export function mdImagePlugin(mode: MarkMode, deskName: string) {
-	return ViewPlugin.fromClass(
+	const plugin = ViewPlugin.fromClass(
 		class {
 			decorations: DecorationSet;
 			constructor(view: EditorView) {
@@ -163,4 +163,9 @@ export function mdImagePlugin(mode: MarkMode, deskName: string) {
 			}
 		}
 	);
+
+	return [
+		plugin,
+		EditorView.atomicRanges.of((view) => view.plugin(plugin)?.decorations ?? Decoration.none)
+	];
 }

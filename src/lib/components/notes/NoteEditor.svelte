@@ -22,7 +22,6 @@
 		mdLinkPlugin,
 		mdSlashPlugin,
 		mdMarkNavPlugin,
-		mdImageInputPlugin,
 		mdImagePlugin,
 		noteEditorTheme,
 		type MarkMode
@@ -92,7 +91,6 @@
 					mdCodePlugin,
 					mdPairPlugin,
 					mdSlashPlugin,
-					mdImageInputPlugin(fsSyncService.currentDesk),
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
 					EditorView.updateListener.of((u) => {

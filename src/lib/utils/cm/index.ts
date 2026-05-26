@@ -13,7 +13,6 @@ export { mdHighlightPlugin } from './highlightPlugin';
 export { mdPairPlugin } from './pairPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { mdSlashPlugin } from './slashPlugin';
-export { mdImageInputPlugin } from './imageInputPlugin';
 export { mdImagePlugin } from './imagePlugin';
 export { noteEditorTheme } from './theme';
 export type { MarkMode } from './shared';
