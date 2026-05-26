@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/chainlist/balise/compare/v0.9.0...v0.10.0) (2026-05-26)
+
+
+### Features
+
+* **cm:** atomic ranges + canonical cursor stepping for hidden marks ([9c97b0f](https://github.com/chainlist/balise/commit/9c97b0f98dbdee0746ea99dcdc9e811ac108ca08))
+
 ## [0.9.0](https://github.com/chainlist/balise/compare/v0.8.0...v0.9.0) (2026-05-26)
 
 
