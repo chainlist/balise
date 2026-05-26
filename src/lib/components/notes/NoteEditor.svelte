@@ -22,6 +22,7 @@
 		mdLinkPlugin,
 		mdSlashPlugin,
 		mdMarkNavPlugin,
+		mdImagePlugin,
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
@@ -51,7 +52,8 @@
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
 			mdCheckboxPlugin(mode),
-			mdTaskTagPlugin(mode)
+			mdTaskTagPlugin(mode),
+			mdImagePlugin(mode)
 		];
 	}
 

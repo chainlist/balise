@@ -3,6 +3,7 @@ import { openDesk } from './desk';
 import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
 import { fsSyncService } from './fs-sync';
+import { fsService } from './fs';
 
 const defaultDesk = 'Personal';
 const defaults = {
@@ -103,7 +104,7 @@ class UIState {
 
 		this.composedTags = [];
 		await openDesk(desk);
-		fsSyncService.setCurrentDesk(desk);
+		fsService.setDesk(desk);
 		await fsSyncService.syncDeskFiles();
 		await Promise.all([
 			tagsService.load(),
