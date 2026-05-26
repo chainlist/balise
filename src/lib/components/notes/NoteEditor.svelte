@@ -22,11 +22,14 @@
 		mdLinkPlugin,
 		mdSlashPlugin,
 		mdMarkNavPlugin,
+		mdImageInputPlugin,
+		mdImagePlugin,
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
+	import { fsSyncService } from '$lib/services/fs-sync';
 	import { noteSignals } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
@@ -39,6 +42,7 @@
 	let confirmOpen = $state(false);
 	let editorView = $state<EditorView | null>(null);
 	const markCompartment = new Compartment();
+	let deskName = '';
 
 	function makeMarkPlugins(mode: MarkMode) {
 		return [
@@ -51,7 +55,8 @@
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
 			mdCheckboxPlugin(mode),
-			mdTaskTagPlugin(mode)
+			mdTaskTagPlugin(mode),
+			mdImagePlugin(mode, deskName)
 		];
 	}
 
@@ -73,6 +78,7 @@
 
 			const noteId = note.id;
 			const noteContent = note.content;
+			deskName = fsSyncService.currentDesk;
 
 			const view = new EditorView({
 				doc: noteContent,
@@ -86,6 +92,7 @@
 					mdCodePlugin,
 					mdPairPlugin,
 					mdSlashPlugin,
+					mdImageInputPlugin(fsSyncService.currentDesk),
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
 					EditorView.updateListener.of((u) => {

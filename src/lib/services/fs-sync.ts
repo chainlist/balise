@@ -26,6 +26,10 @@ class FsSyncService {
 		this.#currentDesk = desk;
 	}
 
+	get currentDesk(): string {
+		return this.#currentDesk;
+	}
+
 	toFrontmatter(note: Note): { meta: string; content: string } {
 		const meta = [
 			'---',
