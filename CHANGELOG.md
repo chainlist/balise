@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.0](https://github.com/chainlist/balise/compare/v0.10.0...v0.11.0) (2026-05-26)
+
+
+### Features
+
+* **cm:** inline task editing via hover edit button in never mode ([aa3f6d7](https://github.com/chainlist/balise/commit/aa3f6d77569346186f59c8c3bfcc2ae9ef5a2a1d))
+* **images:** Add images handling ([#14](https://github.com/chainlist/balise/issues/14)) ([72682b6](https://github.com/chainlist/balise/commit/72682b6f39668821410e35b5a773bcce1692910e))
+
+
+### Bug Fixes
+
+* **cm:** enable task card editing by revealing raw markdown on cursor line ([f7588ab](https://github.com/chainlist/balise/commit/f7588ab65fc53cde21115a5b8a9f973d5a5d43cf))
+* **cm:** extend markNavPlugin to treat link widgets as atomic ranges ([d0ad0b9](https://github.com/chainlist/balise/commit/d0ad0b9353de09e6bf2542a235d07335090d9030))
+* **cm:** restore ignoreEvents=false and button-only mousedown guard on TaskWidget ([804887f](https://github.com/chainlist/balise/commit/804887fc060c68059000eb51c9f78a5eaa384d6c))
+* TaskCard events not working properly on MarkMode.Never and MarkMode.Cursor ([3e9a4c4](https://github.com/chainlist/balise/commit/3e9a4c4a8a4fea66f1c80a71a513b61dc431651b))
+
 ## [0.10.0](https://github.com/chainlist/balise/compare/v0.9.0...v0.10.0) (2026-05-26)
 
 
