@@ -3,7 +3,7 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import LinkChip from '$lib/components/cm/LinkChip.svelte';
-import { makePlugin, SvelteWidget, isRevealed, type MarkMode } from './shared';
+import { makePlugin, SvelteWidget, isRevealed, BARE_URL_RE, type MarkMode } from './shared';
 
 class LinkWidget extends SvelteWidget<{ href: string; label: string }> {
 	protected component = LinkChip;
@@ -20,8 +20,6 @@ class LinkWidget extends SvelteWidget<{ href: string; label: string }> {
 		return other.href === this.href && other.label === this.label;
 	}
 }
-
-const BARE_URL_RE = /https?:\/\/[^\s<>[\]()'"]+/g;
 
 function buildLinkDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {

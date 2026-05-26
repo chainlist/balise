@@ -1,14 +1,19 @@
 import { EditorView, Decoration, keymap } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { Prec, type EditorState, type Extension } from '@codemirror/state';
+import { syntaxTree } from '@codemirror/language';
 import {
 	emphasisMarks,
 	highlightMarks,
 	isMarkRevealed,
 	isRevealed,
+	dedupeOverlapping,
+	BARE_URL_RE,
 	type EmphasisMark,
 	type MarkMode
 } from './shared';
+
+type Atom = { from: number; to: number };
 
 // Combine emphasis marks (parent-bounds reveal) and highlight marks
 // (line-based reveal) into a single list of marks that are currently hidden.
@@ -31,14 +36,68 @@ function hiddenMarks(state: EditorState, mode: MarkMode): EmphasisMark[] {
 	return out;
 }
 
-// Build a range set of hidden marks for EditorView.atomicRanges so vertical
-// motion and clicks skip over them.
+// Collect link ranges that are currently hidden as widget replacements.
+// Mirrors the reveal logic in linkPlugin so the two stay in sync.
+function linkAtoms(view: EditorView, mode: MarkMode): Atom[] {
+	if (mode === 'always') return [];
+	const { state } = view;
+	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+	const out: Atom[] = [];
+	const tree = syntaxTree(state);
+
+	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
+		tree.iterate({
+			from: vFrom,
+			to: vTo,
+			enter(node) {
+				if (node.name !== 'Link') return;
+				if (isRevealed(mode, state.doc.lineAt(node.from).number, cursorLine)) return false;
+				for (let child = node.node.firstChild; child; child = child.nextSibling) {
+					if (child.name === 'URL') {
+						out.push({ from: node.from, to: node.to });
+						break;
+					}
+				}
+				return false;
+			}
+		});
+
+		BARE_URL_RE.lastIndex = 0;
+		const text = state.doc.sliceString(vFrom, vTo);
+		let m: RegExpExecArray | null;
+		while ((m = BARE_URL_RE.exec(text)) !== null) {
+			const start = vFrom + m.index;
+			const end = start + m[0].length;
+			if (isRevealed(mode, state.doc.lineAt(start).number, cursorLine)) continue;
+			let skip = false;
+			for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
+				if (
+					cur.name === 'Link' ||
+					cur.name === 'InlineCode' ||
+					cur.name === 'FencedCode' ||
+					cur.name === 'CodeBlock'
+				) {
+					skip = true;
+					break;
+				}
+			}
+			if (skip) continue;
+			out.push({ from: start, to: end });
+		}
+	}
+
+	return out;
+}
+
+// Build a range set of hidden marks + link atoms for EditorView.atomicRanges so
+// vertical motion and clicks skip over them.
 function hiddenMarkRanges(view: EditorView, mode: MarkMode): DecorationSet {
 	if (mode === 'always') return Decoration.none;
-	const ranges = hiddenMarks(view.state, mode).map((m) =>
+	const markRanges = hiddenMarks(view.state, mode).map((m) =>
 		Decoration.mark({}).range(m.from, m.to)
 	);
-	return Decoration.set(ranges, true);
+	const atomRanges = linkAtoms(view, mode).map((a) => Decoration.mark({}).range(a.from, a.to));
+	return Decoration.set(dedupeOverlapping([...markRanges, ...atomRanges]), true);
 }
 
 // A position is "forbidden" if landing the cursor there would look identical
@@ -57,6 +116,15 @@ function isForbidden(pos: number, marks: EmphasisMark[]): boolean {
 	return false;
 }
 
+// A position is forbidden if it falls strictly inside a link atom (the whole
+// [label](url) range is replaced by a widget — no interior position is valid).
+function isForbiddenInAtom(pos: number, atoms: Atom[]): boolean {
+	for (const a of atoms) {
+		if (pos > a.from && pos < a.to) return true;
+	}
+	return false;
+}
+
 function moveByCanonical(view: EditorView, mode: MarkMode, direction: -1 | 1): boolean {
 	if (mode === 'always') return false;
 	const { state } = view;
@@ -65,10 +133,15 @@ function moveByCanonical(view: EditorView, mode: MarkMode, direction: -1 | 1): b
 
 	const pos = range.head;
 	const marks = hiddenMarks(state, mode);
+	const atoms = linkAtoms(view, mode);
 	const docLen = state.doc.length;
 
 	let target = pos + direction;
-	while (target >= 0 && target <= docLen && isForbidden(target, marks)) {
+	while (
+		target >= 0 &&
+		target <= docLen &&
+		(isForbidden(target, marks) || isForbiddenInAtom(target, atoms))
+	) {
 		target += direction;
 	}
 

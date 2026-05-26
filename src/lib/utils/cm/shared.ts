@@ -88,6 +88,8 @@ export function highlightMarks(state: EditorState): EmphasisMark[] {
 	return out;
 }
 
+export const BARE_URL_RE = /https?:\/\/[^\s<>[\]()'"]+/g;
+
 // Lenient emphasis patterns: match even when the parser rejects them (e.g. trailing spaces).
 // Bold must come before italic to avoid partial matches inside ** delimiters.
 // [regex, cssClass, markLength]
