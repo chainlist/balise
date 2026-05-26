@@ -6,6 +6,11 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
 	plugins: [paraglideVitePlugin({ project: './project.inlang', outdir: './src/paraglide' }),tailwindcss(), sveltekit()],
+	server: {
+		watch: {
+			ignored: ['**/src-tauri/**']
+		}
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
