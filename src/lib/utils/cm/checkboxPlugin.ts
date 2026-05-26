@@ -6,7 +6,7 @@ import Checkbox from '$lib/components/cm/Checkbox.svelte';
 import { SvelteWidget, isRevealed, type MarkMode } from './shared';
 
 // "- [ ]" (unchecked) or "- [x]" (checked) at start of line
-const CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.+)$/;
+const CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.*)$/;
 
 type CheckboxProps = { checked: boolean; onToggle: () => void };
 
