@@ -2,31 +2,27 @@ import { Decoration, EditorView, ViewPlugin } from '@codemirror/view';
 import type { DecorationSet, ViewUpdate } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { BaseDirectory, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 import ImageViewer from '$lib/components/cm/ImageViewer.svelte';
-import { DESKS_ROOT_DIR, sanitizeDeskName } from '$lib/services/desk';
+import { fsService } from '$lib/services/fs';
 import { SvelteWidget, isRevealed, type MarkMode } from './shared';
 
 // --- Widget ---
 
-class ImageWidget extends SvelteWidget<{ path: string; deskName: string }> {
+class ImageWidget extends SvelteWidget<{ path: string }> {
 	protected component = ImageViewer;
 	protected tagName = 'div' as const;
 	protected ignoreEvents = false;
 
-	constructor(
-		readonly path: string,
-		readonly deskName: string
-	) {
+	constructor(readonly path: string) {
 		super();
 	}
 
 	protected getProps() {
-		return { path: this.path, deskName: this.deskName };
+		return { path: this.path };
 	}
 
 	eq(other: ImageWidget): boolean {
-		return other.path === this.path && other.deskName === this.deskName;
+		return other.path === this.path;
 	}
 }
 
@@ -36,18 +32,12 @@ function extFromMime(mimeType: string): string {
 	return (mimeType.split('/')[1] ?? 'png').replace(/\+.*$/, '');
 }
 
-async function saveAttachment(blob: Blob, deskName: string): Promise<string> {
+async function saveAttachment(blob: Blob): Promise<string> {
 	const ext = extFromMime(blob.type);
 	const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
-	const safeDesk = sanitizeDeskName(deskName);
-	const dir = `${DESKS_ROOT_DIR}/${safeDesk}/attachments`;
-
-	await mkdir(dir, { baseDir: BaseDirectory.Document, recursive: true });
+	await fsService.mkdir('attachments');
 	const buffer = await blob.arrayBuffer();
-	await writeFile(`${dir}/${filename}`, new Uint8Array(buffer), {
-		baseDir: BaseDirectory.Document
-	});
-
+	await fsService.writeFile(`attachments/${filename}`, new Uint8Array(buffer));
 	return filename;
 }
 
@@ -61,7 +51,7 @@ function insertMarkdown(view: EditorView, pos: number, filename: string): void {
 
 // --- Event handlers ---
 
-function handlePaste(event: ClipboardEvent, view: EditorView, deskName: string): boolean {
+function handlePaste(event: ClipboardEvent, view: EditorView): boolean {
 	const items = event.clipboardData?.items;
 	if (!items) return false;
 
@@ -72,14 +62,14 @@ function handlePaste(event: ClipboardEvent, view: EditorView, deskName: string):
 
 		event.preventDefault();
 		const pos = view.state.selection.main.from;
-		saveAttachment(blob, deskName).then((filename) => insertMarkdown(view, pos, filename));
+		saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
 		return true;
 	}
 
 	return false;
 }
 
-function handleDrop(event: DragEvent, view: EditorView, deskName: string): boolean {
+function handleDrop(event: DragEvent, view: EditorView): boolean {
 	const items = event.dataTransfer?.items;
 	if (!items) return false;
 
@@ -94,13 +84,13 @@ function handleDrop(event: DragEvent, view: EditorView, deskName: string): boole
 
 	event.preventDefault();
 	const pos = view.posAtCoords({ x: event.clientX, y: event.clientY }) ?? view.state.doc.length;
-	saveAttachment(blob, deskName).then((filename) => insertMarkdown(view, pos, filename));
+	saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
 	return true;
 }
 
 // --- Decoration builder ---
 
-function buildDecos(view: EditorView, mode: MarkMode, deskName: string): DecorationSet {
+function buildDecos(view: EditorView, mode: MarkMode): DecorationSet {
 	if (mode === 'always') return Decoration.none;
 
 	const { state } = view;
@@ -125,7 +115,7 @@ function buildDecos(view: EditorView, mode: MarkMode, deskName: string): Decorat
 				if (!path) return false;
 
 				ranges.push(
-					Decoration.replace({ widget: new ImageWidget(path, deskName) }).range(node.from, node.to)
+					Decoration.replace({ widget: new ImageWidget(path) }).range(node.from, node.to)
 				);
 				return false;
 			}
@@ -138,28 +128,24 @@ function buildDecos(view: EditorView, mode: MarkMode, deskName: string): Decorat
 
 // --- Plugin ---
 
-export function mdImagePlugin(mode: MarkMode, deskName: string) {
+export function mdImagePlugin(mode: MarkMode) {
 	const plugin = ViewPlugin.fromClass(
 		class {
 			decorations: DecorationSet;
 			constructor(view: EditorView) {
-				this.decorations = buildDecos(view, mode, deskName);
+				this.decorations = buildDecos(view, mode);
 			}
 			update(u: ViewUpdate) {
 				if (u.docChanged || u.viewportChanged || u.selectionSet) {
-					this.decorations = buildDecos(u.view, mode, deskName);
+					this.decorations = buildDecos(u.view, mode);
 				}
 			}
 		},
 		{
 			decorations: (v) => v.decorations,
 			eventHandlers: {
-				paste(event: ClipboardEvent, view: EditorView) {
-					return handlePaste(event, view, deskName);
-				},
-				drop(event: DragEvent, view: EditorView) {
-					return handleDrop(event, view, deskName);
-				}
+				paste: handlePaste,
+				drop: handleDrop
 			}
 		}
 	);

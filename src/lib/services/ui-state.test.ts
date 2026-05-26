@@ -21,8 +21,12 @@ vi.mock('$lib/services/tags.svelte', () => ({
 }));
 vi.mock('$lib/services/fs-sync', () => ({
 	fsSyncService: {
-		setCurrentDesk: vi.fn(),
 		syncDeskFiles: vi.fn().mockResolvedValue(undefined)
+	}
+}));
+vi.mock('$lib/services/fs', () => ({
+	fsService: {
+		setDesk: vi.fn()
 	}
 }));
 

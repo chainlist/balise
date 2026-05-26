@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
-	import { DESKS_ROOT_DIR, sanitizeDeskName } from '$lib/services/desk';
+	import { fsService } from '$lib/services/fs';
 
-	let { path, deskName }: { path: string; deskName: string } = $props();
+	let { path }: { path: string } = $props();
 
 	let src = $state('');
 	let error = $state(false);
@@ -16,10 +15,7 @@
 				src = path;
 				return;
 			}
-			const safeDesk = sanitizeDeskName(deskName);
-			const data = await readFile(`${DESKS_ROOT_DIR}/${safeDesk}/${path}`, {
-				baseDir: BaseDirectory.Document
-			});
+			const data = await fsService.readFile(path);
 			objectUrl = URL.createObjectURL(new Blob([data]));
 			src = objectUrl;
 		};

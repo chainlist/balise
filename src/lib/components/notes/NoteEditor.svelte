@@ -28,7 +28,6 @@
 	} from '$lib/utils/cm';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
-	import { fsSyncService } from '$lib/services/fs-sync';
 	import { noteSignals } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
@@ -41,7 +40,6 @@
 	let confirmOpen = $state(false);
 	let editorView = $state<EditorView | null>(null);
 	const markCompartment = new Compartment();
-	let deskName = '';
 
 	function makeMarkPlugins(mode: MarkMode) {
 		return [
@@ -55,7 +53,7 @@
 			mdTagPlugin(mode),
 			mdCheckboxPlugin(mode),
 			mdTaskTagPlugin(mode),
-			mdImagePlugin(mode, deskName)
+			mdImagePlugin(mode)
 		];
 	}
 
@@ -77,7 +75,6 @@
 
 			const noteId = note.id;
 			const noteContent = note.content;
-			deskName = fsSyncService.currentDesk;
 
 			const view = new EditorView({
 				doc: noteContent,
