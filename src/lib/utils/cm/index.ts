@@ -1,5 +1,8 @@
 export { mdStylePlugin } from './stylePlugin';
 export { mdHidePlugin } from './hidePlugin';
+export { mdBulletPlugin } from './bulletPlugin';
+export { mdHrPlugin } from './hrPlugin';
+export { mdHeaderPlugin } from './headerPlugin';
 export { mdCodePlugin } from './codePlugin';
 export { mdLinkPlugin } from './linkPlugin';
 export { mdTagPlugin } from './tagPlugin';

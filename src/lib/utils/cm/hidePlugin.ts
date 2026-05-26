@@ -1,4 +1,4 @@
-import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
@@ -13,33 +13,6 @@ import {
 
 const PARSED_EMPHASIS = new Set(['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode']);
 
-class BulletWidget extends WidgetType {
-	toDOM() {
-		const span = document.createElement('span');
-		span.className = 'cm-md-bullet';
-		span.textContent = '•';
-		return span;
-	}
-	eq() {
-		return true;
-	}
-}
-
-const bulletWidget = new BulletWidget();
-
-class HrWidget extends WidgetType {
-	toDOM() {
-		const span = document.createElement('span');
-		span.className = 'cm-md-hr';
-		return span;
-	}
-	eq() {
-		return true;
-	}
-}
-
-const hrWidget = new HrWidget();
-
 function buildHideDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {
 		if (mode === 'always') return Decoration.none;
@@ -49,31 +22,24 @@ function buildHideDecos(mode: MarkMode) {
 		const ranges: Range<Decoration>[] = [];
 		const parsedRanges: [number, number][] = [];
 
+		// Tree pass: hide emphasis marks inside parser-recognized emphasis nodes.
 		syntaxTree(state).iterate({
 			enter(node) {
 				const { from, to, name } = node;
 
 				if (PARSED_EMPHASIS.has(name)) {
 					parsedRanges.push([from, to]);
-				}
-
-				if (name === 'ListMark') {
-					const isBullet = node.node.parent?.parent?.name === 'BulletList';
-					if (isBullet) ranges.push(Decoration.replace({ widget: bulletWidget }).range(from, to));
 					return;
 				}
 
-				const parent = node.node.parent;
-				if (parent && isMarkRevealed(mode, parent.from, parent.to, cursorPos)) return;
+				if (!name.endsWith('Mark')) return;
+				// HeaderMark, ListMark, LinkMark etc. are handled by their own plugins.
+				const parentName = node.node.parent?.name;
+				if (!parentName || !PARSED_EMPHASIS.has(parentName)) return;
 
-				if (name === 'HeaderMark') {
-					const lineEnd = state.doc.lineAt(from).to;
-					ranges.push(hideMark.range(from, Math.min(to + 1, lineEnd)));
-				} else if (name === 'HorizontalRule') {
-					ranges.push(Decoration.replace({ widget: hrWidget }).range(from, to));
-				} else if (name.endsWith('Mark')) {
-					ranges.push(hideMark.range(from, to));
-				}
+				const parent = node.node.parent!;
+				if (isMarkRevealed(mode, parent.from, parent.to, cursorPos)) return;
+				ranges.push(hideMark.range(from, to));
 			}
 		});
 

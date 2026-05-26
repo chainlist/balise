@@ -9,6 +9,9 @@
 	import {
 		mdStylePlugin,
 		mdHidePlugin,
+		mdBulletPlugin,
+		mdHrPlugin,
+		mdHeaderPlugin,
 		mdCodePlugin,
 		mdTagPlugin,
 		mdCheckboxPlugin,
@@ -39,6 +42,9 @@
 	function makeMarkPlugins(mode: MarkMode) {
 		return [
 			mdHidePlugin(mode),
+			mdBulletPlugin(mode),
+			mdHrPlugin(mode),
+			mdHeaderPlugin(mode),
 			mdHighlightPlugin(mode),
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
