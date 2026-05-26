@@ -1,5 +1,6 @@
 export { mdStylePlugin } from './stylePlugin';
 export { mdHidePlugin } from './hidePlugin';
+export { mdMarkNavPlugin } from './markNavPlugin';
 export { mdBulletPlugin } from './bulletPlugin';
 export { mdHrPlugin } from './hrPlugin';
 export { mdHeaderPlugin } from './headerPlugin';

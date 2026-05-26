@@ -1,17 +1,15 @@
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
-import { syntaxTree } from '@codemirror/language';
 import {
 	makePlugin,
 	hideMark,
 	LENIENT_EMPHASIS,
 	dedupeOverlapping,
 	isMarkRevealed,
+	emphasisMarks,
 	type MarkMode
 } from './shared';
-
-const PARSED_EMPHASIS = new Set(['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode']);
 
 function buildHideDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {
@@ -22,26 +20,12 @@ function buildHideDecos(mode: MarkMode) {
 		const ranges: Range<Decoration>[] = [];
 		const parsedRanges: [number, number][] = [];
 
-		// Tree pass: hide emphasis marks inside parser-recognized emphasis nodes.
-		syntaxTree(state).iterate({
-			enter(node) {
-				const { from, to, name } = node;
-
-				if (PARSED_EMPHASIS.has(name)) {
-					parsedRanges.push([from, to]);
-					return;
-				}
-
-				if (!name.endsWith('Mark')) return;
-				// HeaderMark, ListMark, LinkMark etc. are handled by their own plugins.
-				const parentName = node.node.parent?.name;
-				if (!parentName || !PARSED_EMPHASIS.has(parentName)) return;
-
-				const parent = node.node.parent!;
-				if (isMarkRevealed(mode, parent.from, parent.to, cursorPos)) return;
-				ranges.push(hideMark.range(from, to));
-			}
-		});
+		// Tree pass: hide emphasis marks whose wrapping node doesn't have the cursor.
+		for (const mark of emphasisMarks(state)) {
+			parsedRanges.push([mark.parentFrom, mark.parentTo]);
+			if (isMarkRevealed(mode, mark.parentFrom, mark.parentTo, cursorPos)) continue;
+			ranges.push(hideMark.range(mark.from, mark.to));
+		}
 
 		// Regex fallback: hide marks for emphasis patterns the parser rejected (e.g. trailing spaces).
 		const isCoveredByTree = (from: number, to: number) =>

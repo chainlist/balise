@@ -21,6 +21,7 @@
 		mdFormatPlugin,
 		mdLinkPlugin,
 		mdSlashPlugin,
+		mdMarkNavPlugin,
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
@@ -42,6 +43,7 @@
 	function makeMarkPlugins(mode: MarkMode) {
 		return [
 			mdHidePlugin(mode),
+			mdMarkNavPlugin(mode),
 			mdBulletPlugin(mode),
 			mdHrPlugin(mode),
 			mdHeaderPlugin(mode),
