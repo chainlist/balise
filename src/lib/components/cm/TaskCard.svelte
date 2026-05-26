@@ -6,12 +6,42 @@
 	let {
 		status,
 		text,
-		onToggle
+		onToggle,
+		onEdit
 	}: {
 		status: TaskStatus;
 		text: string;
 		onToggle: () => void;
+		onEdit?: (newText: string) => void;
 	} = $props();
+
+	let editing = $state(false);
+	let editValue = $state('');
+	let inputEl = $state<HTMLInputElement | undefined>(undefined);
+
+	$effect(() => {
+		if (editing && inputEl) inputEl.focus();
+	});
+
+	function startEdit() {
+		editValue = text;
+		editing = true;
+	}
+
+	function commitEdit() {
+		const trimmed = editValue.trim();
+		if (trimmed && trimmed !== text) onEdit?.(trimmed);
+		editing = false;
+	}
+
+	function handleKey(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			commitEdit();
+		} else if (e.key === 'Escape') {
+			editing = false;
+		}
+	}
 
 	let renderedText = $derived(marked.parseInline(text) as string);
 
@@ -36,14 +66,13 @@
 	const { bg, border, label } = $derived(styles[status]);
 </script>
 
-<button
-	class="my-1 flex w-full items-center gap-3 rounded border px-3 py-2 text-left text-sm"
+<div
+	class="group my-1 flex w-full items-center gap-3 rounded border px-3 py-2 text-sm"
 	style="background: {bg}; border-color: {border};"
-	onclick={onToggle}
 >
-	<div
-		role="checkbox"
-		aria-checked={status === 'done'}
+	<button
+		type="button"
+		onclick={onToggle}
 		aria-label={label}
 		class="flex size-4 shrink-0 items-center justify-center rounded border-2 transition-colors"
 		style="border-color: {border}; background: {status === 'done' ? border : 'transparent'};"
@@ -63,15 +92,36 @@
 				<circle cx="4" cy="4" r="3" />
 			</svg>
 		{/if}
-	</div>
+	</button>
 
 	<span
 		class="flex-1 leading-snug"
 		class:line-through={status === 'done'}
 		class:opacity-60={status === 'done'}
 	>
-		{@html renderedText}
+		{#if editing}
+			<input
+				bind:this={inputEl}
+				bind:value={editValue}
+				onblur={commitEdit}
+				onkeydown={handleKey}
+				class="w-full bg-transparent outline-none"
+			/>
+		{:else}
+			{@html renderedText}
+		{/if}
 	</span>
 
-
-</button>
+	{#if onEdit && !editing}
+		<button
+			type="button"
+			onclick={startEdit}
+			aria-label="Edit task"
+			class="opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100!"
+		>
+			<svg class="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+				<path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2L11.5 2.5z" stroke-linejoin="round" />
+			</svg>
+		</button>
+	{/if}
+</div>
