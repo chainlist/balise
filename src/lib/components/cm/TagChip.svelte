@@ -20,7 +20,7 @@
 <svelte:element
 	this={navigate ? 'button' : 'span'}
 	{...navigate ? { type: 'button' } : {}}
-	class="rounded border border-transparent px-1.5 select-none"
+	class="rounded border border-transparent px-1.5 leading-snug select-none"
 	class:cursor-pointer={navigate}
 	class:cursor-default={!navigate}
 	style="color: {color ?? 'var(--primary)'}; background: color-mix(in oklch, {color ??

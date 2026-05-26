@@ -11,7 +11,8 @@
 		mdHidePlugin,
 		mdCodePlugin,
 		mdTagPlugin,
-		mdTaskPlugin,
+		mdCheckboxPlugin,
+		mdTaskTagPlugin,
 		mdHighlightPlugin,
 		mdPairPlugin,
 		mdFormatPlugin,
@@ -41,7 +42,8 @@
 			mdHighlightPlugin(mode),
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
-			mdTaskPlugin(mode)
+			mdCheckboxPlugin(mode),
+			mdTaskTagPlugin(mode)
 		];
 	}
 
