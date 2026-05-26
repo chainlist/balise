@@ -1,5 +1,6 @@
 import { ViewPlugin, Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet, ViewUpdate } from '@codemirror/view';
+import type { Range } from '@codemirror/state';
 import { mount, unmount, type Component } from 'svelte';
 
 export type MarkMode = 'always' | 'cursor' | 'never';
@@ -16,6 +17,20 @@ export const LENIENT_EMPHASIS: [RegExp, string, number][] = [
 	[/(?<![A-Za-z0-9])_([^\n_]+)_(?![A-Za-z0-9])/g, 'cm-md-italic', 1],
 	[/~~([^\n~]+)~~/g, 'cm-md-strike', 2]
 ];
+
+// Sort by start asc, end desc (outer ranges first), then drop any range nested in an earlier one.
+export function dedupeOverlapping(ranges: Range<Decoration>[]): Range<Decoration>[] {
+	ranges.sort((a, b) => a.from - b.from || b.to - a.to);
+	const out: Range<Decoration>[] = [];
+	let lastTo = -1;
+	for (const r of ranges) {
+		if (r.from >= lastTo) {
+			out.push(r);
+			lastTo = r.to;
+		}
+	}
+	return out;
+}
 
 export function makePlugin(
 	build: (v: EditorView) => DecorationSet,

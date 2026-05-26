@@ -2,7 +2,7 @@ import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { makePlugin, hideMark, LENIENT_EMPHASIS, type MarkMode } from './shared';
+import { makePlugin, hideMark, LENIENT_EMPHASIS, dedupeOverlapping, type MarkMode } from './shared';
 
 const PARSED_EMPHASIS = new Set(['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode']);
 
@@ -97,16 +97,7 @@ function buildHideDecos(mode: MarkMode) {
 			}
 		}
 
-		ranges.sort((a, b) => a.from - b.from || b.to - a.to);
-		const deduped: Range<Decoration>[] = [];
-		let lastTo = -1;
-		for (const r of ranges) {
-			if (r.from >= lastTo) {
-				deduped.push(r);
-				lastTo = r.to;
-			}
-		}
-		return Decoration.set(deduped);
+		return Decoration.set(dedupeOverlapping(ranges));
 	};
 }
 

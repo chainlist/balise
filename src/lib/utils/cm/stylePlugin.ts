@@ -2,7 +2,7 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { makePlugin, LENIENT_EMPHASIS } from './shared';
+import { makePlugin, LENIENT_EMPHASIS, dedupeOverlapping } from './shared';
 
 const STYLE_NODES: Record<string, string> = {
 	StrongEmphasis: 'cm-md-bold',
@@ -45,18 +45,7 @@ function buildStyleDecos(view: EditorView): DecorationSet {
 		}
 	}
 
-	// Sort by start asc, end desc (outer ranges first). Skip nested overlaps.
-	ranges.sort((a, b) => a.from - b.from || b.to - a.to);
-	const deduped: Range<Decoration>[] = [];
-	let lastTo = -1;
-	for (const r of ranges) {
-		if (r.from >= lastTo) {
-			deduped.push(r);
-			lastTo = r.to;
-		}
-	}
-
-	return Decoration.set(deduped);
+	return Decoration.set(dedupeOverlapping(ranges));
 }
 
 // Styling doesn't depend on cursor position - skip selectionSet rebuilds.
