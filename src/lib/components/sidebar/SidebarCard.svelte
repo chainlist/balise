@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { ChevronDownIcon } from '@lucide/svelte';
-	import { fade } from 'svelte/transition';
 
 	let {
 		title,
@@ -21,27 +20,29 @@
 		headerEnd?: Snippet;
 	} = $props();
 
-	const grow = $derived(!fitContent && open);
+	const flex = $derived(!fitContent);
+	const isOpen = $derived(!collapsible || open);
 </script>
 
 <section
-	class="flex flex-col rounded bg-card shadow-md transition-[flex-grow] duration-200 ease-out"
-	style:flex-grow={grow ? 1 : 0}
-	class:min-h-0={grow}
+	class="panel"
+	class:fit={fitContent}
+	class:open={isOpen}
+	style:flex-grow={isOpen && flex ? 1 : 0}
+	style:flex-basis={isOpen && flex ? '0' : 'auto'}
+	style:max-height={fitContent ? (isOpen ? '9999px' : undefined) : undefined}
 >
 	{#if collapsible}
 		<header class="flex items-center gap-1 px-3 py-2">
 			<button
 				type="button"
-				class="flex flex-1 items-center justify-between text-left text-[11px] font-semibold tracking-wider text-sidebar-foreground/60 uppercase transition-colors hover:text-sidebar-foreground"
+				class="flex flex-1 items-center justify-between text-left text-[11px] font-semibold tracking-wider text-sidebar-foreground/60 uppercase hover:text-sidebar-foreground"
 				onclick={onToggle}
 				aria-expanded={open}
 			>
 				<span>{title}</span>
 				<ChevronDownIcon
-					class="size-3.5 shrink-0 text-sidebar-foreground/40 transition-transform duration-200 {open
-						? ''
-						: '-rotate-90'}"
+					class="size-3.5 shrink-0 text-sidebar-foreground/40 {open ? '' : '-rotate-90'}"
 				/>
 			</button>
 			{#if headerEnd}
@@ -49,14 +50,47 @@
 			{/if}
 		</header>
 	{/if}
-	{#if !collapsible || open}
-		<div
-			transition:fade={{ duration: 150 }}
-			class="flex flex-col overflow-hidden"
-			class:min-h-0={grow}
-			class:flex-1={grow}
-		>
+	<div class="body" class:open={isOpen}>
+		<div class="body-inner">
 			{@render children()}
 		</div>
-	{/if}
+	</div>
 </section>
+
+<style lang="postcss">
+	@reference "../../../routes/layout.css";
+
+	.panel {
+		@apply flex min-h-0 flex-col overflow-hidden rounded bg-card shadow-md;
+		transition:
+			flex-grow 0.2s ease,
+			flex-basis 0.2s ease,
+			max-height 0.2s ease;
+	}
+
+	.body {
+		display: grid;
+		grid-template-rows: 0fr;
+		transition: grid-template-rows 0.2s ease;
+		overflow: hidden;
+	}
+
+	.body.open {
+		grid-template-rows: 1fr;
+	}
+
+	/* flex panels: body must fill and scroll */
+	.panel:not(.fit) .body {
+		flex: 1 1 0;
+		min-height: 0;
+	}
+
+	.body-inner {
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.panel:not(.fit) .body-inner {
+		@apply scrollbar-none overflow-y-auto;
+	}
+</style>

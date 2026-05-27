@@ -103,7 +103,7 @@
 			<button
 				type="button"
 				onclick={clearActiveTag}
-				class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium transition-colors hover:bg-muted/70"
+				class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium hover:bg-muted/70"
 				style={tagColor(uiState.activeTag) ? `border-color: ${tagColor(uiState.activeTag)};` : ''}
 			>
 				<TagName tag={uiState.activeTag} />
@@ -114,7 +114,7 @@
 			<button
 				type="button"
 				onclick={() => uiState.toggleComposedTag(t)}
-				class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium transition-colors hover:bg-muted/70"
+				class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium hover:bg-muted/70"
 				style={tagColor(t) ? `border-color: ${tagColor(t)};` : ''}
 			>
 				<TagName tag={t} />
@@ -132,7 +132,7 @@
 			<button
 				type="button"
 				onclick={() => handleSelect(note.id)}
-				class="flex flex-col items-start gap-1 rounded border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-left transition-colors hover:border-outline-variant"
+				class="flex flex-col items-start gap-1 rounded border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-left hover:border-outline-variant"
 				class:active={noteSelection.selectedNoteId === note.id}
 			>
 				<span class="w-full truncate text-sm font-semibold text-on-surface">

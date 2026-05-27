@@ -67,7 +67,7 @@
 						type="button"
 						variant="ghost"
 						size="icon-xs"
-						class="ml-auto h-6 w-6 rounded text-destructive opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+						class="ml-auto h-6 w-6 rounded text-destructive opacity-0 group-hover:opacity-100 hover:text-destructive"
 						onclick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();

@@ -49,7 +49,7 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden bg-primary/5 p-3">
-	<SidebarCard collapsible={false}>
+	<SidebarCard collapsible={false} fitContent>
 		<SidebarHeader />
 	</SidebarCard>
 	<SidebarCard
