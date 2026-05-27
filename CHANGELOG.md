@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0](https://github.com/chainlist/balise/compare/v0.11.0...v0.12.0) (2026-05-27)
+
+
+### Features
+
+* **journal:** lazy note creation, local-date grouping, single focus ([7e06231](https://github.com/chainlist/balise/commit/7e0623119f843ee6fa5e026b6908f52dd10ff837))
+
+
+### Bug Fixes
+
+* change journal ordering ([556da9d](https://github.com/chainlist/balise/commit/556da9da7a69b1b3f70665d590d44ab90e160999))
+* **checkbox:** change the way checkbox are displayed after a new line on MarkMode.Never ([00b8275](https://github.com/chainlist/balise/commit/00b8275d9335ca246915a2f1c22003d0b9e6b262))
+* notes not saving on proper date ([fa72b14](https://github.com/chainlist/balise/commit/fa72b143972799aef11f3e9545994c80af96096a))
+
 ## [0.11.0](https://github.com/chainlist/balise/compare/v0.10.0...v0.11.0) (2026-05-26)
 
 
