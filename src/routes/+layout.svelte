@@ -54,9 +54,17 @@
 			<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
 		</div>
 	{:else}
-		<div class="grid h-screen w-full grid-cols-[minmax(0,280px)_1fr]" in:fade={{ duration: 250 }}>
-			<Sidebar />
-			<div class="overflow-hidden">
+		<div class="relative flex h-screen w-full" in:fade={{ duration: 250 }}>
+			<div
+				class="ease absolute inset-y-0 left-0 z-10 transition-transform duration-150"
+				class:zen={uiState.isZenModeActive}
+			>
+				<Sidebar />
+			</div>
+			<div
+				class="ease h-full w-full overflow-hidden transition-[padding-left] duration-150"
+				class:pl-75={!uiState.isZenModeActive}
+			>
 				{@render children()}
 			</div>
 		</div>
@@ -67,3 +75,11 @@
 		{/if}
 	{/if}
 </SidebarProvider>
+
+<style lang="postcss">
+	@reference './layout.css';
+
+	.zen {
+		@apply -translate-x-full;
+	}
+</style>

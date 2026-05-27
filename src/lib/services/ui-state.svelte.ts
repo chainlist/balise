@@ -21,6 +21,7 @@ class UIState {
 	isCommandPaletteOpen = $state(false);
 	isCapturingShortcut = $state(false);
 	isWizardOpen = $state(false);
+	isZenModeActive = $state(false);
 	activeNoteId = $state<string | null>(null);
 
 	#store: Store | null = null;
@@ -73,6 +74,10 @@ class UIState {
 		if (this.activeDesk === desk) {
 			await this.setActiveDesk(next[0]);
 		}
+	}
+
+	async toggleZenMode() {
+		this.isZenModeActive = !this.isZenModeActive;
 	}
 
 	async setActiveTag(tag: string | null): Promise<void> {

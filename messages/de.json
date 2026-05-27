@@ -50,5 +50,7 @@
   "nav_journaling": "Journaling",
   "nav_tasks": "Aufgaben",
   "nav_tags": "Tags",
-  "nav_notes": "Notizen"
+  "nav_notes": "Notizen",
+  "shortcut_toggle_zen_mode_name": "Zen-Modus umschalten",
+  "shortcut_toggle_zen_mode_desc": "Seitenleiste und Notizliste für eine ablenkungsfreie Ansicht ausblenden"
 }

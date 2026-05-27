@@ -115,6 +115,8 @@
 	"shortcut_prev_note_desc": "Sélectionner la note au-dessus dans la liste",
 	"shortcut_next_note_name": "Note suivante",
 	"shortcut_next_note_desc": "Sélectionner la note en-dessous dans la liste",
+	"shortcut_toggle_zen_mode_name": "Activer/désactiver le mode zen",
+	"shortcut_toggle_zen_mode_desc": "Masquer la barre latérale et la liste des notes pour une vue sans distraction",
 
 	"settings_about_heading": "À propos",
 	"settings_about_description": "Informations sur l'application et mises à jour.",

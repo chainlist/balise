@@ -115,6 +115,8 @@
 	"shortcut_prev_note_desc": "Select the note above in the list",
 	"shortcut_next_note_name": "Next Note",
 	"shortcut_next_note_desc": "Select the note below in the list",
+	"shortcut_toggle_zen_mode_name": "Toggle Zen Mode",
+	"shortcut_toggle_zen_mode_desc": "Hide the sidebar and note list for a distraction-free view",
 
 	"settings_about_heading": "About",
 	"settings_about_description": "App information and updates.",

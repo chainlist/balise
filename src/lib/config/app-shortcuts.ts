@@ -75,5 +75,14 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
 			if (idx !== -1 && idx < notes.length - 1) noteSignals.signalSelectNote(notes[idx + 1].id);
 		}
+	},
+	{
+		id: 'toggle-zen-mode',
+		name: m.shortcut_toggle_zen_mode_name,
+		description: m.shortcut_toggle_zen_mode_desc,
+		defaultBinding: '$mod+Shift+z',
+		run: () => {
+			uiState.isZenModeActive = !uiState.isZenModeActive;
+		}
 	}
 ];

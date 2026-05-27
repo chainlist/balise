@@ -4,7 +4,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 </script>
 
-<div class="flex h-screen flex-col">
+<div class="flex h-screen w-75 flex-col">
 	<AccordionSidebar />
 </div>
 
