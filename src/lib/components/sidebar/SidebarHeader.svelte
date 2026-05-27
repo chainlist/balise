@@ -3,7 +3,13 @@
 	import { useSidebar } from '$lib/components/shadcn/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ChevronsUpDownIcon, PlusIcon, Trash2Icon, LayoutListIcon } from '@lucide/svelte';
+	import {
+		ChevronsUpDownIcon,
+		PlusIcon,
+		Trash2Icon,
+		LayoutListIcon,
+		Settings
+	} from '@lucide/svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
@@ -27,7 +33,12 @@
 </script>
 
 <div class="flex flex-col gap-2 p-3">
-	<h1 class="text-lg font-bold">Balise</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="text-lg font-bold">Balise</h1>
+		<Button variant="ghost" size="icon-sm" onclick={() => (uiState.isSettingsOpen = true)}>
+			<Settings class="size-3.5" />
+		</Button>
+	</div>
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
