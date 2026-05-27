@@ -28,7 +28,7 @@
 	class:active={isActive}
 	onclick={handleTagClick}
 	class="group/tag-item relative inline-flex w-full items-center justify-between rounded py-1.5 text-on-surface-variant transition-all select-none hover:px-1 hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
-	transition:fly|global={{ delay, y: -8, duration: 200 }}
+	in:fly|global={{ delay, y: -8, duration: 200 }}
 >
 	<div class="flex min-w-0 items-center gap-2">
 		{#if tag.pinned}
