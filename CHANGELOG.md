@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://github.com/chainlist/balise/compare/v0.12.1...v0.13.0) (2026-05-27)
+
+
+### Features
+
+* **design:** Redisgn completely the sidebar to have a more zen/unbloated aesthetic ([#18](https://github.com/chainlist/balise/issues/18)) ([5243ccc](https://github.com/chainlist/balise/commit/5243ccc67c135aa96fe86313e1a8ae695f5fb30b))
+
+
+### Bug Fixes
+
+* **journal:** reload journal when switching desk ([bbed29b](https://github.com/chainlist/balise/commit/bbed29bec9538a03f882ec1eef1bd73a64258bb5))
+
 ## [0.12.1](https://github.com/chainlist/balise/compare/v0.12.0...v0.12.1) (2026-05-27)
 
 
