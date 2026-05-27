@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.12.1](https://github.com/chainlist/balise/compare/v0.12.0...v0.12.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* **journal:** add popover calendar button ([f31e90d](https://github.com/chainlist/balise/commit/f31e90d681347bb2f57ddf81ddf3fffa419774f7))
+* **journal:** fix small size window calendar display by displaying a button instead of the full calendar ([ed9ab60](https://github.com/chainlist/balise/commit/ed9ab6073379e12d323129d9391bb3dabe915980))
+* only notes with #journal tag are turned in the journal ([d59d15a](https://github.com/chainlist/balise/commit/d59d15a626d726522746885c9fa445ef83259868))
+
 ## [0.12.0](https://github.com/chainlist/balise/compare/v0.11.0...v0.12.0) (2026-05-27)
 
 
