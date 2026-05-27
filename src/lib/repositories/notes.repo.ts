@@ -141,8 +141,10 @@ export async function queryJournalNotesByDate(
 	const rows = await db.select<RawNote[]>(
 		`SELECT n.* FROM notes n
      WHERE n.created_at >= $1 AND n.created_at < $2
-     AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'journal')
-     ORDER BY n.created_at ASC`,
+     ORDER BY
+       CASE WHEN EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'journal')
+            THEN 0 ELSE 1 END,
+       n.created_at ASC`,
 		[utcFrom, utcTo]
 	);
 	return rows.map(mapNote);
