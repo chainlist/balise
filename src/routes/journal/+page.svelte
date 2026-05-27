@@ -80,7 +80,9 @@
 	});
 
 	$effect(() => {
-		if (selectedDate) loadForDate(toJSDate(selectedDate));
+		if (selectedDate && uiState.activeDesk) {
+			loadForDate(toJSDate(selectedDate));
+		}
 	});
 
 	function handleWindowPointerDown(e: PointerEvent) {
