@@ -4,10 +4,8 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagDisplayName, UNTAGGED_FILTER, type Tag } from '$lib/services/tags.svelte';
 	import { Settings2Icon, PinIcon } from '@lucide/svelte';
-	import { fly } from 'svelte/transition';
 
-	let { tag, onSettings, delay }: { tag: Tag; onSettings?: (tag: Tag) => void; delay?: number } =
-		$props();
+	let { tag, onSettings }: { tag: Tag; onSettings?: (tag: Tag) => void } = $props();
 
 	let isActive = $derived(uiState.activeTag === tag.tag);
 
@@ -27,8 +25,7 @@
 	data-tag={tag.tag}
 	class:active={isActive}
 	onclick={handleTagClick}
-	class="group/tag-item relative inline-flex w-full items-center justify-between rounded py-1.5 text-on-surface-variant transition-all select-none hover:px-1 hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
-	in:fly|global={{ delay, y: -8, duration: 200 }}
+	class="group/tag-item relative inline-flex w-full items-center justify-between rounded py-1.5 text-on-surface-variant select-none hover:px-1 hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
 >
 	<div class="flex min-w-0 items-center gap-2">
 		{#if tag.pinned}

@@ -57,7 +57,7 @@
 	@reference "../../../routes/layout.css";
 
 	.row {
-		@apply inline-flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-on-surface-variant transition-colors select-none hover:bg-sidebar-accent hover:text-on-surface;
+		@apply inline-flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-on-surface-variant select-none hover:bg-sidebar-accent hover:text-on-surface;
 	}
 
 	.row[disabled] {

@@ -22,8 +22,8 @@
 			pinned: false
 		}}
 	/>
-	{#each tagsService.tags as tag, i (tag.tag)}
-		<TagSidebarItem {tag} onSettings={openTagSettings} delay={i * 15} />
+	{#each tagsService.tags as tag (tag.tag)}
+		<TagSidebarItem {tag} onSettings={openTagSettings} />
 	{/each}
 </div>
 
