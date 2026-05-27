@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/chainlist/balise/compare/v0.13.0...v0.13.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* **sidebar:** Fix sidebar animations ([#19](https://github.com/chainlist/balise/issues/19)) ([476078f](https://github.com/chainlist/balise/commit/476078f78138b589a0aa92ebb44e67512e5ad3de))
+
 ## [0.13.0](https://github.com/chainlist/balise/compare/v0.12.1...v0.13.0) (2026-05-27)
 
 
