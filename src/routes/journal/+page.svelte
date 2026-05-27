@@ -1,5 +1,8 @@
 ﻿<script lang="ts">
 	import { Calendar } from '$lib/components/shadcn/calendar/index.js';
+	import { Popover } from 'bits-ui';
+	import { Button } from '$lib/components/shadcn/button/index.js';
+	import { Calendar as CalendarIcon } from '@lucide/svelte';
 	import { today, getLocalTimeZone } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
 	import { notesService } from '$lib/services/notes.svelte';
@@ -18,6 +21,13 @@
 
 	const allNotes = $derived([...journalNotes, ...(draftNote ? [draftNote] : [])]);
 	const hasMultipleNotes = $derived(allNotes.length > 1);
+	const selectedDateLabel = $derived(
+		selectedDate
+			? new Intl.DateTimeFormat(navigator.language, { dateStyle: 'medium' }).format(
+					toJSDate(selectedDate)
+				)
+			: ''
+	);
 
 	function toJSDate(dv: DateValue): Date {
 		return new Date(dv.year, dv.month - 1, dv.day);
@@ -74,8 +84,26 @@
 </script>
 
 <div class="relative h-full">
-	<div class="absolute top-4 left-4 z-10 overflow-hidden rounded-lg border bg-background shadow-md">
-		<Calendar type="single" bind:value={selectedDate} locale={navigator.language} />
+	<div class="absolute top-4 left-4 z-10">
+		<Popover.Root>
+			<Popover.Trigger>
+				{#snippet child({ props })}
+					<Button variant="outline" size="sm" {...props}>
+						<CalendarIcon class="size-4" />
+						{selectedDateLabel}
+					</Button>
+				{/snippet}
+			</Popover.Trigger>
+			<Popover.Portal>
+				<Popover.Content
+					class="z-50 overflow-hidden rounded-lg border bg-background shadow-md"
+					sideOffset={4}
+					align="start"
+				>
+					<Calendar type="single" bind:value={selectedDate} locale={navigator.language} />
+				</Popover.Content>
+			</Popover.Portal>
+		</Popover.Root>
 	</div>
 
 	<div class="h-full space-y-8 overflow-y-auto pb-16">

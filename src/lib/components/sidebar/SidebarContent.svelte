@@ -6,7 +6,7 @@
 	import { resolve } from '$app/paths';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
-	import { LayoutDashboardIcon, NotebookIcon } from '@lucide/svelte';
+	import { BookOpen, BookOpenText, LayoutDashboardIcon, NotebookIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import { page } from '$app/state';
 
@@ -35,6 +35,10 @@
 			{m.nav_browse()}
 		</span>
 		<div class="pl-1">
+			<a href={resolve('/journal')} class="button" class:active={isJournalPage}>
+				<BookOpenText class="size-4" />
+				{m.nav_journaling()}
+			</a>
 			<a href={resolve('/dashboard')} class="button" class:active={isDashboard}>
 				<LayoutDashboardIcon class="size-4" />
 				{m.nav_dashboard()}
@@ -47,10 +51,6 @@
 				<NotebookIcon class="size-4" />
 				{m.nav_all_notes()}
 			</button>
-			<a href={resolve('/journal')} class="button" class:active={isJournalPage}>
-				<NotebookIcon class="size-4" />
-				{m.nav_journaling()}
-			</a>
 			<button disabled class="button">{m.nav_tasks()}</button>
 		</div>
 	</div>
