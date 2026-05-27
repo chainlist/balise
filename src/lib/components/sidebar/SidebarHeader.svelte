@@ -26,8 +26,8 @@
 	}
 </script>
 
-<header class="flex flex-col gap-2 p-4">
-	<h1 class="text-2xl font-bold">Balise</h1>
+<div class="flex flex-col gap-2 p-3">
+	<h1 class="text-lg font-bold">Balise</h1>
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
@@ -77,8 +77,7 @@
 			</DropdownMenu.Item>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
-</header>
-<hr />
+</div>
 
 <AddDeskSheet bind:open={isAddDeskOpen} />
 <DeleteDeskSheet bind:open={isDeleteConfirmOpen} bind:deskName={deskPendingDelete} />

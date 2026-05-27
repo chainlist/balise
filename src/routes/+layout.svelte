@@ -54,7 +54,7 @@
 			<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
 		</div>
 	{:else}
-		<div class="grid h-screen w-full grid-cols-[minmax(0,250px)_1fr]" in:fade={{ duration: 250 }}>
+		<div class="grid h-screen w-full grid-cols-[minmax(0,280px)_1fr]" in:fade={{ duration: 250 }}>
 			<Sidebar />
 			<div class="overflow-hidden">
 				{@render children()}
