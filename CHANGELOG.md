@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.2](https://github.com/chainlist/balise/compare/v0.13.1...v0.13.2) (2026-05-27)
+
+
+### Bug Fixes
+
+* **code:** fix code block resolution ([e56b6fa](https://github.com/chainlist/balise/commit/e56b6fa68bc685e7fc101aecc523725471fc0a46))
+
 ## [0.13.1](https://github.com/chainlist/balise/compare/v0.13.0...v0.13.1) (2026-05-27)
 
 
