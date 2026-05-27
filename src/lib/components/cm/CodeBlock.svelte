@@ -3,6 +3,6 @@
 	import * as Code from '$lib/components/shadcn/code';
 </script>
 
-<div class="w-full p-6">
-	<Code.Root lang={lang as any} {code} />
+<div class="flex w-full overflow-x-auto rounded border bg-white/50 p-6 font-mono dark:bg-white/10">
+	{code}
 </div>
