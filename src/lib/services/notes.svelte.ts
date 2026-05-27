@@ -7,6 +7,7 @@ import {
 	queryUntaggedNotes,
 	queryNoteById,
 	insertNote,
+	insertNoteAt,
 	updateNoteContent,
 	queryNoteUpdatedAt,
 	deleteNoteById,
@@ -77,9 +78,16 @@ class NotesService {
 		return queryJournalNotesByDate(getDB(), utcFrom, utcTo);
 	}
 
-	async createForDate(id: string, content: string): Promise<void> {
+	async createForDate(id: string, content: string, localDate: Date): Promise<void> {
 		const db = getDB();
-		await insertNote(db, id, content);
+		const now = new Date();
+		const isToday = now.getFullYear() === localDate.getFullYear()
+			&& now.getMonth() === localDate.getMonth()
+			&& now.getDate() === localDate.getDate();
+		const createdAt = isToday
+			? toSQLiteUTC(now)
+			: toSQLiteUTC(new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), 12, 0, 0));
+		await insertNoteAt(db, id, content, createdAt);
 		await tagsService.syncNoteTags(id, content);
 		const note = await queryNoteById(db, id);
 		if (note) await fsSyncService.syncNoteFile(note);

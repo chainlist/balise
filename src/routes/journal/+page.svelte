@@ -34,7 +34,7 @@
 		const formatted = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'full' }).format(
 			date
 		);
-		return `### ${formatted}\n\n#${JOURNAL_TAG}\n\n`;
+		return `### ${formatted}\n\n\n\n#${JOURNAL_TAG}`;
 	}
 
 	async function loadForDate(date: Date): Promise<void> {
@@ -48,7 +48,7 @@
 		} else {
 			const id = crypto.randomUUID();
 			onSaveHandlers.set(id, async (content) => {
-				await notesService.createForDate(id, content);
+				await notesService.createForDate(id, content, date);
 				onSaveHandlers.delete(id);
 			});
 			draftNote = {
@@ -95,4 +95,3 @@
 		{/each}
 	</div>
 </div>
-

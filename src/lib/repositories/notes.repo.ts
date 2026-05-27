@@ -72,6 +72,18 @@ export async function insertNote(db: Database, id: string, content: string): Pro
 	]);
 }
 
+export async function insertNoteAt(
+	db: Database,
+	id: string,
+	content: string,
+	createdAt: string
+): Promise<void> {
+	await db.execute(
+		'INSERT INTO notes (id, content, title, created_at) VALUES ($1, $2, $3, $4)',
+		[id, content, extractTitle(content), createdAt]
+	);
+}
+
 export async function insertNoteWithMeta(
 	db: Database,
 	note: {
