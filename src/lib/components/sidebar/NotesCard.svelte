@@ -74,7 +74,7 @@
 					</Button>
 				{/snippet}
 			</DropdownMenu.Trigger>
-			<DropdownMenu.Content class="w-56 rounded" align="end">
+			<DropdownMenu.Content class="w-56 rounded" align="start" side="right">
 				<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
 					<Input
 						bind:value={tagSearch}
@@ -104,9 +104,7 @@
 				type="button"
 				onclick={clearActiveTag}
 				class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium transition-colors hover:bg-muted/70"
-				style={tagColor(uiState.activeTag)
-					? `border-color: ${tagColor(uiState.activeTag)};`
-					: ''}
+				style={tagColor(uiState.activeTag) ? `border-color: ${tagColor(uiState.activeTag)};` : ''}
 			>
 				<TagName tag={uiState.activeTag} />
 				<XIcon class="size-3 opacity-50 group-hover:opacity-100" />
@@ -126,7 +124,7 @@
 	</div>
 {/if}
 
-<div class="flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 pb-3 scrollbar-none">
+<div class="flex flex-1 scrollbar-none flex-col gap-1.5 overflow-y-auto px-3 pb-3">
 	{#if notesService.notes.length === 0}
 		<p class="px-2 py-6 text-center text-sm text-muted-foreground">{m.no_notes_yet()}</p>
 	{:else}
