@@ -121,6 +121,22 @@ export async function queryTotalNotesCount(db: Database): Promise<number> {
 	return result[0]?.count ?? 0;
 }
 
+export async function queryJournalNotesByDate(
+	db: Database,
+	utcFrom: string,
+	utcTo: string
+): Promise<Note[]> {
+	const rows = await db.select<RawNote[]>(
+		`SELECT n.* FROM notes n
+     WHERE n.created_at >= $1 AND n.created_at < $2
+     AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'journal')
+     ORDER BY n.created_at ASC`,
+		[utcFrom, utcTo]
+	);
+	return rows.map(mapNote);
+}
+
+
 export async function queryAllNotesMeta(
 	db: Database
 ): Promise<{ id: string; updated_at: string }[]> {

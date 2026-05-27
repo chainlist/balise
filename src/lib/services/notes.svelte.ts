@@ -9,7 +9,8 @@ import {
 	insertNote,
 	updateNoteContent,
 	queryNoteUpdatedAt,
-	deleteNoteById
+	deleteNoteById,
+	queryJournalNotesByDate
 } from '$lib/repositories/notes.repo';
 
 import type { Note } from '$lib/repositories/notes.repo';
@@ -20,6 +21,10 @@ export function newNoteContent(activeTag: string | null): string {
 		'### New Note\n\n' +
 		(activeTag && activeTag !== UNTAGGED_FILTER ? `#${activeTag}\n\n` : '')
 	);
+}
+
+function toSQLiteUTC(d: Date): string {
+	return d.toISOString().replace('T', ' ').slice(0, 19);
 }
 
 class NotesService {
@@ -52,14 +57,32 @@ class NotesService {
 		const db = getDB();
 		await updateNoteContent(db, id, content);
 		await tagsService.syncNoteTags(id, content);
-		const note = this.notes.find((n) => n.id === id);
-		if (note) {
-			note.content = content;
-			note.title = extractTitle(content);
+		const inList = this.notes.find((n) => n.id === id);
+		if (inList) {
+			inList.content = content;
+			inList.title = extractTitle(content);
 			const ts = await queryNoteUpdatedAt(db, id);
-			if (ts) note.updated_at = ts;
-			await fsSyncService.syncNoteFile(note);
+			if (ts) inList.updated_at = ts;
+			await fsSyncService.syncNoteFile(inList);
+		} else {
+			const note = await queryNoteById(db, id);
+			if (note) await fsSyncService.syncNoteFile(note);
 		}
+	}
+
+	async queryForDate(localDate: Date): Promise<Note[]> {
+		const y = localDate.getFullYear(), mo = localDate.getMonth(), d = localDate.getDate();
+		const utcFrom = toSQLiteUTC(new Date(y, mo, d));
+		const utcTo = toSQLiteUTC(new Date(y, mo, d + 1));
+		return queryJournalNotesByDate(getDB(), utcFrom, utcTo);
+	}
+
+	async createForDate(id: string, content: string): Promise<void> {
+		const db = getDB();
+		await insertNote(db, id, content);
+		await tagsService.syncNoteTags(id, content);
+		const note = await queryNoteById(db, id);
+		if (note) await fsSyncService.syncNoteFile(note);
 	}
 
 	async delete(id: string): Promise<void> {

@@ -1,3 +1,7 @@
+<script module lang="ts">
+	let focusedNoteId = $state<string | null>(null);
+</script>
+
 <script lang="ts">
 	import { EditorView, keymap } from '@codemirror/view';
 	import { Compartment } from '@codemirror/state';
@@ -35,7 +39,10 @@
 	import { EllipsisVerticalIcon, Trash2Icon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
-	let { note }: { note: Note } = $props();
+	let {
+		note,
+		onSave
+	}: { note: Note; onSave?: (content: string) => Promise<void> } = $props();
 
 	let confirmOpen = $state(false);
 	let editorView = $state<EditorView | null>(null);
@@ -63,8 +70,9 @@
 
 	$effect(() => {
 		const mode = settingsService.markdownMarks;
+		const effectiveMode: MarkMode = mode === 'cursor' && focusedNoteId !== note.id ? 'never' : mode;
 		if (editorView) {
-			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(mode)) });
+			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(effectiveMode)) });
 		}
 	});
 
@@ -91,11 +99,16 @@
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
 					EditorView.updateListener.of((u) => {
+						if (u.focusChanged) {
+							if (u.view.hasFocus) focusedNoteId = noteId;
+							else if (focusedNoteId === noteId) focusedNoteId = null;
+						}
 						if (!u.docChanged) return;
 						clearTimeout(saveTimer);
 						const val = u.state.doc.toString();
 						saveTimer = setTimeout(async () => {
-							await notesService.update(noteId, val);
+							if (onSave) await onSave(val);
+							else await notesService.update(noteId, val);
 						}, 500);
 					})
 				],
@@ -103,10 +116,14 @@
 			});
 
 			editorView = view;
-			view.focus();
+			if (!focusedNoteId) {
+				focusedNoteId = noteId;
+				view.focus();
+			}
 
 			return () => {
 				clearTimeout(saveTimer);
+				if (focusedNoteId === noteId) focusedNoteId = null;
 				editorView = null;
 				view.destroy();
 			};

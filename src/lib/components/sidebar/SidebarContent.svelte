@@ -14,6 +14,7 @@
 	let tagPendingSettings = $state<Tag | null>(null);
 	const isDashboard = $derived(page.url.pathname === '/dashboard');
 	const isNotesPage = $derived(page.url.pathname === '/');
+	const isJournalPage = $derived(page.url.pathname === '/journal');
 
 	function openTagSettings(tag: Tag) {
 		tagPendingSettings = tag;
@@ -46,7 +47,10 @@
 				<NotebookIcon class="size-4" />
 				{m.nav_all_notes()}
 			</button>
-			<button disabled class="button">{m.nav_journaling()}</button>
+			<a href={resolve('/journal')} class="button" class:active={isJournalPage}>
+				<NotebookIcon class="size-4" />
+				{m.nav_journaling()}
+			</a>
 			<button disabled class="button">{m.nav_tasks()}</button>
 		</div>
 	</div>

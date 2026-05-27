@@ -3,10 +3,17 @@
 	import { tagsService, tagDisplayName, type Tag } from '$lib/services/tags.svelte';
 	import { getDB } from '$lib/utils/db';
 	import { queryTotalNotesCount } from '$lib/repositories/notes.repo';
-	import { FileTextIcon, HashIcon, MergeIcon, TrendingUpIcon, ArrowRightIcon } from '@lucide/svelte';
+	import {
+		FileTextIcon,
+		HashIcon,
+		MergeIcon,
+		TrendingUpIcon,
+		ArrowRightIcon
+	} from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import TagChip from '$lib/components/cm/TagChip.svelte';
 	import * as m from '$paraglide/messages.js';
+	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let totalNotes = $state(0);
 
@@ -36,6 +43,7 @@
 
 	onMount(async () => {
 		totalNotes = await queryTotalNotesCount(getDB());
+		uiState.setActiveTag(null);
 	});
 </script>
 
@@ -92,7 +100,7 @@
 									></div>
 								</div>
 							</div>
-							<span class="w-6 text-right text-xs tabular-nums text-muted-foreground"
+							<span class="w-6 text-right text-xs text-muted-foreground tabular-nums"
 								>{tag.count}</span
 							>
 						</div>
@@ -120,7 +128,9 @@
 							<ArrowRightIcon class="size-3 shrink-0 text-muted-foreground" />
 							<TagChip tag={b.tag} navigate={false} />
 							<div class="ml-auto flex items-center gap-2">
-								<span class="text-xs text-muted-foreground">{m.dashboard_merge_count({ count: a.count + b.count })}</span>
+								<span class="text-xs text-muted-foreground"
+									>{m.dashboard_merge_count({ count: a.count + b.count })}</span
+								>
 								<Button variant="outline" size="sm" disabled>{m.action_merge()}</Button>
 							</div>
 						</div>
