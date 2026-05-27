@@ -30,6 +30,7 @@
 	class:open={isOpen}
 	style:flex-grow={isOpen && flex ? 1 : 0}
 	style:flex-basis={isOpen && flex ? '0' : 'auto'}
+	style:max-height={fitContent ? (isOpen ? '9999px' : undefined) : undefined}
 >
 	{#if collapsible}
 		<header class="flex items-center gap-1 px-3 py-2">
@@ -60,17 +61,11 @@
 	@reference "../../../routes/layout.css";
 
 	.panel {
-		@apply flex flex-col min-h-0 overflow-hidden rounded bg-card shadow-md;
-		transition: flex-grow 0.2s ease, flex-basis 0.2s ease, max-height 0.2s ease;
-	}
-
-	/* fit-content panels: constrain with max-height instead of flex-grow */
-	.panel.fit {
-		max-height: 44px;
-	}
-
-	.panel.fit.open {
-		max-height: 300px;
+		@apply flex min-h-0 flex-col overflow-hidden rounded bg-card shadow-md;
+		transition:
+			flex-grow 0.2s ease,
+			flex-basis 0.2s ease,
+			max-height 0.2s ease;
 	}
 
 	.body {
@@ -96,6 +91,6 @@
 	}
 
 	.panel:not(.fit) .body-inner {
-		overflow-y: auto;
+		@apply scrollbar-none overflow-y-auto;
 	}
 </style>
