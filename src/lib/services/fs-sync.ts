@@ -3,7 +3,7 @@ import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
 import {
 	queryAllNotesMeta,
-	queryNotesByIds,
+	queryNotesWithContentByIds,
 	updateNoteContent,
 	insertNoteWithMeta
 } from '$lib/repositories/notes.repo';
@@ -12,7 +12,7 @@ import type { Note } from '$lib/repositories/notes.repo';
 type NoteMeta = Omit<Note, 'content' | 'title'>;
 
 class FsSyncService {
-	toFrontmatter(note: Note): { meta: string; content: string } {
+	toFrontmatter(note: Note & { content: string }): { meta: string; content: string } {
 		const meta = [
 			'---',
 			`id: ${note.id}`,
@@ -51,7 +51,7 @@ class FsSyncService {
 		};
 	}
 
-	async syncNoteFile(note: Note): Promise<void> {
+	async syncNoteFile(note: Note & { content: string }): Promise<void> {
 		if (!fsService.currentDesk) return;
 		const { meta, content } = this.toFrontmatter(note);
 		await fsService.writeTextFile(`${note.id}.md`, meta + content);
@@ -121,7 +121,7 @@ class FsSyncService {
 
 		const missingIds = dbNotes.filter((n) => !syncedIds.has(n.id)).map((n) => n.id);
 		if (missingIds.length > 0) {
-			const notes = await queryNotesByIds(db, missingIds);
+			const notes = await queryNotesWithContentByIds(db, missingIds);
 			await Promise.all(notes.map((note) => this.syncNoteFile(note)));
 		}
 	}

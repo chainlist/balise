@@ -1,10 +1,11 @@
 import type Database from '@tauri-apps/plugin-sql';
-import { extractTitle } from '$lib/utils/note-title';
+import { extractTitle, notePreview } from '$lib/utils/note-title';
 
 interface RawNote {
 	id: string;
 	title: string;
-	content: string;
+	preview: string;
+	content?: string;
 	pinned: number;
 	archived: number;
 	created_at: string;
@@ -14,7 +15,8 @@ interface RawNote {
 export interface Note {
 	id: string;
 	title: string;
-	content: string;
+	preview: string;
+	content?: string;
 	pinned: boolean;
 	archived: boolean;
 	created_at: string;
@@ -25,10 +27,13 @@ function mapNote(raw: RawNote): Note {
 	return { ...raw, pinned: raw.pinned === 1, archived: raw.archived === 1 };
 }
 
+const NOTE_COLS = 'id, title, preview, pinned, archived, created_at, updated_at';
+const NOTE_COLS_N = 'n.id, n.title, n.preview, n.pinned, n.archived, n.created_at, n.updated_at';
+
 export async function queryNotesByTags(db: Database, tags: string[]): Promise<Note[]> {
 	if (tags.length === 0) {
 		const rows = await db.select<RawNote[]>(
-			'SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC'
+			`SELECT ${NOTE_COLS} FROM notes ORDER BY pinned DESC, updated_at DESC`
 		);
 		return rows.map(mapNote);
 	}
@@ -41,7 +46,7 @@ export async function queryNotesByTags(db: Database, tags: string[]): Promise<No
 		.join('\n     ');
 
 	const rows = await db.select<RawNote[]>(
-		`SELECT n.* FROM notes n
+		`SELECT ${NOTE_COLS_N} FROM notes n
      WHERE 1=1
      ${existsClauses}
      ORDER BY n.pinned DESC, n.updated_at DESC`,
@@ -52,7 +57,7 @@ export async function queryNotesByTags(db: Database, tags: string[]): Promise<No
 
 export async function queryUntaggedNotes(db: Database): Promise<Note[]> {
 	const rows = await db.select<RawNote[]>(
-		`SELECT * FROM notes
+		`SELECT ${NOTE_COLS} FROM notes
        WHERE id NOT IN (SELECT DISTINCT note_id FROM note_tags)
        ORDER BY pinned DESC, updated_at DESC`
 	);
@@ -60,15 +65,27 @@ export async function queryUntaggedNotes(db: Database): Promise<Note[]> {
 }
 
 export async function queryNoteById(db: Database, id: string): Promise<Note | null> {
-	const rows = await db.select<RawNote[]>('SELECT * FROM notes WHERE id = $1', [id]);
+	const rows = await db.select<RawNote[]>(
+		`SELECT ${NOTE_COLS} FROM notes WHERE id = $1`,
+		[id]
+	);
 	return rows[0] ? mapNote(rows[0]) : null;
 }
 
+export async function queryNoteContent(db: Database, id: string): Promise<string> {
+	const rows = await db.select<{ content: string }[]>(
+		'SELECT content FROM notes WHERE id = $1',
+		[id]
+	);
+	return rows[0]?.content ?? '';
+}
+
 export async function insertNote(db: Database, id: string, content: string): Promise<void> {
-	await db.execute('INSERT INTO notes (id, content, title) VALUES ($1, $2, $3)', [
+	await db.execute('INSERT INTO notes (id, content, title, preview) VALUES ($1, $2, $3, $4)', [
 		id,
 		content,
-		extractTitle(content)
+		extractTitle(content),
+		notePreview(content)
 	]);
 }
 
@@ -79,8 +96,8 @@ export async function insertNoteAt(
 	createdAt: string
 ): Promise<void> {
 	await db.execute(
-		'INSERT INTO notes (id, content, title, created_at) VALUES ($1, $2, $3, $4)',
-		[id, content, extractTitle(content), createdAt]
+		'INSERT INTO notes (id, content, title, preview, created_at) VALUES ($1, $2, $3, $4, $5)',
+		[id, content, extractTitle(content), notePreview(content), createdAt]
 	);
 }
 
@@ -96,11 +113,12 @@ export async function insertNoteWithMeta(
 	}
 ): Promise<void> {
 	await db.execute(
-		'INSERT INTO notes (id, content, title, pinned, archived, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+		'INSERT INTO notes (id, content, title, preview, pinned, archived, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
 		[
 			note.id,
 			note.content,
 			extractTitle(note.content),
+			notePreview(note.content),
 			note.pinned ? 1 : 0,
 			note.archived ? 1 : 0,
 			note.created_at,
@@ -111,8 +129,8 @@ export async function insertNoteWithMeta(
 
 export async function updateNoteContent(db: Database, id: string, content: string): Promise<void> {
 	await db.execute(
-		"UPDATE notes SET content = $1, title = $2, updated_at = datetime('now') WHERE id = $3",
-		[content, extractTitle(content), id]
+		"UPDATE notes SET content = $1, title = $2, preview = $3, updated_at = datetime('now') WHERE id = $4",
+		[content, extractTitle(content), notePreview(content), id]
 	);
 }
 
@@ -139,7 +157,7 @@ export async function queryJournalNotesByDate(
 	utcTo: string
 ): Promise<Note[]> {
 	const rows = await db.select<RawNote[]>(
-		`SELECT n.* FROM notes n
+		`SELECT ${NOTE_COLS_N} FROM notes n
      WHERE n.created_at >= $1 AND n.created_at < $2
        AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'journal')
      ORDER BY n.created_at ASC`,
@@ -158,8 +176,24 @@ export async function queryAllNotesMeta(
 export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note[]> {
 	if (ids.length === 0) return [];
 	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
-	const rows = await db.select<RawNote[]>(`SELECT * FROM notes WHERE id IN (${placeholders})`, ids);
+	const rows = await db.select<RawNote[]>(
+		`SELECT ${NOTE_COLS} FROM notes WHERE id IN (${placeholders})`,
+		ids
+	);
 	return rows.map(mapNote);
+}
+
+export async function queryNotesWithContentByIds(
+	db: Database,
+	ids: string[]
+): Promise<(Note & { content: string })[]> {
+	if (ids.length === 0) return [];
+	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+	const rows = await db.select<RawNote[]>(
+		`SELECT ${NOTE_COLS}, content FROM notes WHERE id IN (${placeholders})`,
+		ids
+	);
+	return rows.map((r) => ({ ...mapNote(r), content: r.content ?? '' }));
 }
 
 export type NoteSearchResult = { id: string; title: string; excerpt: string | null };

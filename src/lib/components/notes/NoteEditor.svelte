@@ -76,13 +76,13 @@
 		}
 	});
 
-	function mount(container: HTMLDivElement) {
-		return untrack(() => {
+	async function mount(container: HTMLDivElement) {
+		return untrack(async () => {
 			const editorEl = container.querySelector<HTMLDivElement>('[data-editor]')!;
 			let saveTimer: ReturnType<typeof setTimeout>;
 
 			const noteId = note.id;
-			const noteContent = note.content;
+			const noteContent = await notesService.loadContent(noteId);
 
 			const view = new EditorView({
 				doc: noteContent,

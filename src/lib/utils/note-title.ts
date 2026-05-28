@@ -5,3 +5,9 @@ export function extractTitle(content: string): string {
 	}
 	return '';
 }
+
+export function notePreview(content: string): string {
+	const title = extractTitle(content);
+	const rest = title ? content.slice(content.indexOf(title) + title.length) : content;
+	return rest.trim().slice(0, 140);
+}

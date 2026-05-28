@@ -60,8 +60,15 @@ const MIGRATIONS: Migration[] = [
         DELETE FROM search_index WHERE id = old.id AND type = 'note';
       END;
     `
+	},
+	{
+		version: 2,
+		sql: `
+      ALTER TABLE notes ADD COLUMN preview TEXT NOT NULL DEFAULT '';
+      UPDATE notes SET preview = TRIM(SUBSTR(TRIM(SUBSTR(content, INSTR(content, CHAR(10)))), 1, 140));
+    `
 	}
-	// add future migrations here as { version: 2, sql: '...' }
+	// add future migrations here as { version: 3, sql: '...' }
 ];
 
 export async function migrate(db: Database): Promise<void> {

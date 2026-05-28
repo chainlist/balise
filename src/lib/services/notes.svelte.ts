@@ -1,11 +1,12 @@
 import { getDB } from '$lib/utils/db';
 import { tagsService, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
-import { extractTitle } from '$lib/utils/note-title';
+import { extractTitle, notePreview } from '$lib/utils/note-title';
 import { fsSyncService } from '$lib/services/fs-sync';
 import {
 	queryNotesByTags,
 	queryUntaggedNotes,
 	queryNoteById,
+	queryNoteContent,
 	insertNote,
 	insertNoteAt,
 	updateNoteContent,
@@ -60,14 +61,14 @@ class NotesService {
 		await tagsService.syncNoteTags(id, content);
 		const inList = this.notes.find((n) => n.id === id);
 		if (inList) {
-			inList.content = content;
 			inList.title = extractTitle(content);
+			inList.preview = notePreview(content);
 			const ts = await queryNoteUpdatedAt(db, id);
 			if (ts) inList.updated_at = ts;
-			await fsSyncService.syncNoteFile(inList);
+			await fsSyncService.syncNoteFile({ ...inList, content });
 		} else {
 			const note = await queryNoteById(db, id);
-			if (note) await fsSyncService.syncNoteFile(note);
+			if (note) await fsSyncService.syncNoteFile({ ...note, content });
 		}
 	}
 
@@ -91,6 +92,10 @@ class NotesService {
 		await tagsService.syncNoteTags(id, content);
 		const note = await queryNoteById(db, id);
 		if (note) await fsSyncService.syncNoteFile(note);
+	}
+
+	async loadContent(id: string): Promise<string> {
+		return queryNoteContent(getDB(), id);
 	}
 
 	async delete(id: string): Promise<void> {
