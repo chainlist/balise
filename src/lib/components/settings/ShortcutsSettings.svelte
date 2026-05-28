@@ -5,9 +5,20 @@
 	import { RotateCcwIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
+	import { Input } from '$lib/components/shadcn/input/index.js';
 
 	let listeningFor = $state<string | null>(null);
 	let conflictName = $state<string | null>(null);
+	let searchQuery = $state('');
+
+	const filteredShortcuts = $derived(
+		searchQuery.trim() === ''
+			? APP_SHORTCUTS
+			: APP_SHORTCUTS.filter((def) => {
+					const q = searchQuery.toLowerCase();
+					return def.name().toLowerCase().includes(q) || def.description().toLowerCase().includes(q);
+				})
+	);
 
 	$effect(() => {
 		uiState.isCapturingShortcut = listeningFor !== null;
@@ -83,6 +94,12 @@
 	<div class="px-6 py-4 border-b">
 		<h2 class="text-base font-semibold">{m.settings_shortcuts_heading()}</h2>
 		<p class="text-sm text-muted-foreground mt-0.5">{m.settings_shortcuts_description()}</p>
+		<Input
+			type="search"
+			bind:value={searchQuery}
+			placeholder="Search shortcuts..."
+			class="mt-3"
+		/>
 	</div>
 
 	<div class="flex-1 overflow-y-auto">
@@ -96,7 +113,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each APP_SHORTCUTS as def (def.id)}
+				{#each filteredShortcuts as def (def.id)}
 					{@const binding = shortcutsService.getBinding(def)}
 					{@const isListening = listeningFor === def.id}
 					{@const hasConflict = isListening && conflictName !== null}
