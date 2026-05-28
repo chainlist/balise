@@ -52,5 +52,13 @@
   "nav_tags": "Tags",
   "nav_notes": "Notizen",
   "shortcut_toggle_zen_mode_name": "Zen-Modus umschalten",
-  "shortcut_toggle_zen_mode_desc": "Seitenleiste und Notizliste für eine ablenkungsfreie Ansicht ausblenden"
+  "shortcut_toggle_zen_mode_desc": "Seitenleiste und Notizliste für eine ablenkungsfreie Ansicht ausblenden",
+
+  "desk_settings_title": "Schreibtisch-Einstellungen",
+  "desk_settings_description": "Diesen Schreibtisch umbenennen oder löschen.",
+  "desk_rename_label": "Schreibtischname",
+  "desk_rename_error_empty": "Bitte einen Namen eingeben.",
+  "desk_rename_error_exists": "Ein Schreibtisch mit diesem Namen existiert bereits.",
+  "desk_rename_error_failed": "Umbenennen fehlgeschlagen.",
+  "desk_rename_saving": "Wird gespeichert..."
 }

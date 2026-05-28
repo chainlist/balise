@@ -3,32 +3,26 @@
 	import { useSidebar } from '$lib/components/shadcn/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import {
-		ChevronsUpDownIcon,
-		PlusIcon,
-		Trash2Icon,
-		LayoutListIcon,
-		Settings
-	} from '@lucide/svelte';
+	import { ChevronsUpDownIcon, PlusIcon, LayoutListIcon, Settings } from '@lucide/svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
-	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
+	import DeskSettingsSheet from '$lib/components/sidebar/DeskSettingsSheet.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const sidebar = useSidebar();
 	const desks = $derived(uiState.desks);
 	const selectedDesk = $derived(uiState.activeDesk);
 	let isAddDeskOpen = $state(false);
-	let isDeleteConfirmOpen = $state(false);
-	let deskPendingDelete = $state<string | null>(null);
+	let isDeskSettingsOpen = $state(false);
+	let deskPendingSettings = $state<string | null>(null);
 
 	async function handleSelectDesk(desk: string) {
 		await uiState.switchDesk(desk);
 	}
 
-	function promptDeleteDesk(desk: string) {
-		deskPendingDelete = desk;
-		isDeleteConfirmOpen = true;
+	function openDeskSettings(desk: string) {
+		deskPendingSettings = desk;
+		isDeskSettingsOpen = true;
 	}
 </script>
 
@@ -61,21 +55,24 @@
 			align="start"
 		>
 			{#each desks as desk (desk)}
-				<DropdownMenu.Item class="group rounded" onclick={() => handleSelectDesk(desk)}>
+				<DropdownMenu.Item
+					class="group rounded {desk === selectedDesk ? 'bg-sidebar-accent text-sidebar-foreground font-medium' : ''}"
+					onclick={() => handleSelectDesk(desk)}
+				>
 					<span class="truncate rounded">{desk}</span>
 					<Button
 						type="button"
 						variant="ghost"
 						size="icon-xs"
-						class="ml-auto h-6 w-6 rounded text-destructive opacity-0 group-hover:opacity-100 hover:text-destructive"
+						class="ml-auto h-6 w-6 rounded opacity-0 group-hover:opacity-100"
 						onclick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
-							promptDeleteDesk(desk);
+							openDeskSettings(desk);
 						}}
 					>
-						<Trash2Icon class="size-3.5" />
-						<span class="sr-only">{m.desk_delete_title()}</span>
+						<Settings class="size-3.5" />
+						<span class="sr-only">{m.desk_settings_title()}</span>
 					</Button>
 				</DropdownMenu.Item>
 			{/each}
@@ -91,4 +88,4 @@
 </div>
 
 <AddDeskSheet bind:open={isAddDeskOpen} />
-<DeleteDeskSheet bind:open={isDeleteConfirmOpen} bind:deskName={deskPendingDelete} />
+<DeskSettingsSheet bind:open={isDeskSettingsOpen} bind:deskName={deskPendingSettings} />
