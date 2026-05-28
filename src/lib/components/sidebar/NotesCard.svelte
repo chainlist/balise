@@ -133,13 +133,13 @@
 			<button
 				type="button"
 				onclick={() => handleSelect(note.id)}
-				class="flex flex-col items-start gap-2 rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {noteSelection.selectedNoteId ===
+				class="flex flex-col items-start gap-2 overflow-hidden rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {noteSelection.selectedNoteId ===
 				note.id
 					? 'rounded-l-none border-l-primary bg-surface-container-low'
 					: 'hover:border-l-primary/40'}"
 			>
-				<div class="flex flex-col gap-2">
-					<span class="w-full truncate text-sm font-semibold text-on-surface">
+				<div class="flex w-full min-w-0 flex-col gap-2">
+					<span class="truncate text-sm font-semibold text-on-surface">
 						{note.title || m.note_untitled()}
 					</span>
 					{#if note.preview}
