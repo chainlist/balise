@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.14.0](https://github.com/chainlist/balise/compare/v0.13.2...v0.14.0) (2026-05-28)
+
+
+### Features
+
+* added zen mode with cmd+shift+z ([a148666](https://github.com/chainlist/balise/commit/a1486664bfc510a417b7c6b055f16fc347794b38))
+* **notes:** lazy-load note content and add preview column ([8bd6e0c](https://github.com/chainlist/balise/commit/8bd6e0c65ed273e3a80807c062c769287e871411))
+* **sidebar:** show note preview text below title in notes list ([907441a](https://github.com/chainlist/balise/commit/907441aa3c8208346af67106677dbb3458edc3b2))
+
+
+### Bug Fixes
+
+* **image:** remove empty line above image widget ([d680806](https://github.com/chainlist/balise/commit/d680806204d975bbb506b68bc346a2cb116525bf))
+* remove single-quote auto-pair and bump Cargo version to 0.13.2 ([27fbef3](https://github.com/chainlist/balise/commit/27fbef372dbdf1d2fcb375a544d557cefc579dd1))
+* **sidebar:** fix missing animation on sidebar tag item ([7e2ed74](https://github.com/chainlist/balise/commit/7e2ed749c556b38876826d4ec2cf931a25fee80e))
+* **sidebar:** note item active/hover border uses correct opacity per state ([2e38b66](https://github.com/chainlist/balise/commit/2e38b662574d35d41c4990f3db846f2df2304340))
+* update sidebar styles and layout ([62b9525](https://github.com/chainlist/balise/commit/62b9525ec0fefb7ebfabdb8e6ab2a86711b163ee))
+
 ## [0.13.2](https://github.com/chainlist/balise/compare/v0.13.1...v0.13.2) (2026-05-27)
 
 
