@@ -136,17 +136,17 @@
 @theme inline {
 	--font-sans: 'Inter Variable', 'Inter', sans-serif;
 
-	--color-primary-50: oklch(0.966 0.008 319.7);
-	--color-primary-100: oklch(0.924 0.015 316.09);
-	--color-primary-200: oklch(0.856 0.03 317.3);
-	--color-primary-300: oklch(0.784 0.047 316.75);
-	--color-primary-400: oklch(0.697 0.066 317.63);
-	--color-primary-500: oklch(0.603 0.085 317.13);
-	--color-primary-600: oklch(0.517 0.071 317.54);
-	--color-primary-700: oklch(0.42 0.058 317.22);
-	--color-primary-800: oklch(0.323 0.046 317.1);
-	--color-primary-900: oklch(0.236 0.035 317.52);
-	--color-primary-950: oklch(0.18 0.025 316.63);
+	--color-primary-50: oklch(0.966 0.013 262.4);
+	--color-primary-100: oklch(0.932 0.025 261.15);
+	--color-primary-200: oklch(0.853 0.057 259.88);
+	--color-primary-300: oklch(0.784 0.088 256.61);
+	--color-primary-400: oklch(0.706 0.126 252.21);
+	--color-primary-500: oklch(0.636 0.127 250.48);
+	--color-primary-600: oklch(0.534 0.106 250.47);
+	--color-primary-700: oklch(0.44 0.088 250.47);
+	--color-primary-800: oklch(0.337 0.067 249.79);
+	--color-primary-900: oklch(0.242 0.047 249.35);
+	--color-primary-950: oklch(0.187 0.037 250.95);
 
 	--color-surface: var(--surface);
 	--color-surface-dim: var(--surface-dim);
