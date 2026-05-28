@@ -1,4 +1,4 @@
-import { BaseDirectory, exists, mkdir, remove } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, exists, mkdir, remove, rename } from '@tauri-apps/plugin-fs';
 import type Database from '@tauri-apps/plugin-sql';
 import { closeDBIfMatches, loadDB } from '$lib/utils/db';
 import { documentDir, join } from '@tauri-apps/api/path';
@@ -43,6 +43,41 @@ async function removeIfExists(
 	if (!present) return;
 
 	await remove(path, { baseDir, recursive });
+}
+
+export async function renameDeskFiles(oldDesk: string, newDesk: string): Promise<void> {
+	const oldSafe = sanitizeDeskName(oldDesk);
+	const newSafe = sanitizeDeskName(newDesk);
+
+	await closeDBIfMatches(oldSafe);
+
+	for (const baseDir of [BaseDirectory.Document, BaseDirectory.AppData]) {
+		for (const ext of ['', '-wal', '-shm', '-journal']) {
+			const oldFile = `${oldSafe}.db${ext}`;
+			const newFile = `${newSafe}.db${ext}`;
+			const present = await exists(oldFile, { baseDir });
+			if (present) {
+				await rename(oldFile, newFile, { oldPathBaseDir: baseDir, newPathBaseDir: baseDir });
+			}
+
+			const oldNested = `${DESKS_ROOT_DIR}/${oldSafe}/${oldSafe}.db${ext}`;
+			const newNested = `${DESKS_ROOT_DIR}/${newSafe}/${newSafe}.db${ext}`;
+			const nestedPresent = await exists(oldNested, { baseDir });
+			if (nestedPresent) {
+				await rename(oldNested, newNested, { oldPathBaseDir: baseDir, newPathBaseDir: baseDir });
+			}
+		}
+	}
+
+	const oldFolder = `${DESKS_ROOT_DIR}/${oldSafe}`;
+	const newFolder = `${DESKS_ROOT_DIR}/${newSafe}`;
+	const folderPresent = await exists(oldFolder, { baseDir: BaseDirectory.Document });
+	if (folderPresent) {
+		await rename(oldFolder, newFolder, {
+			oldPathBaseDir: BaseDirectory.Document,
+			newPathBaseDir: BaseDirectory.Document
+		});
+	}
 }
 
 export async function deleteDeskFiles(desk: string): Promise<void> {

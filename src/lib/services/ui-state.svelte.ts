@@ -1,5 +1,5 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
-import { openDesk } from './desk';
+import { openDesk, renameDeskFiles } from './desk';
 import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
 import { fsSyncService } from './fs-sync';
@@ -60,6 +60,15 @@ class UIState {
 	async addDesk(desk: string): Promise<void> {
 		if (this.desks.includes(desk)) return;
 		await this.setDesks([...this.desks, desk]);
+	}
+
+	async renameDesk(oldDesk: string, newDesk: string): Promise<void> {
+		await renameDeskFiles(oldDesk, newDesk);
+		const next = this.desks.map((d) => (d === oldDesk ? newDesk : d));
+		await this.setDesks(next);
+		if (this.activeDesk === oldDesk) {
+			await this.switchDesk(newDesk, this.activeTag);
+		}
 	}
 
 	async removeDesk(desk: string): Promise<void> {
