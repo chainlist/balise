@@ -30,7 +30,7 @@
 	});
 </script>
 
-<div class="grid w-full place-items-center">
+<div class="image-wrapper my-2 grid w-full place-items-center">
 	{#if src}
 		<img {src} alt="" class="my-1 max-h-96 max-w-full rounded" />
 	{:else if error}

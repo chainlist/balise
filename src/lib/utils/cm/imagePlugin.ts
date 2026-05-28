@@ -1,6 +1,7 @@
 import { Decoration, EditorView, ViewPlugin } from '@codemirror/view';
-import type { DecorationSet, ViewUpdate } from '@codemirror/view';
-import type { Range } from '@codemirror/state';
+import type { DecorationSet } from '@codemirror/view';
+import type { Range, EditorState } from '@codemirror/state';
+import { StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import ImageViewer from '$lib/components/cm/ImageViewer.svelte';
 import { fsService } from '$lib/services/fs';
@@ -90,37 +91,38 @@ function handleDrop(event: DragEvent, view: EditorView): boolean {
 
 // --- Decoration builder ---
 
-function buildDecos(view: EditorView, mode: MarkMode): DecorationSet {
+// Block widgets must come from a StateField. We iterate the full doc (no
+// viewport culling needed — block widgets are cheap and images are sparse).
+function buildDecos(state: EditorState, mode: MarkMode): DecorationSet {
 	if (mode === 'always') return Decoration.none;
 
-	const { state } = view;
 	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
 	const ranges: Range<Decoration>[] = [];
 
-	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
-		syntaxTree(state).iterate({
-			from: vFrom,
-			to: vTo,
-			enter(node) {
-				if (node.name !== 'Image') return;
-				if (isRevealed(mode, state.doc.lineAt(node.from).number, cursorLine)) return false;
+	syntaxTree(state).iterate({
+		enter(node) {
+			if (node.name !== 'Image') return;
+			if (isRevealed(mode, state.doc.lineAt(node.from).number, cursorLine)) return false;
 
-				let path = '';
-				for (let child = node.node.firstChild; child; child = child.nextSibling) {
-					if (child.name === 'URL') {
-						path = state.doc.sliceString(child.from, child.to).trim();
-						break;
-					}
+			let path = '';
+			for (let child = node.node.firstChild; child; child = child.nextSibling) {
+				if (child.name === 'URL') {
+					path = state.doc.sliceString(child.from, child.to).trim();
+					break;
 				}
-				if (!path) return false;
-
-				ranges.push(
-					Decoration.replace({ widget: new ImageWidget(path) }).range(node.from, node.to)
-				);
-				return false;
 			}
-		});
-	}
+			if (!path) return false;
+
+			const line = state.doc.lineAt(node.to);
+			const lineFrom = state.doc.lineAt(node.from).from;
+			ranges.push(
+				Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
+				Decoration.replace({}).range(lineFrom, line.to),
+				Decoration.widget({ widget: new ImageWidget(path), block: true, side: 1 }).range(line.to)
+			);
+			return false;
+		}
+	});
 
 	ranges.sort((a, b) => a.from - b.from);
 	return Decoration.set(ranges, true);
@@ -129,29 +131,21 @@ function buildDecos(view: EditorView, mode: MarkMode): DecorationSet {
 // --- Plugin ---
 
 export function mdImagePlugin(mode: MarkMode) {
-	const plugin = ViewPlugin.fromClass(
-		class {
-			decorations: DecorationSet;
-			constructor(view: EditorView) {
-				this.decorations = buildDecos(view, mode);
-			}
-			update(u: ViewUpdate) {
-				if (u.docChanged || u.viewportChanged || u.selectionSet) {
-					this.decorations = buildDecos(u.view, mode);
-				}
-			}
+	const blockField = StateField.define<DecorationSet>({
+		create: (state) => buildDecos(state, mode),
+		update(deco, tr) {
+			if (tr.docChanged || tr.selection) return buildDecos(tr.state, mode);
+			return deco;
 		},
-		{
-			decorations: (v) => v.decorations,
-			eventHandlers: {
-				paste: handlePaste,
-				drop: handleDrop
-			}
-		}
-	);
+		provide: (f) => EditorView.decorations.from(f)
+	});
 
-	return [
-		plugin,
-		EditorView.atomicRanges.of((view) => view.plugin(plugin)?.decorations ?? Decoration.none)
-	];
+	const eventsPlugin = ViewPlugin.fromClass(class {}, {
+		eventHandlers: {
+			paste: handlePaste,
+			drop: handleDrop
+		}
+	});
+
+	return [blockField, eventsPlugin];
 }
