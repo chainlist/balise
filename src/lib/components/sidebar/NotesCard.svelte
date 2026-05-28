@@ -12,6 +12,7 @@
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { ListFilter, PlusIcon, XIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
+	import NotePreview from '$lib/components/notes/NotePreview.svelte';
 
 	const intl = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'short' });
 
@@ -138,6 +139,11 @@
 				<span class="w-full truncate text-sm font-semibold text-on-surface">
 					{note.title || m.note_untitled()}
 				</span>
+				{#if note.preview}
+					<div class="w-full text-xs text-muted-foreground">
+						<NotePreview content={note.preview} />
+					</div>
+				{/if}
 				<span class="text-[11px] text-neutral-400">
 					{intl.format(new Date(note.updated_at))}
 				</span>

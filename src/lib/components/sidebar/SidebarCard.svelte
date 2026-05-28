@@ -33,22 +33,20 @@
 	style:max-height={fitContent ? (isOpen ? '9999px' : undefined) : undefined}
 >
 	{#if collapsible}
-		<header class="flex items-center gap-1 px-3 py-2">
-			<button
-				type="button"
+		<button type="button" class="flex items-center gap-1 px-3 py-2" onclick={onToggle}>
+			<div
 				class="flex flex-1 items-center justify-between text-left text-[11px] font-semibold tracking-wider text-sidebar-foreground/60 uppercase hover:text-sidebar-foreground"
-				onclick={onToggle}
 				aria-expanded={open}
 			>
 				<span>{title}</span>
 				<ChevronDownIcon
 					class="size-3.5 shrink-0 text-sidebar-foreground/40 {open ? '' : '-rotate-90'}"
 				/>
-			</button>
+			</div>
 			{#if headerEnd}
 				{@render headerEnd()}
 			{/if}
-		</header>
+		</button>
 	{/if}
 	<div class="body" class:open={isOpen}>
 		<div class="body-inner">
