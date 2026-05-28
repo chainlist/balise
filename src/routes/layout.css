@@ -69,6 +69,12 @@
 	--on-background: var(--on-surface);
 
 	--radius: 0.5rem;
+
+	/* Shared markdown rendering tokens */
+	--md-font-mono: ui-monospace, monospace;
+	--md-code-bg: color-mix(in oklch, var(--muted-foreground) 12%, transparent);
+	--md-link-decoration: color-mix(in oklch, var(--primary) 40%, transparent);
+	--md-highlight-bg: color-mix(in oklch, oklch(0.88 0.18 85) 50%, transparent);
 }
 
 .dark {
@@ -276,7 +282,7 @@
 
 @layer utilities {
 	.fts-excerpt mark {
-		background: color-mix(in oklch, oklch(0.88 0.18 85) 50%, transparent);
+		background: var(--md-highlight-bg);
 		border-radius: 2px;
 		color: var(--on-surface);
 		font-weight: normal;

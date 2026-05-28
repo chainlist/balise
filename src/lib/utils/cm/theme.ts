@@ -27,9 +27,9 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-italic': { fontStyle: 'italic', color: 'var(--primary)' },
 	'.cm-md-strike': { textDecoration: 'line-through', opacity: '0.7' },
 	'.cm-md-code': {
-		fontFamily: 'ui-monospace, monospace',
+		fontFamily: 'var(--md-font-mono)',
 		fontSize: '0.875em',
-		background: 'color-mix(in oklch, var(--muted-foreground) 12%, transparent)',
+		background: 'var(--md-code-bg)',
 		borderRadius: '3px',
 		padding: '1px 3px'
 	},
@@ -65,10 +65,10 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-code-header': {
 		display: 'block',
 		padding: '4px 12px',
-		background: 'color-mix(in oklch, var(--muted-foreground) 12%, transparent)'
+		background: 'var(--md-code-bg)'
 	},
 	'.cm-md-code-lang': {
-		fontFamily: 'ui-monospace, monospace',
+		fontFamily: 'var(--md-font-mono)',
 		fontSize: '0.7em',
 		color: 'var(--muted-foreground)',
 		textTransform: 'uppercase',
@@ -78,7 +78,7 @@ export const noteEditorTheme = EditorView.theme({
 		margin: '0',
 		padding: '10px 12px',
 		background: 'color-mix(in oklch, var(--muted-foreground) 6%, transparent)',
-		fontFamily: 'ui-monospace, monospace',
+		fontFamily: 'var(--md-font-mono)',
 		fontSize: '0.875em',
 		lineHeight: '1.6',
 		overflowX: 'auto',
@@ -87,12 +87,12 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-code-footer': {
 		display: 'block',
 		height: '6px',
-		background: 'color-mix(in oklch, var(--muted-foreground) 12%, transparent)'
+		background: 'var(--md-code-bg)'
 	},
 	'.cm-md-link': {
 		color: 'var(--primary)',
 		textDecoration: 'underline',
-		textDecorationColor: 'color-mix(in oklch, var(--primary) 40%, transparent)'
+		textDecorationColor: 'var(--md-link-decoration)'
 	},
 	'.cm-md-tag': {
 		color: 'var(--primary)',
@@ -101,7 +101,7 @@ export const noteEditorTheme = EditorView.theme({
 		padding: '0 calc(var(--spacing) * 1.5)'
 	},
 	'.cm-md-highlight': {
-		background: 'color-mix(in oklch, oklch(0.88 0.18 85) 50%, transparent)',
+		background: 'var(--md-highlight-bg)',
 		borderRadius: '2px'
 	}
 });
