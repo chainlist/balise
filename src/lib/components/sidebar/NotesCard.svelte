@@ -125,7 +125,7 @@
 	</div>
 {/if}
 
-<div class="flex flex-1 scrollbar-none flex-col gap-1.5 overflow-y-auto px-3 pb-3">
+<div class="flex flex-1 scrollbar-none flex-col gap-2 overflow-y-auto px-3 pb-3">
 	{#if notesService.notes.length === 0}
 		<p class="px-2 py-6 text-center text-sm text-muted-foreground">{m.no_notes_yet()}</p>
 	{:else}
@@ -133,29 +133,25 @@
 			<button
 				type="button"
 				onclick={() => handleSelect(note.id)}
-				class="flex flex-col items-start gap-1 rounded border border-outline-variant/40 bg-surface-container-lowest px-3 py-2 text-left hover:border-outline-variant"
-				class:active={noteSelection.selectedNoteId === note.id}
+				class="flex flex-col items-start gap-2 rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {noteSelection.selectedNoteId ===
+				note.id
+					? 'rounded-l-none border-l-primary bg-surface-container-low'
+					: 'hover:border-l-primary/40'}"
 			>
-				<span class="w-full truncate text-sm font-semibold text-on-surface">
-					{note.title || m.note_untitled()}
-				</span>
-				{#if note.preview}
-					<div class="w-full text-xs text-muted-foreground">
-						<NotePreview content={note.preview} />
-					</div>
-				{/if}
-				<span class="text-[11px] text-neutral-400">
+				<div class="flex flex-col gap-2">
+					<span class="w-full truncate text-sm font-semibold text-on-surface">
+						{note.title || m.note_untitled()}
+					</span>
+					{#if note.preview}
+						<div class="w-full text-xs text-muted-foreground">
+							<NotePreview content={note.preview} />
+						</div>
+					{/if}
+				</div>
+				<span class="text-[11px] text-shadow-accent-foreground">
 					{intl.format(new Date(note.updated_at))}
 				</span>
 			</button>
 		{/each}
 	{/if}
 </div>
-
-<style lang="postcss">
-	@reference "../../../routes/layout.css";
-
-	.active {
-		@apply border-primary/40 bg-surface-container-low;
-	}
-</style>
