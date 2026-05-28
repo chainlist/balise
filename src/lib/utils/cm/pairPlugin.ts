@@ -7,8 +7,7 @@ const PAIRS: Record<string, string> = {
 	'(': ')',
 	'[': ']',
 	'{': '}',
-	'"': '"',
-	"'": "'"
+	'"': '"'
 };
 
 export const mdPairPlugin = EditorView.inputHandler.of((view, _from, _to, text) => {
