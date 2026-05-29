@@ -1,4 +1,3 @@
-export { mdStylePlugin } from './stylePlugin';
 export { mdHidePlugin } from './hidePlugin';
 export { mdMarkNavPlugin } from './markNavPlugin';
 export { mdBulletPlugin } from './bulletPlugin';
@@ -10,9 +9,8 @@ export { mdTagPlugin } from './tagPlugin';
 export { mdCheckboxPlugin } from './checkboxPlugin';
 export { mdTaskTagPlugin } from './taskTagPlugin';
 export { mdHighlightPlugin } from './highlightPlugin';
-export { mdPairPlugin } from './pairPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { mdSlashPlugin } from './slashPlugin';
 export { mdImagePlugin } from './imagePlugin';
-export { noteEditorTheme } from './theme';
+export { noteEditorTheme, mdSyntaxHighlighting } from './theme';
 export type { MarkMode } from './shared';

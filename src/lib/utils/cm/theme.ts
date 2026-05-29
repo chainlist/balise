@@ -1,4 +1,18 @@
 import { EditorView } from '@codemirror/view';
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import { tags } from '@lezer/highlight';
+
+const mdHighlightStyle = HighlightStyle.define([
+	{ tag: tags.strong, class: 'cm-md-bold' },
+	{ tag: tags.emphasis, class: 'cm-md-italic' },
+	{ tag: tags.monospace, class: 'cm-md-code' },
+	{ tag: tags.strikethrough, class: 'cm-md-strike' },
+	{ tag: tags.heading1, class: 'cm-md-h1' },
+	{ tag: tags.heading2, class: 'cm-md-h2' },
+	{ tag: tags.heading3, class: 'cm-md-h3' }
+]);
+
+export const mdSyntaxHighlighting = syntaxHighlighting(mdHighlightStyle);
 
 export const noteEditorTheme = EditorView.theme({
 	'&': {

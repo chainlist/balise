@@ -10,8 +10,9 @@
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
 	import { untrack } from 'svelte';
+	import { closeBrackets } from '@codemirror/autocomplete';
 	import {
-		mdStylePlugin,
+		mdSyntaxHighlighting,
 		mdHidePlugin,
 		mdBulletPlugin,
 		mdHrPlugin,
@@ -21,7 +22,6 @@
 		mdCheckboxPlugin,
 		mdTaskTagPlugin,
 		mdHighlightPlugin,
-		mdPairPlugin,
 		mdFormatPlugin,
 		mdLinkPlugin,
 		mdSlashPlugin,
@@ -92,9 +92,9 @@
 					keymap.of([...defaultKeymap, ...historyKeymap]),
 					EditorView.lineWrapping,
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
-					mdStylePlugin,
+					mdSyntaxHighlighting,
 					mdCodePlugin,
-					mdPairPlugin,
+					closeBrackets(),
 					mdSlashPlugin,
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
