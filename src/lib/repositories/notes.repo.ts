@@ -1,5 +1,7 @@
 import type Database from '@tauri-apps/plugin-sql';
 import { extractTitle, notePreview } from '$lib/utils/note-title';
+import type { Note, NoteSearchResult } from '$lib/models/note';
+export type { Note, NoteSearchResult } from '$lib/models/note';
 
 interface RawNote {
 	id: string;
@@ -8,17 +10,6 @@ interface RawNote {
 	content?: string;
 	pinned: number;
 	archived: number;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface Note {
-	id: string;
-	title: string;
-	preview: string;
-	content?: string;
-	pinned: boolean;
-	archived: boolean;
 	created_at: string;
 	updated_at: string;
 }
@@ -195,8 +186,6 @@ export async function queryNotesWithContentByIds(
 	);
 	return rows.map((r) => ({ ...mapNote(r), content: r.content ?? '' }));
 }
-
-export type NoteSearchResult = { id: string; title: string; excerpt: string | null };
 
 export async function searchNotes(db: Database, query: string): Promise<NoteSearchResult[]> {
 	const q = query.trim();

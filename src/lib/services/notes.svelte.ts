@@ -15,8 +15,8 @@ import {
 	queryJournalNotesByDate
 } from '$lib/repositories/notes.repo';
 
-import type { Note } from '$lib/repositories/notes.repo';
-export type { Note };
+import type { Note } from '$lib/models/note';
+export type { Note } from '$lib/models/note';
 
 export function newNoteContent(activeTag: string | null): string {
 	return (

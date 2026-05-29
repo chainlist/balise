@@ -11,18 +11,10 @@ import {
 	queryRelatedTags
 } from '$lib/repositories/tags.repo';
 
-import type { RelatedTag } from '$lib/repositories/tags.repo';
-export type { RelatedTag };
+import type { Tag, RelatedTag } from '$lib/models/tag';
+export type { Tag, RelatedTag } from '$lib/models/tag';
 
 export const UNTAGGED_FILTER = '__untagged__' as const;
-
-export interface Tag {
-	tag: string;
-	color: string | null;
-	display_name: string | null;
-	pinned: boolean;
-	count: number;
-}
 
 export function tagDisplayName(tag: { display_name: string | null; tag: string }): string {
 	return tag.display_name ?? tag.tag;

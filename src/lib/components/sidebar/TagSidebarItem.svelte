@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { tagDisplayName, UNTAGGED_FILTER, type Tag } from '$lib/services/tags.svelte';
+	import { tagDisplayName, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
+	import type { Tag } from '$lib/models/tag';
 	import { Settings2Icon, PinIcon } from '@lucide/svelte';
 	import { fly } from 'svelte/transition';
 

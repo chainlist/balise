@@ -7,7 +7,7 @@ import {
 	updateNoteContent,
 	insertNoteWithMeta
 } from '$lib/repositories/notes.repo';
-import type { Note } from '$lib/repositories/notes.repo';
+import type { Note } from '$lib/models/note';
 
 type NoteMeta = Omit<Note, 'content' | 'title'>;
 

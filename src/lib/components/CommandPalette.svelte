@@ -3,7 +3,8 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { searchNotes, type NoteSearchResult } from '$lib/repositories/notes.repo';
+	import { searchNotes } from '$lib/repositories/notes.repo';
+	import type { NoteSearchResult } from '$lib/models/note';
 	import { noteSignals } from '$lib/services/note-signals';
 	import { getDB } from '$lib/utils/db';
 	import { goto } from '$app/navigation';

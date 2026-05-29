@@ -1,4 +1,6 @@
 import type Database from '@tauri-apps/plugin-sql';
+import type { RelatedTag } from '$lib/models/tag';
+export type { RelatedTag } from '$lib/models/tag';
 
 export interface RawTag {
 	tag: string;
@@ -6,12 +8,6 @@ export interface RawTag {
 	display_name: string | null;
 	pinned: number;
 	count: number;
-}
-
-export interface RelatedTag {
-	tag: string;
-	color: string | null;
-	display_name: string | null;
 }
 
 export async function queryTagsWithCounts(db: Database): Promise<RawTag[]> {

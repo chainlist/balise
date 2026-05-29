@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { tagsService, tagDisplayName, type Tag } from '$lib/services/tags.svelte';
+	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
+	import type { Tag } from '$lib/models/tag';
 	import { getDB } from '$lib/utils/db';
 	import { queryTotalNotesCount } from '$lib/repositories/notes.repo';
 	import {

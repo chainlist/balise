@@ -5,7 +5,7 @@
 	import { today, getLocalTimeZone } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
 	import { notesService } from '$lib/services/notes.svelte';
-	import type { Note } from '$lib/repositories/notes.repo';
+	import type { Note } from '$lib/models/note';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
