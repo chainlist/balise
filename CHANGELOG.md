@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.0](https://github.com/chainlist/balise/compare/v0.14.0...v0.15.0) (2026-05-30)
+
+
+### Features
+
+* **desk:** renaming is now possible ([dec7389](https://github.com/chainlist/balise/commit/dec7389c7b7847ed1b6791d3382d6b33a60a1556))
+* **desk:** renaming is possible ([dec7389](https://github.com/chainlist/balise/commit/dec7389c7b7847ed1b6791d3382d6b33a60a1556))
+
 ## [0.14.0](https://github.com/chainlist/balise/compare/v0.13.2...v0.14.0) (2026-05-28)
 
 
