@@ -70,7 +70,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
-	class="group my-1 flex w-full cursor-pointer items-center gap-3 rounded border px-3 py-2 text-sm"
+	class="group my-1 flex w-full cursor-pointer items-center gap-3 rounded border px-3 py-2"
 	style="background: {bg}; border-color: {border};"
 	onclick={onToggle}
 >
@@ -124,7 +124,13 @@
 			aria-label="Edit task"
 			class="opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100!"
 		>
-			<svg class="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+			<svg
+				class="size-3.5"
+				viewBox="0 0 16 16"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+			>
 				<path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2L11.5 2.5z" stroke-linejoin="round" />
 			</svg>
 		</button>

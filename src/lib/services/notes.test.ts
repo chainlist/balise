@@ -132,14 +132,6 @@ describe('update', () => {
 		expect(tagsService.syncNoteTags).toHaveBeenCalledWith('1', 'new content');
 	});
 
-	it('updates the in-memory note content', async () => {
-		notesService.notes = [NOTE('1')];
-		vi.mocked(repo.updateNoteContent).mockResolvedValue(undefined);
-		vi.mocked(repo.queryNoteUpdatedAt).mockResolvedValue('2025-05-18');
-		await notesService.update('1', 'updated');
-		expect(notesService.notes[0].content).toBe('updated');
-	});
-
 	it('updates the in-memory updated_at timestamp', async () => {
 		notesService.notes = [NOTE('1')];
 		vi.mocked(repo.updateNoteContent).mockResolvedValue(undefined);

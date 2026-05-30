@@ -120,10 +120,10 @@ describe('setActiveTag', () => {
 		expect(uiState.activeTag).toBe('work');
 	});
 
-	it('toggles the tag off when the same tag is passed twice', async () => {
+	it('does nothing when the same tag is passed again', async () => {
 		uiState.activeTag = 'work';
 		await uiState.setActiveTag('work');
-		expect(uiState.activeTag).toBeNull();
+		expect(uiState.activeTag).toBe('work');
 	});
 
 	it('switches to a new tag without toggling', async () => {
@@ -138,11 +138,11 @@ describe('setActiveTag', () => {
 		expect(uiState.composedTags).toHaveLength(0);
 	});
 
-	it('clears composedTags when the active tag is toggled off', async () => {
+	it('does not clear composedTags when the same tag is passed again', async () => {
 		uiState.activeTag = 'work';
 		uiState.composedTags = ['urgent'];
 		await uiState.setActiveTag('work');
-		expect(uiState.composedTags).toHaveLength(0);
+		expect(uiState.composedTags).toHaveLength(1);
 	});
 
 	it('calls notesService.load with the new active tag', async () => {
