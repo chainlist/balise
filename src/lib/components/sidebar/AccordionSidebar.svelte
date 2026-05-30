@@ -4,7 +4,6 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { noteSelection } from '$lib/services/note-selection.svelte';
 	import { noteSignals } from '$lib/services/note-signals';
 	import SidebarCard from '$lib/components/sidebar/SidebarCard.svelte';
 	import SidebarHeader from '$lib/components/sidebar/SidebarHeader.svelte';
@@ -31,13 +30,9 @@
 		prevTag = tag;
 	});
 
-	$effect(() => {
-		uiState.activeNoteId = noteSelection.selectedNoteId;
-	});
-
 	$effect(() =>
 		noteSignals.onSelectNote(async (id) => {
-			noteSelection.select(id);
+			uiState.setActiveNote(id);
 			openCard = 'notes';
 			if (page.url.pathname !== '/') await goto(resolve('/'));
 		})

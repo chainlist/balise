@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { notesService } from '$lib/services/notes.svelte';
-	import { noteSelection } from '$lib/services/note-selection.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import * as m from '$paraglide/messages.js';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 
 	const selectedNote = $derived(
-		notesService.notes.find((n) => n.id === noteSelection.selectedNoteId) ?? null
+		notesService.notes.find((n) => n.id === uiState.activeNoteId) ?? null
 	);
 </script>
 

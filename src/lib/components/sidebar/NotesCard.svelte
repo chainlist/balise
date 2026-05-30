@@ -2,8 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { notesService } from '$lib/services/notes.svelte';
-	import { noteSelection } from '$lib/services/note-selection.svelte';
+	import { notesService, newNoteContent } from '$lib/services/notes.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
 	import TagName from '$lib/components/TagName.svelte';
@@ -30,12 +29,13 @@
 	}
 
 	async function handleCreate() {
-		await noteSelection.createNew();
+		const id = await notesService.create(newNoteContent(uiState.activeTag));
+		uiState.setActiveNote(id);
 		if (page.url.pathname !== '/') await goto(resolve('/'));
 	}
 
 	async function handleSelect(noteId: string) {
-		noteSelection.select(noteId);
+		uiState.setActiveNote(noteId);
 		if (page.url.pathname !== '/') await goto(resolve('/'));
 	}
 
@@ -133,7 +133,7 @@
 			<button
 				type="button"
 				onclick={() => handleSelect(note.id)}
-				class="flex flex-col items-start gap-2 overflow-hidden rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {noteSelection.selectedNoteId ===
+				class="flex flex-col items-start gap-2 overflow-hidden rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {uiState.activeNoteId ===
 				note.id
 					? 'rounded-l-none border-l-primary bg-surface-container-low'
 					: 'hover:border-l-primary/40'}"

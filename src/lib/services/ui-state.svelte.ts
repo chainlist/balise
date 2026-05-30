@@ -22,7 +22,16 @@ class UIState {
 	isCapturingShortcut = $state(false);
 	isWizardOpen = $state(false);
 	isZenModeActive = $state(false);
-	activeNoteId = $state<string | null>(null);
+
+	#noteSelection = $state<{ noteId: string; tag: string | null; composedKey: string } | null>(null);
+	#composedKey = $derived([...this.composedTags].sort().join('\x00'));
+	activeNoteId = $derived.by(() => {
+		const sel = this.#noteSelection;
+		if (sel && sel.tag === this.activeTag && sel.composedKey === this.#composedKey) {
+			return sel.noteId;
+		}
+		return notesService.notes[0]?.id ?? null;
+	});
 
 	#store: Store | null = null;
 
@@ -99,6 +108,10 @@ class UIState {
 			notesService.load(tag),
 			tagsService.loadRelated(tag)
 		]);
+	}
+
+	setActiveNote(id: string): void {
+		this.#noteSelection = { noteId: id, tag: this.activeTag, composedKey: this.#composedKey };
 	}
 
 	async toggleComposedTag(tag: string): Promise<void> {
