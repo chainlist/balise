@@ -125,6 +125,16 @@ export async function updateNoteContent(db: Database, id: string, content: strin
 	);
 }
 
+export async function updateNoteFromSync(
+	db: Database,
+	note: { id: string; content: string; pinned: boolean; archived: boolean; created_at: string }
+): Promise<void> {
+	await db.execute(
+		"UPDATE notes SET content=$1, title=$2, preview=$3, pinned=$4, archived=$5, created_at=$6, updated_at=datetime('now') WHERE id=$7",
+		[note.content, extractTitle(note.content), notePreview(note.content), note.pinned ? 1 : 0, note.archived ? 1 : 0, note.created_at, note.id]
+	);
+}
+
 export async function queryNoteUpdatedAt(db: Database, id: string): Promise<string | null> {
 	const rows = await db.select<{ updated_at: string }[]>(
 		'SELECT updated_at FROM notes WHERE id = $1',

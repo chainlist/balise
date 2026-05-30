@@ -1,15 +1,26 @@
+import { invoke } from '@tauri-apps/api/core';
 import { fsService } from './fs';
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
 import {
 	queryAllNotesMeta,
 	queryNotesWithContentByIds,
-	updateNoteContent,
-	insertNoteWithMeta
+	insertNoteWithMeta,
+	updateNoteFromSync
 } from '$lib/repositories/notes.repo';
 import type { Note } from '$lib/models/note';
 
-type NoteMeta = Omit<Note, 'content' | 'title'>;
+type DeskFileMeta = {
+	name: string;
+	id: string;
+	pinned: boolean;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	mtime_ms: number;
+};
+
+type FileContent = { name: string; content: string };
 
 class FsSyncService {
 	toFrontmatter(note: Note & { content: string }): { meta: string; content: string } {
@@ -24,31 +35,6 @@ class FsSyncService {
 			''
 		].join('\n');
 		return { meta, content: note.content };
-	}
-
-	fromFrontmatter(fileContent: string): { meta: NoteMeta; content: string } | null {
-		const match = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-		if (!match) return null;
-
-		const raw: Record<string, string> = {};
-		for (const line of match[1].split('\n')) {
-			const idx = line.indexOf(':');
-			if (idx === -1) continue;
-			raw[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
-		}
-
-		if (!raw.id) return null;
-
-		return {
-			meta: {
-				id: raw.id,
-				pinned: raw.pinned === '1' || raw.pinned === 'true',
-				archived: raw.archived === '1' || raw.archived === 'true',
-				created_at: raw.created_at,
-				updated_at: raw.updated_at
-			},
-			content: match[2]
-		};
 	}
 
 	async syncNoteFile(note: Note & { content: string }): Promise<void> {
@@ -66,57 +52,65 @@ class FsSyncService {
 		if (!fsService.currentDesk) return;
 		const db = getDB();
 
-		const [entries, dbNotes] = await Promise.all([
-			fsService.readDir(),
+		const [deskFiles, dbNotes] = await Promise.all([
+			invoke<DeskFileMeta[]>('scan_desk_files', { deskName: fsService.currentDesk }),
 			queryAllNotesMeta(db)
 		]);
 
 		const dbMap = new Map(dbNotes.map((n) => [n.id, n.updated_at]));
 		const syncedIds = new Set<string>();
-		const filesToImport: { id: string; content: string }[] = [];
-		const filesToCreate: { meta: NoteMeta; content: string }[] = [];
+		const toCreate: DeskFileMeta[] = [];
+		const toImport: DeskFileMeta[] = [];
 
-		await Promise.all(
-			entries
-				.filter((e) => e.name.endsWith('.md'))
-				.map(async (entry) => {
-					const [fileContent, fileStat] = await Promise.all([
-						fsService.readTextFile(entry.name),
-						fsService.stat(entry.name)
-					]);
-
-					const parsed = this.fromFrontmatter(fileContent);
-					if (!parsed) return;
-
-					const { meta, content } = parsed;
-					syncedIds.add(meta.id);
-
-					const dbUpdatedAt = dbMap.get(meta.id);
-					if (!dbUpdatedAt) {
-						filesToCreate.push({ meta, content });
-						return;
-					}
-
-					if (!fileStat.mtime) return;
-
-					if (fileStat.mtime.getTime() > new Date(dbUpdatedAt).getTime()) {
-						filesToImport.push({ id: meta.id, content });
-					}
-				})
-		);
-
-		if (filesToCreate.length > 0) {
-			await Promise.all(filesToCreate.map(({ meta, content }) => insertNoteWithMeta(db, { ...meta, content })));
-			await Promise.all(filesToCreate.map(({ meta, content }) => tagsService.syncNoteTags(meta.id, content)));
+		for (const file of deskFiles) {
+			syncedIds.add(file.id);
+			const dbUpdatedAt = dbMap.get(file.id);
+			if (!dbUpdatedAt) {
+				toCreate.push(file);
+			} else if (file.mtime_ms > new Date(dbUpdatedAt.includes('T') ? dbUpdatedAt : dbUpdatedAt.replace(' ', 'T') + 'Z').getTime()) {
+				toImport.push(file);
+			}
 		}
 
-		if (filesToImport.length > 0) {
-			await Promise.all(
-				filesToImport.flatMap(({ id, content }) => [
-					updateNoteContent(db, id, content),
-					tagsService.syncNoteTags(id, content)
-				])
-			);
+		const needsContent = [...toCreate, ...toImport];
+		if (needsContent.length > 0) {
+			const contents = await invoke<FileContent[]>('read_desk_files_content', {
+				deskName: fsService.currentDesk,
+				names: needsContent.map((f) => f.name)
+			});
+			const contentMap = new Map(contents.map((c) => [c.name, c.content]));
+
+			if (toCreate.length > 0) {
+				await Promise.all(
+					toCreate.map(({ name, id, pinned, archived, created_at, mtime_ms }) =>
+						insertNoteWithMeta(db, {
+							id,
+							pinned,
+							archived,
+							created_at,
+							updated_at: new Date(mtime_ms).toISOString(),
+							content: contentMap.get(name) ?? ''
+						})
+					)
+				);
+				await Promise.all(
+					toCreate.map(({ name, id }) =>
+						tagsService.syncNoteTags(id, contentMap.get(name) ?? '')
+					)
+				);
+			}
+
+			if (toImport.length > 0) {
+				await Promise.all(
+					toImport.flatMap(({ name, id, pinned, archived, created_at }) => {
+						const content = contentMap.get(name) ?? '';
+						return [
+							updateNoteFromSync(db, { id, content, pinned, archived, created_at }),
+							tagsService.syncNoteTags(id, content)
+						];
+					})
+				);
+			}
 		}
 
 		const missingIds = dbNotes.filter((n) => !syncedIds.has(n.id)).map((n) => n.id);
