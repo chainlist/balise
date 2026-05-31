@@ -84,6 +84,7 @@
 				}
 			]
 		},
-		"opener:default"
+		"opener:default",
+		"fs:allow-resource-read-recursive"
 	]
 }
