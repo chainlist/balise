@@ -22,8 +22,7 @@ export async function initApp() {
 }
 
 export async function checkForNews() {
-	const version = '0.15.0';
-	await getVersion();
+	const version = await getVersion();
 
 	if (version === uiState.lastSeenVersion) return;
 
