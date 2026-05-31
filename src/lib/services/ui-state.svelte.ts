@@ -24,7 +24,7 @@ class UIState {
 	isZenModeActive = $state(false);
 	isNewsOpen = $state(false);
 	newsContent = $state('');
-	newsVersion = '';
+	newsVersion = $state('');
 	lastSeenVersion = $state('');
 
 	#noteSelection = $state<{ noteId: string; tag: string | null; composedKey: string } | null>(null);
