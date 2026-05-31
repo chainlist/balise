@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { getVersion } from '@tauri-apps/api/app';
 	import { updaterService } from '$lib/services/updater.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { checkForNews } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
 
 	let version = $state('');
@@ -73,7 +75,20 @@
 			{/if}
 		</div>
 
-		<!-- Thanks to -->
+		<!-- What's new -->
+			<div>
+				<div class="mb-4 space-y-1.5">
+					<p class="text-sm font-medium">{m.settings_about_news_label()}</p>
+				</div>
+				<button
+					onclick={async () => { uiState.setLastSeenVersion(''); await checkForNews(); }}
+					class="rounded border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
+				>
+					{m.settings_about_read_news()}
+				</button>
+			</div>
+
+			<!-- Thanks to -->
 		<div>
 			<p class="mb-3 text-sm font-medium">{m.settings_about_thanks_heading()}</p>
 			<ul class="space-y-2">

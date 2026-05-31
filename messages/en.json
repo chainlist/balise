@@ -127,6 +127,8 @@
 
 	"settings_about_heading": "About",
 	"settings_about_description": "App information and updates.",
+	"settings_about_news_label": "What's new",
+	"settings_about_read_news": "Read latest news",
 	"settings_about_thanks_heading": "Built with",
 	"settings_about_version": "Version",
 	"settings_about_updates_label": "Updates",
@@ -192,5 +194,7 @@
 	"wizard_action_next": "Next",
 	"wizard_action_back": "Back",
 	"wizard_action_get_started": "Get started",
-	"wizard_run_again": "Setup Wizard"
+	"wizard_run_again": "Setup Wizard",
+
+	"news_got_it": "Got it"
 }

@@ -22,6 +22,10 @@ class UIState {
 	isCapturingShortcut = $state(false);
 	isWizardOpen = $state(false);
 	isZenModeActive = $state(false);
+	isNewsOpen = $state(false);
+	newsContent = $state('');
+	newsVersion = '';
+	lastSeenVersion = $state('');
 
 	#noteSelection = $state<{ noteId: string; tag: string | null; composedKey: string } | null>(null);
 	#composedKey = $derived([...this.composedTags].sort().join('\x00'));
@@ -41,15 +45,17 @@ class UIState {
 			defaults
 		});
 
-		const [activeDesk, desks, activeTag] = await Promise.all([
+		const [activeDesk, desks, activeTag, lastSeenVersion] = await Promise.all([
 			this.#store.get<string>('activeDesk'),
 			this.#store.get<string[]>('desks'),
-			this.#store.get<string>('activeTag')
+			this.#store.get<string>('activeTag'),
+			this.#store.get<string>('lastSeenVersion')
 		]);
 
 		this.activeDesk = activeDesk ?? defaultDesk;
 		this.desks = desks ?? [defaultDesk];
 		this.activeTag = activeTag ?? null;
+		this.lastSeenVersion = lastSeenVersion ?? '';
 
 		if (!this.desks.includes(this.activeDesk)) {
 			this.desks = [...this.desks, this.activeDesk];
@@ -92,6 +98,11 @@ class UIState {
 		if (this.activeDesk === desk) {
 			await this.setActiveDesk(next[0]);
 		}
+	}
+
+	setLastSeenVersion(version: string): void {
+		this.lastSeenVersion = version;
+		this.#store?.set('lastSeenVersion', version);
 	}
 
 	async toggleZenMode() {

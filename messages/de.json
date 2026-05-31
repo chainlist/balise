@@ -4,6 +4,8 @@
 
   "settings_about_heading": "Info",
   "settings_about_description": "App-Informationen und Updates.",
+  "settings_about_news_label": "Was ist neu",
+  "settings_about_read_news": "Neuigkeiten lesen",
   "settings_about_thanks_heading": "Entwickelt mit",
   "settings_about_version": "Version",
   "settings_about_updates_label": "Updates",
@@ -60,5 +62,7 @@
   "desk_rename_error_empty": "Bitte einen Namen eingeben.",
   "desk_rename_error_exists": "Ein Schreibtisch mit diesem Namen existiert bereits.",
   "desk_rename_error_failed": "Umbenennen fehlgeschlagen.",
-  "desk_rename_saving": "Wird gespeichert..."
+  "desk_rename_saving": "Wird gespeichert...",
+
+  "news_got_it": "Verstanden"
 }

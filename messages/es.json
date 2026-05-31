@@ -127,6 +127,8 @@
 
 	"settings_about_heading": "Acerca de",
 	"settings_about_description": "Información de la aplicación y actualizaciones.",
+	"settings_about_news_label": "Novedades",
+	"settings_about_read_news": "Ver las últimas novedades",
 	"settings_about_thanks_heading": "Desarrollado con",
 	"settings_about_version": "Versión",
 	"settings_about_updates_label": "Actualizaciones",
@@ -192,5 +194,7 @@
 	"wizard_action_next": "Siguiente",
 	"wizard_action_back": "Atrás",
 	"wizard_action_get_started": "Empezar",
-	"wizard_run_again": "Asistente de configuración"
+	"wizard_run_again": "Asistente de configuración",
+
+	"news_got_it": "Entendido"
 }

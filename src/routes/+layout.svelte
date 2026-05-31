@@ -11,6 +11,7 @@
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import UpdateNotifier from '$lib/components/UpdateNotifier.svelte';
 	import WizardModal from '$lib/components/WizardModal.svelte';
+	import NewsModal from '$lib/components/NewsModal.svelte';
 	import { LoaderCircle } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import { fade } from 'svelte/transition';
@@ -72,6 +73,9 @@
 		<UpdateNotifier />
 		{#if uiState.isWizardOpen}
 			<WizardModal />
+		{/if}
+		{#if uiState.isNewsOpen}
+			<NewsModal />
 		{/if}
 	{/if}
 </SidebarProvider>
