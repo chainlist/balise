@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/chainlist/balise/compare/v0.16.1...v0.17.0) (2026-05-31)
+
+
+### Features
+
+* tag autocompletion in note editor ([9b29ae7](https://github.com/chainlist/balise/commit/9b29ae775a42ed0b89cb2c7a0d06b2fb68afb855))
+
 ## [0.16.1](https://github.com/chainlist/balise/compare/v0.16.0...v0.16.1) (2026-05-31)
 
 
