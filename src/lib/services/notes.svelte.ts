@@ -1,6 +1,6 @@
 import { getDB } from '$lib/utils/db';
 import { tagsService, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
-import { extractTitle, notePreview } from '$lib/utils/note-title';
+import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import { fsSyncService } from '$lib/services/fs-sync';
 import {
 	queryNotesByTags,

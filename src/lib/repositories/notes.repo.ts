@@ -1,5 +1,5 @@
 import type Database from '@tauri-apps/plugin-sql';
-import { extractTitle, notePreview } from '$lib/utils/note-title';
+import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import type { Note, NoteSearchResult } from '$lib/models/note';
 export type { Note, NoteSearchResult } from '$lib/models/note';
 

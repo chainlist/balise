@@ -1,4 +1,4 @@
-<script module lang="ts">
+﻿<script module lang="ts">
 	let focusedNoteId = $state<string | null>(null);
 </script>
 
@@ -27,6 +27,7 @@
 		mdSlashPlugin,
 		mdMarkNavPlugin,
 		mdImagePlugin,
+		mdTagCompletion,
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
@@ -95,6 +96,7 @@
 					mdSyntaxHighlighting,
 					mdCodePlugin,
 					closeBrackets(),
+					mdTagCompletion,
 					mdSlashPlugin,
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					noteEditorTheme,
