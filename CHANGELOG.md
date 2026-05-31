@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/chainlist/balise/compare/v0.16.0...v0.16.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* news not showing up ([198d8e9](https://github.com/chainlist/balise/commit/198d8e99037a605e3d49638df696446bbde5d553))
+
 ## [0.16.0](https://github.com/chainlist/balise/compare/v0.15.0...v0.16.0) (2026-05-31)
 
 
