@@ -1,7 +1,7 @@
 {
 	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
 	"productName": "Balise",
-	"version": "0.15.0",
+	"version": "0.16.0",
 	"identifier": "com.balise.md",
 	"build": {
 		"frontendDist": "../build",
@@ -27,7 +27,9 @@
 	"plugins": {
 		"updater": {
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQxMzA4ODk5M0NBM0RCMzMKUldRejI2TThtWWd3MGVEcnU1d3haQnQ2NTlWY3ZpTWVOZFhvblVISmdrR010V2xFRVpjVm5hekIK",
-			"endpoints": ["https://github.com/chainlist/balise/releases/latest/download/latest.json"]
+			"endpoints": [
+				"https://github.com/chainlist/balise/releases/latest/download/latest.json"
+			]
 		}
 	},
 	"bundle": {
@@ -44,6 +46,8 @@
 		"android": {
 			"debugApplicationIdSuffix": ".debug"
 		},
-		"resources": ["../static/news/**/*.md"]
+		"resources": [
+			"../static/news/**/*.md"
+		]
 	}
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.16.0](https://github.com/chainlist/balise/compare/v0.15.0...v0.16.0) (2026-05-31)
+
+
+### Features
+
+* show release notes dialog on version update ([bd65c1b](https://github.com/chainlist/balise/commit/bd65c1b1c213182cf23235e3818f6d23cd505616))
+
+
+### Performance Improvements
+
+* optimize boot sync via Rust FS commands ([efcf633](https://github.com/chainlist/balise/commit/efcf633b5566c9201e12479d58f40d414af946f5))
+
 ## [0.15.0](https://github.com/chainlist/balise/compare/v0.14.0...v0.15.0) (2026-05-30)
 
 
