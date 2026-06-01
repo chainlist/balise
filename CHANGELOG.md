@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.18.0](https://github.com/chainlist/balise/compare/v0.17.0...v0.18.0) (2026-06-01)
+
+
+### Features
+
+* **editor:** wire completionKeymap and strip trailing whitespace on save ([a499a5c](https://github.com/chainlist/balise/commit/a499a5c9bdb1b08a446207f89b8ff2ad8c39d219))
+* **graph:** canvas-based tag knowledge graph view ([90b2db4](https://github.com/chainlist/balise/commit/90b2db49068891cecb202be3c4cef181bfbf4136))
+* **ui:** editor folding, heading colors, and sidebar polish ([efc752c](https://github.com/chainlist/balise/commit/efc752c74f7a02af30349aa2c9a8199c3fa7d375))
+
+
+### Bug Fixes
+
+* **editor:** bind Tab/Shift-Tab to indent for list nesting ([1cf87e3](https://github.com/chainlist/balise/commit/1cf87e353ce8d83f4a842f4aa14eb4855045e8e8))
+
 ## [0.17.0](https://github.com/chainlist/balise/compare/v0.16.1...v0.17.0) (2026-05-31)
 
 
