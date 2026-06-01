@@ -47,7 +47,7 @@
   "slash_divider_desc": "Horizontaler Trenner",
 
   "nav_browse": "Durchsuchen",
-  "nav_dashboard": "Dashboard",
+  "nav_knowledge_graph": "Graph",
   "nav_all_notes": "Alle Notizen",
   "nav_journaling": "Journaling",
   "nav_tasks": "Aufgaben",
@@ -64,5 +64,21 @@
   "desk_rename_error_failed": "Umbenennen fehlgeschlagen.",
   "desk_rename_saving": "Wird gespeichert...",
 
-  "news_got_it": "Verstanden"
+  "news_got_it": "Verstanden",
+
+  "graph_settings_title": "Einstellungen",
+  "graph_settings_close": "Einstellungen schließen",
+  "graph_settings_min_cooccurrence": "Min. Verbindungen",
+  "graph_settings_hide_isolated": "Isolierte Tags ausblenden",
+  "graph_settings_node_size_by": "Knotengröße",
+  "graph_settings_node_size_count": "Nach Notizenzahl",
+  "graph_settings_node_size_degree": "Nach Verbindungen",
+  "graph_settings_charge": "Ladung",
+  "graph_settings_link_distance": "Linkabstand",
+  "graph_settings_link_strength": "Linkstärke",
+  "graph_loading": "Graph wird geladen…",
+  "graph_empty": "Noch keine Tags — erstelle Notizen mit #hashtags.",
+
+  "shortcut_goto_knowledge_graph_name": "Zum Graph",
+  "shortcut_goto_knowledge_graph_desc": "Zum Graph navigieren"
 }

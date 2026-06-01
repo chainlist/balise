@@ -5,13 +5,13 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import {
 		BookOpenText,
-		LayoutDashboardIcon,
+		Share2Icon,
 		NotebookIcon,
 		CheckSquareIcon
 	} from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
-	const isDashboard = $derived(page.url.pathname === '/dashboard');
+	const isKnowledgeGraph = $derived(page.url.pathname === '/knowledge-graph');
 	const isJournal = $derived(page.url.pathname === '/journal');
 	const isNotesRoot = $derived(page.url.pathname === '/');
 
@@ -22,9 +22,9 @@
 </script>
 
 <div class="flex flex-col gap-0.5 px-3 pt-1 pb-3">
-	<a href={resolve('/dashboard')} class="row" class:active={isDashboard}>
-		<LayoutDashboardIcon class="size-4" />
-		{m.nav_dashboard()}
+	<a href={resolve('/knowledge-graph')} class="row" class:active={isKnowledgeGraph}>
+		<Share2Icon class="size-4" />
+		{m.nav_knowledge_graph()}
 	</a>
 	<a href={resolve('/journal')} class="row" class:active={isJournal}>
 		<BookOpenText class="size-4" />

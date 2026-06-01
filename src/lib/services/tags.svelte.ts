@@ -8,11 +8,23 @@ import {
 	resolveCanonicalTags,
 	deleteNoteTags,
 	insertNoteTags,
-	queryRelatedTags
+	queryRelatedTags,
+	queryTagCooccurrence
 } from '$lib/repositories/tags.repo';
 
 import type { Tag, RelatedTag } from '$lib/models/tag';
 export type { Tag, RelatedTag } from '$lib/models/tag';
+
+export interface GraphLink {
+	source: string;
+	target: string;
+	weight: number;
+}
+
+export interface GraphData {
+	nodes: Tag[];
+	links: GraphLink[];
+}
 
 export const UNTAGGED_FILTER = '__untagged__' as const;
 
@@ -81,6 +93,17 @@ class TagsService {
 
 		const allCurrentTags = activeTag ? [activeTag, ...composedTags] : composedTags;
 		this.relatedTags = await queryRelatedTags(getDB(), allCurrentTags);
+	}
+
+	async loadGraph(): Promise<GraphData> {
+		if (this.tags.length === 0) await this.load();
+		const rows = await queryTagCooccurrence(getDB());
+		const links: GraphLink[] = rows.map((r) => ({
+			source: r.tag_a,
+			target: r.tag_b,
+			weight: r.weight
+		}));
+		return { nodes: this.tags, links };
 	}
 
 	async syncNoteTags(noteId: string, content: string): Promise<void> {

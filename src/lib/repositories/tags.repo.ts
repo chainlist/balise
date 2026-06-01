@@ -78,6 +78,23 @@ export async function insertNoteTags(
 	);
 }
 
+export interface TagCooccurrenceRow {
+	tag_a: string;
+	tag_b: string;
+	weight: number;
+}
+
+export async function queryTagCooccurrence(db: Database): Promise<TagCooccurrenceRow[]> {
+	return db.select<TagCooccurrenceRow[]>(`
+      SELECT nt1.tag AS tag_a, nt2.tag AS tag_b, COUNT(DISTINCT nt1.note_id) AS weight
+      FROM note_tags nt1
+      JOIN note_tags nt2
+        ON nt1.note_id = nt2.note_id
+       AND LOWER(nt1.tag) < LOWER(nt2.tag)
+      GROUP BY LOWER(nt1.tag), LOWER(nt2.tag)
+    `);
+}
+
 export async function queryRelatedTags(
 	db: Database,
 	allCurrentTags: string[]

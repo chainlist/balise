@@ -18,12 +18,12 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		}
 	},
 	{
-		id: 'goto-dashboard',
-		name: m.shortcut_goto_dashboard_name,
-		description: m.shortcut_goto_dashboard_desc,
+		id: 'goto-knowledge-graph',
+		name: m.shortcut_goto_knowledge_graph_name,
+		description: m.shortcut_goto_knowledge_graph_desc,
 		defaultBinding: '$mod+g',
 		bypassGuard: true,
-		run: () => goto(resolve('/dashboard'))
+		run: () => goto(resolve('/knowledge-graph'))
 	},
 	{
 		id: 'open-settings',
