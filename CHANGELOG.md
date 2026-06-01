@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://github.com/chainlist/balise/compare/v0.19.0...v0.19.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* **editor:** Disable Paragraph folding ([126ab20](https://github.com/chainlist/balise/commit/126ab2019d3326be54092292e94a3b67860ee89b))
+
 ## [0.19.0](https://github.com/chainlist/balise/compare/v0.18.0...v0.19.0) (2026-06-01)
 
 
