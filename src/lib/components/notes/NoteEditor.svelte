@@ -11,7 +11,7 @@
 	import { languages } from '@codemirror/language-data';
 	import { codeFolding, foldGutter, foldKeymap } from '@codemirror/language';
 	import { untrack } from 'svelte';
-	import { closeBrackets } from '@codemirror/autocomplete';
+	import { closeBrackets, completionKeymap } from '@codemirror/autocomplete';
 	import {
 		mdSyntaxHighlighting,
 		mdHidePlugin,
@@ -91,7 +91,13 @@
 				extensions: [
 					history(),
 					mdFormatPlugin,
-					keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, indentWithTab]),
+					keymap.of([
+						...defaultKeymap,
+						...historyKeymap,
+						...foldKeymap,
+						...completionKeymap,
+						indentWithTab
+					]),
 					EditorView.lineWrapping,
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
 					mdSyntaxHighlighting,
@@ -110,7 +116,7 @@
 						}
 						if (!u.docChanged) return;
 						clearTimeout(saveTimer);
-						const val = u.state.doc.toString();
+						const val = u.state.doc.toString().replace(/[ \t]+$/gm, '');
 						saveTimer = setTimeout(async () => {
 							if (onSave) await onSave(val);
 							else await notesService.update(noteId, val);
