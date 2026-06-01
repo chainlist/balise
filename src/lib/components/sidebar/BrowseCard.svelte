@@ -3,14 +3,11 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { notesService, newNoteContent } from '$lib/services/notes.svelte';
 	import {
 		BookOpenText,
 		LayoutDashboardIcon,
 		NotebookIcon,
-		CheckSquareIcon,
-		Settings2Icon,
-		PlusIcon
+		CheckSquareIcon
 	} from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -22,24 +19,9 @@
 		uiState.setActiveTag(null);
 		goto(resolve('/'));
 	}
-
-	async function handleCreate() {
-		const id = await notesService.create(newNoteContent(uiState.activeTag));
-		uiState.setActiveNote(id);
-		if (page.url.pathname !== '/') await goto(resolve('/'));
-	}
 </script>
 
 <div class="flex flex-col gap-0.5 px-3 pt-1 pb-3">
-	<button
-		type="button"
-		class="row"
-		onclick={handleCreate}
-		aria-label={m.shortcut_new_note_name()}
-	>
-		<PlusIcon class="size-4" />
-		{m.shortcut_new_note_name()}
-	</button>
 	<a href={resolve('/dashboard')} class="row" class:active={isDashboard}>
 		<LayoutDashboardIcon class="size-4" />
 		{m.nav_dashboard()}
@@ -60,10 +42,6 @@
 	<button type="button" class="row" disabled>
 		<CheckSquareIcon class="size-4" />
 		{m.nav_tasks()}
-	</button>
-	<button type="button" class="row" onclick={() => (uiState.isSettingsOpen = true)}>
-		<Settings2Icon class="size-4" />
-		{m.nav_settings()}
 	</button>
 </div>
 

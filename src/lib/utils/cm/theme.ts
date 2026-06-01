@@ -31,7 +31,29 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--foreground)' },
 	'.cm-line': { padding: '0' },
 	'.cm-activeLine': { background: 'transparent' },
-	'.cm-gutters': { display: 'none' },
+	'.cm-gutters': {
+		background: 'transparent',
+		border: 'none',
+		color: 'var(--muted-foreground)'
+	},
+	'.cm-foldGutter .cm-gutterElement': {
+		padding: '0 4px',
+		cursor: 'pointer',
+		opacity: '0',
+		transition: 'opacity 120ms ease'
+	},
+	'.cm-foldGutter:hover .cm-gutterElement, .cm-foldGutter .cm-gutterElement[title^="unfold"]':
+		{ opacity: '1' },
+	'.cm-foldGutter .cm-gutterElement:hover': { color: 'var(--primary)' },
+	'.cm-foldPlaceholder': {
+		background: 'color-mix(in oklch, var(--primary) 12%, transparent)',
+		color: 'var(--primary)',
+		border: 'none',
+		borderRadius: '4px',
+		padding: '0 6px',
+		margin: '0 2px',
+		fontSize: '0.85em'
+	},
 	'&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
 		background: 'color-mix(in oklch, var(--primary) 20%, transparent)'
 	},
@@ -51,13 +73,24 @@ export const noteEditorTheme = EditorView.theme({
 		fontSize: '1.65em',
 		fontWeight: '700',
 		lineHeight: '1.2',
+		color: 'var(--primary)',
 		border: '1px solid transparent',
 		borderBottomColor: 'var(--primary)',
 		width: '100%',
 		display: 'inline-block'
 	},
-	'.cm-md-h2': { fontSize: '1.5em', fontWeight: '600', lineHeight: '1.4' },
-	'.cm-md-h3': { fontSize: '1.25em', fontWeight: '600', lineHeight: '1.5' },
+	'.cm-md-h2': {
+		fontSize: '1.5em',
+		fontWeight: '600',
+		lineHeight: '1.4',
+		color: 'var(--primary)'
+	},
+	'.cm-md-h3': {
+		fontSize: '1.25em',
+		fontWeight: '600',
+		lineHeight: '1.5',
+		color: 'var(--primary)'
+	},
 	'.cm-md-list-item': { paddingLeft: '1.5em', textIndent: '-1.5em' },
 	'.cm-md-bullet': { color: 'oklch(0.6 0.22 300)' },
 	'.cm-md-hr': {

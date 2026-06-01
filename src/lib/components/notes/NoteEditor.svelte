@@ -9,6 +9,7 @@
 	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
+	import { codeFolding, foldGutter, foldKeymap } from '@codemirror/language';
 	import { untrack } from 'svelte';
 	import { closeBrackets } from '@codemirror/autocomplete';
 	import {
@@ -90,10 +91,12 @@
 				extensions: [
 					history(),
 					mdFormatPlugin,
-					keymap.of([...defaultKeymap, ...historyKeymap]),
+					keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap]),
 					EditorView.lineWrapping,
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
 					mdSyntaxHighlighting,
+					codeFolding(),
+					foldGutter(),
 					mdCodePlugin,
 					closeBrackets(),
 					mdTagCompletion,
