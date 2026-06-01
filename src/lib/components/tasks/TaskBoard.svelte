@@ -59,6 +59,9 @@
 						aria-hidden="true"
 					></span>
 					<h2 class="text-sm font-semibold">{LABELS[status]()}</h2>
+					{#if status === 'done'}
+						<span class="text-xs text-muted-foreground/60">{m.tasks_done_limit()}</span>
+					{/if}
 				</div>
 				<span class="text-xs text-muted-foreground">{columns[status].length}</span>
 			</header>

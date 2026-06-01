@@ -69,6 +69,7 @@
 	"tasks_status_todo": "Por hacer",
 	"tasks_status_inprogress": "En progreso",
 	"tasks_status_done": "Hecho",
+	"tasks_done_limit": "50 más recientes",
 	"tasks_loading": "Cargando tareas…",
 	"tasks_empty": "Aún no hay tareas. Añade etiquetas #todo, #inprogress, #done o listas de verificación (- [ ]) a tus notas.",
 

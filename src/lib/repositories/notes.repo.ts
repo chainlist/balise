@@ -180,6 +180,36 @@ export async function queryAllNotesWithContent(
 	return db.select('SELECT id, content FROM notes');
 }
 
+export async function queryActiveTaskNotes(
+	db: Database
+): Promise<{ id: string; content: string; updated_at: string }[]> {
+	return db.select(
+		`SELECT n.id, n.content, n.updated_at
+		 FROM notes n
+		 WHERE EXISTS (
+		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) IN ('todo', 'inprogress')
+		 )
+		 ORDER BY n.updated_at DESC`
+	);
+}
+
+const DONE_NOTES_LIMIT = 50;
+
+export async function queryRecentDoneNotes(
+	db: Database
+): Promise<{ id: string; content: string; updated_at: string }[]> {
+	return db.select(
+		`SELECT n.id, n.content, n.updated_at
+		 FROM notes n
+		 WHERE EXISTS (
+		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'done'
+		 )
+		 ORDER BY n.updated_at DESC
+		 LIMIT $1`,
+		[DONE_NOTES_LIMIT]
+	);
+}
+
 export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note[]> {
 	if (ids.length === 0) return [];
 	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');

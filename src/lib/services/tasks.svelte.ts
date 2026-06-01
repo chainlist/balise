@@ -1,5 +1,5 @@
 import { getDB } from '$lib/utils/db';
-import { queryAllNotesWithContent } from '$lib/repositories/notes.repo';
+import { queryActiveTaskNotes, queryRecentDoneNotes } from '$lib/repositories/notes.repo';
 import { notesService } from './notes.svelte';
 import { extractTitle } from '$lib/utils/note-utils';
 import { parseTasksFromNote, type TaskItem, type TaskStatus } from '$lib/utils/task-parser';
@@ -22,10 +22,16 @@ class TasksService {
 	tasks = $state<TaskItem[]>([]);
 
 	async load(): Promise<void> {
-		const rows = await queryAllNotesWithContent(getDB());
+		const db = getDB();
+		const [activeNotes, doneNotes] = await Promise.all([
+			queryActiveTaskNotes(db),
+			queryRecentDoneNotes(db)
+		]);
+
+		const noteMap = new Map([...activeNotes, ...doneNotes].map((n) => [n.id, n]));
 		const all: TaskItem[] = [];
-		for (const row of rows) {
-			all.push(...parseTasksFromNote(row.id, extractTitle(row.content), row.content));
+		for (const note of noteMap.values()) {
+			all.push(...parseTasksFromNote(note.id, extractTitle(note.content), note.content));
 		}
 		this.tasks = all;
 	}

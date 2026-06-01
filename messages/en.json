@@ -69,6 +69,7 @@
 	"tasks_status_todo": "To Do",
 	"tasks_status_inprogress": "In Progress",
 	"tasks_status_done": "Done",
+	"tasks_done_limit": "50 most recent",
 	"tasks_loading": "Loading tasks…",
 	"tasks_empty": "No tasks yet. Add #todo, #inprogress, #done tags or checklists (- [ ]) to your notes.",
 

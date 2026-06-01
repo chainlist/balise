@@ -69,6 +69,7 @@
 	"tasks_status_todo": "Zu erledigen",
 	"tasks_status_inprogress": "In Bearbeitung",
 	"tasks_status_done": "Erledigt",
+	"tasks_done_limit": "50 neueste",
 	"tasks_loading": "Aufgaben werden geladen…",
 	"tasks_empty": "Noch keine Aufgaben. Füge #todo, #inprogress, #done Tags oder Checklisten (- [ ]) zu deinen Notizen hinzu.",
 

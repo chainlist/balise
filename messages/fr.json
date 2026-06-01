@@ -69,6 +69,7 @@
 	"tasks_status_todo": "À faire",
 	"tasks_status_inprogress": "En cours",
 	"tasks_status_done": "Terminé",
+	"tasks_done_limit": "50 plus récents",
 	"tasks_loading": "Chargement des tâches…",
 	"tasks_empty": "Aucune tâche pour l'instant. Ajoutez des balises #todo, #inprogress, #done ou des cases à cocher (- [ ]) à vos notes.",
 
