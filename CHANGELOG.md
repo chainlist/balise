@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.2](https://github.com/chainlist/balise/compare/v0.19.1...v0.19.2) (2026-06-01)
+
+
+### Bug Fixes
+
+* **notes:** Fix notes card shrinking issue ([27198bd](https://github.com/chainlist/balise/commit/27198bdab72904285d534f2f6734e35fd2d72c36))
+
 ## [0.19.1](https://github.com/chainlist/balise/compare/v0.19.0...v0.19.1) (2026-06-01)
 
 
