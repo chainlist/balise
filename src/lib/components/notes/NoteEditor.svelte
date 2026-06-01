@@ -9,7 +9,7 @@
 	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
-	import { codeFolding, foldGutter, foldKeymap } from '@codemirror/language';
+	import { codeFolding, foldGutter, foldKeymap, foldNodeProp } from '@codemirror/language';
 	import { untrack } from 'svelte';
 	import { closeBrackets, completionKeymap } from '@codemirror/autocomplete';
 	import {
@@ -99,7 +99,11 @@
 						indentWithTab
 					]),
 					EditorView.lineWrapping,
-					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
+					markdown({
+						base: markdownLanguage,
+						extensions: [GFM, { props: [foldNodeProp.add({ Paragraph: () => null })] }],
+						codeLanguages: languages
+					}),
 					mdSyntaxHighlighting,
 					codeFolding(),
 					foldGutter(),
