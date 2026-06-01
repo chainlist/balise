@@ -14,7 +14,8 @@
 	const localeLabels: Record<string, string> = {
 		en: 'English',
 		fr: 'Français',
-		es: 'Español'
+		es: 'Español',
+		de: 'Deutsch'
 	};
 </script>
 

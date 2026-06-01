@@ -66,6 +66,12 @@
 	"nav_notes": "Notas",
 	"nav_settings": "Ajustes",
 
+	"tasks_status_todo": "Por hacer",
+	"tasks_status_inprogress": "En progreso",
+	"tasks_status_done": "Hecho",
+	"tasks_loading": "Cargando tareas…",
+	"tasks_empty": "Aún no hay tareas. Añade etiquetas #todo, #inprogress, #done o listas de verificación (- [ ]) a tus notas.",
+
 	"settings_appearance_heading": "Apariencia",
 	"settings_appearance_description": "Elige cómo se ve la aplicación.",
 	"settings_theme_label": "Tema",

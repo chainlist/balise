@@ -13,6 +13,7 @@
 
 	const isKnowledgeGraph = $derived(page.url.pathname === '/knowledge-graph');
 	const isJournal = $derived(page.url.pathname === '/journal');
+	const isTasks = $derived(page.url.pathname === '/tasks');
 	const isNotesRoot = $derived(page.url.pathname === '/');
 
 	function handleAllNotesClick() {
@@ -39,10 +40,10 @@
 		<NotebookIcon class="size-4" />
 		{m.nav_all_notes()}
 	</button>
-	<button type="button" class="row" disabled>
+	<a href={resolve('/tasks')} class="row" class:active={isTasks}>
 		<CheckSquareIcon class="size-4" />
 		{m.nav_tasks()}
-	</button>
+	</a>
 </div>
 
 <style lang="postcss">

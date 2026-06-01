@@ -11,7 +11,7 @@ class SettingsService {
 	lineHeight = $state(1.75);
 	markdownMarks = $state<MarkMode>('cursor');
 	customBindings = $state<Record<string, string>>({});
-	language = $state<'fr' | 'es' | 'en'>('en');
+	language = $state<'fr' | 'es' | 'en' | 'de'>('en');
 
 	#store: Store | null = null;
 
@@ -25,7 +25,7 @@ class SettingsService {
 				this.#store.get<number>('lineHeight'),
 				this.#store.get<MarkMode>('markdownMarks'),
 				this.#store.get<Record<string, string>>('customBindings'),
-				this.#store.get<'fr' | 'es' | 'en'>('language')
+				this.#store.get<'fr' | 'es' | 'en' | 'de'>('language')
 			]);
 
 		this.theme = theme ?? 'system';

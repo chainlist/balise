@@ -66,6 +66,12 @@
 	"nav_notes": "Notes",
 	"nav_settings": "Paramètres",
 
+	"tasks_status_todo": "À faire",
+	"tasks_status_inprogress": "En cours",
+	"tasks_status_done": "Terminé",
+	"tasks_loading": "Chargement des tâches…",
+	"tasks_empty": "Aucune tâche pour l'instant. Ajoutez des balises #todo, #inprogress, #done ou des cases à cocher (- [ ]) à vos notes.",
+
 	"settings_appearance_heading": "Apparence",
 	"settings_appearance_description": "Choisissez l'aspect de l'application.",
 	"settings_theme_label": "Thème",

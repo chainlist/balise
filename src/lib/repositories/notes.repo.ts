@@ -174,6 +174,12 @@ export async function queryAllNotesMeta(
 	return db.select('SELECT id, updated_at FROM notes');
 }
 
+export async function queryAllNotesWithContent(
+	db: Database
+): Promise<{ id: string; content: string }[]> {
+	return db.select('SELECT id, content FROM notes');
+}
+
 export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note[]> {
 	if (ids.length === 0) return [];
 	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
