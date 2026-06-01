@@ -7,7 +7,9 @@
 	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
+	import NotesPanel from '$lib/components/sidebar/NotesPanel.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
+	import * as Resizable from '$lib/components/shadcn/resizable/index.js';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import UpdateNotifier from '$lib/components/UpdateNotifier.svelte';
 	import WizardModal from '$lib/components/WizardModal.svelte';
@@ -55,19 +57,21 @@
 			<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
 		</div>
 	{:else}
-		<div class="relative flex h-screen w-full" in:fade={{ duration: 250 }}>
-			<div
-				class="ease absolute inset-y-0 left-0 z-10 transition-transform duration-150"
-				class:zen={uiState.isZenModeActive}
-			>
+		<div class="flex h-screen w-full" in:fade={{ duration: 250 }}>
+			{#if !uiState.isZenModeActive}
 				<Sidebar />
-			</div>
-			<div
-				class="ease h-full w-full overflow-hidden transition-[padding-left] duration-150"
-				class:pl-75={!uiState.isZenModeActive}
-			>
-				{@render children()}
-			</div>
+			{/if}
+			<Resizable.PaneGroup direction="horizontal" autoSaveId="balise-main-layout" class="flex-1">
+				{#if !uiState.isZenModeActive}
+					<Resizable.Pane defaultSize={22} minSize={15} order={1}>
+						<NotesPanel />
+					</Resizable.Pane>
+					<Resizable.Handle />
+				{/if}
+				<Resizable.Pane order={2}>
+					{@render children()}
+				</Resizable.Pane>
+			</Resizable.PaneGroup>
 		</div>
 		<CommandPalette />
 		<UpdateNotifier />
@@ -79,11 +83,3 @@
 		{/if}
 	{/if}
 </SidebarProvider>
-
-<style lang="postcss">
-	@reference './layout.css';
-
-	.zen {
-		@apply -translate-x-full;
-	}
-</style>
