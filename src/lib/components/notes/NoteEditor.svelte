@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { EditorView, keymap } from '@codemirror/view';
 	import { Compartment } from '@codemirror/state';
-	import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
+	import { history, defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands';
 	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
@@ -91,7 +91,7 @@
 				extensions: [
 					history(),
 					mdFormatPlugin,
-					keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap]),
+					keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, indentWithTab]),
 					EditorView.lineWrapping,
 					markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
 					mdSyntaxHighlighting,
