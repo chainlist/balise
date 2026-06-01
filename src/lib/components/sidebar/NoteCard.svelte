@@ -19,7 +19,7 @@
 <button
 	type="button"
 	{onclick}
-	class="flex flex-col items-start gap-2 overflow-hidden rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {active
+	class="flex shrink-0 flex-col items-start gap-2 overflow-hidden rounded border-2 border-transparent bg-primary/5 px-3 py-2 text-left transition-colors hover:rounded-l-none hover:bg-surface-container-low {active
 		? 'rounded-l-none border-l-primary bg-surface-container-low'
 		: 'hover:border-l-primary/40'}"
 >

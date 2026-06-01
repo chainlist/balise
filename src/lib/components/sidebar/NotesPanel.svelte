@@ -82,26 +82,26 @@
 						</Button>
 					{/snippet}
 				</DropdownMenu.Trigger>
-			<DropdownMenu.Content class="w-56 rounded" align="start" side="right">
-				<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
-					<Input
-						bind:value={tagSearch}
-						placeholder={m.search_tags_placeholder()}
-						class="h-7 text-xs"
-					/>
-				</div>
-				<DropdownMenu.Separator />
-				<div class="max-h-60 overflow-auto">
-					{#each filteredRelatedTags as tag (tag.tag)}
-						<DropdownMenu.Item onclick={() => uiState.toggleComposedTag(tag.tag)} class="rounded">
-							<TagName {tag} />
-						</DropdownMenu.Item>
-					{:else}
-						<p class="px-3 py-2 text-center text-xs text-muted-foreground">{m.no_tags_found()}</p>
-					{/each}
-				</div>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+				<DropdownMenu.Content class="w-56 rounded" align="start" side="right">
+					<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
+						<Input
+							bind:value={tagSearch}
+							placeholder={m.search_tags_placeholder()}
+							class="h-7 text-xs"
+						/>
+					</div>
+					<DropdownMenu.Separator />
+					<div class="max-h-60 overflow-auto">
+						{#each filteredRelatedTags as tag (tag.tag)}
+							<DropdownMenu.Item onclick={() => uiState.toggleComposedTag(tag.tag)} class="rounded">
+								<TagName {tag} />
+							</DropdownMenu.Item>
+						{:else}
+							<p class="px-3 py-2 text-center text-xs text-muted-foreground">{m.no_tags_found()}</p>
+						{/each}
+					</div>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
 		</div>
 	</div>
 

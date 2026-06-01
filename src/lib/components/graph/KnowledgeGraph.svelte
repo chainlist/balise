@@ -88,7 +88,7 @@
 		const cs = getComputedStyle(document.documentElement);
 		return {
 			primary: resolveColor(cs.getPropertyValue('--primary').trim() || '#7F77DD'),
-			foreground: resolveColor(cs.getPropertyValue('--foreground').trim() || '#1f1f1f'),
+			foreground: resolveColor(cs.getPropertyValue('--color-foreground').trim() || '#1f1f1f'),
 			outline: resolveColor(cs.getPropertyValue('--outline-variant').trim() || '#888888')
 		};
 	}
@@ -295,4 +295,4 @@
 	}}
 />
 
-<div bind:this={containerEl} class="bg-background relative h-full w-full overflow-hidden"></div>
+<div bind:this={containerEl} class="relative h-full w-full overflow-hidden bg-background"></div>
