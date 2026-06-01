@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/chainlist/balise/compare/v0.18.0...v0.19.0) (2026-06-01)
+
+
+### Features
+
+* **tasks:** kanban board view + German localisation ([15b9974](https://github.com/chainlist/balise/commit/15b997494b2d2fdc5c78e44d13245cedc60d9d76))
+
 ## [0.18.0](https://github.com/chainlist/balise/compare/v0.17.0...v0.18.0) (2026-06-01)
 
 
