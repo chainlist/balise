@@ -10,8 +10,8 @@ export interface GraphSettings {
 export const DEFAULT_GRAPH_SETTINGS: GraphSettings = {
 	minCooccurrence: 1,
 	hideIsolated: false,
-	nodeSizeBy: 'count',
-	chargeStrength: -200,
-	linkDistance: 60,
-	linkStrength: 0.4
+	nodeSizeBy: 'degree',
+	chargeStrength: -30,
+	linkDistance: 35,
+	linkStrength: 0.3
 };

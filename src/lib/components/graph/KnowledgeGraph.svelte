@@ -7,7 +7,7 @@
 
 	// --- Types ---
 
-	type FGNode = Tag & { id: string; degree: number };
+	type FGNode = Tag & { id: string; degree: number; fx?: number; fy?: number };
 	type FGLink = { source: string | FGNode; target: string | FGNode; weight: number };
 	type Theme = { primary: string; foreground: string; outline: string };
 	type RenderConfig = {
@@ -39,7 +39,6 @@
 	let containerEl: HTMLDivElement | undefined = $state();
 	let graph = $state.raw<InstanceType<typeof ForceGraph<FGNode, FGLink>> | null>(null);
 	let theme = $state<Theme>(defaultTheme());
-	let pendingClick: { timer: number; nodeId: string } | null = null;
 	let firstFitDone = false;
 
 	// --- Derived ---
@@ -186,38 +185,16 @@
 
 	// --- Interaction handlers ---
 
-	const DBLCLICK_MS = 250;
-
 	function handleNodeClick(node: FGNode) {
-		if (pendingClick?.nodeId === node.id) {
-			clearTimeout(pendingClick.timer);
-			pendingClick = null;
+		if (selectedTag === node.id) {
 			onNavigate(node.id);
-			return;
+		} else {
+			selectedTag = node.id;
 		}
-		if (pendingClick) clearTimeout(pendingClick.timer);
-		pendingClick = {
-			nodeId: node.id,
-			timer: window.setTimeout(() => {
-				selectedTag = selectedTag === node.id ? null : node.id;
-				pendingClick = null;
-			}, DBLCLICK_MS)
-		};
 	}
 
 	function handleBackgroundClick() {
-		if (pendingClick) {
-			clearTimeout(pendingClick.timer);
-			pendingClick = null;
-		}
 		selectedTag = null;
-	}
-
-	function clearPendingClick() {
-		if (pendingClick) {
-			clearTimeout(pendingClick.timer);
-			pendingClick = null;
-		}
 	}
 
 	// --- Effects ---
@@ -243,6 +220,7 @@
 			.linkCanvasObjectMode(() => 'replace')
 			.onNodeClick(handleNodeClick)
 			.onBackgroundClick(handleBackgroundClick)
+			.onNodeDragEnd((node: FGNode) => { node.fx = undefined; node.fy = undefined; })
 			.onEngineStop(() => {
 				if (firstFitDone) return;
 				instance.zoomToFit(300, 40);
@@ -263,7 +241,6 @@
 		graph = instance;
 
 		return () => {
-			clearPendingClick();
 			ro.disconnect();
 			mo.disconnect();
 			instance._destructor();
