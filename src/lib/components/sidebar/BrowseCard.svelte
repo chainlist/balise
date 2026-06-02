@@ -3,12 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import {
-		BookOpenText,
-		Share2Icon,
-		NotebookIcon,
-		CheckSquareIcon
-	} from '@lucide/svelte';
+	import { BookOpenText, Share2Icon, NotebookIcon, CheckSquareIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const isKnowledgeGraph = $derived(page.url.pathname === '/knowledge-graph');

@@ -17,7 +17,7 @@ export async function queryTagsWithCounts(db: Database): Promise<RawTag[]> {
       LEFT JOIN note_tags nt ON LOWER(nt.tag) = LOWER(t.tag)
       LEFT JOIN tag_settings ts ON ts.tag = t.tag
       GROUP BY t.tag
-      ORDER BY COALESCE(ts.pinned, 0) DESC, t.tag
+      ORDER BY COALESCE(ts.pinned, 0) DESC, t.tag COLLATE NOCASE
     `);
 }
 

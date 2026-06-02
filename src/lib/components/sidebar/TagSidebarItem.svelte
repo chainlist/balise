@@ -4,7 +4,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagDisplayName, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 	import type { Tag } from '$lib/models/tag';
-	import { Settings2Icon, PinIcon } from '@lucide/svelte';
+	import { Settings2Icon, PinIcon, HashIcon } from '@lucide/svelte';
 
 	let { tag, onSettings }: { tag: Tag; onSettings?: (tag: Tag) => void } = $props();
 
@@ -39,9 +39,13 @@
 			<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"
 			></span>
 		{:else if tag.color}
-			<span class="shrink-0 text-sm" style="color: {tag.color};">#</span>
+			<span class="shrink-0 text-sm" style="color: {tag.color};">
+				<HashIcon size="14" />
+			</span>
 		{:else}
-			<span class="shrink-0 text-sm text-sidebar-foreground/30">#</span>
+			<span class="shrink-0 text-sm text-sidebar-foreground/30">
+				<HashIcon size="14" />
+			</span>
 		{/if}
 		<span class="truncate">{tagDisplayName(tag)}</span>
 	</div>

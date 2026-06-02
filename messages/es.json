@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 
 	"note_untitled": "Sin título",
+	"note_new_title": "Nueva nota",
 	"no_notes_yet": "Aún no hay notas.",
 	"note_empty_state": "Selecciona una nota o crea una nueva.",
 	"note_delete_title": "Eliminar nota",

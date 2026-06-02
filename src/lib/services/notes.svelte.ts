@@ -14,12 +14,13 @@ import {
 	queryJournalNotesByDate
 } from '$lib/repositories/notes.repo';
 
+import * as m from '$paraglide/messages.js';
 import type { Note } from '$lib/models/note';
 export type { Note } from '$lib/models/note';
 
 export function newNoteContent(activeTag: string | null): string {
 	return (
-		'### New Note\n\n' +
+		`### ${m.note_new_title()}\n\n` +
 		(activeTag && activeTag !== UNTAGGED_FILTER ? `#${activeTag}\n\n` : '')
 	);
 }

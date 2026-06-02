@@ -80,7 +80,7 @@ class TagsService {
 			if (settings.display_name !== undefined) updated.display_name = settings.display_name;
 			if (settings.pinned !== undefined) {
 				updated.pinned = settings.pinned;
-				this.tags.sort((a, b) => Number(b.pinned) - Number(a.pinned) || a.tag.localeCompare(b.tag));
+				this.tags.sort((a, b) => Number(b.pinned) - Number(a.pinned) || a.tag.localeCompare(b.tag, undefined, { sensitivity: 'base' }));
 			}
 		}
 	}
