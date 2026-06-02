@@ -12,9 +12,10 @@ export interface TaskItem {
 	source: TaskSource;
 }
 
-const HASHTAG_RE = /#(todo|inprogress|done)\b/i;
+export const HASHTAG_RE = /#(todo|inprogress|done)\b/i;
 const HASHTAG_STRIP_RE = /#(todo|inprogress|done)\b\s*/gi;
-const CHECKLIST_RE = /^[ \t]*- \[( |[xX]|~)\]\s+(.+)$/;
+// Groups: [1] prefix "- [", [2] marker, [3] "] " separator, [4] text
+export const CHECKLIST_RE = /^([ \t]*- \[)( |[xX]|~)(\]\s*)(.+)$/;
 
 function hashtagStatus(tag: string): TaskStatus {
 	const lower = tag.toLowerCase();
@@ -65,8 +66,8 @@ export function parseTasksFromNote(
 				noteTitle,
 				lineIndex: i,
 				lineText: line,
-				text: checklistMatch[2].trim(),
-				status: checklistStatus(checklistMatch[1]),
+				text: checklistMatch[4].trim(),
+				status: checklistStatus(checklistMatch[2]),
 				source: 'checklist'
 			});
 		}

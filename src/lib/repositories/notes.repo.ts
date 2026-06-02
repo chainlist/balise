@@ -49,7 +49,7 @@ export async function queryNotesByTags(db: Database, tags: string[]): Promise<No
 export async function queryUntaggedNotes(db: Database): Promise<Note[]> {
 	const rows = await db.select<RawNote[]>(
 		`SELECT ${NOTE_COLS} FROM notes
-       WHERE id NOT IN (SELECT DISTINCT note_id FROM note_tags)
+       WHERE NOT EXISTS (SELECT 1 FROM note_tags WHERE note_id = notes.id)
        ORDER BY pinned DESC, updated_at DESC`
 	);
 	return rows.map(mapNote);
@@ -71,25 +71,23 @@ export async function queryNoteContent(db: Database, id: string): Promise<string
 	return rows[0]?.content ?? '';
 }
 
-export async function insertNote(db: Database, id: string, content: string): Promise<void> {
-	await db.execute('INSERT INTO notes (id, content, title, preview) VALUES ($1, $2, $3, $4)', [
-		id,
-		content,
-		extractTitle(content),
-		notePreview(content)
-	]);
-}
-
-export async function insertNoteAt(
+export async function insertNote(
 	db: Database,
 	id: string,
 	content: string,
-	createdAt: string
+	createdAt?: string
 ): Promise<void> {
-	await db.execute(
-		'INSERT INTO notes (id, content, title, preview, created_at) VALUES ($1, $2, $3, $4, $5)',
-		[id, content, extractTitle(content), notePreview(content), createdAt]
-	);
+	if (createdAt) {
+		await db.execute(
+			'INSERT INTO notes (id, content, title, preview, created_at) VALUES ($1, $2, $3, $4, $5)',
+			[id, content, extractTitle(content), notePreview(content), createdAt]
+		);
+	} else {
+		await db.execute(
+			'INSERT INTO notes (id, content, title, preview) VALUES ($1, $2, $3, $4)',
+			[id, content, extractTitle(content), notePreview(content)]
+		);
+	}
 }
 
 export async function insertNoteWithMeta(
@@ -147,11 +145,6 @@ export async function deleteNoteById(db: Database, id: string): Promise<void> {
 	await db.execute('DELETE FROM notes WHERE id = $1', [id]);
 }
 
-export async function queryTotalNotesCount(db: Database): Promise<number> {
-	const result = await db.select<[{ count: number }]>('SELECT COUNT(*) as count FROM notes');
-	return result[0]?.count ?? 0;
-}
-
 export async function queryJournalNotesByDate(
 	db: Database,
 	utcFrom: string,
@@ -172,12 +165,6 @@ export async function queryAllNotesMeta(
 	db: Database
 ): Promise<{ id: string; updated_at: string }[]> {
 	return db.select('SELECT id, updated_at FROM notes');
-}
-
-export async function queryAllNotesWithContent(
-	db: Database
-): Promise<{ id: string; content: string }[]> {
-	return db.select('SELECT id, content FROM notes');
 }
 
 export async function queryActiveTaskNotes(
@@ -208,16 +195,6 @@ export async function queryRecentDoneNotes(
 		 LIMIT $1`,
 		[DONE_NOTES_LIMIT]
 	);
-}
-
-export async function queryNotesByIds(db: Database, ids: string[]): Promise<Note[]> {
-	if (ids.length === 0) return [];
-	const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
-	const rows = await db.select<RawNote[]>(
-		`SELECT ${NOTE_COLS} FROM notes WHERE id IN (${placeholders})`,
-		ids
-	);
-	return rows.map(mapNote);
 }
 
 export async function queryNotesWithContentByIds(

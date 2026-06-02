@@ -23,7 +23,7 @@ export async function queryTagsWithCounts(db: Database): Promise<RawTag[]> {
 
 export async function queryUntaggedCount(db: Database): Promise<number> {
 	const rows = await db.select<{ count: number }[]>(
-		`SELECT COUNT(*) AS count FROM notes WHERE id NOT IN (SELECT DISTINCT note_id FROM note_tags)`
+		`SELECT COUNT(*) AS count FROM notes WHERE NOT EXISTS (SELECT 1 FROM note_tags WHERE note_id = notes.id)`
 	);
 	return rows[0]?.count ?? 0;
 }

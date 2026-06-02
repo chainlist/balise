@@ -8,7 +8,6 @@ import {
 	queryNoteById,
 	queryNoteContent,
 	insertNote,
-	insertNoteAt,
 	updateNoteContent,
 	queryNoteUpdatedAt,
 	deleteNoteById,
@@ -88,7 +87,7 @@ class NotesService {
 		const createdAt = isToday
 			? toSQLiteUTC(now)
 			: toSQLiteUTC(new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), 12, 0, 0));
-		await insertNoteAt(db, id, content, createdAt);
+		await insertNote(db, id, content, createdAt);
 		await tagsService.syncNoteTags(id, content);
 		const note = await queryNoteById(db, id);
 		if (note) await fsSyncService.syncNoteFile(note);

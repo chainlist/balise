@@ -28,7 +28,7 @@
 
 <div class="flex flex-col gap-2 p-3">
 	<div class="flex items-center justify-between">
-		<h1 class="text-lg font-bold">Balise</h1>
+		<h1 class="text-xl font-bold text-primary">Balise</h1>
 		<Button variant="ghost" size="icon-sm" onclick={() => (uiState.isSettingsOpen = true)}>
 			<Settings class="size-3.5" />
 		</Button>
@@ -56,7 +56,9 @@
 		>
 			{#each desks as desk (desk)}
 				<DropdownMenu.Item
-					class="group rounded {desk === selectedDesk ? 'bg-sidebar-accent text-sidebar-foreground font-medium' : ''}"
+					class="group rounded {desk === selectedDesk
+						? 'bg-sidebar-accent font-medium text-sidebar-foreground'
+						: ''}"
 					onclick={() => handleSelectDesk(desk)}
 				>
 					<span class="truncate rounded">{desk}</span>

@@ -2,12 +2,15 @@ import { getDB } from '$lib/utils/db';
 import { queryActiveTaskNotes, queryRecentDoneNotes } from '$lib/repositories/notes.repo';
 import { notesService } from './notes.svelte';
 import { extractTitle } from '$lib/utils/note-utils';
-import { parseTasksFromNote, type TaskItem, type TaskStatus } from '$lib/utils/task-parser';
+import {
+	parseTasksFromNote,
+	HASHTAG_RE,
+	CHECKLIST_RE,
+	type TaskItem,
+	type TaskStatus
+} from '$lib/utils/task-parser';
 
 export type { TaskItem, TaskStatus, TaskSource } from '$lib/utils/task-parser';
-
-const HASHTAG_RE = /#(todo|inprogress|done)\b/i;
-const CHECKLIST_RE = /^([ \t]*- \[)( |[xX]|~)(\].*)$/;
 
 function rewriteHashtagLine(line: string, newStatus: TaskStatus): string {
 	return line.replace(HASHTAG_RE, `#${newStatus}`);
@@ -15,7 +18,7 @@ function rewriteHashtagLine(line: string, newStatus: TaskStatus): string {
 
 function rewriteChecklistLine(line: string, newStatus: TaskStatus): string {
 	const marker = newStatus === 'done' ? 'x' : ' ';
-	return line.replace(CHECKLIST_RE, (_, prefix, _old, suffix) => `${prefix}${marker}${suffix}`);
+	return line.replace(CHECKLIST_RE, (_, pre, _old, sep, text) => `${pre}${marker}${sep}${text}`);
 }
 
 class TasksService {

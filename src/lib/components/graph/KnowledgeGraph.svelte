@@ -5,8 +5,20 @@
 	import { tagDisplayName } from '$lib/services/tags.svelte';
 	import type { GraphSettings } from './types';
 
+	// --- Types ---
+
 	type FGNode = Tag & { id: string; degree: number };
 	type FGLink = { source: string | FGNode; target: string | FGNode; weight: number };
+	type Theme = { primary: string; foreground: string; outline: string };
+	type RenderConfig = {
+		theme: Theme;
+		maxWeight: number;
+		nodeSizeBy: 'count' | 'degree';
+		selectedTag: string | null;
+		neighborSet: Set<string> | null;
+	};
+
+	// --- Props ---
 
 	let {
 		nodes,
@@ -22,15 +34,15 @@
 		onNavigate: (tag: string) => void;
 	} = $props();
 
+	// --- State ---
+
 	let containerEl: HTMLDivElement | undefined = $state();
 	let graph = $state.raw<InstanceType<typeof ForceGraph<FGNode, FGLink>> | null>(null);
-
-	let pendingClickTimer: number | null = null;
-	let pendingClickNodeId: string | null = null;
-	const DBLCLICK_MS = 250;
-
-	let theme = $state(defaultTheme());
+	let theme = $state<Theme>(defaultTheme());
+	let pendingClick: { timer: number; nodeId: string } | null = null;
 	let firstFitDone = false;
+
+	// --- Derived ---
 
 	const filtered = $derived.by(() => {
 		const minW = settings.minCooccurrence;
@@ -45,17 +57,13 @@
 			id: n.tag,
 			degree: degree.get(n.tag) ?? 0
 		}));
-		if (settings.hideIsolated) {
-			resultNodes = resultNodes.filter((n) => n.degree > 0);
-		}
+		if (settings.hideIsolated) resultNodes = resultNodes.filter((n) => n.degree > 0);
 		const visibleIds = new Set(resultNodes.map((n) => n.id));
 		const resultLinks: FGLink[] = validLinks
 			.filter((l) => visibleIds.has(l.source) && visibleIds.has(l.target))
 			.map((l) => ({ source: l.source, target: l.target, weight: l.weight }));
 		return { nodes: resultNodes, links: resultLinks };
 	});
-
-	const maxWeight = $derived(filtered.links.reduce((m, l) => Math.max(m, l.weight), 1));
 
 	const neighborSet = $derived.by(() => {
 		if (!selectedTag) return null;
@@ -69,7 +77,17 @@
 		return set;
 	});
 
-	function defaultTheme() {
+	const render = $derived<RenderConfig>({
+		theme,
+		maxWeight: filtered.links.reduce((m, l) => Math.max(m, l.weight), 1),
+		nodeSizeBy: settings.nodeSizeBy,
+		selectedTag,
+		neighborSet
+	});
+
+	// --- Theme helpers ---
+
+	function defaultTheme(): Theme {
 		return { primary: '#7F77DD', foreground: '#1f1f1f', outline: '#888888' };
 	}
 
@@ -84,7 +102,7 @@
 		return resolved || cssColor;
 	}
 
-	function readTheme() {
+	function readTheme(): Theme {
 		const cs = getComputedStyle(document.documentElement);
 		return {
 			primary: resolveColor(cs.getPropertyValue('--primary').trim() || '#7F77DD'),
@@ -93,66 +111,122 @@
 		};
 	}
 
-	function radiusFor(n: { count: number; degree: number }): number {
-		const v = settings.nodeSizeBy === 'count' ? n.count : n.degree;
+	// --- Draw helpers ---
+
+	function radiusFor(n: { count: number; degree: number }, nodeSizeBy: 'count' | 'degree'): number {
+		const v = nodeSizeBy === 'count' ? n.count : n.degree;
 		return 4 + Math.min(20, Math.sqrt(Math.max(0, v)) * 2.5);
 	}
 
-	function widthFor(weight: number): number {
+	function widthFor(weight: number, maxWeight: number): number {
 		return 0.4 + Math.sqrt(weight / Math.max(1, maxWeight)) * 3;
 	}
 
-	function isNodeDimmed(n: FGNode): boolean {
-		return neighborSet !== null && !neighborSet.has(n.id);
+	function isNodeDimmed(n: FGNode, ns: Set<string> | null): boolean {
+		return ns !== null && !ns.has(n.id);
 	}
 
-	function isLinkDimmed(l: FGLink): boolean {
-		if (!neighborSet) return false;
+	function isLinkDimmed(l: FGLink, ns: Set<string> | null): boolean {
+		if (!ns) return false;
 		const sId = typeof l.source === 'object' ? l.source.id : l.source;
 		const tId = typeof l.target === 'object' ? l.target.id : l.target;
-		return !(neighborSet.has(sId) && neighborSet.has(tId));
+		return !(ns.has(sId) && ns.has(tId));
 	}
 
+	// --- Canvas painters ---
+
+	function paintNode(node: FGNode, ctx: CanvasRenderingContext2D, scale: number, r: RenderConfig) {
+		if (node.x === undefined || node.y === undefined) return;
+		const radius = radiusFor(node, r.nodeSizeBy);
+		ctx.save();
+		ctx.globalAlpha = isNodeDimmed(node, r.neighborSet) ? 0.25 : 1;
+		ctx.fillStyle = node.color ?? r.theme.primary;
+		ctx.beginPath();
+		ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+		ctx.fill();
+		if (r.selectedTag === node.id) {
+			ctx.strokeStyle = r.theme.foreground;
+			ctx.lineWidth = 2 / scale;
+			ctx.stroke();
+		}
+		if (scale > 0.7) {
+			const fontSize = 11 / scale;
+			ctx.font = `${fontSize}px sans-serif`;
+			ctx.fillStyle = r.theme.foreground;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'top';
+			ctx.fillText(tagDisplayName(node), node.x, node.y + radius + 2 / scale);
+		}
+		ctx.restore();
+	}
+
+	function paintNodeHitArea(node: FGNode, color: string, ctx: CanvasRenderingContext2D, r: RenderConfig) {
+		if (node.x === undefined || node.y === undefined) return;
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.arc(node.x, node.y, radiusFor(node, r.nodeSizeBy), 0, Math.PI * 2);
+		ctx.fill();
+	}
+
+	function paintLink(link: FGLink, ctx: CanvasRenderingContext2D, r: RenderConfig) {
+		const src = link.source;
+		const tgt = link.target;
+		if (typeof src !== 'object' || typeof tgt !== 'object') return;
+		if (src.x === undefined || src.y === undefined || tgt.x === undefined || tgt.y === undefined) return;
+		ctx.save();
+		ctx.globalAlpha = isLinkDimmed(link, r.neighborSet) ? 0.08 : 0.45;
+		ctx.strokeStyle = r.theme.outline;
+		ctx.lineWidth = widthFor(link.weight, r.maxWeight);
+		ctx.beginPath();
+		ctx.moveTo(src.x, src.y);
+		ctx.lineTo(tgt.x, tgt.y);
+		ctx.stroke();
+		ctx.restore();
+	}
+
+	// --- Interaction handlers ---
+
+	const DBLCLICK_MS = 250;
+
 	function handleNodeClick(node: FGNode) {
-		if (pendingClickTimer !== null && pendingClickNodeId === node.id) {
-			clearTimeout(pendingClickTimer);
-			pendingClickTimer = null;
-			pendingClickNodeId = null;
+		if (pendingClick?.nodeId === node.id) {
+			clearTimeout(pendingClick.timer);
+			pendingClick = null;
 			onNavigate(node.id);
 			return;
 		}
-		if (pendingClickTimer !== null) {
-			clearTimeout(pendingClickTimer);
-		}
-		pendingClickNodeId = node.id;
-		pendingClickTimer = window.setTimeout(() => {
-			selectedTag = selectedTag === node.id ? null : node.id;
-			pendingClickTimer = null;
-			pendingClickNodeId = null;
-		}, DBLCLICK_MS);
+		if (pendingClick) clearTimeout(pendingClick.timer);
+		pendingClick = {
+			nodeId: node.id,
+			timer: window.setTimeout(() => {
+				selectedTag = selectedTag === node.id ? null : node.id;
+				pendingClick = null;
+			}, DBLCLICK_MS)
+		};
 	}
 
 	function handleBackgroundClick() {
-		if (pendingClickTimer !== null) {
-			clearTimeout(pendingClickTimer);
-			pendingClickTimer = null;
-			pendingClickNodeId = null;
+		if (pendingClick) {
+			clearTimeout(pendingClick.timer);
+			pendingClick = null;
 		}
 		selectedTag = null;
 	}
 
 	function clearPendingClick() {
-		if (pendingClickTimer !== null) {
-			clearTimeout(pendingClickTimer);
-			pendingClickTimer = null;
-			pendingClickNodeId = null;
+		if (pendingClick) {
+			clearTimeout(pendingClick.timer);
+			pendingClick = null;
 		}
 	}
 
+	// --- Effects ---
+
+	// Instance lifecycle
 	$effect(() => {
 		if (!containerEl) return;
-
 		theme = readTheme();
+		firstFitDone = false;
 
 		const instance = new ForceGraph<FGNode, FGLink>(containerEl);
 		const rect = containerEl.getBoundingClientRect();
@@ -197,16 +271,18 @@
 		};
 	});
 
+	// Graph data
 	$effect(() => {
 		const g = graph;
 		if (!g) return;
-		const data = {
+		firstFitDone = false;
+		g.graphData({
 			nodes: filtered.nodes.map((n) => ({ ...n })),
 			links: filtered.links.map((l) => ({ source: l.source, target: l.target, weight: l.weight }))
-		};
-		g.graphData(data);
+		});
 	});
 
+	// Force settings
 	$effect(() => {
 		const g = graph;
 		if (!g) return;
@@ -225,67 +301,14 @@
 		g.d3ReheatSimulation();
 	});
 
+	// Canvas rendering
 	$effect(() => {
 		const g = graph;
 		if (!g) return;
-		void settings.nodeSizeBy;
-		void selectedTag;
-		void neighborSet;
-		void theme;
-		void maxWeight;
-
-		g.nodeCanvasObject((node, ctx, scale) => {
-			if (node.x === undefined || node.y === undefined) return;
-			const r = radiusFor(node);
-			const dimmed = isNodeDimmed(node);
-			ctx.save();
-			ctx.globalAlpha = dimmed ? 0.25 : 1;
-			ctx.fillStyle = node.color ?? theme.primary;
-			ctx.beginPath();
-			ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-			ctx.fill();
-			if (selectedTag === node.id) {
-				ctx.strokeStyle = theme.foreground;
-				ctx.lineWidth = 2 / scale;
-				ctx.stroke();
-			}
-			if (scale > 0.7) {
-				const fontSize = 11 / scale;
-				ctx.font = `${fontSize}px sans-serif`;
-				ctx.fillStyle = theme.foreground;
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'top';
-				ctx.fillText(tagDisplayName(node), node.x, node.y + r + 2 / scale);
-			}
-			ctx.restore();
-		});
-
-		g.nodePointerAreaPaint((node, color, ctx) => {
-			if (node.x === undefined || node.y === undefined) return;
-			const r = radiusFor(node);
-			ctx.fillStyle = color;
-			ctx.beginPath();
-			ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-			ctx.fill();
-		});
-
-		g.linkCanvasObject((link, ctx) => {
-			const src = link.source;
-			const tgt = link.target;
-			if (typeof src !== 'object' || typeof tgt !== 'object') return;
-			if (src.x === undefined || src.y === undefined || tgt.x === undefined || tgt.y === undefined)
-				return;
-			const dimmed = isLinkDimmed(link);
-			ctx.save();
-			ctx.globalAlpha = dimmed ? 0.08 : 0.45;
-			ctx.strokeStyle = theme.outline;
-			ctx.lineWidth = widthFor(link.weight);
-			ctx.beginPath();
-			ctx.moveTo(src.x, src.y);
-			ctx.lineTo(tgt.x, tgt.y);
-			ctx.stroke();
-			ctx.restore();
-		});
+		const r = render;
+		g.nodeCanvasObject((node, ctx, scale) => paintNode(node, ctx, scale, r));
+		g.nodePointerAreaPaint((node, color, ctx) => paintNodeHitArea(node, color, ctx, r));
+		g.linkCanvasObject((link, ctx) => paintLink(link, ctx, r));
 	});
 </script>
 

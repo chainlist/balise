@@ -52,7 +52,7 @@
 
 <div class="flex h-full min-h-0 flex-col bg-sidebar">
 	<div class="flex items-center justify-between gap-1 px-3 pt-3 pb-2">
-		<span class="truncate text-sm font-medium text-on-surface">
+		<span class="text-md truncate font-medium text-on-surface">
 			<TagName tag={uiState.activeTag || m.all_notes()} />
 		</span>
 		<div class="flex items-center">
@@ -82,7 +82,7 @@
 						</Button>
 					{/snippet}
 				</DropdownMenu.Trigger>
-				<DropdownMenu.Content class="w-56 rounded" align="start" side="right">
+				<DropdownMenu.Content class="w-56 rounded bg-sidebar" align="end" side="bottom">
 					<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
 						<Input
 							bind:value={tagSearch}
@@ -93,7 +93,10 @@
 					<DropdownMenu.Separator />
 					<div class="max-h-60 overflow-auto">
 						{#each filteredRelatedTags as tag (tag.tag)}
-							<DropdownMenu.Item onclick={() => uiState.toggleComposedTag(tag.tag)} class="rounded">
+							<DropdownMenu.Item
+								onclick={() => uiState.toggleComposedTag(tag.tag)}
+								class="rounded dark:focus:bg-surface-container-high"
+							>
 								<TagName {tag} />
 							</DropdownMenu.Item>
 						{:else}
@@ -107,22 +110,22 @@
 
 	{#if uiState.activeTag || uiState.composedTags.length > 0}
 		<div class="flex flex-wrap items-center gap-1 px-3 pb-2">
-			{#if uiState.activeTag}
+			<!-- {#if uiState.activeTag}
 				<button
 					type="button"
 					onclick={clearActiveTag}
-					class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium hover:bg-muted/70"
+					class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-sm font-medium hover:bg-muted/70"
 					style={tagColor(uiState.activeTag) ? `border-color: ${tagColor(uiState.activeTag)};` : ''}
 				>
 					<TagName tag={uiState.activeTag} />
 					<XIcon class="size-3 opacity-50 group-hover:opacity-100" />
 				</button>
-			{/if}
+			{/if} -->
 			{#each uiState.composedTags as t (t)}
 				<button
 					type="button"
 					onclick={() => uiState.toggleComposedTag(t)}
-					class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-xs font-medium hover:bg-muted/70"
+					class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-sm font-medium hover:bg-muted/70"
 					style={tagColor(t) ? `border-color: ${tagColor(t)};` : ''}
 				>
 					<TagName tag={t} />
