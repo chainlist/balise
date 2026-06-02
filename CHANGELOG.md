@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.20.0](https://github.com/chainlist/balise/compare/v0.19.2...v0.20.0) (2026-06-02)
+
+
+### Features
+
+* case-insensitive tag sort and translated new-note title ([b31a748](https://github.com/chainlist/balise/commit/b31a7488a00c8c1a45b6c31e4a0ca52b4cbd6bd3))
+
+
+### Bug Fixes
+
+* **graph:** change default graph settings ([010cb2c](https://github.com/chainlist/balise/commit/010cb2cbbb4a101e1b1387cc347236268182a61a))
+
 ## [0.19.2](https://github.com/chainlist/balise/compare/v0.19.1...v0.19.2) (2026-06-01)
 
 
