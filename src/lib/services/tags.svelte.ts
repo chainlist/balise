@@ -8,23 +8,11 @@ import {
 	resolveCanonicalTags,
 	deleteNoteTags,
 	insertNoteTags,
-	queryRelatedTags,
-	queryTagCooccurrences
+	queryRelatedTags
 } from '$lib/repositories/tags.repo';
 
 import type { Tag, RelatedTag } from '$lib/models/tag';
 export type { Tag, RelatedTag } from '$lib/models/tag';
-
-export interface TagCooccurrence {
-	a: string;
-	b: string;
-	count: number;
-}
-
-export interface SunburstData {
-	tags: Tag[];
-	cooccurrences: TagCooccurrence[];
-}
 
 export const UNTAGGED_FILTER = '__untagged__' as const;
 
@@ -80,7 +68,11 @@ class TagsService {
 			if (settings.display_name !== undefined) updated.display_name = settings.display_name;
 			if (settings.pinned !== undefined) {
 				updated.pinned = settings.pinned;
-				this.tags.sort((a, b) => Number(b.pinned) - Number(a.pinned) || a.tag.localeCompare(b.tag, undefined, { sensitivity: 'base' }));
+				this.tags.sort(
+					(a, b) =>
+						Number(b.pinned) - Number(a.pinned) ||
+						a.tag.localeCompare(b.tag, undefined, { sensitivity: 'base' })
+				);
 			}
 		}
 	}
@@ -93,13 +85,6 @@ class TagsService {
 
 		const allCurrentTags = activeTag ? [activeTag, ...composedTags] : composedTags;
 		this.relatedTags = await queryRelatedTags(getDB(), allCurrentTags);
-	}
-
-	async loadSunburst(): Promise<SunburstData> {
-		if (this.tags.length === 0) await this.load();
-		const rows = await queryTagCooccurrences(getDB());
-		const cooccurrences = rows.map((r) => ({ a: r.tag_a, b: r.tag_b, count: r.count }));
-		return { tags: this.tags, cooccurrences };
 	}
 
 	async syncNoteTags(noteId: string, content: string): Promise<void> {
