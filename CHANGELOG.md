@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/chainlist/balise/compare/v0.21.0...v0.21.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* **graph:** lag feeling when navigating out of the graph ([0212c94](https://github.com/chainlist/balise/commit/0212c9405cb40c3d155e5c38da05eb749741d1ed))
+
 ## [0.21.0](https://github.com/chainlist/balise/compare/v0.20.0...v0.21.0) (2026-06-04)
 
 
