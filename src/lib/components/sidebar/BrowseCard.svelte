@@ -6,7 +6,7 @@
 	import { BookOpenText, Share2Icon, NotebookIcon, CheckSquareIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
-	const isKnowledgeGraph = $derived(page.url.pathname === '/knowledge-graph');
+	const isKnowledgeGraph = $derived(page.url.pathname === '/graph');
 	const isJournal = $derived(page.url.pathname === '/journal');
 	const isTasks = $derived(page.url.pathname === '/tasks');
 	const isNotesRoot = $derived(page.url.pathname === '/');
@@ -18,7 +18,7 @@
 </script>
 
 <div class="flex flex-col gap-0.5 px-3 pt-1 pb-3">
-	<a href={resolve('/knowledge-graph')} class="row" class:active={isKnowledgeGraph}>
+	<a href={resolve('/graph')} class="row" class:active={isKnowledgeGraph}>
 		<Share2Icon class="size-4" />
 		{m.nav_knowledge_graph()}
 	</a>

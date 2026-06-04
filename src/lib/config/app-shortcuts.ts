@@ -23,7 +23,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: m.shortcut_goto_knowledge_graph_desc,
 		defaultBinding: '$mod+g',
 		bypassGuard: true,
-		run: () => goto(resolve('/knowledge-graph'))
+		run: () => goto(resolve('/graph'))
 	},
 	{
 		id: 'open-settings',
