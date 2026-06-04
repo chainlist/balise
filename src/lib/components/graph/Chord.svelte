@@ -47,7 +47,7 @@
 	stroke-width={w}
 	stroke-opacity={opacity}
 	stroke-linecap="round"
-	transition:drawFade|global
+	transition:drawFade
 />
 
 <style>
