@@ -113,7 +113,8 @@
 	"graph_empty": "Noch keine Tags — erstelle Notizen mit #hashtags.",
 	"graph_settings_title": "Einstellungen",
 	"graph_settings_close": "Einstellungen schließen",
-	"graph_settings_categories": "Kategorien",
+	"graph_settings_tags": "Tags",
+	"graph_settings_tags_desc": "Anzahl der Tags im Graphen",
 	"graph_settings_min_cooccurrence": "Min. Verbindungen",
 
 	"shortcut_open_command_palette_name": "Befehlspalette öffnen",

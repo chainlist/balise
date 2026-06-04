@@ -35,7 +35,7 @@
 	];
 
 	let loaded = $state(false);
-	let selected = $state<string | null>(null); // canonical tag name, or null for the overview
+	const selected = $derived(uiState.activeTag);
 	let categoryCount = $state(10);
 	let minCooccurrence = $state(1);
 	let settingsOpen = $state(false);
@@ -113,7 +113,7 @@
 
 	function handleArc(label: string) {
 		const t = rankedTags.find((tag) => labelFor(tag) === label);
-		if (t) selected = t.tag;
+		if (t) uiState.setActiveTag(t.tag);
 	}
 
 	// The center shows the selected tag; clicking it opens that tag's notes.
@@ -141,7 +141,7 @@
 				variant="outline"
 				size="sm"
 				class="absolute top-8 left-8 z-10"
-				onclick={() => (selected = null)}
+				onclick={() => uiState.setActiveTag(null)}
 			>
 				<ArrowLeftIcon class="size-4" />
 				{tagDisplayName(selectedTag)}
@@ -149,7 +149,7 @@
 		{/if}
 
 		{#if settingsOpen}
-			<div class="absolute top-8 right-8 z-10 w-64 rounded-lg border bg-card p-4 shadow-md">
+			<div class="absolute top-8 right-8 z-10 w-64 rounded border bg-card p-4 shadow-md">
 				<div class="mb-3 flex items-center justify-between">
 					<h2 class="text-sm font-semibold text-foreground">{m.graph_settings_title()}</h2>
 					<button
@@ -165,13 +165,16 @@
 				<div class="space-y-4">
 					<label class="block">
 						<div class="mb-1 flex items-center justify-between">
-							<span class="text-xs text-foreground">{m.graph_settings_categories()}</span>
+							<div>
+								<span class="text-xs text-foreground">{m.graph_settings_tags()}</span>
+								<p class="text-[10px] text-muted-foreground">{m.graph_settings_tags_desc()}</p>
+							</div>
 							<span class="text-xs text-muted-foreground tabular-nums">{categoryCount}</span>
 						</div>
 						<input
 							type="range"
 							min="1"
-							max={Math.max(1, rankedTags.length)}
+							max={20}
 							step="1"
 							bind:value={categoryCount}
 							class="w-full"
