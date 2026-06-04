@@ -36,6 +36,15 @@
 
 	let loaded = $state(false);
 	const selected = $derived(uiState.activeTag);
+
+	let prevDesk = uiState.activeDesk;
+	$effect(() => {
+		const desk = uiState.activeDesk;
+		if (desk !== prevDesk) {
+			prevDesk = desk;
+			graphService.load();
+		}
+	});
 	let categoryCount = $state(10);
 	let minCooccurrence = $state(1);
 	let settingsOpen = $state(false);
