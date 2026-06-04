@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.21.0](https://github.com/chainlist/balise/compare/v0.20.0...v0.21.0) (2026-06-04)
+
+
+### Features
+
+* **graph:** new sunburst graph ([93a2db5](https://github.com/chainlist/balise/commit/93a2db54caf5d811942c27201fb8c7a9e12d323d))
+* sunburst graph ([00f795a](https://github.com/chainlist/balise/commit/00f795a52fa22b86ab3ff8991967e85b562164f6))
+
 ## [0.20.0](https://github.com/chainlist/balise/compare/v0.19.2...v0.20.0) (2026-06-02)
 
 
