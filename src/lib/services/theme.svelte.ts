@@ -3,8 +3,14 @@ import { settingsService } from './settings.svelte';
 export type Theme = 'light' | 'dark' | 'system';
 
 class ThemeService {
+	#isDark = $state(false);
+
 	get theme(): Theme {
 		return settingsService.theme;
+	}
+
+	get isDark(): boolean {
+		return this.#isDark;
 	}
 
 	#resolve(): 'light' | 'dark' {
@@ -13,7 +19,9 @@ class ThemeService {
 	}
 
 	applyTheme(): void {
-		document.documentElement.classList.toggle('dark', this.#resolve() === 'dark');
+		const dark = this.#resolve() === 'dark';
+		document.documentElement.classList.toggle('dark', dark);
+		this.#isDark = dark;
 	}
 
 	setTheme(theme: Theme): void {

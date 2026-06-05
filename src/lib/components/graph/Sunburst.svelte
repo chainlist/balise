@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
-	import { polar, sector, SIZE, C, MAX_DOTS, GAP, RI, RO, RD, type SunburstArc } from './sunburst';
+	import { polar, sector, SIZE, C, MAX_DOTS, GAP, DOT_STEP, RI, RO, RD, type SunburstArc } from './sunburst';
 	import Arc from './Arc.svelte';
 	import RelatedDot from './RelatedDot.svelte';
 	import OverflowBadge from './OverflowBadge.svelte';
@@ -49,7 +49,7 @@
 			const overflow = sorted.length - shown.length;
 			const slots = shown.length + (overflow > 0 ? 1 : 0);
 			// Group the dots in a short row centred above the arc, not spread across it.
-			const step = 0.09;
+			const step = DOT_STEP;
 			const start = mid - ((slots - 1) * step) / 2;
 			const angleAt = (k: number) => start + k * step;
 			const dots = shown.map((rt, k) => {

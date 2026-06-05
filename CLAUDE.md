@@ -119,6 +119,11 @@ src/lib/
     └── cm/             # CodeMirror plugins (pairs, code, style, format)
 ```
 
+### Component Design Conventions
+
+- **Prefer small, single-responsibility Svelte components** that can be reused in other contexts. A component that grows past ~150 lines is a signal to split it. Each component should do one thing: render a piece of UI, manage one slice of state, or encapsulate one interaction pattern.
+- Long page components that mix layout, settings panels, business logic, and sub-views are hard to maintain. Extract self-contained sections into their own components early.
+
 ### Key Conventions
 
 - **Services are classes, utilities are plain functions.** Any module that acts as a service (has side effects, wraps other services, or is an abstraction layer) must be a class exported as a singleton (e.g. `export const fsSyncService = new FsSyncService()`). Pure utilities with no service dependencies (e.g. `desk.ts`, `notes.repo.ts`) export functions directly.

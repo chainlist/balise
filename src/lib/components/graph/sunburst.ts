@@ -20,6 +20,7 @@ export const RO = 230; // arc outer radius
 export const RD = 268; // related-dot ring radius
 export const GAP = 0.04; // radians between arcs
 export const MAX_DOTS = 5;
+export const DOT_STEP = 0.09; // radians between related-tag dots
 
 export function polar(r: number, a: number): [number, number] {
 	return [C + Math.cos(a) * r, C + Math.sin(a) * r];

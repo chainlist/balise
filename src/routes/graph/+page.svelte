@@ -4,12 +4,14 @@
 	import { resolve } from '$app/paths';
 	import { tagDisplayName } from '$lib/services/tags.svelte';
 	import { graphService } from '$lib/services/graph.svelte';
+	import { themeService } from '$lib/services/theme.svelte';
 	import type { Tag } from '$lib/models/tag';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import Sunburst from '$lib/components/graph/Sunburst.svelte';
+	import GraphSettings from '$lib/components/graph/GraphSettings.svelte';
 	import type { SunburstArc } from '$lib/components/graph/sunburst';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ArrowLeftIcon, ChevronUpIcon, SettingsIcon } from '@lucide/svelte';
+	import { ArrowLeftIcon, SettingsIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const DEFAULT_TAG_COLOR = '#7F77DD';
@@ -36,6 +38,7 @@
 
 	let loaded = $state(false);
 	const selected = $derived(uiState.activeTag);
+	const isDark = $derived(themeService.isDark);
 
 	let prevDesk = uiState.activeDesk;
 	$effect(() => {
@@ -48,21 +51,12 @@
 	let categoryCount = $state(10);
 	let minCooccurrence = $state(1);
 	let settingsOpen = $state(false);
-	let isDark = $state(false);
 
 	onMount(() => {
-		isDark = document.documentElement.classList.contains('dark');
-		const mo = new MutationObserver(() => {
-			isDark = document.documentElement.classList.contains('dark');
-		});
-		mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
 		uiState
 			.setActiveTag(null)
 			.then(() => graphService.load())
 			.then(() => (loaded = true));
-
-		return () => mo.disconnect();
 	});
 
 	const rankedTags = $derived(graphService.rankedTags);
@@ -80,21 +74,17 @@
 		return map;
 	});
 
-	function labelFor(t: Tag): string {
-		return t.display_name ?? `#${t.tag}`;
-	}
-
 	function colorFor(t: Tag): string {
 		return colorByLower[t.tag.toLowerCase()] ?? DEFAULT_TAG_COLOR;
 	}
 
 	function arcFor(t: Tag): SunburstArc {
 		return {
-			label: labelFor(t),
+			label: tagDisplayName(t),
 			noteCount: t.count,
 			color: colorFor(t),
 			relatedTags: graphService.neighborsOf(t.tag, minCooccurrence).map((n) => ({
-				label: labelFor(n.tag),
+				label: tagDisplayName(n.tag),
 				color: colorFor(n.tag),
 				weight: n.weight
 			}))
@@ -118,10 +108,10 @@
 		return rankedTags.slice(0, n).map((t) => arcFor(t));
 	});
 
-	const centerLabel = $derived(selectedTag ? labelFor(selectedTag) : null);
+	const centerLabel = $derived(selectedTag ? tagDisplayName(selectedTag) : null);
 
 	function handleArc(label: string) {
-		const t = rankedTags.find((tag) => labelFor(tag) === label);
+		const t = rankedTags.find((tag) => tagDisplayName(tag) === label);
 		if (t) uiState.setActiveTag(t.tag);
 	}
 
@@ -158,54 +148,12 @@
 		{/if}
 
 		{#if settingsOpen}
-			<div class="absolute top-8 right-8 z-10 w-64 rounded border bg-card p-4 shadow-md">
-				<div class="mb-3 flex items-center justify-between">
-					<h2 class="text-sm font-semibold text-foreground">{m.graph_settings_title()}</h2>
-					<button
-						type="button"
-						class="rounded p-1 text-muted-foreground hover:text-foreground"
-						onclick={() => (settingsOpen = false)}
-						aria-label={m.graph_settings_close()}
-					>
-						<ChevronUpIcon class="size-4" />
-					</button>
-				</div>
-
-				<div class="space-y-4">
-					<label class="block">
-						<div class="mb-1 flex items-center justify-between">
-							<div>
-								<span class="text-xs text-foreground">{m.graph_settings_tags()}</span>
-								<p class="text-[10px] text-muted-foreground">{m.graph_settings_tags_desc()}</p>
-							</div>
-							<span class="text-xs text-muted-foreground tabular-nums">{categoryCount}</span>
-						</div>
-						<input
-							type="range"
-							min="1"
-							max={20}
-							step="1"
-							bind:value={categoryCount}
-							class="w-full"
-						/>
-					</label>
-
-					<label class="block">
-						<div class="mb-1 flex items-center justify-between">
-							<span class="text-xs text-foreground">{m.graph_settings_min_cooccurrence()}</span>
-							<span class="text-xs text-muted-foreground tabular-nums">{minCooccurrence}</span>
-						</div>
-						<input
-							type="range"
-							min="1"
-							max={Math.max(1, graphService.maxWeight)}
-							step="1"
-							bind:value={minCooccurrence}
-							class="w-full"
-						/>
-					</label>
-				</div>
-			</div>
+			<GraphSettings
+				bind:categoryCount
+				bind:minCooccurrence
+				maxWeight={graphService.maxWeight}
+				onclose={() => (settingsOpen = false)}
+			/>
 		{:else}
 			<Button
 				variant="outline"

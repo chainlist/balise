@@ -47,6 +47,23 @@ class GraphService {
 		return score;
 	});
 
+	// Pre-built adjacency index: tag (lowercase) -> sorted neighbor list.
+	private readonly neighborsByTag = $derived.by(() => {
+		const map: Record<string, TagNeighbor[]> = {};
+		for (const c of this.cooccurrences) {
+			const a = c.a.toLowerCase();
+			const b = c.b.toLowerCase();
+			const tagA = this.byLower[a];
+			const tagB = this.byLower[b];
+			if (tagA && tagB) {
+				(map[a] ??= []).push({ tag: tagB, weight: c.count });
+				(map[b] ??= []).push({ tag: tagA, weight: c.count });
+			}
+		}
+		for (const key in map) map[key].sort((x, y) => y.weight - x.weight);
+		return map;
+	});
+
 	// All tags ordered by total co-occurrence weight (most connected first).
 	readonly rankedTags = $derived.by(() =>
 		[...tagsService.tags].sort((x, y) => {
@@ -60,18 +77,8 @@ class GraphService {
 
 	// Tags co-occurring with `name`, above `minWeight`, strongest first.
 	neighborsOf(name: string, minWeight = 1): TagNeighbor[] {
-		const lower = name.toLowerCase();
-		const out: TagNeighbor[] = [];
-		for (const c of this.cooccurrences) {
-			if (c.count < minWeight) continue;
-			const a = c.a.toLowerCase();
-			const b = c.b.toLowerCase();
-			const partner = a === lower ? b : b === lower ? a : null;
-			if (!partner) continue;
-			const tag = this.byLower[partner];
-			if (tag) out.push({ tag, weight: c.count });
-		}
-		return out.sort((x, y) => y.weight - x.weight);
+		const neighbors = this.neighborsByTag[name.toLowerCase()] ?? [];
+		return minWeight <= 1 ? neighbors : neighbors.filter((n) => n.weight >= minWeight);
 	}
 }
 
