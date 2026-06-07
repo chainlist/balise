@@ -10,14 +10,6 @@ export interface HashtagMatch extends ParsedHashtag {
 	length: number;
 }
 
-const HASHTAG_RE = new RegExp(`^${TAG_PATTERN_SOURCE}$`);
-
-export function parseHashtag(text: string): ParsedHashtag | null {
-	const match = HASHTAG_RE.exec(text);
-	if (!match) return null;
-	return { name: match[1], param: match[2] };
-}
-
 export function parseAllHashtags(text: string): HashtagMatch[] {
 	const re = new RegExp(TAG_PATTERN_SOURCE, 'g');
 	const results: HashtagMatch[] = [];

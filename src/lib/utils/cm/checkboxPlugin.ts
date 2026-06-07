@@ -1,9 +1,9 @@
 import { StateField, Prec } from '@codemirror/state';
-import type { EditorState, Extension, Range } from '@codemirror/state';
+import type { Extension, Range, Line } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import Checkbox from '$lib/components/cm/Checkbox.svelte';
-import { SvelteWidget, isRevealed, type MarkMode } from './shared';
+import { SvelteWidget, buildLineDecos, type MarkMode } from './shared';
 
 // "- [ ]" (unchecked) or "- [x]" (checked) at start of line
 const CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.*)$/;
@@ -47,53 +47,40 @@ class CheckboxWidget extends SvelteWidget<CheckboxProps> {
 	}
 }
 
-function buildCheckboxDecos(mode: MarkMode, state: EditorState): DecorationSet {
-	if (mode === 'always') return Decoration.none;
+function processCheckboxLine(line: Line, ranges: Range<Decoration>[]) {
+	const match = CHECKBOX_RE.exec(line.text);
+	if (!match) return;
 
-	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
-	const ranges: Range<Decoration>[] = [];
+	const checked = match[1] !== ' ';
+	const bracketOffset = line.text.indexOf('[');
+	const markerFrom = line.from + bracketOffset;
+	const markerTo = markerFrom + 3; // "[ ]" / "[x]" are 3 chars
+	const textStart = markerTo + 1; // skip space after "]"
 
-	for (let i = 1; i <= state.doc.lines; i++) {
-		const line = state.doc.line(i);
-		if (isRevealed(mode, line.number, cursorLine)) continue;
+	ranges.push(
+		Decoration.replace({ widget: new CheckboxWidget(checked, markerFrom, markerTo) }).range(
+			line.from,
+			textStart
+		)
+	);
 
-		const match = CHECKBOX_RE.exec(line.text);
-		if (!match) continue;
-
-		const checked = match[1] !== ' ';
-		const bracketOffset = line.text.indexOf('[');
-		const markerFrom = line.from + bracketOffset;
-		const markerTo = markerFrom + 3; // "[ ]" / "[x]" are 3 chars
-		const textStart = markerTo + 1; // skip space after "]"
-
+	if (checked) {
 		ranges.push(
-			Decoration.replace({ widget: new CheckboxWidget(checked, markerFrom, markerTo) }).range(
-				line.from,
-				textStart
-			)
+			Decoration.mark({
+				attributes: { style: 'opacity:0.6;text-decoration:line-through' }
+			}).range(textStart, line.to)
 		);
-
-		if (checked) {
-			ranges.push(
-				Decoration.mark({
-					attributes: { style: 'opacity:0.6;text-decoration:line-through' }
-				}).range(textStart, line.to)
-			);
-		}
 	}
-
-	ranges.sort((a, b) => a.from - b.from);
-	return Decoration.set(ranges, true);
 }
 
 export function mdCheckboxPlugin(mode: MarkMode): Extension {
 	return Prec.high(
 		StateField.define<DecorationSet>({
 			create(state) {
-				return buildCheckboxDecos(mode, state);
+				return buildLineDecos(mode, state, processCheckboxLine);
 			},
 			update(decos, tr) {
-				if (tr.docChanged || tr.selection) return buildCheckboxDecos(mode, tr.state);
+				if (tr.docChanged || tr.selection) return buildLineDecos(mode, tr.state, processCheckboxLine);
 				return decos.map(tr.changes);
 			},
 			provide(field) {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
-	import { polar, sector, SIZE, C, MAX_DOTS, GAP, DOT_STEP, RI, RO, RD, type SunburstArc } from './sunburst';
+	import { polar, sector, buildChords, buildLayout, SIZE, C, RI, RO, type SunburstArc } from './sunburst';
 	import Arc from './Arc.svelte';
 	import RelatedDot from './RelatedDot.svelte';
 	import OverflowBadge from './OverflowBadge.svelte';
@@ -36,38 +36,7 @@
 		Math.max(1, ...arcs.flatMap((a) => a.relatedTags.map((r) => r.weight)))
 	);
 
-	const layout = $derived.by(() => {
-		const n = arcs.length;
-		if (n === 0) return [];
-		const span = (Math.PI * 2 - GAP * n) / n;
-		return arcs.map((arc, i) => {
-			const a0 = i * (span + GAP) - Math.PI / 2 + GAP / 2;
-			const a1 = a0 + span;
-			const mid = (a0 + a1) / 2;
-			const sorted = [...arc.relatedTags].sort((x, y) => y.weight - x.weight);
-			const shown = sorted.slice(0, MAX_DOTS);
-			const overflow = sorted.length - shown.length;
-			const slots = shown.length + (overflow > 0 ? 1 : 0);
-			// Group the dots in a short row centred above the arc, not spread across it.
-			const step = DOT_STEP;
-			const start = mid - ((slots - 1) * step) / 2;
-			const angleAt = (k: number) => start + k * step;
-			const dots = shown.map((rt, k) => {
-				const [x, y] = polar(RD, angleAt(k));
-				return { rt, x, y, r: 3.5 + (rt.weight / maxWeight) * 7 };
-			});
-			let badge: { count: number; x: number; y: number } | null = null;
-			if (overflow > 0) {
-				const [x, y] = polar(RD, angleAt(slots - 1));
-				badge = { count: overflow, x, y };
-			}
-			// Tangential to the arc, flipped on the lower half so text stays upright.
-			let deg = ((((mid * 180) / Math.PI + 90) % 360) + 360) % 360;
-			if (deg > 90 && deg < 270) deg += 180;
-			const [lx, ly] = polar((RI + RO) / 2, mid);
-			return { arc, i, a0, a1, mid, dots, badge, span, label: { x: lx, y: ly, deg } };
-		});
-	});
+	const layout = $derived(buildLayout(arcs, maxWeight));
 
 	// Arc index by label, for resolving a related-tag dot to its partner arc.
 	const indexByLabel = $derived.by(() => {
@@ -76,60 +45,8 @@
 		return map;
 	});
 
-	// One gradient chord per co-occurring pair of shown arcs. Each end normally
-	// anchors to the dot the arc renders for the other; if the partner hides this
-	// tag inside its "+N" overflow badge, the chord anchors to that badge instead.
-	const chords = $derived.by(() => {
-		const key = (from: string, to: string) => `${from}\n${to}`;
-		const dotByPair: Record<string, { x: number; y: number }> = {};
-		for (const l of layout) {
-			for (const d of l.dots) dotByPair[key(l.arc.label, d.rt.label)] = { x: d.x, y: d.y };
-		}
-
-		const out: {
-			id: string;
-			x1: number;
-			y1: number;
-			x2: number;
-			y2: number;
-			c1: string;
-			c2: string;
-			w: number;
-			a: number;
-			b: number;
-		}[] = [];
-		for (const l of layout) {
-			for (const d of l.dots) {
-				const partner = indexByLabel[d.rt.label];
-				if (partner === undefined || partner === l.i) continue;
-				const pl = layout[partner];
-				const back = dotByPair[key(pl.arc.label, l.arc.label)];
-				let end: { x: number; y: number };
-				if (back) {
-					// Mutual: both arcs show each other — draw once, dot-to-dot.
-					if (l.i >= partner) continue;
-					end = back;
-				} else {
-					// One-sided: partner hides this tag in its overflow — anchor to the badge.
-					if (!pl.badge) continue;
-					end = { x: pl.badge.x, y: pl.badge.y };
-				}
-				out.push({
-					id: `${Math.min(l.i, partner)}-${Math.max(l.i, partner)}`,
-					x1: d.x,
-					y1: d.y,
-					x2: end.x,
-					y2: end.y,
-					c1: l.arc.color,
-					c2: d.rt.color,
-					w: 0.5 + (d.rt.weight / maxWeight) * 2,
-					a: l.i,
-					b: partner
-				});
-			}
-		}
-		return out;
-	});
+	// One gradient chord per co-occurring pair of shown arcs. Logic lives in sunburst.ts.
+	const chords = $derived(buildChords(layout, indexByLabel, maxWeight));
 
 	// What the pointer is emphasising: a whole arc (with all its chords) or, when
 	// hovering a single dot, just that dot's chord and the two arcs it links.

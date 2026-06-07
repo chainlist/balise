@@ -3,7 +3,7 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import LinkChip from '$lib/components/cm/LinkChip.svelte';
-import { makePlugin, SvelteWidget, isRevealed, BARE_URL_RE, type MarkMode } from './shared';
+import { makePlugin, SvelteWidget, isRevealed, forEachBareUrl, type MarkMode } from './shared';
 
 class LinkWidget extends SvelteWidget<{ href: string; label: string }> {
 	protected component = LinkChip;
@@ -55,34 +55,9 @@ function buildLinkDecos(mode: MarkMode) {
 			});
 		}
 
-		for (const { from, to } of view.visibleRanges) {
-			BARE_URL_RE.lastIndex = 0;
-			const text = state.doc.sliceString(from, to);
-			let match: RegExpExecArray | null;
-			while ((match = BARE_URL_RE.exec(text)) !== null) {
-				const start = from + match.index;
-				const end = start + match[0].length;
-				if (isRevealed(mode, state.doc.lineAt(start).number, cursorLine)) continue;
-
-				let skip = false;
-				for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
-					if (
-						cur.name === 'Link' ||
-						cur.name === 'InlineCode' ||
-						cur.name === 'FencedCode' ||
-						cur.name === 'CodeBlock'
-					) {
-						skip = true;
-						break;
-					}
-				}
-				if (skip) continue;
-
-				ranges.push(
-					Decoration.replace({ widget: new LinkWidget(match[0], match[0]) }).range(start, end)
-				);
-			}
-		}
+		forEachBareUrl(view, mode, cursorLine, (start, end, text) => {
+			ranges.push(Decoration.replace({ widget: new LinkWidget(text, text) }).range(start, end));
+		});
 
 		ranges.sort((a, b) => a.from - b.from);
 		return Decoration.set(ranges, true);

@@ -82,10 +82,7 @@ class SlashPluginClass implements PluginValue {
 		this.close();
 	}
 
-	close() {
-		const wasActive = this.active;
-		this.active = false;
-		this.slashFrom = -1;
+	private teardownMenu() {
 		this.controls = {};
 		if (this.menuInstance) {
 			unmount(this.menuInstance);
@@ -95,20 +92,19 @@ class SlashPluginClass implements PluginValue {
 			this.menuContainer.remove();
 			this.menuContainer = null;
 		}
+	}
+
+	close() {
+		const wasActive = this.active;
+		this.active = false;
+		this.slashFrom = -1;
+		this.teardownMenu();
 		if (wasActive) this.view.focus();
 	}
 
 	destroy() {
 		this.active = false;
-		this.controls = {};
-		if (this.menuInstance) {
-			unmount(this.menuInstance);
-			this.menuInstance = null;
-		}
-		if (this.menuContainer) {
-			this.menuContainer.remove();
-			this.menuContainer = null;
-		}
+		this.teardownMenu();
 	}
 }
 

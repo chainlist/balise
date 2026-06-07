@@ -7,7 +7,7 @@ import {
 	queryUntaggedNotes,
 	queryNoteById,
 	insertNote,
-	updateNoteContent,
+	updateNote,
 	queryNoteUpdatedAt,
 	deleteNoteById
 } from './notes.repo';
@@ -71,7 +71,7 @@ describe('queryUntaggedNotes', () => {
 		db.select.mockResolvedValue([]);
 		await queryUntaggedNotes(db as never);
 		const [sql] = db.select.mock.calls[0] as [string];
-		expect(sql).toContain('NOT IN (SELECT DISTINCT note_id FROM note_tags)');
+		expect(sql).toContain('NOT EXISTS (SELECT 1 FROM note_tags WHERE note_id = notes.id)');
 	});
 
 	it('returns notes from the DB', async () => {
@@ -113,36 +113,71 @@ describe('queryNoteById', () => {
 describe('insertNote', () => {
 	it('executes an INSERT INTO notes', async () => {
 		const db = makeDB();
-		await insertNote(db as never, 'id-1', 'hello');
+		await insertNote(db as never, { id: 'id-1', content: 'hello' });
 		const [sql] = db.execute.mock.calls[0] as [string];
 		expect(sql).toContain('INSERT INTO notes');
 	});
 
 	it('passes the id and content as parameters', async () => {
 		const db = makeDB();
-		await insertNote(db as never, 'id-1', 'hello');
+		await insertNote(db as never, { id: 'id-1', content: 'hello' });
 		const [, params] = db.execute.mock.calls[0] as [string, unknown[]];
 		expect(params).toContain('id-1');
 		expect(params).toContain('hello');
 	});
+
+	it('includes createdAt in the INSERT when provided', async () => {
+		const db = makeDB();
+		await insertNote(db as never, { id: 'm1', content: 'hello', createdAt: '2025-01-01' });
+		const [sql, params] = db.execute.mock.calls[0] as [string, unknown[]];
+		expect(sql).toContain('created_at');
+		expect(params).toContain('2025-01-01');
+	});
+
+	it('includes pinned, archived, createdAt and updatedAt when provided', async () => {
+		const db = makeDB();
+		await insertNote(db as never, {
+			id: 'm1',
+			content: 'hello',
+			pinned: true,
+			archived: false,
+			createdAt: '2025-01-01',
+			updatedAt: '2025-01-02'
+		});
+		const [, params] = db.execute.mock.calls[0] as [string, unknown[]];
+		expect(params).toContain('m1');
+		expect(params).toContain(1); // pinned=true → 1
+		expect(params).toContain(0); // archived=false → 0
+		expect(params).toContain('2025-01-01');
+		expect(params).toContain('2025-01-02');
+	});
 });
 
-// ─── updateNoteContent ────────────────────────────────────────────────────────
+// ─── updateNote ───────────────────────────────────────────────────────────────
 
-describe('updateNoteContent', () => {
+describe('updateNote', () => {
 	it('executes an UPDATE notes SET content', async () => {
 		const db = makeDB();
-		await updateNoteContent(db as never, '1', 'new');
+		await updateNote(db as never, '1', { content: 'new' });
 		const [sql] = db.execute.mock.calls[0] as [string];
 		expect(sql).toContain('UPDATE notes SET content');
 	});
 
-	it('passes content, title, preview, then id as params', async () => {
+	it('passes content first and id last as params', async () => {
 		const db = makeDB();
-		await updateNoteContent(db as never, '1', 'new content');
+		await updateNote(db as never, '1', { content: 'new content' });
 		const [, params] = db.execute.mock.calls[0] as [string, unknown[]];
 		expect(params[0]).toBe('new content');
-		expect(params[3]).toBe('1');
+		expect(params[params.length - 1]).toBe('1');
+	});
+
+	it('includes pinned and archived when provided', async () => {
+		const db = makeDB();
+		await updateNote(db as never, 's1', { content: 'synced', pinned: true, archived: true, createdAt: '2025-01-01' });
+		const [, params] = db.execute.mock.calls[0] as [string, unknown[]];
+		expect(params.filter((p) => p === 1)).toHaveLength(2); // pinned=1, archived=1
+		expect(params).toContain('s1');
+		expect(params).toContain('2025-01-01');
 	});
 });
 
@@ -181,3 +216,4 @@ describe('deleteNoteById', () => {
 		expect(params).toContain('99');
 	});
 });
+

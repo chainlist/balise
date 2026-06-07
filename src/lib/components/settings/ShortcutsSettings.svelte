@@ -36,24 +36,25 @@
 			.replace(/\+/g, isMac ? '' : '+');
 	}
 
-	function buildBinding(e: KeyboardEvent): string | null {
-		const key = e.key;
-
-		const BLOCKED_BARE = ['Escape', 'Enter', ' '];
-		const hasModifier = e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
-		if (BLOCKED_BARE.includes(key) && !hasModifier) return null;
-
+	function buildModifiers(e: KeyboardEvent): string[] {
 		const parts: string[] = [];
 		if (isMac ? e.metaKey : e.ctrlKey) parts.push('$mod');
 		else if (e.ctrlKey) parts.push('Control');
 		else if (e.metaKey) parts.push('Meta');
 		if (e.altKey) parts.push('Alt');
 		if (e.shiftKey) parts.push('Shift');
+		return parts;
+	}
+
+	function buildBinding(e: KeyboardEvent): string | null {
+		const key = e.key;
+		const hasModifier = e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
+		if (['Escape', 'Enter', ' '].includes(key) && !hasModifier) return null;
 
 		const keyName = key === ' ' ? 'Space' : key;
-		const isModifierKey = ['Control', 'Meta', 'Alt', 'Shift'].includes(keyName);
-		if (isModifierKey) return null;
+		if (['Control', 'Meta', 'Alt', 'Shift'].includes(keyName)) return null;
 
+		const parts = buildModifiers(e);
 		parts.push(keyName.length === 1 ? keyName.toLowerCase() : keyName);
 		return parts.join('+');
 	}

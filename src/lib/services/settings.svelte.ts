@@ -46,24 +46,24 @@ class SettingsService {
 
 	setTheme(theme: Theme): void {
 		this.theme = theme;
-		this.#store?.set('theme', theme);
+		void this.#store?.set('theme', theme);
 	}
 
 	setFontSize(size: number): void {
 		this.fontSize = size;
 		this.#applyEditorVars();
-		this.#store?.set('fontSize', size);
+		void this.#store?.set('fontSize', size);
 	}
 
 	setLineHeight(value: number): void {
 		this.lineHeight = value;
 		this.#applyEditorVars();
-		this.#store?.set('lineHeight', value);
+		void this.#store?.set('lineHeight', value);
 	}
 
 	setMarkdownMarks(value: MarkMode): void {
 		this.markdownMarks = value;
-		this.#store?.set('markdownMarks', value);
+		void this.#store?.set('markdownMarks', value);
 	}
 
 	async setLanguage(lang: string): Promise<void> {
@@ -77,14 +77,14 @@ class SettingsService {
 
 	setBinding(id: string, binding: string): void {
 		this.customBindings = { ...this.customBindings, [id]: binding };
-		this.#store?.set('customBindings', this.customBindings);
+		void this.#store?.set('customBindings', this.customBindings);
 	}
 
 	resetBinding(id: string): void {
 		const next = { ...this.customBindings };
 		delete next[id];
 		this.customBindings = next;
-		this.#store?.set('customBindings', next);
+		void this.#store?.set('customBindings', next);
 	}
 }
 

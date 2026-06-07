@@ -3,13 +3,13 @@ import { queryTagCooccurrences } from '$lib/repositories/tags.repo';
 import { tagsService } from '$lib/services/tags.svelte';
 import type { Tag } from '$lib/models/tag';
 
-export interface TagCooccurrence {
+interface TagCooccurrence {
 	a: string;
 	b: string;
 	count: number;
 }
 
-export interface TagNeighbor {
+interface TagNeighbor {
 	tag: Tag;
 	weight: number;
 }

@@ -33,7 +33,7 @@ export async function upsertTagSettings(
 	tag: string,
 	settings: Partial<{ color: string; display_name: string | null; pinned: boolean }>
 ): Promise<void> {
-	const pinnedVal = settings.pinned !== undefined ? (settings.pinned ? 1 : 0) : null;
+	const pinnedVal = settings.pinned == null ? null : settings.pinned ? 1 : 0;
 	await db.execute(
 		`INSERT INTO tag_settings (tag, color, display_name, pinned)
        VALUES ($1, COALESCE($2, '#7F77DD'), $3, COALESCE($4, 0))

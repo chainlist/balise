@@ -20,7 +20,7 @@ export function sanitizeDeskName(desk: string): string {
 	return sanitized;
 }
 
-export async function ensureDeskFolder(desk: string): Promise<string> {
+async function ensureDeskFolder(desk: string): Promise<string> {
 	const safeDesk = sanitizeDeskName(desk);
 	await mkdir(`${DESKS_ROOT_DIR}/${safeDesk}`, {
 		baseDir: BaseDirectory.Document,

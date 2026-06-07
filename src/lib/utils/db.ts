@@ -4,7 +4,7 @@ import { migrate } from './migrations';
 let db = null as Database | null;
 let currentDBName = null as string | null;
 
-export async function closeDB(): Promise<void> {
+async function closeDB(): Promise<void> {
 	if (!db) return;
 
 	await db.close();

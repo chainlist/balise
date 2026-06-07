@@ -1,5 +1,6 @@
 import { getDB } from '$lib/utils/db';
 import { TAG_PATTERN_SOURCE } from '$lib/utils/tag-parser';
+import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
 
 import {
 	queryTagsWithCounts,
@@ -12,7 +13,6 @@ import {
 } from '$lib/repositories/tags.repo';
 
 import type { Tag, RelatedTag } from '$lib/models/tag';
-export type { Tag, RelatedTag } from '$lib/models/tag';
 
 export const UNTAGGED_FILTER = '__untagged__' as const;
 
@@ -20,29 +20,36 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 	return tag.display_name ?? tag.tag;
 }
 
-export function extractTags(content: string): string[] {
-	// eslint-disable-next-line svelte/prefer-svelte-reactivity
-	const tags = new Set<string>();
-	// Group 1: hashtag name; Group 2: hashtag param (unused); Group 3: code fence lang; Group 4: task state char ( , x/X, ~)
-	const pattern = new RegExp(
-		TAG_PATTERN_SOURCE + '|^```([a-zA-Z][a-zA-Z0-9]*)|^[ \\t]*- \\[( |[xX]|~)\\]',
-		'gm'
-	);
+function extractHashtags(content: string): string[] {
+	return [...content.matchAll(new RegExp(TAG_PATTERN_SOURCE, 'gm'))].map((m) => m[1]);
+}
 
-	for (const match of content.matchAll(pattern)) {
-		if (match[1] !== undefined) {
-			tags.add(match[1]);
-		} else if (match[3] !== undefined) {
-			tags.add('code');
-			tags.add(match[3].toLowerCase());
-		} else if (match[4] !== undefined) {
-			if (match[4] === ' ') tags.add('todo');
-			else if (match[4] === '~') tags.add('inprogress');
-			else tags.add('done');
-		}
+function extractCodeTags(content: string): string[] {
+	const tags: string[] = [];
+	for (const [, lang] of content.matchAll(/^```([a-zA-Z][a-zA-Z0-9]*)/gm)) {
+		tags.push('code', lang.toLowerCase());
 	}
+	return tags;
+}
 
-	return [...tags];
+function extractChecklistTags(content: string): string[] {
+	const tags: string[] = [];
+	for (const [, marker] of content.matchAll(/^[ \t]*- \[( |[xX]|~)\]/gm)) {
+		if (marker === ' ') tags.push(SYSTEM_TAGS.TODO);
+		else if (marker === '~') tags.push(SYSTEM_TAGS.INPROGRESS);
+		else tags.push(SYSTEM_TAGS.DONE);
+	}
+	return tags;
+}
+
+export function extractTags(content: string): string[] {
+	return [
+		...new Set([
+			...extractHashtags(content),
+			...extractCodeTags(content),
+			...extractChecklistTags(content)
+		])
+	];
 }
 
 class TagsService {

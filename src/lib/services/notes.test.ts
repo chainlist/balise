@@ -5,7 +5,7 @@ vi.mock('$lib/repositories/notes.repo', () => ({
 	queryUntaggedNotes: vi.fn(),
 	queryNoteById: vi.fn(),
 	insertNote: vi.fn(),
-	updateNoteContent: vi.fn(),
+	updateNote: vi.fn(),
 	queryNoteUpdatedAt: vi.fn(),
 	deleteNoteById: vi.fn()
 }));
@@ -97,8 +97,7 @@ describe('create', () => {
 		await notesService.create('My content');
 		expect(repo.insertNote).toHaveBeenCalledWith(
 			expect.anything(),
-			expect.any(String),
-			'My content'
+			expect.objectContaining({ content: 'My content', id: expect.any(String) })
 		);
 	});
 
@@ -116,17 +115,17 @@ describe('create', () => {
 // ─── update ───────────────────────────────────────────────────────────────────
 
 describe('update', () => {
-	it('calls updateNoteContent with the id and new content', async () => {
+	it('calls updateNote with the id and new content', async () => {
 		notesService.notes = [NOTE('1')];
-		vi.mocked(repo.updateNoteContent).mockResolvedValue(undefined);
+		vi.mocked(repo.updateNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteUpdatedAt).mockResolvedValue('2025-05-18');
 		await notesService.update('1', 'new content');
-		expect(repo.updateNoteContent).toHaveBeenCalledWith(expect.anything(), '1', 'new content');
+		expect(repo.updateNote).toHaveBeenCalledWith(expect.anything(), '1', expect.objectContaining({ content: 'new content' }));
 	});
 
 	it('calls tagsService.syncNoteTags with id and new content', async () => {
 		notesService.notes = [NOTE('1')];
-		vi.mocked(repo.updateNoteContent).mockResolvedValue(undefined);
+		vi.mocked(repo.updateNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteUpdatedAt).mockResolvedValue('2025-05-18');
 		await notesService.update('1', 'new content');
 		expect(tagsService.syncNoteTags).toHaveBeenCalledWith('1', 'new content');
@@ -134,7 +133,7 @@ describe('update', () => {
 
 	it('updates the in-memory updated_at timestamp', async () => {
 		notesService.notes = [NOTE('1')];
-		vi.mocked(repo.updateNoteContent).mockResolvedValue(undefined);
+		vi.mocked(repo.updateNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteUpdatedAt).mockResolvedValue('2025-05-18T12:00:00');
 		await notesService.update('1', 'updated');
 		expect(notesService.notes[0].updated_at).toBe('2025-05-18T12:00:00');

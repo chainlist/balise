@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 type Options = {
 	/** The time before the copied status is reset. */
 	delay: number;

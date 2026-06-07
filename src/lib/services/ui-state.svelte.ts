@@ -126,12 +126,12 @@ class UIState {
 	}
 
 	async toggleComposedTag(tag: string): Promise<void> {
-		const current = this.composedTags;
-		const next = current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag];
-		this.composedTags = next;
+		const s = new Set(this.composedTags);
+		if (s.has(tag)) s.delete(tag); else s.add(tag);
+		this.composedTags = [...s];
 		await Promise.all([
-			notesService.load(this.activeTag, next),
-			tagsService.loadRelated(this.activeTag, next)
+			notesService.load(this.activeTag, this.composedTags),
+			tagsService.loadRelated(this.activeTag, this.composedTags)
 		]);
 	}
 

@@ -9,16 +9,17 @@ import {
 	type TaskItem,
 	type TaskStatus
 } from '$lib/utils/task-parser';
+import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
 
-export type { TaskItem, TaskStatus, TaskSource } from '$lib/utils/task-parser';
+export type { TaskItem, TaskStatus } from '$lib/utils/task-parser';
 
 function rewriteHashtagLine(line: string, newStatus: TaskStatus): string {
 	return line.replace(HASHTAG_RE, `#${newStatus}`);
 }
 
 function rewriteChecklistLine(line: string, newStatus: TaskStatus): string {
-	const marker = newStatus === 'done' ? 'x' : ' ';
-	return line.replace(CHECKLIST_RE, (_, pre, _old, sep, text) => `${pre}${marker}${sep}${text}`);
+	const marker = newStatus === SYSTEM_TAGS.DONE ? 'x' : ' ';
+	return line.replace(CHECKLIST_RE, (_, _prefix, _checkmark, sep, text) => `${_prefix}${marker}${sep}${text}`);
 }
 
 class TasksService {

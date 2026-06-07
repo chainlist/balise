@@ -13,28 +13,7 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ArrowLeftIcon, SettingsIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
-
-	const DEFAULT_TAG_COLOR = '#7F77DD';
-	const PALETTE_LIGHT = [
-		'#7F77DD',
-		'#1D9E75',
-		'#D85A30',
-		'#378ADD',
-		'#9333EA',
-		'#E0A30E',
-		'#D6336C',
-		'#0CA678'
-	];
-	const PALETTE_DARK = [
-		'#AFA9EC',
-		'#5DCAA5',
-		'#F0997B',
-		'#85B7EB',
-		'#C084FC',
-		'#F5CF5B',
-		'#F06595',
-		'#38D9A9'
-	];
+	import { assignGraphColors, DEFAULT_TAG_COLOR } from '$lib/utils/graph-colors';
 
 	let loaded = $state(false);
 	const selected = $derived(uiState.activeTag);
@@ -60,19 +39,9 @@
 	});
 
 	const rankedTags = $derived(graphService.rankedTags);
-	const palette = $derived(isDark ? PALETTE_DARK : PALETTE_LIGHT);
 
 	// Stable color per tag (by score rank), honouring custom colors.
-	const colorByLower = $derived.by(() => {
-		const map: Record<string, string> = {};
-		rankedTags.forEach((t, i) => {
-			map[t.tag.toLowerCase()] =
-				t.color && t.color.toUpperCase() !== DEFAULT_TAG_COLOR
-					? t.color
-					: palette[i % palette.length];
-		});
-		return map;
-	});
+	const colorByLower = $derived(assignGraphColors(rankedTags, isDark));
 
 	function colorFor(t: Tag): string {
 		return colorByLower[t.tag.toLowerCase()] ?? DEFAULT_TAG_COLOR;

@@ -8,7 +8,7 @@ import {
 	queryNoteById,
 	queryNoteContent,
 	insertNote,
-	updateNoteContent,
+	updateNote,
 	queryNoteUpdatedAt,
 	deleteNoteById,
 	queryJournalNotesByDate
@@ -46,7 +46,7 @@ class NotesService {
 	async create(content = ''): Promise<string> {
 		const db = getDB();
 		const id = crypto.randomUUID();
-		await insertNote(db, id, content);
+		await insertNote(db, { id, content });
 		const note = await queryNoteById(db, id);
 		if (note) {
 			this.notes = [note, ...this.notes];
@@ -57,7 +57,7 @@ class NotesService {
 
 	async update(id: string, content: string): Promise<void> {
 		const db = getDB();
-		await updateNoteContent(db, id, content);
+		await updateNote(db, id, { content });
 		await tagsService.syncNoteTags(id, content);
 		const inList = this.notes.find((n) => n.id === id);
 		if (inList) {
@@ -88,7 +88,7 @@ class NotesService {
 		const createdAt = isToday
 			? toSQLiteUTC(now)
 			: toSQLiteUTC(new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), 12, 0, 0));
-		await insertNote(db, id, content, createdAt);
+		await insertNote(db, { id, content, createdAt });
 		await tagsService.syncNoteTags(id, content);
 		const note = await queryNoteById(db, id);
 		if (note) await fsSyncService.syncNoteFile(note);

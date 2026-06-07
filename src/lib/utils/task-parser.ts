@@ -1,3 +1,5 @@
+import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
+
 export type TaskStatus = 'todo' | 'inprogress' | 'done';
 export type TaskSource = 'hashtag' | 'checklist';
 
@@ -19,15 +21,15 @@ export const CHECKLIST_RE = /^([ \t]*- \[)( |[xX]|~)(\]\s*)(.+)$/;
 
 function hashtagStatus(tag: string): TaskStatus {
 	const lower = tag.toLowerCase();
-	if (lower === 'done') return 'done';
-	if (lower === 'inprogress') return 'inprogress';
-	return 'todo';
+	if (lower === SYSTEM_TAGS.DONE) return SYSTEM_TAGS.DONE;
+	if (lower === SYSTEM_TAGS.INPROGRESS) return SYSTEM_TAGS.INPROGRESS;
+	return SYSTEM_TAGS.TODO;
 }
 
 function checklistStatus(marker: string): TaskStatus {
-	if (marker === ' ') return 'todo';
-	if (marker === '~') return 'inprogress';
-	return 'done';
+	if (marker === ' ') return SYSTEM_TAGS.TODO;
+	if (marker === '~') return SYSTEM_TAGS.INPROGRESS;
+	return SYSTEM_TAGS.DONE;
 }
 
 export function parseTasksFromNote(

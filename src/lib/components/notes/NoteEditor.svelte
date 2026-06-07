@@ -89,16 +89,10 @@
 			const view = new EditorView({
 				doc: noteContent,
 				extensions: [
+					// Core
 					history(),
-					mdFormatPlugin,
-					keymap.of([
-						...defaultKeymap,
-						...historyKeymap,
-						...foldKeymap,
-						...completionKeymap,
-						indentWithTab
-					]),
 					EditorView.lineWrapping,
+					// Language / syntax
 					markdown({
 						base: markdownLanguage,
 						extensions: [GFM, { props: [foldNodeProp.add({ Paragraph: () => null })] }],
@@ -108,11 +102,24 @@
 					codeFolding(),
 					foldGutter(),
 					mdCodePlugin,
+					// Keybindings
+					mdFormatPlugin,
+					keymap.of([
+						...defaultKeymap,
+						...historyKeymap,
+						...foldKeymap,
+						...completionKeymap,
+						indentWithTab
+					]),
+					// Editing helpers
 					closeBrackets(),
 					mdTagCompletion,
 					mdSlashPlugin,
+					// Mark visibility (dynamically reconfigured)
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
+					// Theme
 					noteEditorTheme,
+					// Save on change
 					EditorView.updateListener.of((u) => {
 						if (u.focusChanged) {
 							if (u.view.hasFocus) focusedNoteId = noteId;

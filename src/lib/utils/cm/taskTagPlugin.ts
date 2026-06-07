@@ -1,24 +1,25 @@
 import { StateField, Prec } from '@codemirror/state';
-import type { EditorState, Extension, Range } from '@codemirror/state';
+import type { Extension, Range, Line } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
-import { SvelteWidget, isRevealed, type MarkMode } from './shared';
+import { SvelteWidget, buildLineDecos, type MarkMode } from './shared';
+import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
 
 const TASK_TAG_RE = /#(todo|done|inprogress)\b/i;
 const TASK_TAG_STRIP_RE = /#(todo|done|inprogress)\b\s*/gi;
 
 const NEXT_STATUS_TAG: Record<TaskStatus, string> = {
-	todo: '#inprogress',
-	inprogress: '#done',
-	done: '#todo'
+	todo: `#${SYSTEM_TAGS.INPROGRESS}`,
+	inprogress: `#${SYSTEM_TAGS.DONE}`,
+	done: `#${SYSTEM_TAGS.TODO}`
 };
 
 function tagToStatus(tag: string): TaskStatus {
 	const lower = tag.toLowerCase();
-	if (lower === 'done') return 'done';
-	if (lower === 'inprogress') return 'inprogress';
-	return 'todo';
+	if (lower === SYSTEM_TAGS.DONE) return SYSTEM_TAGS.DONE;
+	if (lower === SYSTEM_TAGS.INPROGRESS) return SYSTEM_TAGS.INPROGRESS;
+	return SYSTEM_TAGS.TODO;
 }
 
 type TaskProps = { status: TaskStatus; text: string; onToggle: () => void; onEdit?: (newText: string) => void };
@@ -78,22 +79,14 @@ class TaskWidget extends SvelteWidget<TaskProps> {
 	}
 }
 
-function buildTaskTagDecos(mode: MarkMode, state: EditorState): DecorationSet {
-	if (mode === 'always') return Decoration.none;
-
-	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
-	const ranges: Range<Decoration>[] = [];
-
-	for (let i = 1; i <= state.doc.lines; i++) {
-		const line = state.doc.line(i);
-		if (isRevealed(mode, line.number, cursorLine)) continue;
-
+function processTaskTagLine(mode: MarkMode) {
+	return (line: Line, ranges: Range<Decoration>[]) => {
 		const match = TASK_TAG_RE.exec(line.text);
-		if (!match) continue;
+		if (!match) return;
 
 		// Lone task tag (no other text on the line) falls through to tagPlugin as a chip.
 		const displayText = line.text.replace(TASK_TAG_STRIP_RE, '').trim();
-		if (displayText.length === 0) continue;
+		if (displayText.length === 0) return;
 
 		const status = tagToStatus(match[1]);
 		const tagFrom = line.from + match.index;
@@ -112,20 +105,18 @@ function buildTaskTagDecos(mode: MarkMode, state: EditorState): DecorationSet {
 				)
 			}).range(line.from, line.to)
 		);
-	}
-
-	ranges.sort((a, b) => a.from - b.from);
-	return Decoration.set(ranges, true);
+	};
 }
 
 export function mdTaskTagPlugin(mode: MarkMode): Extension {
+	const process = processTaskTagLine(mode);
 	return Prec.high(
 		StateField.define<DecorationSet>({
 			create(state) {
-				return buildTaskTagDecos(mode, state);
+				return buildLineDecos(mode, state, process);
 			},
 			update(decos, tr) {
-				if (tr.docChanged || tr.selection) return buildTaskTagDecos(mode, tr.state);
+				if (tr.docChanged || tr.selection) return buildLineDecos(mode, tr.state, process);
 				return decos.map(tr.changes);
 			},
 			provide(field) {

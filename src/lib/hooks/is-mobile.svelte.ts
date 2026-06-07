@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { MediaQuery } from "svelte/reactivity";
 
 const DEFAULT_MOBILE_BREAKPOINT = 768;

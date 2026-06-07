@@ -1,21 +1,17 @@
 type IdHandler = (id: string) => void;
 
 class NoteSignals {
-	#selectNote: IdHandler[] = [];
-	#deleteNote: IdHandler[] = [];
+	#selectNote = new Set<IdHandler>();
+	#deleteNote = new Set<IdHandler>();
 
 	onSelectNote(fn: IdHandler): () => void {
-		this.#selectNote.push(fn);
-		return () => {
-			this.#selectNote = this.#selectNote.filter((h) => h !== fn);
-		};
+		this.#selectNote.add(fn);
+		return () => this.#selectNote.delete(fn);
 	}
 
 	onDeleteNote(fn: IdHandler): () => void {
-		this.#deleteNote.push(fn);
-		return () => {
-			this.#deleteNote = this.#deleteNote.filter((h) => h !== fn);
-		};
+		this.#deleteNote.add(fn);
+		return () => this.#deleteNote.delete(fn);
 	}
 
 	signalSelectNote(id: string): void {

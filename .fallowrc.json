@@ -1,0 +1,20 @@
+{
+	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+	"entry": ["src/index.{ts,tsx,js,jsx}", "src/main.{ts,tsx,js,jsx}"],
+	"workspaces": {
+		"packages": ["src/*", "/src-tauri/*"]
+	},
+	"ignoreDependencies": [
+		"@fontsource/inter",
+		"@tauri-apps/plugin-window-state",
+		"codemirror",
+		"nanoid"
+	],
+	"usedClassMembers": [
+		{ "extends": "WidgetType", "members": ["toDOM", "destroy", "ignoreEvent"] }
+	],
+	"rules": {
+		"unused-dependencies": "warn"
+	},
+	"ignorePatterns": ["src/lib/components/shadcn/**", "*.test.{ts,tsx,js,jsx}"]
+}

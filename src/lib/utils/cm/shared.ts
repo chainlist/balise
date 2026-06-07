@@ -1,6 +1,6 @@
 import { ViewPlugin, Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet, ViewUpdate } from '@codemirror/view';
-import type { EditorState, Range } from '@codemirror/state';
+import type { EditorState, Range, Line } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { mount, unmount, type Component } from 'svelte';
 
@@ -34,7 +34,7 @@ export function isMarkRevealed(
 
 // Parser nodes that wrap inline emphasis marks. The marks themselves (EmphasisMark,
 // CodeMark, etc.) live as children of these nodes.
-export const PARSED_EMPHASIS = new Set([
+const PARSED_EMPHASIS = new Set([
 	'Emphasis',
 	'StrongEmphasis',
 	'Strikethrough',
@@ -132,6 +132,57 @@ export function makePlugin(
 		},
 		{ decorations: (v) => v.decorations }
 	);
+}
+
+// Iterate every document line that is not on the cursor's line, collect decorations,
+// sort and return a DecorationSet. Used by checkboxPlugin and taskTagPlugin.
+export function buildLineDecos(
+	mode: MarkMode,
+	state: EditorState,
+	process: (line: Line, ranges: Range<Decoration>[]) => void
+): DecorationSet {
+	if (mode === 'always') return Decoration.none;
+	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+	const ranges: Range<Decoration>[] = [];
+	for (let i = 1; i <= state.doc.lines; i++) {
+		const line = state.doc.line(i);
+		if (isRevealed(mode, line.number, cursorLine)) continue;
+		process(line, ranges);
+	}
+	ranges.sort((a, b) => a.from - b.from);
+	return Decoration.set(ranges, true);
+}
+
+// Walk every visible-range character that matches BARE_URL_RE and is not nested
+// inside a Link/InlineCode/FencedCode/CodeBlock node, then call callback.
+// Used by linkPlugin and markNavPlugin to avoid duplicating this logic.
+export function forEachBareUrl(
+	view: EditorView,
+	mode: MarkMode,
+	cursorLine: number,
+	callback: (start: number, end: number, text: string) => void
+): void {
+	const { state } = view;
+	const tree = syntaxTree(state);
+	for (const { from, to } of view.visibleRanges) {
+		BARE_URL_RE.lastIndex = 0;
+		const text = state.doc.sliceString(from, to);
+		let match: RegExpExecArray | null;
+		while ((match = BARE_URL_RE.exec(text)) !== null) {
+			const start = from + match.index;
+			const end = start + match[0].length;
+			if (isRevealed(mode, state.doc.lineAt(start).number, cursorLine)) continue;
+			let skip = false;
+			for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
+				if (cur.name === 'Link' || cur.name === 'InlineCode' || cur.name === 'FencedCode' || cur.name === 'CodeBlock') {
+					skip = true;
+					break;
+				}
+			}
+			if (skip) continue;
+			callback(start, end, match[0]);
+		}
+	}
 }
 
 const widgetInstances = new WeakMap<HTMLElement, ReturnType<typeof mount>>();

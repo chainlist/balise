@@ -29,12 +29,16 @@ class ThemeService {
 		this.applyTheme();
 	}
 
+	#mediaListener = () => {
+		if (settingsService.theme === 'system') this.applyTheme();
+	};
+
 	init(): void {
 		this.applyTheme();
-		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-			if (settingsService.theme === 'system') this.applyTheme();
-		});
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.#mediaListener);
 	}
+
+
 }
 
 export const themeService = new ThemeService();

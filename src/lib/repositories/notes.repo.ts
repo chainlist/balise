@@ -1,6 +1,7 @@
 import type Database from '@tauri-apps/plugin-sql';
 import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import type { Note, NoteSearchResult } from '$lib/models/note';
+import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
 export type { Note, NoteSearchResult } from '$lib/models/note';
 
 interface RawNote {
@@ -73,64 +74,41 @@ export async function queryNoteContent(db: Database, id: string): Promise<string
 
 export async function insertNote(
 	db: Database,
-	id: string,
-	content: string,
-	createdAt?: string
-): Promise<void> {
-	if (createdAt) {
-		await db.execute(
-			'INSERT INTO notes (id, content, title, preview, created_at) VALUES ($1, $2, $3, $4, $5)',
-			[id, content, extractTitle(content), notePreview(content), createdAt]
-		);
-	} else {
-		await db.execute(
-			'INSERT INTO notes (id, content, title, preview) VALUES ($1, $2, $3, $4)',
-			[id, content, extractTitle(content), notePreview(content)]
-		);
-	}
-}
-
-export async function insertNoteWithMeta(
-	db: Database,
 	note: {
 		id: string;
 		content: string;
-		pinned: boolean;
-		archived: boolean;
-		created_at: string;
-		updated_at: string;
+		createdAt?: string;
+		updatedAt?: string;
+		pinned?: boolean;
+		archived?: boolean;
 	}
 ): Promise<void> {
-	await db.execute(
-		'INSERT INTO notes (id, content, title, preview, pinned, archived, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-		[
-			note.id,
-			note.content,
-			extractTitle(note.content),
-			notePreview(note.content),
-			note.pinned ? 1 : 0,
-			note.archived ? 1 : 0,
-			note.created_at,
-			note.updated_at
-		]
-	);
+	const title = extractTitle(note.content);
+	const preview = notePreview(note.content);
+	const cols = ['id', 'content', 'title', 'preview'];
+	const vals: unknown[] = [note.id, note.content, title, preview];
+	if (note.createdAt !== undefined) { cols.push('created_at'); vals.push(note.createdAt); }
+	if (note.updatedAt !== undefined) { cols.push('updated_at'); vals.push(note.updatedAt); }
+	if (note.pinned !== undefined) { cols.push('pinned'); vals.push(note.pinned ? 1 : 0); }
+	if (note.archived !== undefined) { cols.push('archived'); vals.push(note.archived ? 1 : 0); }
+	const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
+	await db.execute(`INSERT INTO notes (${cols.join(', ')}) VALUES (${placeholders})`, vals);
 }
 
-export async function updateNoteContent(db: Database, id: string, content: string): Promise<void> {
-	await db.execute(
-		"UPDATE notes SET content = $1, title = $2, preview = $3, updated_at = datetime('now') WHERE id = $4",
-		[content, extractTitle(content), notePreview(content), id]
-	);
-}
-
-export async function updateNoteFromSync(
+export async function updateNote(
 	db: Database,
-	note: { id: string; content: string; pinned: boolean; archived: boolean; created_at: string }
+	id: string,
+	fields: { content: string; pinned?: boolean; archived?: boolean; createdAt?: string }
 ): Promise<void> {
-	await db.execute(
-		"UPDATE notes SET content=$1, title=$2, preview=$3, pinned=$4, archived=$5, created_at=$6, updated_at=datetime('now') WHERE id=$7",
-		[note.content, extractTitle(note.content), notePreview(note.content), note.pinned ? 1 : 0, note.archived ? 1 : 0, note.created_at, note.id]
-	);
+	const title = extractTitle(fields.content);
+	const preview = notePreview(fields.content);
+	const sets = ['content = $1', `title = $2`, `preview = $3`, `updated_at = datetime('now')`];
+	const vals: unknown[] = [fields.content, title, preview];
+	if (fields.pinned !== undefined) { sets.push(`pinned = $${vals.length + 1}`); vals.push(fields.pinned ? 1 : 0); }
+	if (fields.archived !== undefined) { sets.push(`archived = $${vals.length + 1}`); vals.push(fields.archived ? 1 : 0); }
+	if (fields.createdAt !== undefined) { sets.push(`created_at = $${vals.length + 1}`); vals.push(fields.createdAt); }
+	vals.push(id);
+	await db.execute(`UPDATE notes SET ${sets.join(', ')} WHERE id = $${vals.length}`, vals);
 }
 
 export async function queryNoteUpdatedAt(db: Database, id: string): Promise<string | null> {
@@ -153,7 +131,7 @@ export async function queryJournalNotesByDate(
 	const rows = await db.select<RawNote[]>(
 		`SELECT ${NOTE_COLS_N} FROM notes n
      WHERE n.created_at >= $1 AND n.created_at < $2
-       AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'journal')
+       AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = '${SYSTEM_TAGS.JOURNAL}')
      ORDER BY n.created_at ASC`,
 		[utcFrom, utcTo]
 	);
@@ -174,7 +152,7 @@ export async function queryActiveTaskNotes(
 		`SELECT n.id, n.content, n.updated_at
 		 FROM notes n
 		 WHERE EXISTS (
-		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) IN ('todo', 'inprogress')
+		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) IN ('${SYSTEM_TAGS.TODO}', '${SYSTEM_TAGS.INPROGRESS}')
 		 )
 		 ORDER BY n.updated_at DESC`
 	);
@@ -189,7 +167,7 @@ export async function queryRecentDoneNotes(
 		`SELECT n.id, n.content, n.updated_at
 		 FROM notes n
 		 WHERE EXISTS (
-		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = 'done'
+		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = '${SYSTEM_TAGS.DONE}'
 		 )
 		 ORDER BY n.updated_at DESC
 		 LIMIT $1`,

@@ -8,7 +8,7 @@ import {
 	isMarkRevealed,
 	isRevealed,
 	dedupeOverlapping,
-	BARE_URL_RE,
+	forEachBareUrl,
 	type EmphasisMark,
 	type MarkMode
 } from './shared';
@@ -17,8 +17,6 @@ type Atom = { from: number; to: number };
 
 // Combine emphasis marks (parent-bounds reveal) and highlight marks
 // (line-based reveal) into a single list of marks that are currently hidden.
-// Emphasis and highlight use different reveal predicates to mirror the
-// visual behavior in hidePlugin and highlightPlugin respectively.
 function hiddenMarks(state: EditorState, mode: MarkMode): EmphasisMark[] {
 	if (mode === 'always') return [];
 	const cursorPos = state.selection.main.head;
@@ -61,36 +59,13 @@ function linkAtoms(view: EditorView, mode: MarkMode): Atom[] {
 				return false;
 			}
 		});
-
-		BARE_URL_RE.lastIndex = 0;
-		const text = state.doc.sliceString(vFrom, vTo);
-		let m: RegExpExecArray | null;
-		while ((m = BARE_URL_RE.exec(text)) !== null) {
-			const start = vFrom + m.index;
-			const end = start + m[0].length;
-			if (isRevealed(mode, state.doc.lineAt(start).number, cursorLine)) continue;
-			let skip = false;
-			for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
-				if (
-					cur.name === 'Link' ||
-					cur.name === 'InlineCode' ||
-					cur.name === 'FencedCode' ||
-					cur.name === 'CodeBlock'
-				) {
-					skip = true;
-					break;
-				}
-			}
-			if (skip) continue;
-			out.push({ from: start, to: end });
-		}
 	}
+
+	forEachBareUrl(view, mode, cursorLine, (start, end) => out.push({ from: start, to: end }));
 
 	return out;
 }
 
-// Build a range set of hidden marks + link atoms for EditorView.atomicRanges so
-// vertical motion and clicks skip over them.
 function hiddenMarkRanges(view: EditorView, mode: MarkMode): DecorationSet {
 	if (mode === 'always') return Decoration.none;
 	const markRanges = hiddenMarks(view.state, mode).map((m) =>
@@ -100,24 +75,14 @@ function hiddenMarkRanges(view: EditorView, mode: MarkMode): DecorationSet {
 	return Decoration.set(dedupeOverlapping([...markRanges, ...atomRanges]), true);
 }
 
-// A position is "forbidden" if landing the cursor there would look identical
-// to landing one step further out. For a hidden emphasis **bold**:
-//   - positions strictly inside the marks (between the two * chars)
-//   - the inner edges (right after opening mark / right before closing mark)
-// Skipping both makes the cursor hop in 3-char steps at the boundary instead
-// of two visually-indistinguishable single-char steps.
 function isForbidden(pos: number, marks: EmphasisMark[]): boolean {
 	for (const m of marks) {
-		// Opening mark: forbid (m.from, m.to] — inside the mark and the inner edge.
 		if (m.from === m.parentFrom && pos > m.from && pos <= m.to) return true;
-		// Closing mark: forbid [m.from, m.to) — the inner edge and inside the mark.
 		if (m.to === m.parentTo && pos >= m.from && pos < m.to) return true;
 	}
 	return false;
 }
 
-// A position is forbidden if it falls strictly inside a link atom (the whole
-// [label](url) range is replaced by a widget — no interior position is valid).
 function isForbiddenInAtom(pos: number, atoms: Atom[]): boolean {
 	for (const a of atoms) {
 		if (pos > a.from && pos < a.to) return true;
@@ -125,23 +90,28 @@ function isForbiddenInAtom(pos: number, atoms: Atom[]): boolean {
 	return false;
 }
 
-function moveByCanonical(view: EditorView, mode: MarkMode, direction: -1 | 1): boolean {
-	if (mode === 'always') return false;
-	const { state } = view;
-	const range = state.selection.main;
-	if (!range.empty) return false;
+function isBlockedPosition(pos: number, marks: EmphasisMark[], atoms: Atom[]): boolean {
+	return isForbidden(pos, marks) || isForbiddenInAtom(pos, atoms);
+}
 
-	const pos = range.head;
-	const marks = hiddenMarks(state, mode);
+// Returns the cursor position if the selection is collapsed and mode is not 'always',
+// otherwise null. Used as the shared guard for moveByCanonical and deleteThroughMark.
+function getCollapsedCursorPos(view: EditorView, mode: MarkMode): number | null {
+	if (mode === 'always') return null;
+	const range = view.state.selection.main;
+	return range.empty ? range.head : null;
+}
+
+function moveByCanonical(view: EditorView, mode: MarkMode, direction: -1 | 1): boolean {
+	const pos = getCollapsedCursorPos(view, mode);
+	if (pos === null) return false;
+
+	const marks = hiddenMarks(view.state, mode);
 	const atoms = linkAtoms(view, mode);
-	const docLen = state.doc.length;
+	const docLen = view.state.doc.length;
 
 	let target = pos + direction;
-	while (
-		target >= 0 &&
-		target <= docLen &&
-		(isForbidden(target, marks) || isForbiddenInAtom(target, atoms))
-	) {
+	while (target >= 0 && target <= docLen && isBlockedPosition(target, marks, atoms)) {
 		target += direction;
 	}
 
@@ -153,26 +123,18 @@ function moveByCanonical(view: EditorView, mode: MarkMode, direction: -1 | 1): b
 // Backspace at the end of a hidden closing mark: delete the character INSIDE
 // the emphasis, just before the mark. Symmetric for Delete on opening marks.
 function deleteThroughMark(view: EditorView, mode: MarkMode, direction: -1 | 1): boolean {
-	if (mode === 'always') return false;
-	const { state } = view;
-	const range = state.selection.main;
-	if (!range.empty) return false;
-	const pos = range.head;
+	const pos = getCollapsedCursorPos(view, mode);
+	if (pos === null) return false;
 
-	const adjacent = hiddenMarks(state, mode).find((m) =>
+	const adjacent = hiddenMarks(view.state, mode).find((m) =>
 		direction === -1 ? m.to === pos : m.from === pos
 	);
 	if (!adjacent) return false;
 
 	const from = direction === -1 ? adjacent.from - 1 : adjacent.to;
 	const to = from + 1;
-	if (from < 0 || to > state.doc.length) return false;
+	if (from < 0 || to > view.state.doc.length) return false;
 
-	// Keep cursor inside the mark after the delete. `from` (in old-doc coords)
-	// stays at the same position in the new doc since it sits at the edge of the
-	// deleted range, so passing it as the new-state anchor lands the cursor right
-	// against the surviving mark — "at the end of content" (Backspace) or "at the
-	// start of content" (Delete).
 	view.dispatch({ changes: { from, to }, selection: { anchor: from } });
 	return true;
 }
