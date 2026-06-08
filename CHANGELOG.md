@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.22.0](https://github.com/chainlist/balise/compare/v0.21.1...v0.22.0) (2026-06-08)
+
+
+### Features
+
+* added back the forced graph ([fc65425](https://github.com/chainlist/balise/commit/fc65425a39fbdf3a961242e4bed461a9a4a02144))
+* Radial graph added ([e5ca57e](https://github.com/chainlist/balise/commit/e5ca57e848b7154ec28f5bfc47b1cffbfcef2c03))
+
+
+### Bug Fixes
+
+* **graph:** now selecting a tag refresh the notes list ([a6b342b](https://github.com/chainlist/balise/commit/a6b342bd64dc7669bcb41b10205a402b17b2944a))
+* **graph:** switching desk while on the graph page properly reload the tags ([1b735ab](https://github.com/chainlist/balise/commit/1b735ab0296b24ef02b9dbe5b6e857bb43a06f6c))
+
 ## [0.21.1](https://github.com/chainlist/balise/compare/v0.21.0...v0.21.1) (2026-06-04)
 
 
