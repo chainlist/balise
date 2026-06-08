@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.23.0](https://github.com/chainlist/balise/compare/v0.22.1...v0.23.0) (2026-06-08)
+
+
+### Features
+
+* **quick:** Added quick add window mode ([e09e85a](https://github.com/chainlist/balise/commit/e09e85a2f28ce811bb911444f9625e7860f4b015))
+* **quick:** Added quick add window mode ([3956816](https://github.com/chainlist/balise/commit/39568165c6b380be571e7b3e40d0a8309dd84f33))
+
 ## [0.22.1](https://github.com/chainlist/balise/compare/v0.22.0...v0.22.1) (2026-06-08)
 
 
