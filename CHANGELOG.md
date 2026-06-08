@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.1](https://github.com/chainlist/balise/compare/v0.22.0...v0.22.1) (2026-06-08)
+
+
+### Bug Fixes
+
+* **editor:** Fix missing placeholder on empty line ([aa3fa09](https://github.com/chainlist/balise/commit/aa3fa09671aa0e9ff7941675491e6e370f81aa8e))
+
 ## [0.22.0](https://github.com/chainlist/balise/compare/v0.21.1...v0.22.0) (2026-06-08)
 
 
