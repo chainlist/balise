@@ -31,7 +31,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_window_state::Builder::new().skip_initial_state("quick").build())
+        .plugin(tauri_plugin_window_state::Builder::new().with_denylist(&["quick"]).build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -55,6 +55,16 @@ pub fn run() {
                     Code::Space,
                 ),
             )?;
+
+            let app_handle = app.handle().clone();
+            app.get_webview_window("main")
+                .expect("main window not found")
+                .on_window_event(move |event| {
+                    if let tauri::WindowEvent::Destroyed = event {
+                        app_handle.exit(0);
+                    }
+                });
+
             Ok(())
         })
         .run(tauri::generate_context!())
