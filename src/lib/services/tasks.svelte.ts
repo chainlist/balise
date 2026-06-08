@@ -60,7 +60,12 @@ class TasksService {
 
 		lines[task.lineIndex] = newLine;
 		await notesService.update(task.noteId, lines.join('\n'));
-		await this.load();
+
+		const found = this.tasks.find((t) => t.id === task.id);
+		if (found) {
+			found.status = newStatus;
+			found.lineText = newLine;
+		}
 	}
 }
 

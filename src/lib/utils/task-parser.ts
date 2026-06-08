@@ -15,7 +15,7 @@ export interface TaskItem {
 }
 
 export const HASHTAG_RE = /#(todo|inprogress|done)\b/i;
-const HASHTAG_STRIP_RE = /#(todo|inprogress|done)\b\s*/gi;
+export const HASHTAG_STRIP_RE = /#(todo|inprogress|done)\b\s*/gi;
 // Groups: [1] prefix "- [", [2] marker, [3] "] " separator, [4] text
 export const CHECKLIST_RE = /^([ \t]*- \[)( |[xX]|~)(\]\s*)(.+)$/;
 

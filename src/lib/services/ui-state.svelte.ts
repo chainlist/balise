@@ -17,6 +17,7 @@ class UIState {
 	activeTag = $state<string | null>(null);
 	composedTags = $state<string[]>([]);
 	ready = $state(false);
+	focusedNoteId = $state<string | null>(null);
 	isSettingsOpen = $state(false);
 	isCommandPaletteOpen = $state(false);
 	isCapturingShortcut = $state(false);

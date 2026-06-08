@@ -3,28 +3,16 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import type { TaskItem, TaskStatus } from '$lib/utils/task-parser';
+	import type { TaskItem } from '$lib/utils/task-parser';
+	import { TASK_STATUS_COLOR } from '$lib/utils/task-colors';
 	import * as m from '$paraglide/messages.js';
 
 	let { task }: { task: TaskItem } = $props();
 
-	const styles: Record<TaskStatus, { bg: string; border: string }> = {
-		todo: {
-			bg: 'color-mix(in oklch, oklch(0.65 0.18 240) 10%, transparent)',
-			border: 'color-mix(in oklch, oklch(0.65 0.18 240) 40%, transparent)'
-		},
-		done: {
-			bg: 'color-mix(in oklch, oklch(0.65 0.18 145) 10%, transparent)',
-			border: 'color-mix(in oklch, oklch(0.65 0.18 145) 40%, transparent)'
-		},
-		inprogress: {
-			bg: 'color-mix(in oklch, oklch(0.75 0.18 85) 10%, transparent)',
-			border: 'color-mix(in oklch, oklch(0.75 0.18 85) 40%, transparent)'
-		}
-	};
-
 	const renderedText = $derived(marked.parseInline(task.text) as string);
-	const { bg, border } = $derived(styles[task.status]);
+	const color = $derived(TASK_STATUS_COLOR[task.status]);
+	const bg = $derived(`color-mix(in oklch, ${color} 10%, transparent)`);
+	const border = $derived(`color-mix(in oklch, ${color} 40%, transparent)`);
 	const isChecklist = $derived(task.source === 'checklist');
 
 	function openNote() {

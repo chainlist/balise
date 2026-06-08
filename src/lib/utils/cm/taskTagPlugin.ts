@@ -5,9 +5,7 @@ import type { DecorationSet } from '@codemirror/view';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
 import { SvelteWidget, buildLineDecos, type MarkMode } from './shared';
 import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
-
-const TASK_TAG_RE = /#(todo|done|inprogress)\b/i;
-const TASK_TAG_STRIP_RE = /#(todo|done|inprogress)\b\s*/gi;
+import { HASHTAG_RE, HASHTAG_STRIP_RE } from '$lib/utils/task-parser';
 
 const NEXT_STATUS_TAG: Record<TaskStatus, string> = {
 	todo: `#${SYSTEM_TAGS.INPROGRESS}`,
@@ -81,11 +79,11 @@ class TaskWidget extends SvelteWidget<TaskProps> {
 
 function processTaskTagLine(mode: MarkMode) {
 	return (line: Line, ranges: Range<Decoration>[]) => {
-		const match = TASK_TAG_RE.exec(line.text);
+		const match = HASHTAG_RE.exec(line.text);
 		if (!match) return;
 
 		// Lone task tag (no other text on the line) falls through to tagPlugin as a chip.
-		const displayText = line.text.replace(TASK_TAG_STRIP_RE, '').trim();
+		const displayText = line.text.replace(HASHTAG_STRIP_RE, '').trim();
 		if (displayText.length === 0) return;
 
 		const status = tagToStatus(match[1]);

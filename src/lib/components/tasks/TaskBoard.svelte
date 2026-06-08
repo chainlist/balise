@@ -3,6 +3,7 @@
 	import { flip } from 'svelte/animate';
 	import { tasksService, type TaskItem, type TaskStatus } from '$lib/services/tasks.svelte';
 	import TaskBoardCard from './TaskBoardCard.svelte';
+	import { TASK_STATUS_COLOR as ACCENT } from '$lib/utils/task-colors';
 	import * as m from '$paraglide/messages.js';
 
 	const FLIP_MS = 200;
@@ -11,11 +12,6 @@
 		todo: m.tasks_status_todo,
 		inprogress: m.tasks_status_inprogress,
 		done: m.tasks_status_done
-	};
-	const ACCENT: Record<TaskStatus, string> = {
-		todo: 'oklch(0.65 0.18 240)',
-		inprogress: 'oklch(0.75 0.18 85)',
-		done: 'oklch(0.65 0.18 145)'
 	};
 
 	let columns = $state<Record<TaskStatus, TaskItem[]>>({ todo: [], inprogress: [], done: [] });

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
+	import { TASK_STATUS_COLOR } from '$lib/utils/task-colors';
 
 	export type TaskStatus = 'todo' | 'done' | 'inprogress';
 
@@ -44,27 +45,14 @@
 		}
 	}
 
+	const LABEL: Record<TaskStatus, string> = { todo: 'To Do', done: 'Done', inprogress: 'In Progress' };
+
 	let renderedText = $derived(marked.parseInline(text) as string);
 
-	const styles: Record<TaskStatus, { bg: string; border: string; label: string }> = {
-		todo: {
-			bg: 'color-mix(in oklch, oklch(0.65 0.18 240) 10%, transparent)',
-			border: 'color-mix(in oklch, oklch(0.65 0.18 240) 40%, transparent)',
-			label: 'To Do'
-		},
-		done: {
-			bg: 'color-mix(in oklch, oklch(0.65 0.18 145) 10%, transparent)',
-			border: 'color-mix(in oklch, oklch(0.65 0.18 145) 40%, transparent)',
-			label: 'Done'
-		},
-		inprogress: {
-			bg: 'color-mix(in oklch, oklch(0.75 0.18 85) 10%, transparent)',
-			border: 'color-mix(in oklch, oklch(0.75 0.18 85) 40%, transparent)',
-			label: 'In Progress'
-		}
-	};
-
-	const { bg, border, label } = $derived(styles[status]);
+	const color = $derived(TASK_STATUS_COLOR[status]);
+	const bg = $derived(`color-mix(in oklch, ${color} 10%, transparent)`);
+	const border = $derived(`color-mix(in oklch, ${color} 40%, transparent)`);
+	const label = $derived(LABEL[status]);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

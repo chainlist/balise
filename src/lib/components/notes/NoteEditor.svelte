@@ -1,8 +1,4 @@
-﻿<script module lang="ts">
-	let focusedNoteId = $state<string | null>(null);
-</script>
-
-<script lang="ts">
+﻿<script lang="ts">
 	import { EditorView, keymap } from '@codemirror/view';
 	import { Compartment } from '@codemirror/state';
 	import { history, defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands';
@@ -34,11 +30,11 @@
 	} from '$lib/utils/cm';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import { noteSignals } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
-	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
-	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon } from '@lucide/svelte';
+	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	let {
@@ -72,7 +68,7 @@
 
 	$effect(() => {
 		const mode = settingsService.markdownMarks;
-		const effectiveMode: MarkMode = mode === 'cursor' && focusedNoteId !== note.id ? 'never' : mode;
+		const effectiveMode: MarkMode = mode === 'cursor' && uiState.focusedNoteId !== note.id ? 'never' : mode;
 		if (editorView) {
 			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(effectiveMode)) });
 		}
@@ -122,8 +118,8 @@
 					// Save on change
 					EditorView.updateListener.of((u) => {
 						if (u.focusChanged) {
-							if (u.view.hasFocus) focusedNoteId = noteId;
-							else if (focusedNoteId === noteId) focusedNoteId = null;
+							if (u.view.hasFocus) uiState.focusedNoteId = noteId;
+							else if (uiState.focusedNoteId === noteId) uiState.focusedNoteId = null;
 						}
 						if (!u.docChanged) return;
 						clearTimeout(saveTimer);
@@ -138,14 +134,14 @@
 			});
 
 			editorView = view;
-			if (!focusedNoteId) {
-				focusedNoteId = noteId;
+			if (!uiState.focusedNoteId) {
+				uiState.focusedNoteId = noteId;
 				view.focus();
 			}
 
 			return () => {
 				clearTimeout(saveTimer);
-				if (focusedNoteId === noteId) focusedNoteId = null;
+				if (uiState.focusedNoteId === noteId) uiState.focusedNoteId = null;
 				editorView = null;
 				view.destroy();
 			};
@@ -181,24 +177,4 @@
 	</div>
 </div>
 
-<Sheet.Root bind:open={confirmOpen}>
-	<Sheet.Content side="right" class="w-full sm:max-w-md">
-		<Sheet.Header class="gap-2 border-b p-6">
-			<Sheet.Title>{m.note_delete_title()}</Sheet.Title>
-			<Sheet.Description>
-				{m.note_delete_description()}
-			</Sheet.Description>
-		</Sheet.Header>
-		<div class="flex justify-end gap-2 p-6">
-			<Button type="button" variant="outline" onclick={() => (confirmOpen = false)}>{m.action_cancel()}</Button>
-			<Button
-				type="button"
-				variant="destructive"
-				onclick={async () => {
-					await notesService.delete(note.id);
-					confirmOpen = false;
-				}}>{m.action_delete()}</Button
-			>
-		</div>
-	</Sheet.Content>
-</Sheet.Root>
+<NoteDeleteDialog {note} bind:open={confirmOpen} />
