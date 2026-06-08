@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { Calendar } from '$lib/components/shadcn/calendar/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { Calendar as CalendarIcon } from '@lucide/svelte';

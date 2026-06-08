@@ -74,7 +74,15 @@ fn read_frontmatter_meta(path: &Path, name: String) -> Option<DeskFileMeta> {
         return None;
     }
 
-    Some(DeskFileMeta { name, id, pinned, archived, created_at, updated_at, mtime_ms })
+    Some(DeskFileMeta {
+        name,
+        id,
+        pinned,
+        archived,
+        created_at,
+        updated_at,
+        mtime_ms,
+    })
 }
 
 #[tauri::command]
@@ -92,7 +100,11 @@ pub fn scan_desk_files(
         if path.extension().and_then(|e| e.to_str()) != Some("md") {
             continue;
         }
-        let Some(name) = path.file_name().and_then(|n| n.to_str()).map(str::to_string) else {
+        let Some(name) = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .map(str::to_string)
+        else {
             continue;
         };
         if let Some(meta) = read_frontmatter_meta(&path, name) {

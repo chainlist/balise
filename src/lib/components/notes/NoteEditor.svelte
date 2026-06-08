@@ -6,7 +6,7 @@
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
 	import { codeFolding, foldGutter, foldKeymap, foldNodeProp } from '@codemirror/language';
-	import { untrack } from 'svelte';
+	import { untrack, onMount } from 'svelte';
 	import { closeBrackets, completionKeymap } from '@codemirror/autocomplete';
 	import {
 		mdSyntaxHighlighting,
@@ -34,14 +34,27 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { noteSignals } from '$lib/services/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
-	import { EllipsisVerticalIcon, Trash2Icon } from '@lucide/svelte';
+	import { EllipsisVerticalIcon, Trash2Icon, PinIcon } from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
 	import * as m from '$paraglide/messages.js';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
 
 	let {
 		note,
-		onSave
-	}: { note: Note; onSave?: (content: string) => Promise<void> } = $props();
+		onSave,
+		pinnable = false
+	}: { note: Note; onSave?: (content: string) => Promise<void>; pinnable?: boolean } = $props();
+
+	let alwaysOnTop = $state(false);
+
+	onMount(async () => {
+		if (pinnable) alwaysOnTop = await getCurrentWindow().isAlwaysOnTop();
+	});
+
+	async function toggleAlwaysOnTop() {
+		alwaysOnTop = !alwaysOnTop;
+		await getCurrentWindow().setAlwaysOnTop(alwaysOnTop);
+	}
 
 	let confirmOpen = $state(false);
 	let editorView = $state<EditorView | null>(null);
@@ -155,27 +168,38 @@
 	<div data-editor class="mx-auto w-full max-w-175"></div>
 
 	<div class="absolute top-5 right-5 -translate-y-1/2">
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				{#snippet child({ props })}
-					<button
-						{...props}
-						class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+		{#if pinnable}
+			<button
+				onclick={toggleAlwaysOnTop}
+				class="flex size-6 items-center justify-center rounded hover:bg-muted"
+				class:text-primary={alwaysOnTop}
+				class:text-muted-foreground={!alwaysOnTop}
+			>
+				<PinIcon class="size-4 {alwaysOnTop ? 'fill-current' : ''}" />
+			</button>
+		{:else}
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}
+						<button
+							{...props}
+							class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+						>
+							<EllipsisVerticalIcon class="size-4" />
+						</button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="end">
+					<DropdownMenu.Item
+						class="text-destructive focus:text-destructive"
+						onclick={() => (confirmOpen = true)}
 					>
-						<EllipsisVerticalIcon class="size-4" />
-					</button>
-				{/snippet}
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="end">
-				<DropdownMenu.Item
-					class="text-destructive focus:text-destructive"
-					onclick={() => (confirmOpen = true)}
-				>
-					<Trash2Icon class="size-4" />
-					{m.action_delete()}
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+						<Trash2Icon class="size-4" />
+						{m.action_delete()}
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		{/if}
 	</div>
 </div>
 
