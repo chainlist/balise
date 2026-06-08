@@ -72,6 +72,20 @@ describe('buildForceGraph', () => {
 		const { links } = buildForceGraph(tags, cooc, opts);
 		expect(links).toHaveLength(0);
 	});
+
+	it('keeps all nodes by default even when isolated', () => {
+		const tags = [makeTag('a'), makeTag('b'), makeTag('lonely')];
+		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'b', count: 1 }];
+		const { nodes } = buildForceGraph(tags, cooc, opts);
+		expect(nodes.map((n) => n.id)).toContain('lonely');
+	});
+
+	it('drops isolated nodes when hideIsolated is set', () => {
+		const tags = [makeTag('a'), makeTag('b'), makeTag('lonely')];
+		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'b', count: 1 }];
+		const { nodes } = buildForceGraph(tags, cooc, { ...opts, hideIsolated: true });
+		expect(nodes.map((n) => n.id).sort()).toEqual(['a', 'b']);
+	});
 });
 
 describe('buildAdjacency', () => {

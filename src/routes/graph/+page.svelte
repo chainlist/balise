@@ -10,6 +10,7 @@
 	import Sunburst from '$lib/components/graph/Sunburst.svelte';
 	import ForceGraph from '$lib/components/graph/ForceGraph.svelte';
 	import GraphSettings from '$lib/components/graph/GraphSettings.svelte';
+	import ForceGraphSettings from '$lib/components/graph/ForceGraphSettings.svelte';
 	import type { SunburstArc } from '$lib/components/graph/sunburst';
 	import { buildForceGraph } from '$lib/components/graph/force-graph';
 	import { Button } from '$lib/components/shadcn/button/index.js';
@@ -18,7 +19,7 @@
 	import { assignGraphColors, DEFAULT_TAG_COLOR } from '$lib/utils/graph-colors';
 
 	let loaded = $state(false);
-	let mode = $state<'sunburst' | 'force'>('sunburst');
+	const mode = $derived(uiState.graphMode);
 	const selected = $derived(uiState.activeTag);
 	const isDark = $derived(themeService.isDark);
 
@@ -33,6 +34,11 @@
 	let categoryCount = $state(10);
 	let minCooccurrence = $state(1);
 	let settingsOpen = $state(false);
+
+	// Network-mode tunables (page-local, like the sunburst sliders).
+	let repulsion = $state(380);
+	let linkDistance = $state(30);
+	let hideIsolated = $state(false);
 
 	onMount(() => {
 		uiState
@@ -86,7 +92,8 @@
 	const forceGraph = $derived(
 		buildForceGraph(rankedTags, graphService.cooccurrences, {
 			colorFor,
-			labelFor: tagDisplayName
+			labelFor: tagDisplayName,
+			hideIsolated
 		})
 	);
 
@@ -138,7 +145,7 @@
 			<Button
 				variant={mode === 'sunburst' ? 'default' : 'ghost'}
 				size="sm"
-				onclick={() => (mode = 'sunburst')}
+				onclick={() => uiState.setGraphMode('sunburst')}
 				aria-label={m.graph_mode_sunburst()}
 			>
 				<ChartPieIcon class="size-4" />
@@ -147,7 +154,7 @@
 			<Button
 				variant={mode === 'force' ? 'default' : 'ghost'}
 				size="sm"
-				onclick={() => (mode = 'force')}
+				onclick={() => uiState.setGraphMode('force')}
 				aria-label={m.graph_mode_force()}
 			>
 				<NetworkIcon class="size-4" />
@@ -155,8 +162,8 @@
 			</Button>
 		</div>
 
-		{#if mode === 'sunburst'}
-			{#if settingsOpen}
+		{#if settingsOpen}
+			{#if mode === 'sunburst'}
 				<GraphSettings
 					bind:categoryCount
 					bind:minCooccurrence
@@ -164,19 +171,26 @@
 					onclose={() => (settingsOpen = false)}
 				/>
 			{:else}
-				<Button
-					variant="outline"
-					size="sm"
-					class="absolute top-8 right-8 z-10"
-					onclick={() => (settingsOpen = true)}
-				>
-					<SettingsIcon class="size-4" />
-					{m.graph_settings_title()}
-				</Button>
+				<ForceGraphSettings
+					bind:repulsion
+					bind:linkDistance
+					bind:hideIsolated
+					onclose={() => (settingsOpen = false)}
+				/>
 			{/if}
+		{:else}
+			<Button
+				variant="outline"
+				size="sm"
+				class="absolute top-8 right-8 z-10"
+				onclick={() => (settingsOpen = true)}
+			>
+				<SettingsIcon class="size-4" />
+				{m.graph_settings_title()}
+			</Button>
 		{/if}
 
-		<div class="h-full w-full">
+		<div class="h-full w-full {mode === 'sunburst' ? 'pt-14' : ''}">
 			{#if mode === 'sunburst'}
 				<Sunburst
 					{centerLabel}
@@ -191,6 +205,8 @@
 					links={forceGraph.links}
 					{selected}
 					{isDark}
+					{repulsion}
+					{linkDistance}
 					onSelect={(tag) => uiState.setActiveTag(tag)}
 					onOpen={openTagNotes}
 				/>

@@ -118,6 +118,12 @@
 	"graph_settings_min_cooccurrence": "Conexiones mín.",
 	"graph_mode_sunburst": "Radial",
 	"graph_mode_force": "Red",
+	"graph_settings_repulsion": "Dispersión",
+	"graph_settings_repulsion_desc": "Fuerza con la que los nodos se repelen",
+	"graph_settings_link_distance": "Longitud de enlaces",
+	"graph_settings_link_distance_desc": "Distancia en reposo entre etiquetas conectadas",
+	"graph_settings_hide_isolated": "Ocultar etiquetas aisladas",
+	"graph_settings_hide_isolated_desc": "Quitar etiquetas sin conexiones",
 
 	"shortcut_open_command_palette_name": "Abrir paleta de comandos",
 	"shortcut_open_command_palette_desc": "Abrir la paleta para buscar notas, etiquetas y comandos",

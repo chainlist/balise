@@ -12,12 +12,15 @@ const defaults = {
 	desks: [defaultDesk]
 };
 
+export type GraphMode = 'sunburst' | 'force';
+
 class UIState {
 	modal = new ModalState();
 	activeDesk = $state(defaultDesk);
 	desks = $state([defaultDesk] as string[]);
 	activeTag = $state<string | null>(null);
 	composedTags = $state<string[]>([]);
+	graphMode = $state<GraphMode>('sunburst');
 	ready = $state(false);
 	focusedNoteId = $state<string | null>(null);
 
@@ -39,16 +42,18 @@ class UIState {
 			defaults
 		});
 
-		const [activeDesk, desks, activeTag, lastSeenVersion] = await Promise.all([
+		const [activeDesk, desks, activeTag, graphMode, lastSeenVersion] = await Promise.all([
 			this.#store.get<string>('activeDesk'),
 			this.#store.get<string[]>('desks'),
 			this.#store.get<string>('activeTag'),
+			this.#store.get<GraphMode>('graphMode'),
 			this.#store.get<string>('lastSeenVersion')
 		]);
 
 		this.activeDesk = activeDesk ?? defaultDesk;
 		this.desks = desks ?? [defaultDesk];
 		this.activeTag = activeTag ?? null;
+		this.graphMode = graphMode ?? 'sunburst';
 		this.modal.init(this.#store, lastSeenVersion ?? '');
 
 		if (!this.desks.includes(this.activeDesk)) {
@@ -106,13 +111,19 @@ class UIState {
 		]);
 	}
 
+	async setGraphMode(mode: GraphMode): Promise<void> {
+		this.graphMode = mode;
+		await this.#store?.set('graphMode', mode);
+	}
+
 	setActiveNote(id: string): void {
 		this.#noteSelection = { noteId: id, tag: this.activeTag, composedKey: this.#composedKey };
 	}
 
 	async toggleComposedTag(tag: string): Promise<void> {
 		const s = new Set(this.composedTags);
-		if (s.has(tag)) s.delete(tag); else s.add(tag);
+		if (s.has(tag)) s.delete(tag);
+		else s.add(tag);
 		this.composedTags = [...s];
 		await Promise.all([
 			notesService.load(this.activeTag, this.composedTags),

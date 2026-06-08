@@ -25,6 +25,8 @@
 		links,
 		selected,
 		isDark,
+		repulsion,
+		linkDistance,
 		onSelect,
 		onOpen
 	}: {
@@ -32,9 +34,15 @@
 		links: ForceLink[];
 		selected: string | null;
 		isDark: boolean;
+		repulsion: number;
+		linkDistance: number;
 		onSelect: (tag: string | null) => void;
 		onOpen: (tag: string) => void;
 	} = $props();
+
+	function linkDistanceFor(weight: number, base: number): number {
+		return base + 60 / Math.sqrt(weight);
+	}
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
@@ -164,14 +172,20 @@
 			}
 		});
 
+		// Read the tunables untracked: the dedicated effect below applies live
+		// slider changes so they don't rebuild the simulation (which would reset
+		// the layout). They're only read here to seed a correct initial build.
+		const initRepulsion = untrack(() => repulsion);
+		const initDistance = untrack(() => linkDistance);
+
 		sim = forceSimulation<ForceNode, ForceLink>(ns)
 			.force(
 				'link',
 				forceLink<ForceNode, ForceLink>(ls)
 					.id((d) => d.id)
-					.distance((d) => 30 + 60 / Math.sqrt(d.weight))
+					.distance((d) => linkDistanceFor(d.weight, initDistance))
 			)
-			.force('charge', forceManyBody().strength(-380))
+			.force('charge', forceManyBody().strength(-initRepulsion))
 			// Gravity toward the center: forceX/forceY actually *pull* nodes back,
 			// unlike forceCenter (which only recenters the centroid and lets the
 			// cloud expand without bound while a node is pinned/dragged). Kept low
@@ -198,6 +212,17 @@
 		fx?.x(c.x);
 		fy?.y(c.y);
 		sim?.alpha(0.3).restart();
+	});
+
+	// Apply the spread sliders live, without rebuilding (keeps node positions).
+	$effect(() => {
+		const charge = sim?.force('charge') as ReturnType<typeof forceManyBody> | undefined;
+		charge?.strength(-repulsion);
+		const link = sim?.force('link') as
+			| ReturnType<typeof forceLink<ForceNode, ForceLink>>
+			| undefined;
+		link?.distance((d) => linkDistanceFor(d.weight, linkDistance));
+		sim?.alpha(0.4).restart();
 	});
 
 	// Pin the selected node to the center as the "hub"; release others.

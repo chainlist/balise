@@ -51,10 +51,14 @@ export function nodeRadiusFor(count: number, maxCount: number): number {
 export function buildForceGraph(
 	tags: Tag[],
 	cooccurrences: TagCooccurrence[],
-	opts: { colorFor: (t: Tag) => string; labelFor: (t: Tag) => string }
+	opts: {
+		colorFor: (t: Tag) => string;
+		labelFor: (t: Tag) => string;
+		hideIsolated?: boolean;
+	}
 ): { nodes: ForceNode[]; links: ForceLink[] } {
 	const maxCount = tags.reduce((mx, t) => Math.max(mx, t.count), 0);
-	const nodes: ForceNode[] = tags.map((t) => ({
+	let nodes: ForceNode[] = tags.map((t) => ({
 		id: t.tag.toLowerCase(),
 		tag: t.tag,
 		label: opts.labelFor(t),
@@ -72,6 +76,16 @@ export function buildForceGraph(
 			links.push({ source: a, target: b, weight: c.count });
 		}
 	}
+
+	if (opts.hideIsolated) {
+		const linked = new Set<string>();
+		for (const l of links) {
+			linked.add(linkEndId(l.source));
+			linked.add(linkEndId(l.target));
+		}
+		nodes = nodes.filter((n) => linked.has(n.id));
+	}
+
 	return { nodes, links };
 }
 
