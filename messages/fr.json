@@ -96,6 +96,17 @@
 	"settings_marks_cursor": "Sur le curseur",
 	"settings_marks_never": "Jamais",
 
+	"settings_magic_tags_match_starts_with": "Commence par",
+	"settings_magic_tags_match_ends_with": "Se termine par",
+	"settings_magic_tags_match_contains": "Contient",
+	"settings_magic_tags_match_contains_word": "Contient le mot",
+
+	"settings_magic_tags_heading": "Tags magiques",
+	"settings_magic_tags_description": "Assignez automatiquement des tags selon des motifs.",
+	"settings_magic_tags_pattern_placeholder": "Motif (ex. - [ ])",
+	"settings_magic_tags_tag_placeholder": "Tag (ex. todo)",
+	"settings_magic_tags_add": "Ajouter une règle",
+
 	"settings_shortcuts_heading": "Raccourcis",
 	"settings_shortcuts_description": "Cliquez sur un raccourci pour le réassigner.",
 	"settings_shortcuts_col_name": "Nom",

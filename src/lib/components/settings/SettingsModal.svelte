@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { Dialog } from 'bits-ui';
-	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon } from '@lucide/svelte';
+	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon, SparklesIcon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
 	import AppearanceSettings from './AppearanceSettings.svelte';
 	import EditorSettings from './EditorSettings.svelte';
 	import AboutSettings from './AboutSettings.svelte';
+	import MagicTagsSettings from './MagicTagsSettings.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -36,6 +37,12 @@
 			label: m.settings_editor_heading(),
 			icon: TypeIcon,
 			component: EditorSettings
+		},
+		{
+			id: 'magic-tags',
+			label: m.settings_magic_tags_heading(),
+			icon: SparklesIcon,
+			component: MagicTagsSettings
 		},
 		{
 			id: 'shortcuts',

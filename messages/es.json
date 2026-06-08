@@ -96,6 +96,17 @@
 	"settings_marks_cursor": "En el cursor",
 	"settings_marks_never": "Nunca",
 
+	"settings_magic_tags_match_starts_with": "Empieza con",
+	"settings_magic_tags_match_ends_with": "Termina con",
+	"settings_magic_tags_match_contains": "Contiene",
+	"settings_magic_tags_match_contains_word": "Contiene palabra",
+
+	"settings_magic_tags_heading": "Tags mágicos",
+	"settings_magic_tags_description": "Asigna etiquetas automáticamente según patrones.",
+	"settings_magic_tags_pattern_placeholder": "Patrón (ej. - [ ])",
+	"settings_magic_tags_tag_placeholder": "Etiqueta (ej. todo)",
+	"settings_magic_tags_add": "Añadir regla",
+
 	"settings_shortcuts_heading": "Atajos",
 	"settings_shortcuts_description": "Haz clic en un atajo para reasignarlo.",
 	"settings_shortcuts_col_name": "Nombre",

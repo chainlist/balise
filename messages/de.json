@@ -96,6 +96,17 @@
 	"settings_marks_cursor": "Am Cursor",
 	"settings_marks_never": "Nie",
 
+	"settings_magic_tags_match_starts_with": "Beginnt mit",
+	"settings_magic_tags_match_ends_with": "Endet mit",
+	"settings_magic_tags_match_contains": "Enthält",
+	"settings_magic_tags_match_contains_word": "Enthält Wort",
+
+	"settings_magic_tags_heading": "Magic Tags",
+	"settings_magic_tags_description": "Tags automatisch anhand von Mustern zuweisen.",
+	"settings_magic_tags_pattern_placeholder": "Muster (z.B. - [ ])",
+	"settings_magic_tags_tag_placeholder": "Tag (z.B. todo)",
+	"settings_magic_tags_add": "Regel hinzufügen",
+
 	"settings_shortcuts_heading": "Tastenkürzel",
 	"settings_shortcuts_description": "Klicke auf ein Kürzel, um es neu zuzuweisen.",
 	"settings_shortcuts_col_name": "Name",

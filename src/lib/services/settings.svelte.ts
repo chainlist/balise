@@ -5,6 +5,26 @@ import { setLocale, locales } from '$paraglide/runtime.js';
 
 export const SUPPORTED_LOCALES = locales;
 
+export const MAGIC_TAG_MATCH_TYPES = {
+	STARTS_WITH: 'starts_with',
+	ENDS_WITH: 'ends_with',
+	CONTAINS: 'contains',
+	CONTAINS_WORD: 'contains_word'
+} as const;
+
+export type MagicTagMatchType = (typeof MAGIC_TAG_MATCH_TYPES)[keyof typeof MAGIC_TAG_MATCH_TYPES];
+
+export interface MagicTag {
+	pattern: string;
+	matchType: MagicTagMatchType;
+	tag: string;
+}
+
+export const DEFAULT_MAGIC_TAGS: MagicTag[] = [
+	{ pattern: '- [ ]', matchType: MAGIC_TAG_MATCH_TYPES.STARTS_WITH, tag: 'todo' },
+	{ pattern: '- [x]', matchType: MAGIC_TAG_MATCH_TYPES.STARTS_WITH, tag: 'done' }
+];
+
 class SettingsService {
 	theme = $state<Theme>('system');
 	fontSize = $state(16);
@@ -12,20 +32,22 @@ class SettingsService {
 	markdownMarks = $state<MarkMode>('cursor');
 	customBindings = $state<Record<string, string>>({});
 	language = $state<'fr' | 'es' | 'en' | 'de'>('en');
+	magicTags = $state<MagicTag[]>(DEFAULT_MAGIC_TAGS);
 
 	#store: Store | null = null;
 
 	async init(): Promise<void> {
 		this.#store = await load('settings.json', { autoSave: 100 });
 
-		const [theme, fontSize, lineHeight, markdownMarks, customBindings, language] =
+		const [theme, fontSize, lineHeight, markdownMarks, customBindings, language, magicTags] =
 			await Promise.all([
 				this.#store.get<Theme>('theme'),
 				this.#store.get<number>('fontSize'),
 				this.#store.get<number>('lineHeight'),
 				this.#store.get<MarkMode>('markdownMarks'),
 				this.#store.get<Record<string, string>>('customBindings'),
-				this.#store.get<'fr' | 'es' | 'en' | 'de'>('language')
+				this.#store.get<'fr' | 'es' | 'en' | 'de'>('language'),
+				this.#store.get<MagicTag[]>('magicTags')
 			]);
 
 		this.theme = theme ?? 'system';
@@ -34,6 +56,10 @@ class SettingsService {
 		this.markdownMarks = markdownMarks ?? 'cursor';
 		this.customBindings = customBindings ?? {};
 		this.language = language ?? 'en';
+		this.magicTags = (magicTags ?? DEFAULT_MAGIC_TAGS).map(({ matchType, ...rest }) => ({
+			...rest,
+			matchType: (matchType as MagicTagMatchType | undefined) ?? MAGIC_TAG_MATCH_TYPES.CONTAINS
+		}));
 
 		setLocale(this.language);
 		this.#applyEditorVars();
@@ -85,6 +111,11 @@ class SettingsService {
 		delete next[id];
 		this.customBindings = next;
 		void this.#store?.set('customBindings', next);
+	}
+
+	setMagicTags(tags: MagicTag[]): void {
+		this.magicTags = tags;
+		void this.#store?.set('magicTags', tags);
 	}
 }
 

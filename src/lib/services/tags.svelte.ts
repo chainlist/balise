@@ -1,6 +1,6 @@
 import { getDB } from '$lib/utils/db';
 import { TAG_PATTERN_SOURCE } from '$lib/utils/tag-parser';
-import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
+import { settingsService, MAGIC_TAG_MATCH_TYPES } from './settings.svelte';
 
 import {
 	queryTagsWithCounts,
@@ -32,14 +32,42 @@ function extractCodeTags(content: string): string[] {
 	return tags;
 }
 
-function extractChecklistTags(content: string): string[] {
-	const tags: string[] = [];
-	for (const [, marker] of content.matchAll(/^[ \t]*- \[( |[xX]|~)\]/gm)) {
-		if (marker === ' ') tags.push(SYSTEM_TAGS.TODO);
-		else if (marker === '~') tags.push(SYSTEM_TAGS.INPROGRESS);
-		else tags.push(SYSTEM_TAGS.DONE);
+function escapeRegex(s: string): string {
+	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractMagicTags(content: string): string[] {
+	const magicTags = settingsService.magicTags;
+	if (magicTags.length === 0) return [];
+
+	const found = new Set<string>();
+
+	for (const matchType of Object.values(MAGIC_TAG_MATCH_TYPES)) {
+		const ofType = magicTags.filter((t) => t.matchType === matchType);
+		if (ofType.length === 0) continue;
+
+		let re: RegExp;
+		if (matchType === MAGIC_TAG_MATCH_TYPES.CONTAINS_WORD) {
+			const groups = ofType
+				.map(({ pattern }) => `(?:(?<=^|[ \\t])(${escapeRegex(pattern)})(?=[ \\t]|$))`)
+				.join('|');
+			re = new RegExp(groups, 'gm');
+		} else {
+			const groups = ofType.map(({ pattern }) => `(${escapeRegex(pattern)})`).join('|');
+			if (matchType === MAGIC_TAG_MATCH_TYPES.STARTS_WITH)
+				re = new RegExp(`^[ \\t]*(?:${groups})`, 'gm');
+			else if (matchType === MAGIC_TAG_MATCH_TYPES.ENDS_WITH)
+				re = new RegExp(`(?:${groups})[ \\t]*$`, 'gm');
+			else re = new RegExp(`(?:${groups})`, 'gm');
+		}
+
+		for (const match of content.matchAll(re)) {
+			const idx = match.slice(1).findIndex((g) => g !== undefined);
+			if (idx >= 0) found.add(ofType[idx].tag);
+		}
 	}
-	return tags;
+
+	return [...found];
 }
 
 export function extractTags(content: string): string[] {
@@ -47,7 +75,7 @@ export function extractTags(content: string): string[] {
 		...new Set([
 			...extractHashtags(content),
 			...extractCodeTags(content),
-			...extractChecklistTags(content)
+			...extractMagicTags(content)
 		])
 	];
 }
