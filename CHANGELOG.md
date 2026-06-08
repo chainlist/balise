@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/chainlist/balise/compare/v0.23.0...v0.23.1) (2026-06-08)
+
+
+### Bug Fixes
+
+* **editor:** placeholder cursor size ([9c7c73f](https://github.com/chainlist/balise/commit/9c7c73f564af32cb2ec233e1215caf4a51268d1a))
+
 ## [0.23.0](https://github.com/chainlist/balise/compare/v0.22.1...v0.23.0) (2026-06-08)
 
 
