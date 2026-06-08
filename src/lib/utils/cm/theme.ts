@@ -42,8 +42,9 @@ export const noteEditorTheme = EditorView.theme({
 		opacity: '0',
 		transition: 'opacity 120ms ease'
 	},
-	'.cm-foldGutter:hover .cm-gutterElement, .cm-foldGutter .cm-gutterElement[title^="unfold"]':
-		{ opacity: '1' },
+	'.cm-foldGutter:hover .cm-gutterElement, .cm-foldGutter .cm-gutterElement[title^="unfold"]': {
+		opacity: '1'
+	},
 	'.cm-foldGutter .cm-gutterElement:hover': { color: 'var(--primary)' },
 	'.cm-foldPlaceholder': {
 		background: 'color-mix(in oklch, var(--primary) 12%, transparent)',
@@ -151,12 +152,15 @@ export const noteEditorTheme = EditorView.theme({
 		background: 'var(--md-highlight-bg)',
 		borderRadius: '2px'
 	},
-	'.cm-md-placeholder': {
+	'[data-placeholder]': { position: 'relative' },
+	'[data-placeholder]::before': {
+		content: 'attr(data-placeholder)',
+		position: 'absolute',
+		top: '0',
+		left: '0',
 		color: 'var(--muted-foreground)',
 		opacity: '0.5',
 		pointerEvents: 'none',
-		userSelect: 'none',
-		display: 'inline-block',
-		verticalAlign: 'top'
+		userSelect: 'none'
 	}
 });

@@ -26,7 +26,7 @@
 	data-tag={tag.tag}
 	class:active={isActive}
 	onclick={handleTagClick}
-	class="group/tag-item relative inline-flex w-full items-center justify-between rounded px-2 py-1.5 text-sm text-on-surface-variant transition-all select-none hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
+	class="group/tag-item relative inline-flex w-full items-center justify-between rounded px-2 py-1.5 text-sm text-on-surface-variant transition-all select-none hover:bg-sidebar-accent hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
 >
 	<div class="flex min-w-0 items-center gap-2">
 		{#if tag.pinned}

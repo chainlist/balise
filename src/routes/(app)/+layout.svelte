@@ -10,6 +10,7 @@
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
 	import * as Resizable from '$lib/components/shadcn/resizable/index.js';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import TitleBar from '$lib/components/TitleBar.svelte';
 	import UpdateNotifier from '$lib/components/UpdateNotifier.svelte';
 	import WizardModal from '$lib/components/WizardModal.svelte';
 	import NewsModal from '$lib/components/NewsModal.svelte';
