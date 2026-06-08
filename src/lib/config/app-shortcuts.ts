@@ -1,6 +1,7 @@
 import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
 import { notesService, newNoteContent } from '$lib/services/notes.svelte';
 import { uiState } from '$lib/services/ui-state.svelte';
+import { modalState } from '$lib/services/modal-state.svelte';
 import { noteSignals } from '$lib/services/note-signals';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -14,7 +15,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		defaultBinding: '$mod+k',
 		bypassGuard: true,
 		run: () => {
-			uiState.isCommandPaletteOpen = !uiState.isCommandPaletteOpen;
+			modalState.isCommandPaletteOpen = !modalState.isCommandPaletteOpen;
 		}
 	},
 	{
@@ -32,7 +33,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		defaultBinding: '$mod+,',
 		bypassGuard: true,
 		run: () => {
-			uiState.isSettingsOpen = !uiState.isSettingsOpen;
+			modalState.isSettingsOpen = !modalState.isSettingsOpen;
 		}
 	},
 	{
@@ -82,7 +83,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: m.shortcut_toggle_zen_mode_desc,
 		defaultBinding: '$mod+Shift+z',
 		run: () => {
-			uiState.isZenModeActive = !uiState.isZenModeActive;
+			modalState.isZenModeActive = !modalState.isZenModeActive;
 		}
 	}
 ];

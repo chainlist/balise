@@ -6,7 +6,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 	import Button from '$lib/components/shadcn/button/button.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { modalState } from '$lib/services/modal-state.svelte';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { getBaseDir } from '$lib/services/desk';
@@ -35,12 +35,12 @@
 		if (selectedLang !== settingsService.language) {
 			await settingsService.setLanguage(selectedLang);
 		} else {
-			uiState.isWizardOpen = false;
+			modalState.isWizardOpen = false;
 		}
 	}
 </script>
 
-<DialogPrimitive.Root open={uiState.isWizardOpen} onOpenChange={(v) => (uiState.isWizardOpen = v)}>
+<DialogPrimitive.Root open={modalState.isWizardOpen} onOpenChange={(v) => (modalState.isWizardOpen = v)}>
 	<DialogPrimitive.Portal>
 		<DialogPrimitive.Overlay
 			class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"

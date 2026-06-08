@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { modalState } from '$lib/services/modal-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
@@ -21,7 +21,7 @@
 	);
 
 	$effect(() => {
-		uiState.isCapturingShortcut = listeningFor !== null;
+		modalState.isCapturingShortcut = listeningFor !== null;
 	});
 
 	const isMac =

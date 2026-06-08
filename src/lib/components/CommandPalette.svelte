@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Command from '$lib/components/shadcn/command/index.js';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import { modalState } from '$lib/services/modal-state.svelte';
 	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { searchNotes } from '$lib/repositories/notes.repo';
@@ -43,31 +44,31 @@
 	}
 
 	$effect(() => {
-		if (uiState.isCommandPaletteOpen) {
+		if (modalState.isCommandPaletteOpen) {
 			tick().then(() => inputRef?.select());
 		}
 	});
 
 	async function selectNote(id: string) {
-		uiState.isCommandPaletteOpen = false;
+		modalState.isCommandPaletteOpen = false;
 		await uiState.setActiveTag(null);
 		await goto(resolve('/'));
 		noteSignals.signalSelectNote(id);
 	}
 
 	function selectTag(tag: string) {
-		uiState.isCommandPaletteOpen = false;
+		modalState.isCommandPaletteOpen = false;
 		uiState.setActiveTag(tag);
 		goto(resolve('/'));
 	}
 
 	function runCommand(run: () => void | Promise<void>) {
-		uiState.isCommandPaletteOpen = false;
+		modalState.isCommandPaletteOpen = false;
 		run();
 	}
 </script>
 
-<Command.Dialog bind:open={uiState.isCommandPaletteOpen} shouldFilter={false} class="rounded">
+<Command.Dialog bind:open={modalState.isCommandPaletteOpen} shouldFilter={false} class="rounded">
 	<Command.Input
 		bind:ref={inputRef}
 		class="rounded-xs"
