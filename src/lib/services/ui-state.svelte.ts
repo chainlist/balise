@@ -1,4 +1,5 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
+import { ModalState } from './modal-state.svelte';
 import { openDesk, renameDeskFiles } from './desk';
 import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
@@ -12,6 +13,7 @@ const defaults = {
 };
 
 class UIState {
+	modal = new ModalState();
 	activeDesk = $state(defaultDesk);
 	desks = $state([defaultDesk] as string[]);
 	activeTag = $state<string | null>(null);
@@ -37,15 +39,17 @@ class UIState {
 			defaults
 		});
 
-		const [activeDesk, desks, activeTag] = await Promise.all([
+		const [activeDesk, desks, activeTag, lastSeenVersion] = await Promise.all([
 			this.#store.get<string>('activeDesk'),
 			this.#store.get<string[]>('desks'),
-			this.#store.get<string>('activeTag')
+			this.#store.get<string>('activeTag'),
+			this.#store.get<string>('lastSeenVersion')
 		]);
 
 		this.activeDesk = activeDesk ?? defaultDesk;
 		this.desks = desks ?? [defaultDesk];
 		this.activeTag = activeTag ?? null;
+		this.modal.init(this.#store, lastSeenVersion ?? '');
 
 		if (!this.desks.includes(this.activeDesk)) {
 			this.desks = [...this.desks, this.activeDesk];

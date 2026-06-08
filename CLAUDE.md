@@ -131,6 +131,11 @@ src/lib/
 - **Services** own business logic and reactive state (`$state` runes). They may import repositories and other services, but never create circular dependencies.
 - **`ui-state`** is the top-level orchestrator: it imports `notesService`, `tagsService`, and `fsSyncService`. Nothing imports `uiState` to avoid circular deps.
 - Files are stored at `~/Documents/Balise/{deskName}/{noteId}.md` with YAML frontmatter containing note metadata.
+- **Singleton services don't need `destroy()`**. Services exported as module-level singletons live for the entire app lifetime. A `destroy()` method is dead code unless something in the app actually calls it. Don't add one speculatively.
+- **`void` on intentional fire-and-forget promises.** When a `Promise` is deliberately not awaited (e.g. `store.set()` backed by `autoSave`), prefix with `void`. A bare floating call looks like a mistake; `void` makes the intent explicit. Example: `void this.#store?.set('theme', theme)`.
+- **`as const` over `enum` for named string constants.** When values are strings used in comparisons, SQL, or serialized formats, prefer `as const` objects. They emit no JS, values are the literal strings (no runtime indirection), and they work with `Object.values()` / `keyof typeof`.
+- **Observer/pub-sub: `Set<Handler>`, return the unsubscriber.** Use a `Set` instead of an array for event handlers. Return the unsubscribe function directly from the subscribe call. Avoids O(n) splice, eliminates storing the handler reference at the call site, and deduplicates identical registrations automatically.
+- **Extract complex `$derived.by()` blocks to pure functions.** If a `$derived.by()` block does non-trivial computation (geometry, ranking, color mapping), extract it to a named pure function in a `.ts` file. The component keeps a one-liner derived call; the logic becomes independently unit-testable.
 
 ---
 

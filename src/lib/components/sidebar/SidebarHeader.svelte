@@ -5,7 +5,6 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ChevronsUpDownIcon, PlusIcon, LayoutListIcon, Settings } from '@lucide/svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { modalState } from '$lib/services/modal-state.svelte';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeskSettingsSheet from '$lib/components/sidebar/DeskSettingsSheet.svelte';
 	import * as m from '$paraglide/messages.js';
@@ -30,7 +29,7 @@
 <div class="flex flex-col gap-2 p-3">
 	<div class="flex items-center justify-between">
 		<h1 class="text-xl font-bold text-primary">Balise</h1>
-		<Button variant="ghost" size="icon-sm" onclick={() => (modalState.isSettingsOpen = true)}>
+		<Button variant="ghost" size="icon-sm" onclick={() => (uiState.modal.isSettingsOpen = true)}>
 			<Settings class="size-3.5" />
 		</Button>
 	</div>

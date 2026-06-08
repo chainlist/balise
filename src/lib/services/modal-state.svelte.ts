@@ -1,6 +1,6 @@
-import { load, type Store } from '@tauri-apps/plugin-store';
+import type { Store } from '@tauri-apps/plugin-store';
 
-class ModalState {
+export class ModalState {
 	isSettingsOpen = $state(false);
 	isCommandPaletteOpen = $state(false);
 	isCapturingShortcut = $state(false);
@@ -13,9 +13,9 @@ class ModalState {
 
 	#store: Store | null = null;
 
-	async init(): Promise<void> {
-		this.#store = await load('ui-state.json', { autoSave: 100, defaults: {} });
-		this.lastSeenVersion = (await this.#store.get<string>('lastSeenVersion')) ?? '';
+	init(store: Store, lastSeenVersion: string): void {
+		this.#store = store;
+		this.lastSeenVersion = lastSeenVersion;
 	}
 
 	setLastSeenVersion(version: string): void {
@@ -23,5 +23,3 @@ class ModalState {
 		void this.#store?.set('lastSeenVersion', version);
 	}
 }
-
-export const modalState = new ModalState();

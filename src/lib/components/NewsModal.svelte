@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from 'bits-ui';
-	import { modalState } from '$lib/services/modal-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import Button from '$lib/components/shadcn/button/button.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	function close() {
-		modalState.isNewsOpen = false;
-		modalState.setLastSeenVersion(modalState.newsVersion);
+		uiState.modal.isNewsOpen = false;
+		uiState.modal.setLastSeenVersion(uiState.modal.newsVersion);
 	}
 </script>
 
 <DialogPrimitive.Root
-	open={modalState.isNewsOpen}
+	open={uiState.modal.isNewsOpen}
 	onOpenChange={(v) => {
 		if (!v) close();
 	}}
@@ -26,7 +26,7 @@
 			<div class="flex-1 overflow-y-auto p-8">
 				<div class="prose prose-sm max-w-none dark:prose-invert">
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html modalState.newsContent}
+					{@html uiState.modal.newsContent}
 				</div>
 			</div>
 			<div class="flex shrink-0 justify-end border-t px-8 py-4">

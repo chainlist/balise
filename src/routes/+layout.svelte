@@ -4,7 +4,6 @@
 	import { tinykeys } from 'tinykeys';
 	import { initApp } from '$lib/utils/init-app';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { modalState } from '$lib/services/modal-state.svelte';
 	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
@@ -27,7 +26,7 @@
 		const { error: initError } = await initApp();
 		error = initError;
 		if (!error) {
-			modalState.isWizardOpen = !localStorage.getItem('balise_onboarding_done');
+			uiState.modal.isWizardOpen = !localStorage.getItem('balise_onboarding_done');
 		}
 	});
 
@@ -36,8 +35,8 @@
 			window,
 			shortcutsService.buildTinykeysMap(
 				APP_SHORTCUTS,
-				() => !modalState.isSettingsOpen,
-				() => !modalState.isCapturingShortcut
+				() => !uiState.modal.isSettingsOpen,
+				() => !uiState.modal.isCapturingShortcut
 			)
 		);
 	});
@@ -59,11 +58,11 @@
 		</div>
 	{:else}
 		<div class="flex h-screen w-full" in:fade={{ duration: 250 }}>
-			{#if !modalState.isZenModeActive}
+			{#if !uiState.modal.isZenModeActive}
 				<Sidebar />
 			{/if}
 			<Resizable.PaneGroup direction="horizontal" autoSaveId="balise-main-layout" class="flex-1">
-				{#if !modalState.isZenModeActive}
+				{#if !uiState.modal.isZenModeActive}
 					<Resizable.Pane defaultSize={22} minSize={15} order={1}>
 						<NotesPanel />
 					</Resizable.Pane>
@@ -76,10 +75,10 @@
 		</div>
 		<CommandPalette />
 		<UpdateNotifier />
-		{#if modalState.isWizardOpen}
+		{#if uiState.modal.isWizardOpen}
 			<WizardModal />
 		{/if}
-		{#if modalState.isNewsOpen}
+		{#if uiState.modal.isNewsOpen}
 			<NewsModal />
 		{/if}
 	{/if}

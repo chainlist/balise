@@ -3,7 +3,7 @@
 	import BrowseCard from '$lib/components/sidebar/BrowseCard.svelte';
 	import TagsCard from '$lib/components/sidebar/TagsCard.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import { modalState } from '$lib/services/modal-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import * as m from '$paraglide/messages.js';
 </script>
 
@@ -29,4 +29,4 @@
 	</div>
 </div>
 
-<SettingsModal open={modalState.isSettingsOpen} />
+<SettingsModal open={uiState.modal.isSettingsOpen} />

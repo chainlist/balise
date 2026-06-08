@@ -7,14 +7,14 @@
 	import AppearanceSettings from './AppearanceSettings.svelte';
 	import EditorSettings from './EditorSettings.svelte';
 	import AboutSettings from './AboutSettings.svelte';
-	import { modalState } from '$lib/services/modal-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 
 	function runWizard() {
 		localStorage.removeItem('balise_onboarding_done');
-		modalState.isSettingsOpen = false;
-		modalState.isWizardOpen = true;
+		uiState.modal.isSettingsOpen = false;
+		uiState.modal.isWizardOpen = true;
 	}
 
 	let { open = false }: { open?: boolean } = $props();
@@ -55,7 +55,7 @@
 	const ActiveSection = $derived(activeSection.component);
 </script>
 
-<Dialog.Root {open} onOpenChange={(v) => (modalState.isSettingsOpen = v)}>
+<Dialog.Root {open} onOpenChange={(v) => (uiState.modal.isSettingsOpen = v)}>
 	<Dialog.Portal>
 		<Dialog.Overlay
 			class="fixed inset-0 z-50 bg-black/40 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 supports-backdrop-filter:backdrop-blur-sm"

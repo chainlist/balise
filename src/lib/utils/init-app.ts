@@ -1,5 +1,4 @@
 import { uiState } from '$lib/services/ui-state.svelte';
-import { modalState } from '$lib/services/modal-state.svelte';
 import { themeService } from '$lib/services/theme.svelte';
 import { settingsService } from '$lib/services/settings.svelte';
 import { getVersion } from '@tauri-apps/api/app';
@@ -11,7 +10,7 @@ export async function initApp() {
 	try {
 		await settingsService.init();
 		themeService.init();
-		await Promise.all([uiState.init(), modalState.init()]);
+		await uiState.init();
 		await uiState.switchDesk(uiState.activeDesk, uiState.activeTag);
 		uiState.ready = true;
 		await checkForNews();
@@ -25,15 +24,15 @@ export async function initApp() {
 export async function checkForNews() {
 	const version = await getVersion();
 
-	if (version === modalState.lastSeenVersion) return;
+	if (version === uiState.modal.lastSeenVersion) return;
 
 	try {
 		const path = await resolveResource(`../static/news/${version}.md`);
 		const md = await readTextFile(path);
-		modalState.newsContent = await marked(md);
-		modalState.newsVersion = version;
-		modalState.isNewsOpen = true;
+		uiState.modal.newsContent = await marked(md);
+		uiState.modal.newsVersion = version;
+		uiState.modal.isNewsOpen = true;
 	} catch {
-		modalState.setLastSeenVersion(version);
+		uiState.modal.setLastSeenVersion(version);
 	}
 }
