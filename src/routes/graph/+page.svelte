@@ -8,14 +8,17 @@
 	import type { Tag } from '$lib/models/tag';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import Sunburst from '$lib/components/graph/Sunburst.svelte';
+	import ForceGraph from '$lib/components/graph/ForceGraph.svelte';
 	import GraphSettings from '$lib/components/graph/GraphSettings.svelte';
 	import type { SunburstArc } from '$lib/components/graph/sunburst';
+	import { buildForceGraph } from '$lib/components/graph/force-graph';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { ArrowLeftIcon, SettingsIcon } from '@lucide/svelte';
+	import { ArrowLeftIcon, SettingsIcon, ChartPieIcon, NetworkIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import { assignGraphColors, DEFAULT_TAG_COLOR } from '$lib/utils/graph-colors';
 
 	let loaded = $state(false);
+	let mode = $state<'sunburst' | 'force'>('sunburst');
 	const selected = $derived(uiState.activeTag);
 	const isDark = $derived(themeService.isDark);
 
@@ -79,6 +82,14 @@
 
 	const centerLabel = $derived(selectedTag ? tagDisplayName(selectedTag) : null);
 
+	// Force mode shows every tag and every co-occurrence (ignores the sliders).
+	const forceGraph = $derived(
+		buildForceGraph(rankedTags, graphService.cooccurrences, {
+			colorFor,
+			labelFor: tagDisplayName
+		})
+	);
+
 	function handleArc(label: string) {
 		const t = rankedTags.find((tag) => tagDisplayName(tag) === label);
 		if (t) uiState.setActiveTag(t.tag);
@@ -89,6 +100,11 @@
 		if (!selectedTag) return;
 		uiState.setActiveTag(selectedTag.tag);
 		goto(resolve('/'));
+	}
+
+	// A node click re-centers that tag as the hub; a double-click opens its notes.
+	function openTagNotes(tag: string) {
+		uiState.setActiveTag(tag).then(() => goto(resolve('/')));
 	}
 </script>
 
@@ -116,33 +132,69 @@
 			</Button>
 		{/if}
 
-		{#if settingsOpen}
-			<GraphSettings
-				bind:categoryCount
-				bind:minCooccurrence
-				maxWeight={graphService.maxWeight}
-				onclose={() => (settingsOpen = false)}
-			/>
-		{:else}
+		<div
+			class="absolute top-8 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded border bg-card p-1"
+		>
 			<Button
-				variant="outline"
+				variant={mode === 'sunburst' ? 'default' : 'ghost'}
 				size="sm"
-				class="absolute top-8 right-8 z-10"
-				onclick={() => (settingsOpen = true)}
+				onclick={() => (mode = 'sunburst')}
+				aria-label={m.graph_mode_sunburst()}
 			>
-				<SettingsIcon class="size-4" />
-				{m.graph_settings_title()}
+				<ChartPieIcon class="size-4" />
+				{m.graph_mode_sunburst()}
 			</Button>
+			<Button
+				variant={mode === 'force' ? 'default' : 'ghost'}
+				size="sm"
+				onclick={() => (mode = 'force')}
+				aria-label={m.graph_mode_force()}
+			>
+				<NetworkIcon class="size-4" />
+				{m.graph_mode_force()}
+			</Button>
+		</div>
+
+		{#if mode === 'sunburst'}
+			{#if settingsOpen}
+				<GraphSettings
+					bind:categoryCount
+					bind:minCooccurrence
+					maxWeight={graphService.maxWeight}
+					onclose={() => (settingsOpen = false)}
+				/>
+			{:else}
+				<Button
+					variant="outline"
+					size="sm"
+					class="absolute top-8 right-8 z-10"
+					onclick={() => (settingsOpen = true)}
+				>
+					<SettingsIcon class="size-4" />
+					{m.graph_settings_title()}
+				</Button>
+			{/if}
 		{/if}
 
 		<div class="h-full w-full">
-			<Sunburst
-				{centerLabel}
-				fallbackLabel={uiState.activeDesk}
-				{arcs}
-				onArcClick={handleArc}
-				onCenterClick={openSelectedNotes}
-			/>
+			{#if mode === 'sunburst'}
+				<Sunburst
+					{centerLabel}
+					fallbackLabel={uiState.activeDesk}
+					{arcs}
+					onArcClick={handleArc}
+					onCenterClick={openSelectedNotes}
+				/>
+			{:else}
+				<ForceGraph
+					nodes={forceGraph.nodes}
+					links={forceGraph.links}
+					{selected}
+					{isDark}
+					onSelect={(tag) => uiState.setActiveTag(tag)}
+					onOpen={openTagNotes}
+				/>
+			{/if}
 		</div>
 	{/if}
 </div>
