@@ -186,6 +186,8 @@
 	"slash_divider_label": "Divisor",
 	"slash_divider_desc": "Separador horizontal",
 
+	"editor_placeholder": "Escribe algo o escribe «/» para ver comandos",
+
 	"wizard_lang_title": "Elige tu idioma",
 	"wizard_lang_subtitle": "Puedes cambiarlo en cualquier momento desde Ajustes.",
 	"wizard_welcome_title": "Bienvenido a Balise",

@@ -150,5 +150,13 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-highlight': {
 		background: 'var(--md-highlight-bg)',
 		borderRadius: '2px'
+	},
+	'.cm-md-placeholder': {
+		color: 'var(--muted-foreground)',
+		opacity: '0.5',
+		pointerEvents: 'none',
+		userSelect: 'none',
+		display: 'inline-block',
+		verticalAlign: 'top'
 	}
 });

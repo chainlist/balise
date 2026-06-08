@@ -12,6 +12,7 @@ export { mdHighlightPlugin } from './highlightPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { mdSlashPlugin } from './slashPlugin';
 export { mdImagePlugin } from './imagePlugin';
+export { mdPlaceholderPlugin } from './placeholderPlugin';
 export { mdTagCompletion } from './tagCompletion';
 export { noteEditorTheme, mdSyntaxHighlighting } from './theme';
 export type { MarkMode } from './shared';

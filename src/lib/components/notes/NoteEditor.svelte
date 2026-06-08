@@ -22,6 +22,7 @@
 		mdFormatPlugin,
 		mdLinkPlugin,
 		mdSlashPlugin,
+		mdPlaceholderPlugin,
 		mdMarkNavPlugin,
 		mdImagePlugin,
 		mdTagCompletion,
@@ -111,6 +112,7 @@
 					closeBrackets(),
 					mdTagCompletion,
 					mdSlashPlugin,
+					mdPlaceholderPlugin,
 					// Mark visibility (dynamically reconfigured)
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					// Theme

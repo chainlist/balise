@@ -186,6 +186,8 @@
 	"slash_divider_label": "Trennlinie",
 	"slash_divider_desc": "Horizontaler Trenner",
 
+	"editor_placeholder": "Schreibe etwas oder tippe „/“ für Befehle",
+
 	"wizard_lang_title": "Wähle deine Sprache",
 	"wizard_lang_subtitle": "Du kannst dies später in den Einstellungen ändern.",
 	"wizard_welcome_title": "Willkommen bei Balise",
