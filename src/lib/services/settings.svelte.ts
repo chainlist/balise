@@ -1,4 +1,5 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
+import { trayService } from '$lib/services/tray';
 import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
 import { setLocale, locales } from '$paraglide/runtime.js';
@@ -33,22 +34,32 @@ class SettingsService {
 	customBindings = $state<Record<string, string>>({});
 	language = $state<'fr' | 'es' | 'en' | 'de'>('en');
 	magicTags = $state<MagicTag[]>(DEFAULT_MAGIC_TAGS);
+	closeToTray = $state<boolean | null>(null);
 
 	#store: Store | null = null;
 
 	async init(): Promise<void> {
 		this.#store = await load('settings.json', { autoSave: 100 });
 
-		const [theme, fontSize, lineHeight, markdownMarks, customBindings, language, magicTags] =
-			await Promise.all([
-				this.#store.get<Theme>('theme'),
-				this.#store.get<number>('fontSize'),
-				this.#store.get<number>('lineHeight'),
-				this.#store.get<MarkMode>('markdownMarks'),
-				this.#store.get<Record<string, string>>('customBindings'),
-				this.#store.get<'fr' | 'es' | 'en' | 'de'>('language'),
-				this.#store.get<MagicTag[]>('magicTags')
-			]);
+		const [
+			theme,
+			fontSize,
+			lineHeight,
+			markdownMarks,
+			customBindings,
+			language,
+			magicTags,
+			closeToTray
+		] = await Promise.all([
+			this.#store.get<Theme>('theme'),
+			this.#store.get<number>('fontSize'),
+			this.#store.get<number>('lineHeight'),
+			this.#store.get<MarkMode>('markdownMarks'),
+			this.#store.get<Record<string, string>>('customBindings'),
+			this.#store.get<'fr' | 'es' | 'en' | 'de'>('language'),
+			this.#store.get<MagicTag[]>('magicTags'),
+			this.#store.get<boolean>('closeToTray')
+		]);
 
 		this.theme = theme ?? 'system';
 		this.fontSize = fontSize ?? 16;
@@ -60,6 +71,7 @@ class SettingsService {
 			...rest,
 			matchType: (matchType as MagicTagMatchType | undefined) ?? MAGIC_TAG_MATCH_TYPES.CONTAINS
 		}));
+		this.closeToTray = closeToTray ?? null;
 
 		setLocale(this.language);
 		this.#applyEditorVars();
@@ -98,6 +110,7 @@ class SettingsService {
 			await this.#store.set('language', lang);
 			await this.#store.save();
 		}
+		await trayService.remove();
 		window.location.reload();
 	}
 
@@ -116,6 +129,11 @@ class SettingsService {
 	setMagicTags(tags: MagicTag[]): void {
 		this.magicTags = tags;
 		void this.#store?.set('magicTags', tags);
+	}
+
+	setCloseToTray(value: boolean): void {
+		this.closeToTray = value;
+		void this.#store?.set('closeToTray', value);
 	}
 }
 

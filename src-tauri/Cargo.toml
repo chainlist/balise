@@ -21,7 +21,7 @@ tauri-build = { version = "2.6.1", features = [] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
-tauri = { version = "2.11.1", features = [] }
+tauri = { version = "2.11.1", features = [ "tray-icon" ] }
 tauri-plugin-log = "2"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-store = "2"
@@ -33,6 +33,7 @@ tauri-plugin-process = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
+window-vibrancy = "0.5"
 
 [target.'cfg(target_os = "android")'.dependencies]
 libsqlite3-sys = { version = "*", features = ["bundled"] }

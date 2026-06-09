@@ -74,6 +74,11 @@
 	"tasks_loading": "Aufgaben werden geladen…",
 	"tasks_empty": "Noch keine Aufgaben. Füge #todo, #inprogress, #done Tags oder Checklisten (- [ ]) zu deinen Notizen hinzu.",
 
+	"settings_general_heading": "Allgemein",
+	"settings_general_description": "App-Verhalten konfigurieren.",
+	"settings_close_behavior_label": "Anwendung schließen",
+	"settings_close_behavior_helper": "Was passiert, wenn Sie das App-Fenster schließen.",
+
 	"settings_appearance_heading": "Erscheinungsbild",
 	"settings_appearance_description": "Wähle, wie die App aussieht.",
 	"settings_theme_label": "Design",
@@ -226,5 +231,14 @@
 	"wizard_action_get_started": "Loslegen",
 	"wizard_run_again": "Einrichtungsassistent",
 
-	"news_got_it": "Verstanden"
+	"news_got_it": "Verstanden",
+
+	"tray_open": "Anwendung öffnen",
+	"tray_quick_add": "Schnell hinzufügen",
+	"tray_quit": "Beenden",
+
+	"close_behavior_title": "Balise schließen?",
+	"close_behavior_description": "Wählen Sie, was passiert, wenn Sie die App schließen. Sie können dies später in den Einstellungen ändern.",
+	"close_behavior_tray": "In der Taskleiste minimieren",
+	"close_behavior_quit": "Anwendung beenden"
 }

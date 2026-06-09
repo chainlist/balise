@@ -22,7 +22,6 @@ class UIState {
 	composedTags = $state<string[]>([]);
 	graphMode = $state<GraphMode>('sunburst');
 	ready = $state(false);
-	focusedNoteId = $state<string | null>(null);
 
 	#noteSelection = $state<{ noteId: string; tag: string | null; composedKey: string } | null>(null);
 	#composedKey = $derived([...this.composedTags].sort().join('\x00'));

@@ -27,7 +27,9 @@
 				"width": 700,
 				"height": 250,
 				"center": true,
-				"visible": false
+				"visible": false,
+				"transparent": true,
+				"decorations": true
 			}
 		],
 		"security": {
@@ -37,9 +39,7 @@
 	"plugins": {
 		"updater": {
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQxMzA4ODk5M0NBM0RCMzMKUldRejI2TThtWWd3MGVEcnU1d3haQnQ2NTlWY3ZpTWVOZFhvblVISmdrR010V2xFRVpjVm5hekIK",
-			"endpoints": [
-				"https://github.com/chainlist/balise/releases/latest/download/latest.json"
-			]
+			"endpoints": ["https://github.com/chainlist/balise/releases/latest/download/latest.json"]
 		}
 	},
 	"bundle": {
@@ -56,8 +56,6 @@
 		"android": {
 			"debugApplicationIdSuffix": ".debug"
 		},
-		"resources": [
-			"../static/news/**/*.md"
-		]
+		"resources": ["../static/news/**/*.md"]
 	}
 }

@@ -6,7 +6,7 @@
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
 	import { codeFolding, foldGutter, foldKeymap, foldNodeProp } from '@codemirror/language';
-	import { untrack, type Snippet } from 'svelte';
+	import { untrack } from 'svelte';
 	import { closeBrackets, completionKeymap } from '@codemirror/autocomplete';
 	import {
 		mdSyntaxHighlighting,
@@ -29,17 +29,24 @@
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
-	import { notesService, type Note } from '$lib/services/notes.svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let {
-		note,
-		onSave,
-		children
-	}: { note: Note; onSave?: (content: string) => Promise<void>; children?: Snippet } = $props();
+		content,
+		autofocus = false,
+		onchange,
+		onfocus,
+		onblur
+	}: {
+		content: string;
+		autofocus?: boolean;
+		onchange?: (val: string) => void;
+		onfocus?: () => void;
+		onblur?: () => void;
+	} = $props();
 
 	let editorView = $state<EditorView | null>(null);
+	let focused = $state(false);
 	const markCompartment = new Compartment();
 
 	function makeMarkPlugins(mode: MarkMode) {
@@ -60,22 +67,16 @@
 
 	$effect(() => {
 		const mode = settingsService.markdownMarks;
-		const effectiveMode: MarkMode = mode === 'cursor' && uiState.focusedNoteId !== note.id ? 'never' : mode;
+		const effectiveMode: MarkMode = mode === 'cursor' && !focused ? 'never' : mode;
 		if (editorView) {
 			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(effectiveMode)) });
 		}
 	});
 
-	async function mount(container: HTMLDivElement) {
-		return untrack(async () => {
-			const editorEl = container.querySelector<HTMLDivElement>('[data-editor]')!;
-			let saveTimer: ReturnType<typeof setTimeout>;
-
-			const noteId = note.id;
-			const noteContent = await notesService.loadContent(noteId);
-
+	function mount(container: HTMLDivElement) {
+		return untrack(() => {
 			const view = new EditorView({
-				doc: noteContent,
+				doc: content,
 				extensions: [
 					// Core
 					history(),
@@ -108,33 +109,29 @@
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					// Theme
 					noteEditorTheme,
-					// Save on change
+					// Focus + change listener
 					EditorView.updateListener.of((u) => {
 						if (u.focusChanged) {
-							if (u.view.hasFocus) uiState.focusedNoteId = noteId;
-							else if (uiState.focusedNoteId === noteId) uiState.focusedNoteId = null;
+							if (u.view.hasFocus) {
+								focused = true;
+								onfocus?.();
+							} else {
+								focused = false;
+								onblur?.();
+							}
 						}
-						if (!u.docChanged) return;
-						clearTimeout(saveTimer);
-						const val = u.state.doc.toString().replace(/[ \t]+$/gm, '');
-						saveTimer = setTimeout(async () => {
-							if (onSave) await onSave(val);
-							else await notesService.update(noteId, val);
-						}, 500);
+						if (u.docChanged) {
+							onchange?.(u.state.doc.toString());
+						}
 					})
 				],
-				parent: editorEl
+				parent: container
 			});
 
 			editorView = view;
-			if (!uiState.focusedNoteId) {
-				uiState.focusedNoteId = noteId;
-				view.focus();
-			}
+			if (autofocus) view.focus();
 
 			return () => {
-				clearTimeout(saveTimer);
-				if (uiState.focusedNoteId === noteId) uiState.focusedNoteId = null;
 				editorView = null;
 				view.destroy();
 			};
@@ -142,7 +139,4 @@
 	}
 </script>
 
-<div {@attach mount} class="relative h-full overflow-y-auto">
-	<div data-editor class="mx-auto w-full max-w-175"></div>
-	{@render children?.()}
-</div>
+<div {@attach mount} class="mx-auto w-full max-w-175"></div>

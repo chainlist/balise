@@ -74,6 +74,11 @@
 	"tasks_loading": "Loading tasks…",
 	"tasks_empty": "No tasks yet. Add #todo, #inprogress, #done tags or checklists (- [ ]) to your notes.",
 
+	"settings_general_heading": "General",
+	"settings_general_description": "Configure app behavior.",
+	"settings_close_behavior_label": "Closing the app",
+	"settings_close_behavior_helper": "What happens when you close the app window.",
+
 	"settings_appearance_heading": "Appearance",
 	"settings_appearance_description": "Choose how the app looks.",
 	"settings_theme_label": "Theme",
@@ -226,5 +231,14 @@
 	"wizard_action_get_started": "Get started",
 	"wizard_run_again": "Setup Wizard",
 
-	"news_got_it": "Got it"
+	"news_got_it": "Got it",
+
+	"tray_open": "Open application",
+	"tray_quick_add": "Quick add",
+	"tray_quit": "Quit",
+
+	"close_behavior_title": "Close Balise?",
+	"close_behavior_description": "Choose what happens when you close the app. You can change this later in Settings.",
+	"close_behavior_tray": "Minimize to tray",
+	"close_behavior_quit": "Quit application"
 }

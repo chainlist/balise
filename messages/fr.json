@@ -74,6 +74,11 @@
 	"tasks_loading": "Chargement des tâches…",
 	"tasks_empty": "Aucune tâche pour l'instant. Ajoutez des balises #todo, #inprogress, #done ou des cases à cocher (- [ ]) à vos notes.",
 
+	"settings_general_heading": "Général",
+	"settings_general_description": "Configurez le comportement de l'application.",
+	"settings_close_behavior_label": "Fermeture de l'application",
+	"settings_close_behavior_helper": "Ce qui se passe quand vous fermez la fenêtre.",
+
 	"settings_appearance_heading": "Apparence",
 	"settings_appearance_description": "Choisissez l'aspect de l'application.",
 	"settings_theme_label": "Thème",
@@ -226,5 +231,14 @@
 	"wizard_action_get_started": "Commencer",
 	"wizard_run_again": "Assistant de configuration",
 
-	"news_got_it": "Compris"
+	"news_got_it": "Compris",
+
+	"tray_open": "Ouvrir l'application",
+	"tray_quick_add": "Ajout rapide",
+	"tray_quit": "Quitter",
+
+	"close_behavior_title": "Fermer Balise ?",
+	"close_behavior_description": "Choisissez ce qui se passe quand vous fermez l'application. Vous pouvez modifier cela dans les paramètres.",
+	"close_behavior_tray": "Réduire dans la barre système",
+	"close_behavior_quit": "Quitter l'application"
 }

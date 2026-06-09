@@ -95,7 +95,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ```
 src/lib/
 ├── components/         # Svelte UI components
-│   ├── shadcn/         # shadcn-svelte primitives (do not edit)
+│   ├── shadcn/         # shadcn-svelte primitives — NEVER edit unless the user explicitly asks
 │   ├── notes/          # Note list and editor components
 │   ├── settings/       # Settings panel components
 │   └── cm/             # CodeMirror editor extensions

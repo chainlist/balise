@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { themeService, type Theme } from '$lib/services/theme.svelte';
-	import { settingsService, SUPPORTED_LOCALES } from '$lib/services/settings.svelte';
 	import { SunIcon, MoonIcon, MonitorIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
@@ -10,13 +9,6 @@
 		{ value: 'dark', label: m.settings_theme_dark, icon: MoonIcon },
 		{ value: 'system', label: m.settings_theme_system, icon: MonitorIcon }
 	];
-
-	const localeLabels: Record<string, string> = {
-		en: 'English',
-		fr: 'Français',
-		es: 'Español',
-		de: 'Deutsch'
-	};
 </script>
 
 <div class="flex flex-col h-full">
@@ -60,28 +52,5 @@
 			</div>
 		</div>
 
-		<!-- Language -->
-		<div>
-			<div class="space-y-1.5 mb-4">
-				<p class="text-sm font-medium">{m.settings_language_label()}</p>
-				<p class="text-xs text-muted-foreground">{m.settings_language_helper()}</p>
-			</div>
-			<div class="flex gap-3">
-				{#each SUPPORTED_LOCALES as locale (locale)}
-					{@const isActive = settingsService.language === locale}
-					<button
-						onclick={() => settingsService.setLanguage(locale)}
-						class={cn(
-							'rounded-lg border-2 px-5 py-3 text-sm font-medium transition-all',
-							isActive
-								? 'border-primary bg-primary/5 text-primary'
-								: 'border-border text-foreground hover:border-muted-foreground/40 hover:bg-muted/50'
-						)}
-					>
-						{localeLabels[locale] ?? locale}
-					</button>
-				{/each}
-			</div>
-		</div>
 	</div>
 </div>

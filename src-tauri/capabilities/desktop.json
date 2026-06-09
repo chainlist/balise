@@ -11,6 +11,7 @@
   "permissions": [
     "window-state:default",
     "updater:default",
-    "global-shortcut:default"
+    "global-shortcut:default",
+    "core:app:allow-default-window-icon"
   ]
 }

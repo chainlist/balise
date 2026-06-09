@@ -2,7 +2,12 @@
 	import { onMount } from 'svelte';
 	import { tinykeys } from 'tinykeys';
 	import { initApp } from '$lib/utils/init-app';
+	import { trayService } from '$lib/services/tray';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import { settingsService } from '$lib/services/settings.svelte';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
+	import { exit } from '@tauri-apps/plugin-process';
+	import CloseToTrayDialog from '$lib/components/CloseToTrayDialog.svelte';
 	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
@@ -22,13 +27,40 @@
 
 	let error = $state<string | null>(null);
 	let ready = $derived(uiState.ready);
+	let showCloseDialog = $state(false);
+
 	onMount(async () => {
-		const { error: initError } = await initApp();
+		const [{ error: initError }] = await Promise.all([initApp(), trayService.init()]);
 		error = initError;
 		if (!error) {
 			uiState.modal.isWizardOpen = !localStorage.getItem('balise_onboarding_done');
 		}
+
+		const win = getCurrentWindow();
+		await win.onCloseRequested(async (event) => {
+			event.preventDefault();
+			const pref = settingsService.closeToTray;
+			if (pref === null) {
+				showCloseDialog = true;
+			} else if (pref) {
+				await win.hide();
+				await trayService.show();
+			} else {
+				await exit(0);
+			}
+		});
 	});
+
+	async function handleCloseBehaviorChoice(choice: 'tray' | 'quit') {
+		showCloseDialog = false;
+		settingsService.setCloseToTray(choice === 'tray');
+		if (choice === 'tray') {
+			await getCurrentWindow().hide();
+			await trayService.show();
+		} else {
+			await exit(0);
+		}
+	}
 
 	$effect(() => {
 		return tinykeys(
@@ -83,3 +115,5 @@
 		{/if}
 	{/if}
 </SidebarProvider>
+
+<CloseToTrayDialog bind:open={showCloseDialog} onchoose={handleCloseBehaviorChoice} />

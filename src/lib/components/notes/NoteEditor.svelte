@@ -5,7 +5,7 @@
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon, PinIcon } from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
-	import NoteEditorView from './NoteEditorView.svelte';
+	import EditorView from './EditorView.svelte';
 	import * as m from '$paraglide/messages.js';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 
@@ -33,7 +33,7 @@
 	}));
 </script>
 
-<NoteEditorView {note} {onSave}>
+<EditorView {note} {onSave}>
 	<div class="absolute top-5 right-5 -translate-y-1/2">
 		{#if pinnable}
 			<button
@@ -68,6 +68,6 @@
 			</DropdownMenu.Root>
 		{/if}
 	</div>
-</NoteEditorView>
+</EditorView>
 
 <NoteDeleteDialog {note} bind:open={confirmOpen} />

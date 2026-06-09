@@ -65,6 +65,18 @@ pub fn run() {
                     }
                 });
 
+            if let Some(quick_window) = app.get_webview_window("quick") {
+                #[cfg(target_os = "windows")]
+                let _ = window_vibrancy::apply_acrylic(&quick_window, Some((18, 18, 18, 50)));
+                #[cfg(target_os = "macos")]
+                let _ = window_vibrancy::apply_vibrancy(
+                    &quick_window,
+                    window_vibrancy::NSVisualEffectMaterial::HudWindow,
+                    None,
+                    Some(16.0),
+                );
+            }
+
             Ok(())
         })
         .run(tauri::generate_context!())

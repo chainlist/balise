@@ -22,3 +22,9 @@
 {:else if ready}
 	{@render children()}
 {/if}
+
+<style>
+	:global(body) {
+		background: transparent;
+	}
+</style>

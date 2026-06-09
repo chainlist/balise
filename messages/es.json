@@ -74,6 +74,11 @@
 	"tasks_loading": "Cargando tareas…",
 	"tasks_empty": "Aún no hay tareas. Añade etiquetas #todo, #inprogress, #done o listas de verificación (- [ ]) a tus notas.",
 
+	"settings_general_heading": "General",
+	"settings_general_description": "Configura el comportamiento de la aplicación.",
+	"settings_close_behavior_label": "Cierre de la aplicación",
+	"settings_close_behavior_helper": "Qué ocurre al cerrar la ventana de la aplicación.",
+
 	"settings_appearance_heading": "Apariencia",
 	"settings_appearance_description": "Elige cómo se ve la aplicación.",
 	"settings_theme_label": "Tema",
@@ -226,5 +231,14 @@
 	"wizard_action_get_started": "Empezar",
 	"wizard_run_again": "Asistente de configuración",
 
-	"news_got_it": "Entendido"
+	"news_got_it": "Entendido",
+
+	"tray_open": "Abrir aplicación",
+	"tray_quick_add": "Añadir rápido",
+	"tray_quit": "Salir",
+
+	"close_behavior_title": "¿Cerrar Balise?",
+	"close_behavior_description": "Elige qué sucede cuando cierras la aplicación. Puedes cambiarlo más tarde en Ajustes.",
+	"close_behavior_tray": "Minimizar en la bandeja",
+	"close_behavior_quit": "Salir de la aplicación"
 }
