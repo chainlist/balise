@@ -101,6 +101,13 @@ describe('create', () => {
 		);
 	});
 
+	it('calls tagsService.syncNoteTags with the id and content', async () => {
+		vi.mocked(repo.insertNote).mockResolvedValue(undefined);
+		vi.mocked(repo.queryNoteById).mockResolvedValue(NOTE());
+		await notesService.create('#work hello');
+		expect(tagsService.syncNoteTags).toHaveBeenCalledWith(expect.any(String), '#work hello');
+	});
+
 	it('prepends the new note to notes', async () => {
 		notesService.notes = [NOTE('existing')];
 		const created = NOTE('new');

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { settingsService, SUPPORTED_LOCALES } from '$lib/services/settings.svelte';
+	import { applyLanguageChange } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 
@@ -46,7 +47,7 @@
 			<Select.Root
 				type="single"
 				value={settingsService.language}
-				onValueChange={(v) => v && settingsService.setLanguage(v)}
+				onValueChange={(v) => v && applyLanguageChange(v)}
 			>
 				<Select.Trigger class="w-auto whitespace-nowrap">{languageLabel}</Select.Trigger>
 				<Select.Content>

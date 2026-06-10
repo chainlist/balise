@@ -1,5 +1,4 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
-import { trayService } from '$lib/services/tray';
 import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
 import { setLocale, locales } from '$paraglide/runtime.js';
@@ -110,8 +109,6 @@ class SettingsService {
 			await this.#store.set('language', lang);
 			await this.#store.save();
 		}
-		await trayService.remove();
-		window.location.reload();
 	}
 
 	setBinding(id: string, binding: string): void {

@@ -47,6 +47,7 @@ class NotesService {
 		const db = getDB();
 		const id = crypto.randomUUID();
 		await insertNote(db, { id, content });
+		await tagsService.syncNoteTags(id, content);
 		const note = await queryNoteById(db, id);
 		if (note) {
 			this.notes = [note, ...this.notes];
