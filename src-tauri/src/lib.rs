@@ -49,10 +49,15 @@ pub fn run() {
                 )?;
             }
 
+            #[cfg(target_os = "macos")]
+            let primary_modifier = Modifiers::SUPER;
+            #[cfg(not(target_os = "macos"))]
+            let primary_modifier = Modifiers::CONTROL;
+
             app.handle().global_shortcut().register(
                 tauri_plugin_global_shortcut::Shortcut::new(
-                    Some(Modifiers::CONTROL | Modifiers::SHIFT),
-                    Code::Space,
+                    Some(primary_modifier | Modifiers::SHIFT),
+                    Code::F12,
                 ),
             )?;
 
