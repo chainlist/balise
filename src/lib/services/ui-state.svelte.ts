@@ -131,19 +131,31 @@ class UIState {
 	}
 
 	async switchDesk(desk: string, activeTag: string | null = null): Promise<void> {
+		const prevDesk = this.activeDesk;
+		try {
+			await openDesk(desk);
+			fsService.setDesk(desk);
+			await fsSyncService.syncDeskFiles();
+			await Promise.all([
+				tagsService.load(),
+				notesService.load(activeTag),
+				tagsService.loadRelated(activeTag)
+			]);
+		} catch (e) {
+			// Point the DB and fs target back at the still-displayed desk so a
+			// failed switch doesn't leave reads/writes hitting the new one.
+			if (prevDesk !== desk) {
+				await openDesk(prevDesk);
+				fsService.setDesk(prevDesk);
+			}
+			throw e;
+		}
+
+		// Commit UI state only once every fallible step has succeeded.
 		if (this.activeTag !== activeTag) {
 			this.activeTag = activeTag;
 		}
-
 		this.composedTags = [];
-		await openDesk(desk);
-		fsService.setDesk(desk);
-		await fsSyncService.syncDeskFiles();
-		await Promise.all([
-			tagsService.load(),
-			notesService.load(activeTag),
-			tagsService.loadRelated(activeTag)
-		]);
 		await this.setActiveDesk(desk);
 	}
 }

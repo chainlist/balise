@@ -48,9 +48,14 @@
 		return `### ${formatted}\n\n\n\n#${JOURNAL_TAG}`;
 	}
 
+	let loadSeq = 0;
+
 	async function loadForDate(date: Date): Promise<void> {
+		const seq = ++loadSeq;
 		const dateStr = toDateStr(date);
 		const notes = await notesService.queryForDate(date);
+		// A newer date selection superseded this load; drop the stale response.
+		if (seq !== loadSeq) return;
 		onSaveHandlers.clear();
 
 		if (notes.length > 0) {
@@ -127,9 +132,7 @@
 	<div class="h-full space-y-8 overflow-y-auto pb-16">
 		{#each allNotes as note (note.id)}
 			<div class="relative" class:h-full={!hasMultipleNotes} class:min-h-min={hasMultipleNotes}>
-				{#key note.id}
-					<NoteEditor {note} onSave={onSaveHandlers.get(note.id)} />
-				{/key}
+				<NoteEditor {note} onSave={onSaveHandlers.get(note.id)} />
 				<div
 					class="absolute bottom-0 left-0 h-px w-full
            bg-linear-to-r
