@@ -78,6 +78,21 @@ export async function insertNoteTags(
 	);
 }
 
+/**
+ * Replace a note's `note_tags` rows with the given (already-derived) tag names.
+ * Canonical resolution MUST run before DELETE - it reads existing rows to
+ * preserve casing.
+ */
+export async function setNoteTags(
+	db: Database,
+	noteId: string,
+	rawNames: string[]
+): Promise<void> {
+	const names = rawNames.length > 0 ? await resolveCanonicalTags(db, rawNames) : [];
+	await deleteNoteTags(db, noteId);
+	if (names.length > 0) await insertNoteTags(db, noteId, names);
+}
+
 export interface TagCooccurrenceRow {
 	tag_a: string;
 	tag_b: string;

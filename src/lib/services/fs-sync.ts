@@ -2,9 +2,9 @@ import { invoke } from '@tauri-apps/api/core';
 import { fsService } from './fs';
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
-import { writeNoteContent } from '$lib/services/note-write';
+import { notesService } from '$lib/services/notes.svelte';
+import { writeNoteFile } from '$lib/repositories/notes.fs.repo';
 import { queryAllNotesMeta, queryNotesWithContentByIds } from '$lib/repositories/notes.repo';
-import type { Note } from '$lib/models/note';
 
 type DeskFileMeta = {
 	name: string;
@@ -25,31 +25,6 @@ function parseDbTimestamp(ts: string): number {
 }
 
 class FsSyncService {
-	toFrontmatter(note: Note & { content: string }): { meta: string; content: string } {
-		const meta = [
-			'---',
-			`id: ${note.id}`,
-			`pinned: ${note.pinned}`,
-			`archived: ${note.archived}`,
-			`created_at: ${note.created_at}`,
-			`updated_at: ${note.updated_at}`,
-			'---',
-			''
-		].join('\n');
-		return { meta, content: note.content };
-	}
-
-	async syncNoteFile(note: Note & { content: string }): Promise<void> {
-		if (!fsService.currentDesk) return;
-		const { meta, content } = this.toFrontmatter(note);
-		await fsService.writeTextFile(`${note.id}.md`, meta + content);
-	}
-
-	async deleteNoteFile(noteId: string): Promise<void> {
-		if (!fsService.currentDesk) return;
-		await fsService.remove(`${noteId}.md`);
-	}
-
 	// Sequential (not Promise.all): canonical tag resolution reads existing rows,
 	// so concurrent writes of notes sharing a new tag could resolve inconsistently.
 	private async createNotes(
@@ -57,7 +32,7 @@ class FsSyncService {
 		contentMap: Map<string, string>
 	): Promise<void> {
 		for (const { name, id, pinned, archived, created_at, mtime_ms } of toCreate) {
-			await writeNoteContent(id, contentMap.get(name) ?? '', {
+			await notesService.importNote(id, contentMap.get(name) ?? '', {
 				create: true,
 				pinned,
 				archived,
@@ -72,7 +47,7 @@ class FsSyncService {
 		contentMap: Map<string, string>
 	): Promise<void> {
 		for (const { name, id, pinned, archived, created_at } of toImport) {
-			await writeNoteContent(id, contentMap.get(name) ?? '', {
+			await notesService.importNote(id, contentMap.get(name) ?? '', {
 				create: false,
 				pinned,
 				archived,
@@ -89,7 +64,7 @@ class FsSyncService {
 		const missingIds = dbNotes.filter((n) => !syncedIds.has(n.id)).map((n) => n.id);
 		if (missingIds.length === 0) return;
 		const notes = await queryNotesWithContentByIds(db, missingIds);
-		await Promise.all(notes.map((note) => this.syncNoteFile(note)));
+		await Promise.all(notes.map((note) => writeNoteFile(note)));
 	}
 
 	async syncDeskFiles(): Promise<void> {

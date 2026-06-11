@@ -103,31 +103,6 @@ describe('setSettings', () => {
 	});
 });
 
-// ─── applyNoteTags ────────────────────────────────────────────────────────────
-
-describe('applyNoteTags', () => {
-	it('deletes note tags and skips insert when content has no hashtags', async () => {
-		await tagsService.applyNoteTags('note-1', 'plain text');
-		expect(repo.deleteNoteTags).toHaveBeenCalledWith(expect.anything(), 'note-1');
-		expect(repo.insertNoteTags).not.toHaveBeenCalled();
-	});
-
-	it('resolves canonicals before deleting, then inserts', async () => {
-		vi.mocked(repo.resolveCanonicalTags).mockResolvedValue(['work']);
-		await tagsService.applyNoteTags('note-1', '#work');
-		expect(repo.resolveCanonicalTags).toHaveBeenCalledWith(expect.anything(), ['work']);
-		expect(repo.deleteNoteTags).toHaveBeenCalled();
-		expect(repo.insertNoteTags).toHaveBeenCalledWith(expect.anything(), 'note-1', ['work']);
-	});
-
-	it('does not refresh the tag list', async () => {
-		vi.mocked(repo.resolveCanonicalTags).mockResolvedValue(['work']);
-		await tagsService.applyNoteTags('note-1', '#work');
-		// load() would call queryTagsWithCounts; applyNoteTags must not reload.
-		expect(repo.queryTagsWithCounts).not.toHaveBeenCalled();
-	});
-});
-
 // ─── loadRelated ──────────────────────────────────────────────────────────────
 
 describe('loadRelated', () => {

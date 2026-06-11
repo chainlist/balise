@@ -10,21 +10,23 @@ vi.mock('$lib/repositories/notes.repo', () => ({
 	deleteNoteById: vi.fn()
 }));
 vi.mock('$lib/utils/db', () => ({ getDB: vi.fn(() => ({})) }));
+vi.mock('$lib/repositories/tags.repo', () => ({
+	setNoteTags: vi.fn().mockResolvedValue(undefined)
+}));
 vi.mock('$lib/services/tags.svelte', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('$lib/services/tags.svelte')>();
 	return {
 		...actual,
 		tagsService: {
-			applyNoteTags: vi.fn().mockResolvedValue(undefined),
 			load: vi.fn().mockResolvedValue(undefined)
 		}
 	};
 });
 
 import { notesService } from './notes.svelte';
-import { UNTAGGED_FILTER } from '$lib/services/tags.svelte';
+import { UNTAGGED_FILTER, tagsService } from '$lib/services/tags.svelte';
 import * as repo from '$lib/repositories/notes.repo';
-import { tagsService } from '$lib/services/tags.svelte';
+import { setNoteTags } from '$lib/repositories/tags.repo';
 
 const NOTE = (id = '1') => ({
 	id,
@@ -101,11 +103,11 @@ describe('create', () => {
 		);
 	});
 
-	it('re-derives tags for the new note via applyNoteTags', async () => {
+	it('re-derives tags for the new note via setNoteTags', async () => {
 		vi.mocked(repo.insertNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteById).mockResolvedValue(NOTE());
 		await notesService.create('#work hello');
-		expect(tagsService.applyNoteTags).toHaveBeenCalledWith(expect.any(String), '#work hello');
+		expect(setNoteTags).toHaveBeenCalledWith(expect.anything(), expect.any(String), ['work']);
 	});
 
 	it('prepends the new note to notes', async () => {
@@ -130,12 +132,12 @@ describe('update', () => {
 		expect(repo.updateNote).toHaveBeenCalledWith(expect.anything(), '1', expect.objectContaining({ content: 'new content' }));
 	});
 
-	it('re-derives tags with id and new content via applyNoteTags', async () => {
+	it('re-derives tags with id and new content via setNoteTags', async () => {
 		notesService.notes = [NOTE('1')];
 		vi.mocked(repo.updateNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteUpdatedAt).mockResolvedValue('2025-05-18');
 		await notesService.update('1', 'new content');
-		expect(tagsService.applyNoteTags).toHaveBeenCalledWith('1', 'new content');
+		expect(setNoteTags).toHaveBeenCalledWith(expect.anything(), '1', []);
 	});
 
 	it('updates the in-memory updated_at timestamp', async () => {
@@ -170,5 +172,28 @@ describe('delete', () => {
 		notesService.notes = [NOTE('1')];
 		await notesService.delete('1');
 		expect(tagsService.load).toHaveBeenCalled();
+	});
+});
+
+// ─── importNote ───────────────────────────────────────────────────────────────
+
+describe('importNote', () => {
+	it('writes content and re-derives tags via setNoteTags', async () => {
+		vi.mocked(repo.insertNote).mockResolvedValue(undefined);
+		await notesService.importNote('f1', '#work hello', { create: true });
+		expect(repo.insertNote).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ id: 'f1', content: '#work hello' })
+		);
+		expect(setNoteTags).toHaveBeenCalledWith(expect.anything(), 'f1', ['work']);
+	});
+
+	it('does not reload tag state or touch the notes list', async () => {
+		vi.mocked(repo.insertNote).mockResolvedValue(undefined);
+		notesService.notes = [NOTE('existing')];
+		await notesService.importNote('f1', 'plain', { create: true });
+		expect(tagsService.load).not.toHaveBeenCalled();
+		expect(notesService.notes).toHaveLength(1);
+		expect(notesService.notes[0].id).toBe('existing');
 	});
 });
