@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { Note } from '$lib/models/note';
 	import NotePreview from '$lib/components/notes/NotePreview.svelte';
+	import { parseDbTimestamp } from '$lib/utils/time';
+	import { settingsService } from '$lib/services/settings.svelte';
 	import * as m from '$paraglide/messages.js';
 
-	const intl = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'short' });
+	const intl = $derived(new Intl.DateTimeFormat(settingsService.language, { dateStyle: 'short' }));
 
 	let {
 		note,
@@ -34,6 +36,6 @@
 		{/if}
 	</div>
 	<span class="text-[11px] text-shadow-accent-foreground">
-		{intl.format(new Date(note.updated_at))}
+		{intl.format(new Date(parseDbTimestamp(note.updated_at)))}
 	</span>
 </button>

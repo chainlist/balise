@@ -210,6 +210,7 @@
 	"slash_divider_desc": "Séparateur horizontal",
 
 	"editor_placeholder": "Écrivez quelque chose, ou tapez « / » pour les commandes",
+	"editor_reading_time": "{minutes} min de lecture",
 
 	"wizard_lang_title": "Choisissez votre langue",
 	"wizard_lang_subtitle": "Vous pouvez modifier ceci dans les Paramètres.",

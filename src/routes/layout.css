@@ -332,3 +332,20 @@
 		font-weight: normal;
 	}
 }
+
+@utility bg-mesh {
+	background-color: #eceaf2;
+	background-image:
+		radial-gradient(58% 52% at 10% 6%, rgba(124, 108, 222, 0.22), transparent 62%),
+		radial-gradient(48% 44% at 93% 9%, rgba(92, 160, 220, 0.2), transparent 62%),
+		radial-gradient(54% 50% at 84% 97%, rgba(228, 138, 176, 0.18), transparent 62%),
+		radial-gradient(48% 48% at 22% 99%, rgba(110, 205, 185, 0.15), transparent 62%);
+}
+@utility bg-mesh-dark {
+	background-color: #0e0d15;
+	background-image:
+		radial-gradient(58% 52% at 10% 6%, rgba(130, 112, 236, 0.36), transparent 60%),
+		radial-gradient(48% 44% at 93% 9%, rgba(64, 126, 212, 0.32), transparent 60%),
+		radial-gradient(54% 50% at 84% 97%, rgba(214, 104, 158, 0.28), transparent 60%),
+		radial-gradient(48% 48% at 22% 99%, rgba(74, 194, 170, 0.24), transparent 60%);
+}
