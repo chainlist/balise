@@ -57,7 +57,7 @@ pub fn run() {
             app.handle().global_shortcut().register(
                 tauri_plugin_global_shortcut::Shortcut::new(
                     Some(primary_modifier | Modifiers::SHIFT),
-                    Code::F12,
+                    Code::Space,
                 ),
             )?;
 

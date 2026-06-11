@@ -2,6 +2,7 @@
 	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import { tasksService, type TaskItem, type TaskStatus } from '$lib/services/tasks.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import TaskBoardCard from './TaskBoardCard.svelte';
 	import { TASK_STATUS_COLOR as ACCENT } from '$lib/utils/task-colors';
 	import * as m from '$paraglide/messages.js';
@@ -37,7 +38,9 @@
 			return;
 		}
 
-		tasksService.moveTask(incoming, status);
+		tasksService.moveTask(incoming, status).catch((e) => {
+			toasterService.error(m.task_update_error_failed(), errorMessage(e));
+		});
 	}
 </script>
 
@@ -49,10 +52,7 @@
 				style="border-color: color-mix(in oklch, {ACCENT[status]} 25%, transparent);"
 			>
 				<div class="flex items-center gap-2">
-					<span
-						class="size-2 rounded-full"
-						style="background: {ACCENT[status]};"
-						aria-hidden="true"
+					<span class="size-2 rounded-full" style="background: {ACCENT[status]};" aria-hidden="true"
 					></span>
 					<h2 class="text-sm font-semibold">{LABELS[status]()}</h2>
 					{#if status === 'done'}

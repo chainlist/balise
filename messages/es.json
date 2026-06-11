@@ -17,6 +17,13 @@
 	"error_heading": "Error",
 	"loading": "Cargando...",
 
+	"note_create_error_failed": "Error al crear la nota.",
+	"note_save_error_failed": "Error al guardar la nota.",
+	"note_delete_error_failed": "Error al eliminar la nota.",
+	"desk_switch_error_failed": "Error al cambiar de escritorio.",
+	"task_update_error_failed": "Error al actualizar la tarea.",
+	"updater_install_error_failed": "Error al instalar la actualización.",
+
 	"command_palette_placeholder": "Buscar notas, etiquetas, comandos...",
 	"command_palette_no_results": "No se encontraron resultados.",
 	"command_palette_group_notes": "Notas",

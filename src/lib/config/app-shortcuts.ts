@@ -2,6 +2,7 @@ import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
 import { notesService, newNoteContent } from '$lib/services/notes.svelte';
 import { uiState } from '$lib/services/ui-state.svelte';
 import { noteSignals } from '$lib/services/note-signals';
+import { toasterService, errorMessage } from '$lib/services/toaster';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import * as m from '$paraglide/messages.js';
@@ -41,8 +42,12 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: m.shortcut_new_note_desc,
 		defaultBinding: '$mod+n',
 		run: async () => {
-			const id = await notesService.create(newNoteContent(uiState.activeTag));
-			noteSignals.signalSelectNote(id);
+			try {
+				const id = await notesService.create(newNoteContent(uiState.activeTag));
+				noteSignals.signalSelectNote(id);
+			} catch (e) {
+				toasterService.error(m.note_create_error_failed(), errorMessage(e));
+			}
 		}
 	},
 	{
