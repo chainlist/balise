@@ -62,7 +62,8 @@ class NotesService {
 				content,
 				pinned: opts.pinned,
 				archived: opts.archived,
-				createdAt: opts.createdAt
+				createdAt: opts.createdAt,
+				updatedAt: opts.updatedAt
 			});
 		}
 		await setNoteTags(db, id, extractTags(content));

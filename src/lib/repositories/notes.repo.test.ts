@@ -179,6 +179,22 @@ describe('updateNote', () => {
 		expect(params).toContain('s1');
 		expect(params).toContain('2025-01-01');
 	});
+
+	it("stamps updated_at with datetime('now') by default", async () => {
+		const db = makeDB();
+		await updateNote(db as never, '1', { content: 'new' });
+		const [sql] = db.execute.mock.calls[0] as [string];
+		expect(sql).toContain("updated_at = datetime('now')");
+	});
+
+	it("uses the provided updatedAt instead of datetime('now')", async () => {
+		const db = makeDB();
+		await updateNote(db as never, 's1', { content: 'synced', updatedAt: '2025-01-02T03:04:05.000Z' });
+		const [sql, params] = db.execute.mock.calls[0] as [string, unknown[]];
+		expect(sql).not.toContain("datetime('now')");
+		expect(params).toContain('2025-01-02T03:04:05.000Z');
+		expect(params[params.length - 1]).toBe('s1'); // id stays last
+	});
 });
 
 // ─── queryNoteUpdatedAt ───────────────────────────────────────────────────────

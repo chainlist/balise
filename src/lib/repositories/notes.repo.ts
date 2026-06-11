@@ -57,18 +57,14 @@ export async function queryUntaggedNotes(db: Database): Promise<Note[]> {
 }
 
 export async function queryNoteById(db: Database, id: string): Promise<Note | null> {
-	const rows = await db.select<RawNote[]>(
-		`SELECT ${NOTE_COLS} FROM notes WHERE id = $1`,
-		[id]
-	);
+	const rows = await db.select<RawNote[]>(`SELECT ${NOTE_COLS} FROM notes WHERE id = $1`, [id]);
 	return rows[0] ? mapNote(rows[0]) : null;
 }
 
 export async function queryNoteContent(db: Database, id: string): Promise<string> {
-	const rows = await db.select<{ content: string }[]>(
-		'SELECT content FROM notes WHERE id = $1',
-		[id]
-	);
+	const rows = await db.select<{ content: string }[]>('SELECT content FROM notes WHERE id = $1', [
+		id
+	]);
 	return rows[0]?.content ?? '';
 }
 
@@ -87,10 +83,22 @@ export async function insertNote(
 	const preview = notePreview(note.content);
 	const cols = ['id', 'content', 'title', 'preview'];
 	const vals: unknown[] = [note.id, note.content, title, preview];
-	if (note.createdAt !== undefined) { cols.push('created_at'); vals.push(note.createdAt); }
-	if (note.updatedAt !== undefined) { cols.push('updated_at'); vals.push(note.updatedAt); }
-	if (note.pinned !== undefined) { cols.push('pinned'); vals.push(note.pinned ? 1 : 0); }
-	if (note.archived !== undefined) { cols.push('archived'); vals.push(note.archived ? 1 : 0); }
+	if (note.createdAt !== undefined) {
+		cols.push('created_at');
+		vals.push(note.createdAt);
+	}
+	if (note.updatedAt !== undefined) {
+		cols.push('updated_at');
+		vals.push(note.updatedAt);
+	}
+	if (note.pinned !== undefined) {
+		cols.push('pinned');
+		vals.push(note.pinned ? 1 : 0);
+	}
+	if (note.archived !== undefined) {
+		cols.push('archived');
+		vals.push(note.archived ? 1 : 0);
+	}
 	const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
 	await db.execute(`INSERT INTO notes (${cols.join(', ')}) VALUES (${placeholders})`, vals);
 }
@@ -98,15 +106,36 @@ export async function insertNote(
 export async function updateNote(
 	db: Database,
 	id: string,
-	fields: { content: string; pinned?: boolean; archived?: boolean; createdAt?: string }
+	fields: {
+		content: string;
+		pinned?: boolean;
+		archived?: boolean;
+		createdAt?: string;
+		updatedAt?: string;
+	}
 ): Promise<void> {
 	const title = extractTitle(fields.content);
 	const preview = notePreview(fields.content);
-	const sets = ['content = $1', `title = $2`, `preview = $3`, `updated_at = datetime('now')`];
+	const sets = ['content = $1', `title = $2`, `preview = $3`];
 	const vals: unknown[] = [fields.content, title, preview];
-	if (fields.pinned !== undefined) { sets.push(`pinned = $${vals.length + 1}`); vals.push(fields.pinned ? 1 : 0); }
-	if (fields.archived !== undefined) { sets.push(`archived = $${vals.length + 1}`); vals.push(fields.archived ? 1 : 0); }
-	if (fields.createdAt !== undefined) { sets.push(`created_at = $${vals.length + 1}`); vals.push(fields.createdAt); }
+	if (fields.updatedAt !== undefined) {
+		sets.push(`updated_at = $${vals.length + 1}`);
+		vals.push(fields.updatedAt);
+	} else {
+		sets.push(`updated_at = datetime('now')`);
+	}
+	if (fields.pinned !== undefined) {
+		sets.push(`pinned = $${vals.length + 1}`);
+		vals.push(fields.pinned ? 1 : 0);
+	}
+	if (fields.archived !== undefined) {
+		sets.push(`archived = $${vals.length + 1}`);
+		vals.push(fields.archived ? 1 : 0);
+	}
+	if (fields.createdAt !== undefined) {
+		sets.push(`created_at = $${vals.length + 1}`);
+		vals.push(fields.createdAt);
+	}
 	vals.push(id);
 	await db.execute(`UPDATE notes SET ${sets.join(', ')} WHERE id = $${vals.length}`, vals);
 }
@@ -137,7 +166,6 @@ export async function queryJournalNotesByDate(
 	);
 	return rows.map(mapNote);
 }
-
 
 export async function queryAllNotesMeta(
 	db: Database

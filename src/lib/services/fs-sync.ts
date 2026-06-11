@@ -46,12 +46,18 @@ class FsSyncService {
 		toImport: DeskFileMeta[],
 		contentMap: Map<string, string>
 	): Promise<void> {
-		for (const { name, id, pinned, archived, created_at } of toImport) {
+		// Preserve the file mtime as updated_at: stamping "now" here would
+		// collapse every imported note to sync time and break recency ordering.
+		// It also damps the write echo (our own file writes land milliseconds
+		// after the DB row, so they re-import once; with the mtime preserved,
+		// that import converges instead of re-triggering).
+		for (const { name, id, pinned, archived, created_at, mtime_ms } of toImport) {
 			await notesService.importNote(id, contentMap.get(name) ?? '', {
 				create: false,
 				pinned,
 				archived,
-				createdAt: created_at
+				createdAt: created_at,
+				updatedAt: new Date(mtime_ms).toISOString()
 			});
 		}
 	}
