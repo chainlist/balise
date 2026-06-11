@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onDestroy, type Snippet } from 'svelte';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import Editor from './Editor.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let {
 		note,
@@ -12,8 +14,12 @@
 	let saveTimer: ReturnType<typeof setTimeout>;
 	let pending: string | null = null;
 
-	function save(content: string): Promise<void> {
-		return onSave ? onSave(content) : notesService.update(note.id, content);
+	async function save(content: string): Promise<void> {
+		try {
+			await (onSave ? onSave(content) : notesService.update(note.id, content));
+		} catch (e) {
+			toasterService.error(m.note_save_error_failed(), errorMessage(e));
+		}
 	}
 
 	// Flush (not drop) any pending save so edits made within the debounce

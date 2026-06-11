@@ -2,8 +2,10 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	let draftId = $state(crypto.randomUUID());
 	let dbNoteId: string | null = null;
@@ -30,7 +32,13 @@
 		await win.onCloseRequested(async (event) => {
 			event.preventDefault();
 			if (dbNoteId && !hasSaved) {
-				await notesService.delete(dbNoteId);
+				try {
+					await notesService.delete(dbNoteId);
+				} catch (e) {
+					// Keep the window (and the toast) visible; the draft is still intact.
+					toasterService.error(m.note_delete_error_failed(), errorMessage(e));
+					return;
+				}
 			}
 			resetDraft();
 			await win.hide();

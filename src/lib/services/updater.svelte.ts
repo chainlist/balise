@@ -1,7 +1,16 @@
 import { check, type Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { toasterService, errorMessage } from './toaster';
+import * as m from '$paraglide/messages.js';
 
-type UpdateStatus = 'idle' | 'checking' | 'up_to_date' | 'available' | 'downloading' | 'done' | 'error';
+type UpdateStatus =
+	| 'idle'
+	| 'checking'
+	| 'up_to_date'
+	| 'available'
+	| 'downloading'
+	| 'done'
+	| 'error';
 
 class UpdaterService {
 	status = $state<UpdateStatus>('idle');
@@ -51,8 +60,9 @@ class UpdaterService {
 				}
 			});
 			await relaunch();
-		} catch {
+		} catch (e) {
 			this.status = 'available';
+			toasterService.error(m.updater_install_error_failed(), errorMessage(e));
 		}
 	}
 }

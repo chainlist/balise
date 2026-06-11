@@ -6,6 +6,7 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { tagsService } from '$lib/services/tags.svelte';
 	import { noteSignals } from '$lib/services/note-signals';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import TagName from '$lib/components/TagName.svelte';
 	import NoteCard from '$lib/components/sidebar/NoteCard.svelte';
 	import TagFilterDropdown from '$lib/components/sidebar/TagFilterDropdown.svelte';
@@ -18,7 +19,13 @@
 	}
 
 	async function handleCreate() {
-		const id = await notesService.create(newNoteContent(uiState.activeTag));
+		let id: string;
+		try {
+			id = await notesService.create(newNoteContent(uiState.activeTag));
+		} catch (e) {
+			toasterService.error(m.note_create_error_failed(), errorMessage(e));
+			return;
+		}
 		uiState.setActiveNote(id);
 		if (page.url.pathname !== '/') await goto(resolve('/'));
 	}

@@ -5,6 +5,7 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ChevronsUpDownIcon, PlusIcon, LayoutListIcon, Settings } from '@lucide/svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeskSettingsSheet from '$lib/components/sidebar/DeskSettingsSheet.svelte';
 	import * as m from '$paraglide/messages.js';
@@ -17,7 +18,11 @@
 	let deskPendingSettings = $state<string | null>(null);
 
 	async function handleSelectDesk(desk: string) {
-		await uiState.switchDesk(desk);
+		try {
+			await uiState.switchDesk(desk);
+		} catch (e) {
+			toasterService.error(m.desk_switch_error_failed(), errorMessage(e));
+		}
 	}
 
 	function openDeskSettings(desk: string) {

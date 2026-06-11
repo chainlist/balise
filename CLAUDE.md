@@ -137,6 +137,7 @@ src/lib/
 - **`as const` over `enum` for named string constants.** When values are strings used in comparisons, SQL, or serialized formats, prefer `as const` objects. They emit no JS, values are the literal strings (no runtime indirection), and they work with `Object.values()` / `keyof typeof`.
 - **Observer/pub-sub: `Set<Handler>`, return the unsubscriber.** Use a `Set` instead of an array for event handlers. Return the unsubscribe function directly from the subscribe call. Avoids O(n) splice, eliminates storing the handler reference at the call site, and deduplicates identical registrations automatically.
 - **Extract complex `$derived.by()` blocks to pure functions.** If a `$derived.by()` block does non-trivial computation (geometry, ranking, color mapping), extract it to a named pure function in a `.ts` file. The component keeps a one-liner derived call; the logic becomes independently unit-testable.
+- **Every failure must display an error or a warning message.** When an operation can fail (DB write, file IO, desk switch, update install), the user must see feedback: either a toast via `toasterService.error(title, message?)` / `toasterService.warning(title, message?)` (message is optional, pass `errorMessage(e)` when the underlying cause helps) or an inline form error for validation in dialogs. Toast titles come from paraglide messages (`m.*`), never hardcoded strings. A silent `catch` is only acceptable for intentional fallbacks (e.g. an optional resource that may not exist, or best-effort cleanup like tray removal).
 
 ---
 

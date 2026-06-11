@@ -17,6 +17,13 @@
 	"error_heading": "Fehler",
 	"loading": "Wird geladen…",
 
+	"note_create_error_failed": "Notiz konnte nicht erstellt werden.",
+	"note_save_error_failed": "Notiz konnte nicht gespeichert werden.",
+	"note_delete_error_failed": "Notiz konnte nicht gelöscht werden.",
+	"desk_switch_error_failed": "Schreibtisch konnte nicht gewechselt werden.",
+	"task_update_error_failed": "Aufgabe konnte nicht aktualisiert werden.",
+	"updater_install_error_failed": "Update konnte nicht installiert werden.",
+
 	"command_palette_placeholder": "Notizen, Tags, Befehle suchen…",
 	"command_palette_no_results": "Keine Ergebnisse gefunden.",
 	"command_palette_group_notes": "Notizen",

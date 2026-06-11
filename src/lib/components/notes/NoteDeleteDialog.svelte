@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { notesService, type Note } from '$lib/services/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as m from '$paraglide/messages.js';
@@ -14,13 +15,19 @@
 			<Sheet.Description>{m.note_delete_description()}</Sheet.Description>
 		</Sheet.Header>
 		<div class="flex justify-end gap-2 p-6">
-			<Button type="button" variant="outline" onclick={() => (open = false)}>{m.action_cancel()}</Button>
+			<Button type="button" variant="outline" onclick={() => (open = false)}
+				>{m.action_cancel()}</Button
+			>
 			<Button
 				type="button"
 				variant="destructive"
 				onclick={async () => {
-					await notesService.delete(note.id);
-					open = false;
+					try {
+						await notesService.delete(note.id);
+						open = false;
+					} catch (e) {
+						toasterService.error(m.note_delete_error_failed(), errorMessage(e));
+					}
 				}}>{m.action_delete()}</Button
 			>
 		</div>

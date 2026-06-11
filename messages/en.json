@@ -17,6 +17,13 @@
 	"error_heading": "Error",
 	"loading": "Loading...",
 
+	"note_create_error_failed": "Failed to create note.",
+	"note_save_error_failed": "Failed to save note.",
+	"note_delete_error_failed": "Failed to delete note.",
+	"desk_switch_error_failed": "Failed to switch desk.",
+	"task_update_error_failed": "Failed to update task.",
+	"updater_install_error_failed": "Failed to install update.",
+
 	"command_palette_placeholder": "Search notes, tags, commands...",
 	"command_palette_no_results": "No results found.",
 	"command_palette_group_notes": "Notes",

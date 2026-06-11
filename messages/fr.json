@@ -17,6 +17,13 @@
 	"error_heading": "Erreur",
 	"loading": "Chargement...",
 
+	"note_create_error_failed": "Impossible de créer la note.",
+	"note_save_error_failed": "Impossible d'enregistrer la note.",
+	"note_delete_error_failed": "Impossible de supprimer la note.",
+	"desk_switch_error_failed": "Impossible de changer de bureau.",
+	"task_update_error_failed": "Impossible de mettre à jour la tâche.",
+	"updater_install_error_failed": "Impossible d'installer la mise à jour.",
+
 	"command_palette_placeholder": "Rechercher des notes, tags, commandes...",
 	"command_palette_no_results": "Aucun résultat.",
 	"command_palette_group_notes": "Notes",
