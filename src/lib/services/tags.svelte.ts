@@ -1,5 +1,6 @@
 import { getDB } from '$lib/utils/db';
 import { TAG_PATTERN_SOURCE } from '$lib/utils/tag-parser';
+import { FENCE_LANG_SOURCE } from '$lib/utils/markdown-patterns';
 import { settingsService, MAGIC_TAG_MATCH_TYPES } from './settings.svelte';
 
 import {
@@ -26,7 +27,7 @@ function extractHashtags(content: string): string[] {
 
 function extractCodeTags(content: string): string[] {
 	const tags: string[] = [];
-	for (const [, lang] of content.matchAll(/^```([a-zA-Z][a-zA-Z0-9]*)/gm)) {
+	for (const [, lang] of content.matchAll(new RegExp(FENCE_LANG_SOURCE, 'gm'))) {
 		tags.push('code', lang.toLowerCase());
 	}
 	return tags;

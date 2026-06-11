@@ -3,6 +3,7 @@ import type { DecorationSet, ViewUpdate } from '@codemirror/view';
 import type { EditorState, Range, Line } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { mount, unmount, type Component } from 'svelte';
+import { HIGHLIGHT_SOURCE, BARE_URL_SOURCE } from '../markdown-patterns';
 
 export type MarkMode = 'always' | 'cursor' | 'never';
 
@@ -72,7 +73,7 @@ export function emphasisMarks(state: EditorState): EmphasisMark[] {
 // Highlight marks =text= aren't in the syntax tree — collect them via the
 // same regex highlightPlugin uses. Same shape as emphasisMarks so consumers
 // can treat them uniformly.
-const HIGHLIGHT_MARK_RE = /=([^=\n]+)=/g;
+const HIGHLIGHT_MARK_RE = new RegExp(HIGHLIGHT_SOURCE, 'g');
 
 export function highlightMarks(state: EditorState): EmphasisMark[] {
 	const out: EmphasisMark[] = [];
@@ -88,7 +89,7 @@ export function highlightMarks(state: EditorState): EmphasisMark[] {
 	return out;
 }
 
-export const BARE_URL_RE = /https?:\/\/[^\s<>[\]()'"]+/g;
+export const BARE_URL_RE = new RegExp(BARE_URL_SOURCE, 'g');
 
 // Lenient emphasis patterns: match even when the parser rejects them (e.g. trailing spaces).
 // Bold must come before italic to avoid partial matches inside ** delimiters.

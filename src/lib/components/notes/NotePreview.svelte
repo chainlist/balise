@@ -6,16 +6,18 @@
 		type Tokens
 	} from 'marked';
 	import { fsService } from '$lib/services/fs';
+	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
 	let { content }: { content: string } = $props();
 
-	// =text= highlight extension (single =, matching the CM plugin regex /=([^=\n]+)=/)
+	// =text= highlight extension — anchored variant of the shared CM highlight pattern
+	const HIGHLIGHT_TOKEN_RE = new RegExp(`^${HIGHLIGHT_SOURCE}`);
 	const highlightToken: TokenizerAndRendererExtension = {
 		name: 'highlight',
 		level: 'inline',
 		start: (src: string) => src.indexOf('='),
 		tokenizer(src: string) {
-			const match = /^=([^=\n]+)=/.exec(src);
+			const match = HIGHLIGHT_TOKEN_RE.exec(src);
 			if (match) return { type: 'highlight', raw: match[0], text: match[1] };
 		},
 		renderer(token: Tokens.Generic) {

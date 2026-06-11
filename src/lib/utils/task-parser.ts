@@ -1,4 +1,7 @@
 import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
+import { CHECKLIST_RE } from '$lib/utils/markdown-patterns';
+
+export { CHECKLIST_RE } from '$lib/utils/markdown-patterns';
 
 export type TaskStatus = 'todo' | 'inprogress' | 'done';
 export type TaskSource = 'hashtag' | 'checklist';
@@ -16,8 +19,6 @@ export interface TaskItem {
 
 export const HASHTAG_RE = /#(todo|inprogress|done)\b/i;
 export const HASHTAG_STRIP_RE = /#(todo|inprogress|done)\b\s*/gi;
-// Groups: [1] prefix "- [", [2] marker, [3] "] " separator, [4] text
-export const CHECKLIST_RE = /^([ \t]*- \[)( |[xX]|~)(\]\s*)(.+)$/;
 
 function hashtagStatus(tag: string): TaskStatus {
 	const lower = tag.toLowerCase();

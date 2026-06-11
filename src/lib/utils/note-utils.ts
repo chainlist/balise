@@ -1,7 +1,9 @@
+import { HEADING_PREFIX_RE } from './markdown-patterns';
+
 export function extractTitle(content: string): string {
 	for (const line of content.split('\n')) {
 		const trimmed = line.trim();
-		if (trimmed) return trimmed.replace(/^#{1,6}\s+/, '').trim();
+		if (trimmed) return trimmed.replace(HEADING_PREFIX_RE, '').trim();
 	}
 	return '';
 }
