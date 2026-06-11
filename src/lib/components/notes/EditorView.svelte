@@ -34,11 +34,11 @@
 	}
 </script>
 
+<!-- Consumers remount this component per note (keyed by note.id), so the
+     debounce timer, pending flush, and loaded content all belong to one note. -->
 <div class="relative h-full overflow-y-auto">
-	{#key note.id}
-		{#await note.content ?? notesService.loadContent(note.id) then content}
-			<Editor {content} autofocus onchange={handleChange} />
-		{/await}
-	{/key}
+	{#await note.content ?? notesService.loadContent(note.id) then content}
+		<Editor {content} autofocus onchange={handleChange} />
+	{/await}
 	{@render children?.()}
 </div>
