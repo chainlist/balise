@@ -34,6 +34,8 @@ import { uiState } from './ui-state.svelte';
 import { openDesk } from '$lib/services/desk';
 import { notesService } from '$lib/services/notes.svelte';
 import { tagsService } from '$lib/services/tags.svelte';
+import { fsSyncService } from '$lib/services/fs-sync';
+import { fsService } from '$lib/services/fs';
 
 // Initialise the store once so the #store field is non-null,
 // making store?.set(...) calls observable in every test.
@@ -234,5 +236,26 @@ describe('switchDesk', () => {
 	it('calls tagsService.loadRelated with null after switching', async () => {
 		await uiState.switchDesk('Work');
 		expect(tagsService.loadRelated).toHaveBeenCalledWith(null);
+	});
+
+	it('keeps activeDesk, activeTag and composedTags when the switch fails', async () => {
+		vi.mocked(fsSyncService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
+		await expect(uiState.switchDesk('Work')).rejects.toThrow('disk');
+		expect(uiState.activeDesk).toBe('Personal');
+		expect(uiState.activeTag).toBe('work');
+		expect(uiState.composedTags).toEqual(['urgent']);
+	});
+
+	it('does not persist the new desk when the switch fails', async () => {
+		vi.mocked(fsSyncService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
+		await expect(uiState.switchDesk('Work')).rejects.toThrow();
+		expect(mockStore.set).not.toHaveBeenCalledWith('activeDesk', 'Work');
+	});
+
+	it('reopens the previous desk when the switch fails', async () => {
+		vi.mocked(fsSyncService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
+		await expect(uiState.switchDesk('Work')).rejects.toThrow();
+		expect(openDesk).toHaveBeenLastCalledWith('Personal');
+		expect(fsService.setDesk).toHaveBeenLastCalledWith('Personal');
 	});
 });
