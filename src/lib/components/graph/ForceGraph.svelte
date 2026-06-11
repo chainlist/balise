@@ -1,14 +1,6 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
-	import {
-		forceSimulation,
-		forceManyBody,
-		forceLink,
-		forceX,
-		forceY,
-		forceCollide,
-		type Simulation
-	} from 'd3-force';
+	import type { Simulation } from 'd3-force';
 	import * as m from '$paraglide/messages.js';
 	import Tooltip from './Tooltip.svelte';
 	import {
@@ -19,6 +11,8 @@
 		type ForceLink,
 		type Transform
 	} from './force-graph';
+	import { drawGraph } from './force-render';
+	import { createSimulation, setSimCenter, setSimTunables } from './force-sim';
 
 	let {
 		nodes,
@@ -39,10 +33,6 @@
 		onSelect: (tag: string | null) => void;
 		onOpen: (tag: string) => void;
 	} = $props();
-
-	function linkDistanceFor(weight: number, base: number): number {
-		return base + 60 / Math.sqrt(weight);
-	}
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
@@ -75,71 +65,22 @@
 		return { x: width / 2 || 300, y: height / 2 || 300 };
 	}
 
-	// What the pointer/selection emphasises; null = nothing dimmed.
-	function focusId(): string | null {
-		return hoveredId ?? selectedId;
-	}
-
-	function nodeAlpha(id: string): number {
-		const f = focusId();
-		if (!f) return 1;
-		if (id === f) return 1;
-		return adjacency.get(f)?.has(id) ? 1 : 0.18;
-	}
-
-	function linkAlpha(a: string, b: string): number {
-		const f = focusId();
-		if (!f) return 0.5;
-		return a === f || b === f ? 0.8 : 0.08;
-	}
-
 	function draw() {
 		const ctx = canvas?.getContext('2d');
 		if (!ctx) return;
-		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-		ctx.clearRect(0, 0, width, height);
-		ctx.translate(transform.x, transform.y);
-		ctx.scale(transform.k, transform.k);
-
-		// Links
-		ctx.lineCap = 'round';
-		for (const l of links) {
-			const s = l.source as ForceNode;
-			const t = l.target as ForceNode;
-			if (s.x == null || t.x == null) continue;
-			ctx.globalAlpha = linkAlpha(s.id, t.id);
-			ctx.strokeStyle = linkColor;
-			ctx.lineWidth = Math.min(3, 0.5 + l.weight * 0.4);
-			ctx.beginPath();
-			ctx.moveTo(s.x, s.y!);
-			ctx.lineTo(t.x, t.y!);
-			ctx.stroke();
-		}
-
-		// Nodes + labels
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'top';
-		ctx.font = '11px ui-sans-serif, system-ui, sans-serif';
-		for (const n of nodes) {
-			if (n.x == null || n.y == null) continue;
-			const alpha = nodeAlpha(n.id);
-			ctx.globalAlpha = alpha;
-			ctx.beginPath();
-			ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-			ctx.fillStyle = n.color;
-			ctx.fill();
-			if (n.id === selectedId) {
-				ctx.lineWidth = 2;
-				ctx.strokeStyle = labelColor;
-				ctx.stroke();
-			}
-			// Labels: skip when zoomed far out unless this node is in focus.
-			if (transform.k >= 0.6 || alpha === 1) {
-				ctx.fillStyle = labelColor;
-				ctx.fillText(n.label, n.x, n.y + n.r + 3);
-			}
-		}
-		ctx.globalAlpha = 1;
+		drawGraph(ctx, {
+			nodes,
+			links,
+			transform,
+			dpr,
+			width,
+			height,
+			focus: hoveredId ?? selectedId,
+			selectedId,
+			adjacency,
+			linkColor,
+			labelColor
+		});
 	}
 
 	function resize() {
@@ -154,49 +95,21 @@
 		draw();
 	}
 
-	// (Re)build the simulation whenever the graph data changes. Reads size
-	// untracked so a resize updates forces without resetting the layout.
+	// (Re)build the simulation whenever the graph data changes. Size and the
+	// spread tunables are read untracked: a resize or slider change is applied
+	// live by the dedicated effects below instead of rebuilding (which would
+	// reset the layout).
 	$effect(() => {
 		const ns = nodes;
 		const ls = links;
 		adjacency = buildAdjacency(ls);
 
-		// Deterministic seed ring around the center so the first frames look settled.
-		// Read size untracked so a resize tweaks forces instead of rebuilding here.
-		const c = untrack(centerWorld);
-		ns.forEach((n, i) => {
-			if (n.x == null) {
-				const a = (i / Math.max(1, ns.length)) * Math.PI * 2;
-				n.x = c.x + Math.cos(a) * 120;
-				n.y = c.y + Math.sin(a) * 120;
-			}
+		sim = createSimulation(ns, ls, {
+			center: untrack(centerWorld),
+			repulsion: untrack(() => repulsion),
+			linkDistance: untrack(() => linkDistance),
+			onTick: draw
 		});
-
-		// Read the tunables untracked: the dedicated effect below applies live
-		// slider changes so they don't rebuild the simulation (which would reset
-		// the layout). They're only read here to seed a correct initial build.
-		const initRepulsion = untrack(() => repulsion);
-		const initDistance = untrack(() => linkDistance);
-
-		sim = forceSimulation<ForceNode, ForceLink>(ns)
-			.force(
-				'link',
-				forceLink<ForceNode, ForceLink>(ls)
-					.id((d) => d.id)
-					.distance((d) => linkDistanceFor(d.weight, initDistance))
-			)
-			.force('charge', forceManyBody().strength(-initRepulsion))
-			// Gravity toward the center: forceX/forceY actually *pull* nodes back,
-			// unlike forceCenter (which only recenters the centroid and lets the
-			// cloud expand without bound while a node is pinned/dragged). Kept low
-			// so clusters can spread; charge above does the separating.
-			.force('x', forceX<ForceNode>(c.x).strength(0.045))
-			.force('y', forceY<ForceNode>(c.y).strength(0.045))
-			.force(
-				'collide',
-				forceCollide<ForceNode>().radius((d) => d.r + 4)
-			)
-			.on('tick', draw);
 
 		return () => {
 			sim?.stop();
@@ -206,23 +119,12 @@
 
 	// Keep the gravity centers aligned with the canvas size, without rebuilding.
 	$effect(() => {
-		const c = { x: width / 2 || 300, y: height / 2 || 300 };
-		const fx = sim?.force('x') as ReturnType<typeof forceX<ForceNode>> | undefined;
-		const fy = sim?.force('y') as ReturnType<typeof forceY<ForceNode>> | undefined;
-		fx?.x(c.x);
-		fy?.y(c.y);
-		sim?.alpha(0.3).restart();
+		setSimCenter(sim, { x: width / 2 || 300, y: height / 2 || 300 });
 	});
 
 	// Apply the spread sliders live, without rebuilding (keeps node positions).
 	$effect(() => {
-		const charge = sim?.force('charge') as ReturnType<typeof forceManyBody> | undefined;
-		charge?.strength(-repulsion);
-		const link = sim?.force('link') as
-			| ReturnType<typeof forceLink<ForceNode, ForceLink>>
-			| undefined;
-		link?.distance((d) => linkDistanceFor(d.weight, linkDistance));
-		sim?.alpha(0.4).restart();
+		setSimTunables(sim, { repulsion, linkDistance });
 	});
 
 	// Pin the selected node to the center as the "hub"; release others.
