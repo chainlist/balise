@@ -273,10 +273,14 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
-		@apply h-full bg-background text-on-background;
+		@apply h-full bg-mesh text-on-background dark:bg-mesh-dark;
 	}
 	html {
-		@apply h-full font-sans;
+		@apply h-full bg-mesh font-sans;
+	}
+	/* dark: compiles to :is(.dark *) and never matches <html>, where the class lives */
+	html.dark {
+		@apply bg-mesh-dark;
 	}
 }
 
@@ -333,6 +337,12 @@
 	}
 }
 
+@utility frost {
+	@apply bg-white/40 backdrop-blur-[30px] backdrop-saturate-[1.6] dark:bg-white/4;
+}
+@utility frost-selected {
+	@apply rounded border border-white/60 bg-white/75 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/[0.13] dark:bg-white/10;
+}
 @utility bg-mesh {
 	background-color: #eceaf2;
 	background-image:

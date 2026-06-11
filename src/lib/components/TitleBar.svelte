@@ -8,7 +8,7 @@
 
 <div
 	data-tauri-drag-region
-	class="flex h-8 w-full shrink-0 items-center border-b border-border bg-background select-none"
+	class="frost flex h-8 w-full shrink-0 items-center border-b border-border select-none"
 >
 	{#if isMac}
 		<div class="ml-3 flex items-center gap-1.5">
