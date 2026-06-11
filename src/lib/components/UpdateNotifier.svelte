@@ -12,7 +12,7 @@
 
 {#if !dismissed && updaterService.status !== 'idle' && updaterService.status !== 'up_to_date' && updaterService.status !== 'error' && updaterService.status !== 'checking'}
 	<div
-		class="fixed top-4 right-4 z-50 flex w-72 flex-col gap-2 rounded border bg-popover p-4 text-sm shadow-lg"
+		class="frost-surface fixed top-4 right-4 z-50 flex w-72 flex-col gap-2 rounded p-4 text-sm shadow-lg"
 	>
 		{#if updaterService.status === 'available'}
 			<div class="flex items-start justify-between gap-2">

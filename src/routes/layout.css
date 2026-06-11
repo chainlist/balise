@@ -340,6 +340,9 @@
 @utility frost {
 	@apply bg-white/40 backdrop-blur-[30px] backdrop-saturate-[1.6] dark:bg-white/4;
 }
+@utility frost-surface {
+	@apply rounded border border-white/60 bg-white/75 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-2xl dark:border-white/[0.13] dark:bg-surface-container/90 dark:shadow-[0_2px_6px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)];
+}
 @utility frost-selected {
 	@apply rounded border border-white/60 bg-white/75 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/[0.13] dark:bg-white/10;
 }

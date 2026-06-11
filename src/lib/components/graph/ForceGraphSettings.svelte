@@ -15,7 +15,7 @@
 	} = $props();
 </script>
 
-<div class="absolute top-8 right-8 z-10 w-64 rounded border bg-card p-4 shadow-md">
+<div class="frost-surface absolute top-8 right-8 z-10 w-64 rounded p-4 shadow-md">
 	<div class="mb-3 flex items-center justify-between">
 		<h2 class="text-sm font-semibold text-foreground">{m.graph_settings_title()}</h2>
 		<button

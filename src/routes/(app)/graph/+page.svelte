@@ -140,7 +140,7 @@
 		{/if}
 
 		<div
-			class="absolute top-8 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded border bg-card p-1"
+			class="frost-surface absolute top-8 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded p-1"
 		>
 			<Button
 				variant={mode === 'sunburst' ? 'default' : 'ghost'}

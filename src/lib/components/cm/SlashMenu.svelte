@@ -65,7 +65,7 @@
 {#if filtered.length > 0}
 	<div
 		role="menu"
-		class="fixed z-50 min-w-48 overflow-hidden rounded border bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
+		class="frost-surface fixed z-50 min-w-48 overflow-hidden rounded p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
 		style="left: {x}px; top: {y}px;"
 	>
 		{#each filtered as action, i (action.id)}

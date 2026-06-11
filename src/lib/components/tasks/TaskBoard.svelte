@@ -46,7 +46,7 @@
 
 <div class="grid h-full grid-cols-3 gap-4 overflow-hidden p-6">
 	{#each ORDER as status (status)}
-		<section class="flex min-h-0 flex-col rounded-lg border bg-card">
+		<section class="frost flex min-h-0 flex-col rounded-lg border">
 			<header
 				class="flex items-center justify-between border-b px-4 py-3"
 				style="border-color: color-mix(in oklch, {ACCENT[status]} 25%, transparent);"
