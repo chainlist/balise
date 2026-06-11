@@ -1,23 +1,15 @@
-import { invoke } from '@tauri-apps/api/core';
 import { fsService } from './fs';
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
 import { notesService } from '$lib/services/notes.svelte';
-import { writeNoteFile } from '$lib/repositories/notes.fs.repo';
+import {
+	writeNoteFile,
+	scanDeskFiles,
+	readDeskFilesContent,
+	type DeskFileMeta
+} from '$lib/repositories/notes.fs.repo';
 import { queryAllNotesMeta, queryNotesWithContentByIds } from '$lib/repositories/notes.repo';
 import { msToIsoUtc, parseDbTimestamp } from '$lib/utils/time';
-
-type DeskFileMeta = {
-	name: string;
-	id: string;
-	pinned: boolean;
-	archived: boolean;
-	created_at: string;
-	updated_at: string;
-	mtime_ms: number;
-};
-
-type FileContent = { name: string; content: string };
 
 class FsSyncService {
 	// Sequential (not Promise.all): canonical tag resolution reads existing rows,
@@ -73,7 +65,7 @@ class FsSyncService {
 		const db = getDB();
 
 		const [deskFiles, dbNotes] = await Promise.all([
-			invoke<DeskFileMeta[]>('scan_desk_files', { deskName: fsService.currentDesk }),
+			scanDeskFiles(fsService.currentDesk),
 			queryAllNotesMeta(db)
 		]);
 
@@ -94,10 +86,10 @@ class FsSyncService {
 
 		const needsContent = [...toCreate, ...toImport];
 		if (needsContent.length > 0) {
-			const contents = await invoke<FileContent[]>('read_desk_files_content', {
-				deskName: fsService.currentDesk,
-				names: needsContent.map((f) => f.name)
-			});
+			const contents = await readDeskFilesContent(
+				fsService.currentDesk,
+				needsContent.map((f) => f.name)
+			);
 			const contentMap = new Map(contents.map((c) => [c.name, c.content]));
 			if (toCreate.length > 0) await this.createNotes(toCreate, contentMap);
 			if (toImport.length > 0) await this.importNotes(toImport, contentMap);
