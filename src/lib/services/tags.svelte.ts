@@ -122,7 +122,11 @@ class TagsService {
 		this.relatedTags = await queryRelatedTags(getDB(), allCurrentTags);
 	}
 
-	async syncNoteTags(noteId: string, content: string): Promise<void> {
+	/**
+	 * Re-derive a note's `note_tags` rows from its content. Does not refresh the
+	 * tag list state - callers reload via `load()` (once, after a batch).
+	 */
+	async applyNoteTags(noteId: string, content: string): Promise<void> {
 		const db = getDB();
 		const rawNames = extractTags(content);
 
@@ -130,8 +134,6 @@ class TagsService {
 		const names = rawNames.length > 0 ? await resolveCanonicalTags(db, rawNames) : [];
 		await deleteNoteTags(db, noteId);
 		if (names.length > 0) await insertNoteTags(db, noteId, names);
-
-		await this.load();
 	}
 }
 

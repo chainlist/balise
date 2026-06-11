@@ -2,13 +2,12 @@ import { getDB } from '$lib/utils/db';
 import { tagsService, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import { fsSyncService } from '$lib/services/fs-sync';
+import { writeNoteContent } from '$lib/services/note-write';
 import {
 	queryNotesByTags,
 	queryUntaggedNotes,
 	queryNoteById,
 	queryNoteContent,
-	insertNote,
-	updateNote,
 	queryNoteUpdatedAt,
 	deleteNoteById,
 	queryJournalNotesByDate
@@ -44,11 +43,10 @@ class NotesService {
 	}
 
 	async create(content = ''): Promise<string> {
-		const db = getDB();
 		const id = crypto.randomUUID();
-		await insertNote(db, { id, content });
-		await tagsService.syncNoteTags(id, content);
-		const note = await queryNoteById(db, id);
+		await writeNoteContent(id, content, { create: true });
+		await tagsService.load();
+		const note = await queryNoteById(getDB(), id);
 		if (note) {
 			this.notes = [note, ...this.notes];
 			await fsSyncService.syncNoteFile(note);
@@ -58,8 +56,8 @@ class NotesService {
 
 	async update(id: string, content: string): Promise<void> {
 		const db = getDB();
-		await updateNote(db, id, { content });
-		await tagsService.syncNoteTags(id, content);
+		await writeNoteContent(id, content, { create: false });
+		await tagsService.load();
 		const inList = this.notes.find((n) => n.id === id);
 		if (inList) {
 			inList.title = extractTitle(content);
@@ -89,8 +87,8 @@ class NotesService {
 		const createdAt = isToday
 			? toSQLiteUTC(now)
 			: toSQLiteUTC(new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), 12, 0, 0));
-		await insertNote(db, { id, content, createdAt });
-		await tagsService.syncNoteTags(id, content);
+		await writeNoteContent(id, content, { create: true, createdAt });
+		await tagsService.load();
 		const note = await queryNoteById(db, id);
 		if (note) await fsSyncService.syncNoteFile(note);
 	}

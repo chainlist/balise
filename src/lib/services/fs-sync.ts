@@ -2,12 +2,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { fsService } from './fs';
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
-import {
-	queryAllNotesMeta,
-	queryNotesWithContentByIds,
-	insertNote,
-	updateNote
-} from '$lib/repositories/notes.repo';
+import { writeNoteContent } from '$lib/services/note-write';
+import { queryAllNotesMeta, queryNotesWithContentByIds } from '$lib/repositories/notes.repo';
 import type { Note } from '$lib/models/note';
 
 type DeskFileMeta = {
@@ -54,42 +50,35 @@ class FsSyncService {
 		await fsService.remove(`${noteId}.md`);
 	}
 
+	// Sequential (not Promise.all): canonical tag resolution reads existing rows,
+	// so concurrent writes of notes sharing a new tag could resolve inconsistently.
 	private async createNotes(
-		db: Awaited<ReturnType<typeof getDB>>,
 		toCreate: DeskFileMeta[],
 		contentMap: Map<string, string>
 	): Promise<void> {
-		await Promise.all(
-			toCreate.map(({ name, id, pinned, archived, created_at, mtime_ms }) =>
-				insertNote(db, {
-					id,
-					content: contentMap.get(name) ?? '',
-					pinned,
-					archived,
-					createdAt: created_at,
-					updatedAt: new Date(mtime_ms).toISOString()
-				})
-			)
-		);
-		await Promise.all(
-			toCreate.map(({ name, id }) => tagsService.syncNoteTags(id, contentMap.get(name) ?? ''))
-		);
+		for (const { name, id, pinned, archived, created_at, mtime_ms } of toCreate) {
+			await writeNoteContent(id, contentMap.get(name) ?? '', {
+				create: true,
+				pinned,
+				archived,
+				createdAt: created_at,
+				updatedAt: new Date(mtime_ms).toISOString()
+			});
+		}
 	}
 
 	private async importNotes(
-		db: Awaited<ReturnType<typeof getDB>>,
 		toImport: DeskFileMeta[],
 		contentMap: Map<string, string>
 	): Promise<void> {
-		await Promise.all(
-			toImport.flatMap(({ name, id, pinned, archived, created_at }) => {
-				const content = contentMap.get(name) ?? '';
-				return [
-					updateNote(db, id, { content, pinned, archived, createdAt: created_at }),
-					tagsService.syncNoteTags(id, content)
-				];
-			})
-		);
+		for (const { name, id, pinned, archived, created_at } of toImport) {
+			await writeNoteContent(id, contentMap.get(name) ?? '', {
+				create: false,
+				pinned,
+				archived,
+				createdAt: created_at
+			});
+		}
 	}
 
 	private async writeOrphanedNotes(
@@ -134,8 +123,10 @@ class FsSyncService {
 				names: needsContent.map((f) => f.name)
 			});
 			const contentMap = new Map(contents.map((c) => [c.name, c.content]));
-			if (toCreate.length > 0) await this.createNotes(db, toCreate, contentMap);
-			if (toImport.length > 0) await this.importNotes(db, toImport, contentMap);
+			if (toCreate.length > 0) await this.createNotes(toCreate, contentMap);
+			if (toImport.length > 0) await this.importNotes(toImport, contentMap);
+			// Refresh tag state once for the whole batch, not per note.
+			await tagsService.load();
 		}
 
 		await this.writeOrphanedNotes(db, dbNotes, syncedIds);

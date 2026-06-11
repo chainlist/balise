@@ -15,7 +15,7 @@ vi.mock('$lib/services/tags.svelte', async (importOriginal) => {
 	return {
 		...actual,
 		tagsService: {
-			syncNoteTags: vi.fn().mockResolvedValue(undefined),
+			applyNoteTags: vi.fn().mockResolvedValue(undefined),
 			load: vi.fn().mockResolvedValue(undefined)
 		}
 	};
@@ -101,11 +101,11 @@ describe('create', () => {
 		);
 	});
 
-	it('calls tagsService.syncNoteTags with the id and content', async () => {
+	it('re-derives tags for the new note via applyNoteTags', async () => {
 		vi.mocked(repo.insertNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteById).mockResolvedValue(NOTE());
 		await notesService.create('#work hello');
-		expect(tagsService.syncNoteTags).toHaveBeenCalledWith(expect.any(String), '#work hello');
+		expect(tagsService.applyNoteTags).toHaveBeenCalledWith(expect.any(String), '#work hello');
 	});
 
 	it('prepends the new note to notes', async () => {
@@ -130,12 +130,12 @@ describe('update', () => {
 		expect(repo.updateNote).toHaveBeenCalledWith(expect.anything(), '1', expect.objectContaining({ content: 'new content' }));
 	});
 
-	it('calls tagsService.syncNoteTags with id and new content', async () => {
+	it('re-derives tags with id and new content via applyNoteTags', async () => {
 		notesService.notes = [NOTE('1')];
 		vi.mocked(repo.updateNote).mockResolvedValue(undefined);
 		vi.mocked(repo.queryNoteUpdatedAt).mockResolvedValue('2025-05-18');
 		await notesService.update('1', 'new content');
-		expect(tagsService.syncNoteTags).toHaveBeenCalledWith('1', 'new content');
+		expect(tagsService.applyNoteTags).toHaveBeenCalledWith('1', 'new content');
 	});
 
 	it('updates the in-memory updated_at timestamp', async () => {
