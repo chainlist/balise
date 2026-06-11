@@ -16,6 +16,9 @@ export const BARE_URL_SOURCE = 'https?:\\/\\/[^\\s<>[\\]()\'"]+';
 /** Fenced code block opener, capture group 1 is the language. Use with `gm`. */
 export const FENCE_LANG_SOURCE = '^```([a-zA-Z][a-zA-Z0-9]*)';
 
+/** Markdown image: `![alt](path)`. Use with `g`. */
+export const IMAGE_SOURCE = '!\\[[^\\]]*\\]\\([^)]*\\)';
+
 /** Leading ATX heading marker (`#` … `######`) plus its trailing space(s). */
 export const HEADING_PREFIX_RE = /^#{1,6}\s+/;
 

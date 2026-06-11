@@ -2,7 +2,10 @@
 	import { onDestroy, type Snippet } from 'svelte';
 	import { notesService, type Note } from '$lib/services/notes.svelte';
 	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { readingTimeMinutes } from '$lib/utils/note-utils';
+	import { parseDbTimestamp } from '$lib/utils/time';
 	import Editor from './Editor.svelte';
+	import EditorHeader from './EditorHeader.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	let {
@@ -13,6 +16,7 @@
 
 	let saveTimer: ReturnType<typeof setTimeout>;
 	let pending: string | null = null;
+	let liveContent = $state<string | null>(null);
 
 	async function save(content: string): Promise<void> {
 		try {
@@ -31,6 +35,7 @@
 
 	function handleChange(val: string) {
 		clearTimeout(saveTimer);
+		liveContent = val;
 		pending = val.replace(/[ \t]+$/gm, '');
 		saveTimer = setTimeout(async () => {
 			const content = pending;
@@ -44,6 +49,10 @@
      debounce timer, pending flush, and loaded content all belong to one note. -->
 <div class="relative h-full overflow-y-auto">
 	{#await note.content ?? notesService.loadContent(note.id) then content}
+		<EditorHeader
+			readingTime={readingTimeMinutes(liveContent ?? content)}
+			date={new Date(parseDbTimestamp(note.created_at))}
+		/>
 		<Editor {content} autofocus onchange={handleChange} />
 	{/await}
 	{@render children?.()}
