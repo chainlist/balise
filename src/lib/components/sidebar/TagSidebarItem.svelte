@@ -5,6 +5,7 @@
 	import { tagDisplayName, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
 	import type { Tag } from '$lib/models/tag';
 	import { Settings2Icon, PinIcon, HashIcon } from '@lucide/svelte';
+	import TagName from '../TagName.svelte';
 
 	let { tag, onSettings }: { tag: Tag; onSettings?: (tag: Tag) => void } = $props();
 
@@ -29,7 +30,8 @@
 	class="group/tag-item relative inline-flex w-full items-center justify-between rounded px-2 py-1.5 text-sm text-on-surface-variant transition-all select-none hover:bg-sidebar-accent hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
 >
 	<div class="flex min-w-0 items-center gap-2">
-		{#if tag.pinned}
+		<TagName {tag} untagged={tag.tag === UNTAGGED_FILTER} />
+		<!-- {#if tag.pinned}
 			<PinIcon
 				size="14"
 				style="color: {tag.color ?? 'currentColor'};"
@@ -47,7 +49,7 @@
 				<HashIcon size="14" />
 			</span>
 		{/if}
-		<span class="truncate">{tagDisplayName(tag)}</span>
+		<span class="truncate">{tagDisplayName(tag)}</span> -->
 	</div>
 	<div
 		role="button"
