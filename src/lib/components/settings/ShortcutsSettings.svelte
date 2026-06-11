@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { shortcutsService } from '$lib/services/shortcuts.svelte';
+	import { settingsService } from '$lib/services/settings.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
@@ -84,7 +85,7 @@
 		}
 
 		conflictName = null;
-		shortcutsService.setBinding(listeningFor, binding);
+		settingsService.setBinding(listeningFor, binding);
 		listeningFor = null;
 	}
 </script>
@@ -145,7 +146,7 @@
 						<td class="pr-4 py-3">
 							{#if binding !== def.defaultBinding}
 								<button
-									onclick={() => shortcutsService.resetBinding(def.id)}
+									onclick={() => settingsService.resetBinding(def.id)}
 									title={m.settings_shortcuts_reset()}
 									class="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
 								>

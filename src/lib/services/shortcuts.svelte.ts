@@ -10,20 +10,8 @@ export interface ShortcutDefinition {
 }
 
 class ShortcutsService {
-	get customBindings(): Record<string, string> {
-		return settingsService.customBindings;
-	}
-
 	getBinding(def: ShortcutDefinition): string {
 		return settingsService.customBindings[def.id] ?? def.defaultBinding;
-	}
-
-	setBinding(id: string, binding: string): void {
-		settingsService.setBinding(id, binding);
-	}
-
-	resetBinding(id: string): void {
-		settingsService.resetBinding(id);
 	}
 
 	buildTinykeysMap(
