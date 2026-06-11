@@ -37,10 +37,14 @@
 
 	let container = $state<HTMLDivElement | null>(null);
 
+	// Cache resolved blob URLs by path so re-renders (e.g. on content edits)
+	// reuse the same URL synchronously instead of re-reading the file and
+	// swapping in a fresh blob, which makes the image blink.
+	const urlCache = new Map<string, string>();
+
 	$effect(() => {
 		if (!container || !html) return;
 
-		const objectUrls: string[] = [];
 		const imgs = container.querySelectorAll<HTMLImageElement>('img[data-path]');
 
 		imgs.forEach(async (img) => {
@@ -49,18 +53,26 @@
 				img.src = path;
 				return;
 			}
+			const cached = urlCache.get(path);
+			if (cached) {
+				img.src = cached;
+				return;
+			}
 			try {
 				const data = await fsService.readFile(path);
 				const url = URL.createObjectURL(new Blob([data]));
-				objectUrls.push(url);
+				urlCache.set(path, url);
 				img.src = url;
 			} catch {
 				img.style.display = 'none';
 			}
 		});
+	});
 
+	$effect(() => {
 		return () => {
-			objectUrls.forEach((u) => URL.revokeObjectURL(u));
+			urlCache.forEach((u) => URL.revokeObjectURL(u));
+			urlCache.clear();
 		};
 	});
 </script>
