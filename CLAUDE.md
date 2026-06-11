@@ -99,8 +99,9 @@ src/lib/
 │   ├── notes/          # Note list and editor components
 │   ├── settings/       # Settings panel components
 │   └── cm/             # CodeMirror editor extensions
-├── repositories/       # Raw DB access (SQL queries only, no state)
-│   ├── notes.repo.ts
+├── repositories/       # Raw persistence access (no state, no business logic)
+│   ├── notes.repo.ts      # Note SQL queries
+│   ├── notes.fs.repo.ts   # Note file IO (frontmatter + {id}.md), wraps fsService
 │   └── tags.repo.ts
 ├── services/           # Business logic and app state
 │   ├── notes.svelte.ts     # Note CRUD + reactive state

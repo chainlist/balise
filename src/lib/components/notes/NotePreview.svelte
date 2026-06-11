@@ -6,16 +6,18 @@
 		type Tokens
 	} from 'marked';
 	import { fsService } from '$lib/services/fs';
+	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
 	let { content }: { content: string } = $props();
 
-	// =text= highlight extension (single =, matching the CM plugin regex /=([^=\n]+)=/)
+	// =text= highlight extension — anchored variant of the shared CM highlight pattern
+	const HIGHLIGHT_TOKEN_RE = new RegExp(`^${HIGHLIGHT_SOURCE}`);
 	const highlightToken: TokenizerAndRendererExtension = {
 		name: 'highlight',
 		level: 'inline',
 		start: (src: string) => src.indexOf('='),
 		tokenizer(src: string) {
-			const match = /^=([^=\n]+)=/.exec(src);
+			const match = HIGHLIGHT_TOKEN_RE.exec(src);
 			if (match) return { type: 'highlight', raw: match[0], text: match[1] };
 		},
 		renderer(token: Tokens.Generic) {
@@ -37,10 +39,14 @@
 
 	let container = $state<HTMLDivElement | null>(null);
 
+	// Cache resolved blob URLs by path so re-renders (e.g. on content edits)
+	// reuse the same URL synchronously instead of re-reading the file and
+	// swapping in a fresh blob, which makes the image blink.
+	const urlCache = new Map<string, string>();
+
 	$effect(() => {
 		if (!container || !html) return;
 
-		const objectUrls: string[] = [];
 		const imgs = container.querySelectorAll<HTMLImageElement>('img[data-path]');
 
 		imgs.forEach(async (img) => {
@@ -49,18 +55,26 @@
 				img.src = path;
 				return;
 			}
+			const cached = urlCache.get(path);
+			if (cached) {
+				img.src = cached;
+				return;
+			}
 			try {
 				const data = await fsService.readFile(path);
 				const url = URL.createObjectURL(new Blob([data]));
-				objectUrls.push(url);
+				urlCache.set(path, url);
 				img.src = url;
 			} catch {
 				img.style.display = 'none';
 			}
 		});
+	});
 
+	$effect(() => {
 		return () => {
-			objectUrls.forEach((u) => URL.revokeObjectURL(u));
+			urlCache.forEach((u) => URL.revokeObjectURL(u));
+			urlCache.clear();
 		};
 	});
 </script>

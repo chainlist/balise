@@ -2,8 +2,9 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { makePlugin, hideMark, isRevealed, type MarkMode } from './shared';
+import { HIGHLIGHT_SOURCE } from '../markdown-patterns';
 
-const HIGHLIGHT_RE = /=([^=\n]+)=/g;
+const HIGHLIGHT_RE = new RegExp(HIGHLIGHT_SOURCE, 'g');
 
 function buildHighlightDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {

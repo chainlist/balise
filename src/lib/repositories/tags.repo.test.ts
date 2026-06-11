@@ -9,6 +9,7 @@ import {
 	resolveCanonicalTags,
 	deleteNoteTags,
 	insertNoteTags,
+	setNoteTags,
 	queryRelatedTags
 } from './tags.repo';
 
@@ -162,6 +163,34 @@ describe('insertNoteTags', () => {
 		await insertNoteTags(db as never, 'note-1', ['a', 'b', 'c']);
 		const [sql] = db.execute.mock.calls[0] as [string];
 		expect(sql.match(/\(\$1, \$\d+\)/g)).toHaveLength(3);
+	});
+});
+
+// ─── setNoteTags ──────────────────────────────────────────────────────────────
+
+describe('setNoteTags', () => {
+	it('deletes and skips resolve + insert when given no names', async () => {
+		const db = makeDB();
+		await setNoteTags(db as never, 'note-1', []);
+		expect(db.select).not.toHaveBeenCalled();
+		expect(db.execute).toHaveBeenCalledTimes(1);
+		const [sql] = db.execute.mock.calls[0] as [string];
+		expect(sql).toContain('DELETE FROM note_tags');
+	});
+
+	it('resolves canonicals before deleting, then inserts', async () => {
+		const db = makeDB();
+		db.select.mockResolvedValue([{ canonical: 'Work' }]);
+		await setNoteTags(db as never, 'note-1', ['work']);
+		// Canonical resolution (select) MUST run before the DELETE to read existing casing.
+		expect(db.select.mock.invocationCallOrder[0]).toBeLessThan(
+			db.execute.mock.invocationCallOrder[0]
+		);
+		const [deleteSql] = db.execute.mock.calls[0] as [string];
+		const [insertSql, insertParams] = db.execute.mock.calls[1] as [string, unknown[]];
+		expect(deleteSql).toContain('DELETE FROM note_tags');
+		expect(insertSql).toContain('INSERT OR IGNORE INTO note_tags');
+		expect(insertParams).toContain('Work');
 	});
 });
 

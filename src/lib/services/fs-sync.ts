@@ -2,13 +2,9 @@ import { invoke } from '@tauri-apps/api/core';
 import { fsService } from './fs';
 import { getDB } from '$lib/utils/db';
 import { tagsService } from '$lib/services/tags.svelte';
-import {
-	queryAllNotesMeta,
-	queryNotesWithContentByIds,
-	insertNote,
-	updateNote
-} from '$lib/repositories/notes.repo';
-import type { Note } from '$lib/models/note';
+import { notesService } from '$lib/services/notes.svelte';
+import { writeNoteFile } from '$lib/repositories/notes.fs.repo';
+import { queryAllNotesMeta, queryNotesWithContentByIds } from '$lib/repositories/notes.repo';
 
 type DeskFileMeta = {
 	name: string;
@@ -29,67 +25,35 @@ function parseDbTimestamp(ts: string): number {
 }
 
 class FsSyncService {
-	toFrontmatter(note: Note & { content: string }): { meta: string; content: string } {
-		const meta = [
-			'---',
-			`id: ${note.id}`,
-			`pinned: ${note.pinned}`,
-			`archived: ${note.archived}`,
-			`created_at: ${note.created_at}`,
-			`updated_at: ${note.updated_at}`,
-			'---',
-			''
-		].join('\n');
-		return { meta, content: note.content };
-	}
-
-	async syncNoteFile(note: Note & { content: string }): Promise<void> {
-		if (!fsService.currentDesk) return;
-		const { meta, content } = this.toFrontmatter(note);
-		await fsService.writeTextFile(`${note.id}.md`, meta + content);
-	}
-
-	async deleteNoteFile(noteId: string): Promise<void> {
-		if (!fsService.currentDesk) return;
-		await fsService.remove(`${noteId}.md`);
-	}
-
+	// Sequential (not Promise.all): canonical tag resolution reads existing rows,
+	// so concurrent writes of notes sharing a new tag could resolve inconsistently.
 	private async createNotes(
-		db: Awaited<ReturnType<typeof getDB>>,
 		toCreate: DeskFileMeta[],
 		contentMap: Map<string, string>
 	): Promise<void> {
-		await Promise.all(
-			toCreate.map(({ name, id, pinned, archived, created_at, mtime_ms }) =>
-				insertNote(db, {
-					id,
-					content: contentMap.get(name) ?? '',
-					pinned,
-					archived,
-					createdAt: created_at,
-					updatedAt: new Date(mtime_ms).toISOString()
-				})
-			)
-		);
-		await Promise.all(
-			toCreate.map(({ name, id }) => tagsService.syncNoteTags(id, contentMap.get(name) ?? ''))
-		);
+		for (const { name, id, pinned, archived, created_at, mtime_ms } of toCreate) {
+			await notesService.importNote(id, contentMap.get(name) ?? '', {
+				create: true,
+				pinned,
+				archived,
+				createdAt: created_at,
+				updatedAt: new Date(mtime_ms).toISOString()
+			});
+		}
 	}
 
 	private async importNotes(
-		db: Awaited<ReturnType<typeof getDB>>,
 		toImport: DeskFileMeta[],
 		contentMap: Map<string, string>
 	): Promise<void> {
-		await Promise.all(
-			toImport.flatMap(({ name, id, pinned, archived, created_at }) => {
-				const content = contentMap.get(name) ?? '';
-				return [
-					updateNote(db, id, { content, pinned, archived, createdAt: created_at }),
-					tagsService.syncNoteTags(id, content)
-				];
-			})
-		);
+		for (const { name, id, pinned, archived, created_at } of toImport) {
+			await notesService.importNote(id, contentMap.get(name) ?? '', {
+				create: false,
+				pinned,
+				archived,
+				createdAt: created_at
+			});
+		}
 	}
 
 	private async writeOrphanedNotes(
@@ -100,7 +64,7 @@ class FsSyncService {
 		const missingIds = dbNotes.filter((n) => !syncedIds.has(n.id)).map((n) => n.id);
 		if (missingIds.length === 0) return;
 		const notes = await queryNotesWithContentByIds(db, missingIds);
-		await Promise.all(notes.map((note) => this.syncNoteFile(note)));
+		await Promise.all(notes.map((note) => writeNoteFile(note)));
 	}
 
 	async syncDeskFiles(): Promise<void> {
@@ -134,8 +98,10 @@ class FsSyncService {
 				names: needsContent.map((f) => f.name)
 			});
 			const contentMap = new Map(contents.map((c) => [c.name, c.content]));
-			if (toCreate.length > 0) await this.createNotes(db, toCreate, contentMap);
-			if (toImport.length > 0) await this.importNotes(db, toImport, contentMap);
+			if (toCreate.length > 0) await this.createNotes(toCreate, contentMap);
+			if (toImport.length > 0) await this.importNotes(toImport, contentMap);
+			// Refresh tag state once for the whole batch, not per note.
+			await tagsService.load();
 		}
 
 		await this.writeOrphanedNotes(db, dbNotes, syncedIds);

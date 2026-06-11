@@ -4,9 +4,7 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import Checkbox from '$lib/components/cm/Checkbox.svelte';
 import { SvelteWidget, buildLineDecos, type MarkMode } from './shared';
-
-// "- [ ]" (unchecked) or "- [x]" (checked) at start of line
-const CHECKBOX_RE = /^[ \t]*- \[([ xX])\] (.*)$/;
+import { CHECKBOX_RE } from '../markdown-patterns';
 
 type CheckboxProps = { checked: boolean; onToggle: () => void };
 

@@ -103,37 +103,6 @@ describe('setSettings', () => {
 	});
 });
 
-// ─── syncNoteTags ─────────────────────────────────────────────────────────────
-
-describe('syncNoteTags', () => {
-	it('deletes note tags and skips insert when content has no hashtags', async () => {
-		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
-		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await tagsService.syncNoteTags('note-1', 'plain text');
-		expect(repo.deleteNoteTags).toHaveBeenCalledWith(expect.anything(), 'note-1');
-		expect(repo.insertNoteTags).not.toHaveBeenCalled();
-	});
-
-	it('resolves canonicals before deleting, then inserts', async () => {
-		vi.mocked(repo.resolveCanonicalTags).mockResolvedValue(['work']);
-		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
-		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await tagsService.syncNoteTags('note-1', '#work');
-		expect(repo.resolveCanonicalTags).toHaveBeenCalledWith(expect.anything(), ['work']);
-		expect(repo.deleteNoteTags).toHaveBeenCalled();
-		expect(repo.insertNoteTags).toHaveBeenCalledWith(expect.anything(), 'note-1', ['work']);
-	});
-
-	it('calls load at the end', async () => {
-		vi.mocked(repo.resolveCanonicalTags).mockResolvedValue(['work']);
-		vi.mocked(repo.queryTagsWithCounts).mockResolvedValue([]);
-		vi.mocked(repo.queryUntaggedCount).mockResolvedValue(0);
-		await tagsService.syncNoteTags('note-1', '#work');
-		// load internally calls queryTagsWithCounts + queryUntaggedCount
-		expect(repo.queryTagsWithCounts).toHaveBeenCalled();
-	});
-});
-
 // ─── loadRelated ──────────────────────────────────────────────────────────────
 
 describe('loadRelated', () => {

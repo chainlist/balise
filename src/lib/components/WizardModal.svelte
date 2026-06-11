@@ -3,6 +3,7 @@
 	import type { MarkMode } from '$lib/utils/cm';
 	import type { Theme } from '$lib/services/theme.svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
+	import { applyLanguageChange } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 	import Button from '$lib/components/shadcn/button/button.svelte';
@@ -33,7 +34,7 @@
 		localStorage.setItem(STORAGE_KEY, 'true');
 		settingsService.setMarkdownMarks(selectedMarkMode);
 		if (selectedLang !== settingsService.language) {
-			await settingsService.setLanguage(selectedLang);
+			await applyLanguageChange(selectedLang);
 		} else {
 			uiState.modal.isWizardOpen = false;
 		}
