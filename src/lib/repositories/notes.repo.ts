@@ -160,9 +160,9 @@ export async function queryJournalNotesByDate(
 	const rows = await db.select<RawNote[]>(
 		`SELECT ${NOTE_COLS_N} FROM notes n
      WHERE n.created_at >= $1 AND n.created_at < $2
-       AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = '${SYSTEM_TAGS.JOURNAL}')
+       AND EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = $3)
      ORDER BY n.created_at ASC`,
-		[utcFrom, utcTo]
+		[utcFrom, utcTo, SYSTEM_TAGS.JOURNAL]
 	);
 	return rows.map(mapNote);
 }
@@ -180,9 +180,10 @@ export async function queryActiveTaskNotes(
 		`SELECT n.id, n.content, n.updated_at
 		 FROM notes n
 		 WHERE EXISTS (
-		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) IN ('${SYSTEM_TAGS.TODO}', '${SYSTEM_TAGS.INPROGRESS}')
+		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) IN ($1, $2)
 		 )
-		 ORDER BY n.updated_at DESC`
+		 ORDER BY n.updated_at DESC`,
+		[SYSTEM_TAGS.TODO, SYSTEM_TAGS.INPROGRESS]
 	);
 }
 
@@ -195,11 +196,11 @@ export async function queryRecentDoneNotes(
 		`SELECT n.id, n.content, n.updated_at
 		 FROM notes n
 		 WHERE EXISTS (
-		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = '${SYSTEM_TAGS.DONE}'
+		   SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = $1
 		 )
 		 ORDER BY n.updated_at DESC
-		 LIMIT $1`,
-		[DONE_NOTES_LIMIT]
+		 LIMIT $2`,
+		[SYSTEM_TAGS.DONE, DONE_NOTES_LIMIT]
 	);
 }
 
