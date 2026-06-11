@@ -5,6 +5,7 @@ import { tagsService } from '$lib/services/tags.svelte';
 import { notesService } from '$lib/services/notes.svelte';
 import { writeNoteFile } from '$lib/repositories/notes.fs.repo';
 import { queryAllNotesMeta, queryNotesWithContentByIds } from '$lib/repositories/notes.repo';
+import { msToIsoUtc, parseDbTimestamp } from '$lib/utils/time';
 
 type DeskFileMeta = {
 	name: string;
@@ -17,12 +18,6 @@ type DeskFileMeta = {
 };
 
 type FileContent = { name: string; content: string };
-
-// SQLite stores timestamps as "YYYY-MM-DD HH:MM:SS" (without T/Z) or ISO 8601.
-// Normalise to a proper ISO string before parsing.
-function parseDbTimestamp(ts: string): number {
-	return new Date(ts.includes('T') ? ts : ts.replace(' ', 'T') + 'Z').getTime();
-}
 
 class FsSyncService {
 	// Sequential (not Promise.all): canonical tag resolution reads existing rows,
@@ -37,7 +32,7 @@ class FsSyncService {
 				pinned,
 				archived,
 				createdAt: created_at,
-				updatedAt: new Date(mtime_ms).toISOString()
+				updatedAt: msToIsoUtc(mtime_ms)
 			});
 		}
 	}
@@ -57,7 +52,7 @@ class FsSyncService {
 				pinned,
 				archived,
 				createdAt: created_at,
-				updatedAt: new Date(mtime_ms).toISOString()
+				updatedAt: msToIsoUtc(mtime_ms)
 			});
 		}
 	}
