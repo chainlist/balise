@@ -4,6 +4,7 @@
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
 	import BackgroundColorsSettings from './BackgroundColorsSettings.svelte';
+	import PrimaryColorSettings from './PrimaryColorSettings.svelte';
 
 	const themeOptions: { value: Theme; label: () => string; icon: typeof SunIcon }[] = [
 		{ value: 'light', label: m.settings_theme_light, icon: SunIcon },
@@ -12,16 +13,16 @@
 	];
 </script>
 
-<div class="flex flex-col h-full">
-	<div class="px-6 py-4 border-b">
+<div class="flex h-full flex-col">
+	<div class="border-b px-6 py-4">
 		<h2 class="text-base font-semibold">{m.settings_appearance_heading()}</h2>
-		<p class="text-sm text-muted-foreground mt-0.5">{m.settings_appearance_description()}</p>
+		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_appearance_description()}</p>
 	</div>
 
-	<div class="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+	<div class="flex-1 space-y-8 overflow-y-auto px-6 py-6">
 		<!-- Theme -->
 		<div>
-			<div class="space-y-1.5 mb-4">
+			<div class="mb-4 space-y-1.5">
 				<p class="text-sm font-medium">{m.settings_theme_label()}</p>
 				<p class="text-xs text-muted-foreground">{m.settings_theme_helper()}</p>
 			</div>
@@ -31,7 +32,7 @@
 					<button
 						onclick={() => themeService.setTheme(option.value)}
 						class={cn(
-							'flex flex-col items-center gap-2.5 rounded-lg border-2 p-4 w-28 transition-all',
+							'flex w-28 flex-col items-center gap-2.5 rounded-lg border-2 p-4 transition-all',
 							isActive
 								? 'border-primary bg-primary/5'
 								: 'border-border hover:border-muted-foreground/40 hover:bg-muted/50'
@@ -53,8 +54,10 @@
 			</div>
 		</div>
 
+		<!-- Primary color -->
+		<PrimaryColorSettings />
+
 		<!-- Background colors -->
 		<BackgroundColorsSettings />
-
 	</div>
 </div>

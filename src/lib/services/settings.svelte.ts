@@ -2,6 +2,7 @@ import { load, type Store } from '@tauri-apps/plugin-store';
 import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
 import { setLocale, locales } from '$paraglide/runtime.js';
+import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/utils/primary-color';
 
 export const SUPPORTED_LOCALES = locales;
 
@@ -43,6 +44,7 @@ class SettingsService {
 	closeToTray = $state<boolean | null>(null);
 	meshColors = $state<MeshColors>([...DEFAULT_MESH_COLORS]);
 	meshEnabled = $state(true);
+	primaryColor = $state<string | null>(null);
 
 	#store: Store | null = null;
 
@@ -59,7 +61,8 @@ class SettingsService {
 			magicTags,
 			closeToTray,
 			meshColors,
-			meshEnabled
+			meshEnabled,
+			primaryColor
 		] = await Promise.all([
 			this.#store.get<Theme>('theme'),
 			this.#store.get<number>('fontSize'),
@@ -70,7 +73,8 @@ class SettingsService {
 			this.#store.get<MagicTag[]>('magicTags'),
 			this.#store.get<boolean>('closeToTray'),
 			this.#store.get<MeshColors>('meshColors'),
-			this.#store.get<boolean>('meshEnabled')
+			this.#store.get<boolean>('meshEnabled'),
+			this.#store.get<string>('primaryColor')
 		]);
 
 		this.theme = theme ?? 'system';
@@ -86,10 +90,12 @@ class SettingsService {
 		this.closeToTray = closeToTray ?? null;
 		this.meshColors = meshColors ?? [...DEFAULT_MESH_COLORS];
 		this.meshEnabled = meshEnabled ?? true;
+		this.primaryColor = primaryColor ?? null;
 
 		setLocale(this.language);
 		this.#applyEditorVars();
 		this.#applyMeshVars();
+		this.#applyPrimaryVars();
 
 		/* Keep theme in sync across windows (main <-> quick add) */
 		void this.#store.onKeyChange<Theme>('theme', (theme) => {
@@ -179,6 +185,29 @@ class SettingsService {
 		this.meshEnabled = value;
 		this.#applyMeshVars();
 		void this.#store?.set('meshEnabled', value);
+	}
+
+	#applyPrimaryVars(): void {
+		const style = document.documentElement.style;
+		if (this.primaryColor) {
+			Object.entries(primaryColorVars(this.primaryColor)).forEach(([name, value]) => {
+				style.setProperty(name, value);
+			});
+		} else {
+			PRIMARY_COLOR_VARS.forEach((name) => style.removeProperty(name));
+		}
+	}
+
+	setPrimaryColor(color: string): void {
+		this.primaryColor = color;
+		this.#applyPrimaryVars();
+		void this.#store?.set('primaryColor', color);
+	}
+
+	resetPrimaryColor(): void {
+		this.primaryColor = null;
+		this.#applyPrimaryVars();
+		void this.#store?.set('primaryColor', null);
 	}
 }
 

@@ -2,25 +2,10 @@
 	import { Popover, Switch } from 'bits-ui';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { settingsService, DEFAULT_MESH_COLORS } from '$lib/services/settings.svelte';
+	import { COLOR_PALETTE } from '$lib/utils/color-palette';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
 	import { RotateCcwIcon } from '@lucide/svelte';
-
-	/* Same palette for every corner; first four are the defaults */
-	const MESH_PALETTE = [
-		'#7c6cde',
-		'#5ca0dc',
-		'#e48ab0',
-		'#6ecdb9',
-		'#9b8cf0',
-		'#54c6ea',
-		'#7ed492',
-		'#e8c468',
-		'#f09e62',
-		'#e87a6a',
-		'#c87ad4',
-		'#8a8f9e'
-	];
 
 	/* Order matches settingsService.meshColors: top-left, top-right, bottom-right, bottom-left */
 	const corners = [
@@ -88,7 +73,7 @@
 						sideOffset={6}
 						class="z-50 grid grid-cols-6 gap-2 rounded-xl bg-popover p-3 shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
 					>
-						{#each MESH_PALETTE as color (color)}
+						{#each COLOR_PALETTE as color (color)}
 							<Popover.Close
 								class={cn(
 									'size-6 rounded-full transition-transform hover:scale-110',
