@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.24.0](https://github.com/chainlist/balise/compare/v0.23.1...v0.24.0) (2026-06-12)
+
+
+### Features
+
+* **editor:** added creation date + reading time as note header ([#46](https://github.com/chainlist/balise/issues/46)) ([4f992e9](https://github.com/chainlist/balise/commit/4f992e9b987d25a4eaa2595076f7edc3cc3a060d))
+* **settings:** configurable magic tags ([0596aa7](https://github.com/chainlist/balise/commit/0596aa71832ddafc866cbcae481c91ca52068255))
+* **systray:** Added systray capability ([c1816c7](https://github.com/chainlist/balise/commit/c1816c76ae37836ed51a1ecaa59419118fcf0f47))
+* **toast:** Added toaster whenever something fails ([f39a5da](https://github.com/chainlist/balise/commit/f39a5da062b1558d18d22860729eac920fadb018))
+* **toast:** Added toaster whenever something fails ([15fc270](https://github.com/chainlist/balise/commit/15fc270c234676b2d2602e34e3e18097fc9a7706))
+* **ui:** Add frost effect and custom colors ([#47](https://github.com/chainlist/balise/issues/47)) ([3552506](https://github.com/chainlist/balise/commit/355250627a50ba3d6d100372a407dfe932877f65))
+* **ui:** Add mesh colors ([364f54f](https://github.com/chainlist/balise/commit/364f54f67683cf6dd4c0f3e61f5f03a429d17af2))
+
+
+### Bug Fixes
+
+* **editor:** flush pending save on unmount and seed editor from note.content ([3732350](https://github.com/chainlist/balise/commit/37323501fbca4dfabbc297b4c4a4d2ed69cce81b))
+* **editor:** wrong margin that caused the editor to wrongfully calculate the content height, making the cursor jump too far on rare circumstances ([84e87af](https://github.com/chainlist/balise/commit/84e87afeab258ab0e6fac36f33a867def0361c50))
+* **journal:** drop stale date-load responses; remove dead note keying ([3fce056](https://github.com/chainlist/balise/commit/3fce056ba453273c158729e5366d43bc2306423c))
+* **note-preview:** blinking image on update ([0c02c98](https://github.com/chainlist/balise/commit/0c02c984a4e8ecc199fff9656ea86b8d4f75ab7c))
+* **quick-add:** Change shortcut to use f12 instead of space key ([4a33f7c](https://github.com/chainlist/balise/commit/4a33f7cdcf2f08bb6e4f9ff0bdba9974ccc200db))
+* **sync:** preserve file mtime as updated_at on note import ([302f3c4](https://github.com/chainlist/balise/commit/302f3c420ad26d4ad6befa75f8a66997f4e7038e))
+* **ui-state:** make switchDesk failure-safe ([d66c223](https://github.com/chainlist/balise/commit/d66c223e3425121c7376feef0861eee072a1e151))
+
 ## [0.23.1](https://github.com/chainlist/balise/compare/v0.23.0...v0.23.1) (2026-06-08)
 
 
