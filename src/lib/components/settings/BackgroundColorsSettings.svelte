@@ -10,6 +10,7 @@
 		type MeshMode
 	} from '$lib/services/settings.svelte';
 	import { COLOR_PALETTE } from '$lib/utils/color-palette';
+	import SegmentedToggle from '$lib/components/SegmentedToggle.svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
 	import { RotateCcwIcon } from '@lucide/svelte';
@@ -89,21 +90,11 @@
 			!settingsService.meshEnabled && 'pointer-events-none opacity-50'
 		)}
 	>
-		<div class="flex w-fit gap-1 rounded-lg bg-surface-container-highest p-1">
-			{#each modes as mode (mode.value)}
-				<button
-					onclick={() => settingsService.setMeshMode(mode.value)}
-					class={cn(
-						'rounded-md px-3 py-1 text-xs font-medium transition-colors',
-						settingsService.meshMode === mode.value
-							? 'bg-popover text-foreground shadow-sm'
-							: 'text-muted-foreground hover:text-foreground'
-					)}
-				>
-					{mode.label()}
-				</button>
-			{/each}
-		</div>
+		<SegmentedToggle
+			options={modes}
+			value={settingsService.meshMode}
+			onValueChange={(mode) => settingsService.setMeshMode(mode)}
+		/>
 
 		<div class="relative mx-auto h-44 max-w-md rounded-xl border bg-mesh dark:bg-mesh-dark">
 			{#if settingsService.meshMode === MESH_MODES.CORNERS}
