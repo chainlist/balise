@@ -2,6 +2,7 @@ mod commands;
 
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, ShortcutState};
+use tauri_plugin_window_state::StateFlags;
 
 fn open_quick_window(app: &tauri::AppHandle) {
     let handle = app.clone();
@@ -31,7 +32,12 @@ pub fn run() {
         )
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_window_state::Builder::new().with_denylist(&["quick"]).build())
+        .plugin(
+            tauri_plugin_window_state::Builder::new()
+                .with_state_flags(StateFlags::all().difference(StateFlags::VISIBLE))
+                .with_denylist(&["quick"])
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -62,13 +68,15 @@ pub fn run() {
             )?;
 
             let app_handle = app.handle().clone();
-            app.get_webview_window("main")
-                .expect("main window not found")
-                .on_window_event(move |event| {
-                    if let tauri::WindowEvent::Destroyed = event {
-                        app_handle.exit(0);
-                    }
-                });
+            let main_window = app
+                .get_webview_window("main")
+                .expect("main window not found");
+            main_window.on_window_event(move |event| {
+                if let tauri::WindowEvent::Destroyed = event {
+                    app_handle.exit(0);
+                }
+            });
+            main_window.show()?;
 
             if let Some(quick_window) = app.get_webview_window("quick") {
                 #[cfg(target_os = "macos")]
