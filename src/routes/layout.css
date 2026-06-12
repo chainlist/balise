@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
 @import '@fontsource-variable/inter';
@@ -86,6 +86,15 @@
 	--mesh-tr: #5ca0dc;
 	--mesh-br: #e48ab0;
 	--mesh-bl: #6ecdb9;
+
+	/* Per-corner bubble scale factors (user-overridable in settings) */
+	--mesh-tl-size: 1;
+	--mesh-tr-size: 1;
+	--mesh-br-size: 1;
+	--mesh-bl-size: 1;
+
+	/* Unified mesh mode: a single tint over the whole background (transparent in corners mode) */
+	--mesh-unified: transparent;
 
 	--radius: 0.5rem;
 
@@ -223,7 +232,7 @@
 	--color-background: var(--background);
 	--color-on-background: var(--on-background);
 
-	/* shadcn aliases → M3, keeps existing components on theme */
+	/* shadcn aliases â†’ M3, keeps existing components on theme */
 	--color-foreground: var(--on-surface);
 	--color-card: var(--surface-container-lowest);
 	--color-card-foreground: var(--on-surface);
@@ -373,23 +382,27 @@
 @utility bg-mesh {
 	background-color: #eceaf2;
 	background-image:
+		linear-gradient(
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent),
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent)
+		),
 		radial-gradient(
-			58% 52% at 10% 6%,
+			calc(58% * var(--mesh-tl-size)) calc(52% * var(--mesh-tl-size)) at 10% 6%,
 			color-mix(in srgb, var(--mesh-tl) 22%, transparent),
 			transparent 62%
 		),
 		radial-gradient(
-			48% 44% at 93% 9%,
+			calc(48% * var(--mesh-tr-size)) calc(44% * var(--mesh-tr-size)) at 93% 9%,
 			color-mix(in srgb, var(--mesh-tr) 20%, transparent),
 			transparent 62%
 		),
 		radial-gradient(
-			54% 50% at 84% 97%,
+			calc(54% * var(--mesh-br-size)) calc(50% * var(--mesh-br-size)) at 84% 97%,
 			color-mix(in srgb, var(--mesh-br) 18%, transparent),
 			transparent 62%
 		),
 		radial-gradient(
-			48% 48% at 22% 99%,
+			calc(48% * var(--mesh-bl-size)) calc(48% * var(--mesh-bl-size)) at 22% 99%,
 			color-mix(in srgb, var(--mesh-bl) 15%, transparent),
 			transparent 62%
 		);
@@ -397,23 +410,27 @@
 @utility bg-mesh-dark {
 	background-color: #0e0d15;
 	background-image:
+		linear-gradient(
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent),
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent)
+		),
 		radial-gradient(
-			58% 52% at 10% 6%,
+			calc(58% * var(--mesh-tl-size)) calc(52% * var(--mesh-tl-size)) at 10% 6%,
 			color-mix(in srgb, var(--mesh-tl) 22%, transparent),
 			transparent 62%
 		),
 		radial-gradient(
-			48% 44% at 93% 9%,
+			calc(48% * var(--mesh-tr-size)) calc(44% * var(--mesh-tr-size)) at 93% 9%,
 			color-mix(in srgb, var(--mesh-tr) 20%, transparent),
 			transparent 62%
 		),
 		radial-gradient(
-			54% 50% at 84% 97%,
+			calc(54% * var(--mesh-br-size)) calc(50% * var(--mesh-br-size)) at 84% 97%,
 			color-mix(in srgb, var(--mesh-br) 18%, transparent),
 			transparent 62%
 		),
 		radial-gradient(
-			48% 48% at 22% 99%,
+			calc(48% * var(--mesh-bl-size)) calc(48% * var(--mesh-bl-size)) at 22% 99%,
 			color-mix(in srgb, var(--mesh-bl) 15%, transparent),
 			transparent 62%
 		);
