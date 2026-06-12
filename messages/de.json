@@ -95,6 +95,11 @@
 	"settings_theme_system": "System",
 	"settings_language_label": "Sprache",
 	"settings_language_helper": "Wähle deine bevorzugte Sprache.",
+	"settings_background_label": "Hintergrundfarben",
+	"settings_background_helper": "Wähle eine Farbe für jede Ecke des App-Hintergrunds.",
+	"settings_background_corner_aria": "Eckfarbe ändern",
+	"settings_background_reset": "Auf Standard zurücksetzen",
+	"settings_background_enable_aria": "Hintergrundfarben ein- oder ausschalten",
 
 	"settings_editor_heading": "Editor",
 	"settings_editor_description": "Passe das Schreiberlebnis an.",

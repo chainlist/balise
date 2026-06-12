@@ -95,6 +95,11 @@
 	"settings_theme_system": "Sistema",
 	"settings_language_label": "Idioma",
 	"settings_language_helper": "Selecciona tu idioma preferido.",
+	"settings_background_label": "Colores de fondo",
+	"settings_background_helper": "Elige un color para cada esquina del fondo de la aplicación.",
+	"settings_background_corner_aria": "Cambiar el color de la esquina",
+	"settings_background_reset": "Restablecer valores predeterminados",
+	"settings_background_enable_aria": "Activar o desactivar los colores de fondo",
 
 	"settings_editor_heading": "Editor",
 	"settings_editor_description": "Personaliza la experiencia de escritura.",

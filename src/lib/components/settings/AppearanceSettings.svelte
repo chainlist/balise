@@ -3,6 +3,7 @@
 	import { SunIcon, MoonIcon, MonitorIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
+	import BackgroundColorsSettings from './BackgroundColorsSettings.svelte';
 
 	const themeOptions: { value: Theme; label: () => string; icon: typeof SunIcon }[] = [
 		{ value: 'light', label: m.settings_theme_light, icon: SunIcon },
@@ -51,6 +52,9 @@
 				{/each}
 			</div>
 		</div>
+
+		<!-- Background colors -->
+		<BackgroundColorsSettings />
 
 	</div>
 </div>
