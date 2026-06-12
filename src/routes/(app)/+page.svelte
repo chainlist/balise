@@ -9,7 +9,7 @@
 	);
 </script>
 
-<div class="h-full w-full bg-primary/5">
+<div class="frost h-full w-full">
 	{#if selectedNote}
 		{#key selectedNote.id}
 			<NoteEditor note={selectedNote} />

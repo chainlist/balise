@@ -47,7 +47,7 @@
 	);
 </script>
 
-<div class="flex h-full min-h-0 flex-col bg-sidebar">
+<div class="flex h-full min-h-0 flex-col frost">
 	<div class="flex items-center justify-between gap-1 px-3 pt-3 pb-2">
 		<span class="text-md truncate font-medium text-on-surface">
 			<TagName tag={uiState.activeTag || m.all_notes()} />

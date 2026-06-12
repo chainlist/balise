@@ -35,7 +35,7 @@
 			</Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="w-56 rounded bg-sidebar" align="end" side="bottom">
+	<DropdownMenu.Content class="frost-surface! w-56 rounded" align="end" side="bottom">
 		<div role="presentation" class="p-2" onpointerdown={(e) => e.stopPropagation()}>
 			<Input
 				bind:value={tagSearch}

@@ -62,7 +62,7 @@
 	};
 </script>
 
-<div class="h-screen w-full bg-background" in:fade={{ duration: 250 }}>
+<div class="frost h-screen w-full" in:fade={{ duration: 250 }}>
 	{#key draftNote.id}
 		<NoteEditor note={draftNote} onSave={handleSave} pinnable />
 	{/key}

@@ -13,7 +13,7 @@
 </script>
 
 <div
-	class="pointer-events-none absolute z-10 max-w-55 border bg-card px-2.5 py-1.5 text-on-surface"
+	class="frost-surface pointer-events-none absolute z-10 max-w-55 px-2.5 py-1.5 text-on-surface"
 	style="left: {x}px; top: {y}px; border-radius: var(--radius-md);"
 >
 	<div class="text-xs font-medium">{title}</div>

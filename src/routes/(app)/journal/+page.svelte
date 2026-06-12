@@ -117,7 +117,7 @@
 			{selectedDateLabel}
 		</Button>
 		<div
-			class="absolute top-full left-0 mt-1 overflow-hidden rounded-lg border bg-background shadow-md"
+			class="frost-surface absolute top-full left-0 mt-1 overflow-hidden rounded-lg shadow-md"
 			class:hidden={!isCalendarOpen}
 		>
 			<Calendar
