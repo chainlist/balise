@@ -7,7 +7,7 @@
 	import * as m from '$paraglide/messages.js';
 </script>
 
-<div class="frost flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border">
+<div class="flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border frost">
 	<SidebarHeader />
 
 	<div class="mt-2 flex flex-col">
