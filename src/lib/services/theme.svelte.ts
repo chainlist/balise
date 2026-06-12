@@ -36,6 +36,12 @@ class ThemeService {
 	init(): void {
 		this.applyTheme();
 		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.#mediaListener);
+		/* Re-apply when settingsService.theme changes from another window (store onKeyChange) */
+		$effect.root(() => {
+			$effect(() => {
+				this.applyTheme();
+			});
+		});
 	}
 
 

@@ -90,6 +90,11 @@ class SettingsService {
 		setLocale(this.language);
 		this.#applyEditorVars();
 		this.#applyMeshVars();
+
+		/* Keep theme in sync across windows (main <-> quick add) */
+		void this.#store.onKeyChange<Theme>('theme', (theme) => {
+			this.theme = theme ?? 'system';
+		});
 	}
 
 	#applyEditorVars(): void {
