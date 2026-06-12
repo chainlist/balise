@@ -38,8 +38,8 @@ export const MESH_MODES = {
 
 export type MeshMode = (typeof MESH_MODES)[keyof typeof MESH_MODES];
 
-export const DEFAULT_MESH_COLORS: MeshColors = ['#7c6cde', '#5ca0dc', '#e48ab0', '#6ecdb9'];
-export const DEFAULT_MESH_SIZES: MeshSizes = [1, 1, 1, 1];
+export const DEFAULT_MESH_COLORS: MeshColors = ['#7c6cde', '#7c6cde', '#7c6cde', '#7c6cde'];
+export const DEFAULT_MESH_SIZES: MeshSizes = [1, 1.9, 1.7, 1];
 export const DEFAULT_MESH_UNIFIED_COLOR = '#7c6cde';
 
 const MESH_CSS_VARS = ['--mesh-tl', '--mesh-tr', '--mesh-br', '--mesh-bl'] as const;
