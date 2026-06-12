@@ -4,7 +4,11 @@ import { Prec } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
 import { mount, unmount, flushSync } from 'svelte';
 import SlashMenu from '$lib/components/cm/SlashMenu.svelte';
-import type { SlashAction, SlashMenuControls } from '$lib/components/cm/SlashMenu.svelte';
+import type {
+	SlashAction,
+	SlashMenuAnchor,
+	SlashMenuControls
+} from '$lib/components/cm/SlashMenu.svelte';
 
 const SLASH_RE = /^[ \t]*\/(\w*)$/;
 
@@ -43,7 +47,7 @@ class SlashPluginClass implements PluginValue {
 					read: (view) => view.coordsAtPos(slashFrom),
 					write: (coords) => {
 						if (coords && this.slashFrom === slashFrom && !this.menuInstance) {
-							this.open(coords.left, coords.bottom + 6, query);
+							this.open(coords, query);
 						}
 					}
 				});
@@ -53,7 +57,7 @@ class SlashPluginClass implements PluginValue {
 		}
 	}
 
-	private open(x: number, y: number, query: string) {
+	private open(anchor: SlashMenuAnchor, query: string) {
 		this.active = true;
 		this.menuContainer = document.createElement('div');
 		document.body.appendChild(this.menuContainer);
@@ -63,11 +67,11 @@ class SlashPluginClass implements PluginValue {
 		this.menuInstance = mount(SlashMenu, {
 			target: this.menuContainer,
 			props: {
-				x,
-				y,
+				anchor,
 				query,
 				controls: this.controls as SlashMenuControls,
-				onSelect: (action: SlashAction) => this.applyAction(action, slashFrom)
+				onSelect: (action: SlashAction) => this.applyAction(action, slashFrom),
+				onDismiss: () => this.close()
 			}
 		});
 		flushSync(); // flush the component's $effect so controls are populated immediately

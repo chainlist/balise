@@ -1,6 +1,13 @@
 <script lang="ts" module>
 	export type { SlashAction } from '$lib/utils/cm/slashActions';
 
+	export interface SlashMenuAnchor {
+		left: number;
+		right: number;
+		top: number;
+		bottom: number;
+	}
+
 	export interface SlashMenuControls {
 		moveUp(): void;
 		moveDown(): void;
@@ -12,26 +19,39 @@
 
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import * as Popover from '$lib/components/shadcn/popover';
 	import { SLASH_ACTIONS, type SlashAction } from '$lib/utils/cm/slashActions';
 
 	let {
 		query = '',
-		x = 0,
-		y = 0,
+		anchor,
 		onSelect,
+		onDismiss,
 		controls
 	}: {
 		query: string;
-		x: number;
-		y: number;
+		anchor: SlashMenuAnchor;
 		onSelect: (action: SlashAction) => void;
+		onDismiss: () => void;
 		controls: SlashMenuControls;
 	} = $props();
 
 	const ACTIONS = SLASH_ACTIONS;
 
+	// Virtual anchor at the slash character so the popover can flip/shift to stay in the viewport
+	const customAnchor = {
+		getBoundingClientRect: () =>
+			new DOMRect(anchor.left, anchor.top, anchor.right - anchor.left, anchor.bottom - anchor.top)
+	};
+
 	let internalQuery = $state(untrack(() => query));
 	let selectedIndex = $state(0);
+	let itemEls: HTMLElement[] = [];
+
+	// Keep the keyboard-selected item visible inside the scrolling menu
+	$effect(() => {
+		itemEls[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+	});
 
 	let filtered = $derived(
 		internalQuery === ''
@@ -62,14 +82,28 @@
 	});
 </script>
 
-{#if filtered.length > 0}
-	<div
+<Popover.Root
+	open={filtered.length > 0}
+	onOpenChange={(open) => {
+		if (!open) onDismiss();
+	}}
+>
+	<Popover.Content
+		{customAnchor}
+		side="bottom"
+		align="start"
+		sideOffset={6}
+		collisionPadding={8}
+		trapFocus={false}
+		escapeKeydownBehavior="ignore"
+		onOpenAutoFocus={(e) => e.preventDefault()}
+		onCloseAutoFocus={(e) => e.preventDefault()}
 		role="menu"
-		class="frost-surface fixed z-50 min-w-48 overflow-hidden rounded p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
-		style="left: {x}px; top: {y}px;"
+		class="max-h-[min(24rem,var(--bits-floating-available-height))] w-auto min-w-48 overflow-y-auto frost-surface! p-1.5"
 	>
 		{#each filtered as action, i (action.id)}
 			<button
+				bind:this={itemEls[i]}
 				role="menuitem"
 				class="relative flex w-full cursor-default items-center gap-2.5 rounded px-3 py-2 text-left text-sm font-medium outline-none select-none hover:bg-accent hover:text-accent-foreground"
 				class:bg-accent={i === selectedIndex}
@@ -90,5 +124,5 @@
 				</span>
 			</button>
 		{/each}
-	</div>
-{/if}
+	</Popover.Content>
+</Popover.Root>
