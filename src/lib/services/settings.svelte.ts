@@ -25,6 +25,13 @@ export const DEFAULT_MAGIC_TAGS: MagicTag[] = [
 	{ pattern: '- [x]', matchType: MAGIC_TAG_MATCH_TYPES.STARTS_WITH, tag: 'done' }
 ];
 
+/* Order matches the mesh gradients: top-left, top-right, bottom-right, bottom-left */
+export type MeshColors = [string, string, string, string];
+
+export const DEFAULT_MESH_COLORS: MeshColors = ['#7c6cde', '#5ca0dc', '#e48ab0', '#6ecdb9'];
+
+const MESH_CSS_VARS = ['--mesh-tl', '--mesh-tr', '--mesh-br', '--mesh-bl'] as const;
+
 class SettingsService {
 	theme = $state<Theme>('system');
 	fontSize = $state(16);
@@ -34,6 +41,8 @@ class SettingsService {
 	language = $state<'fr' | 'es' | 'en' | 'de'>('en');
 	magicTags = $state<MagicTag[]>(DEFAULT_MAGIC_TAGS);
 	closeToTray = $state<boolean | null>(null);
+	meshColors = $state<MeshColors>([...DEFAULT_MESH_COLORS]);
+	meshEnabled = $state(true);
 
 	#store: Store | null = null;
 
@@ -48,7 +57,9 @@ class SettingsService {
 			customBindings,
 			language,
 			magicTags,
-			closeToTray
+			closeToTray,
+			meshColors,
+			meshEnabled
 		] = await Promise.all([
 			this.#store.get<Theme>('theme'),
 			this.#store.get<number>('fontSize'),
@@ -57,7 +68,9 @@ class SettingsService {
 			this.#store.get<Record<string, string>>('customBindings'),
 			this.#store.get<'fr' | 'es' | 'en' | 'de'>('language'),
 			this.#store.get<MagicTag[]>('magicTags'),
-			this.#store.get<boolean>('closeToTray')
+			this.#store.get<boolean>('closeToTray'),
+			this.#store.get<MeshColors>('meshColors'),
+			this.#store.get<boolean>('meshEnabled')
 		]);
 
 		this.theme = theme ?? 'system';
@@ -71,14 +84,26 @@ class SettingsService {
 			matchType: (matchType as MagicTagMatchType | undefined) ?? MAGIC_TAG_MATCH_TYPES.CONTAINS
 		}));
 		this.closeToTray = closeToTray ?? null;
+		this.meshColors = meshColors ?? [...DEFAULT_MESH_COLORS];
+		this.meshEnabled = meshEnabled ?? true;
 
 		setLocale(this.language);
 		this.#applyEditorVars();
+		this.#applyMeshVars();
 	}
 
 	#applyEditorVars(): void {
 		document.documentElement.style.setProperty('--editor-font-size', `${this.fontSize}px`);
 		document.documentElement.style.setProperty('--editor-line-height', `${this.lineHeight}`);
+	}
+
+	#applyMeshVars(): void {
+		MESH_CSS_VARS.forEach((cssVar, i) => {
+			document.documentElement.style.setProperty(
+				cssVar,
+				this.meshEnabled ? this.meshColors[i] : 'transparent'
+			);
+		});
 	}
 
 	setTheme(theme: Theme): void {
@@ -131,6 +156,24 @@ class SettingsService {
 	setCloseToTray(value: boolean): void {
 		this.closeToTray = value;
 		void this.#store?.set('closeToTray', value);
+	}
+
+	setMeshColor(corner: number, color: string): void {
+		this.meshColors[corner] = color;
+		this.#applyMeshVars();
+		void this.#store?.set('meshColors', $state.snapshot(this.meshColors));
+	}
+
+	resetMeshColors(): void {
+		this.meshColors = [...DEFAULT_MESH_COLORS];
+		this.#applyMeshVars();
+		void this.#store?.set('meshColors', $state.snapshot(this.meshColors));
+	}
+
+	setMeshEnabled(value: boolean): void {
+		this.meshEnabled = value;
+		this.#applyMeshVars();
+		void this.#store?.set('meshEnabled', value);
 	}
 }
 

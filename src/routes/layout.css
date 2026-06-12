@@ -68,6 +68,12 @@
 	--background: var(--surface);
 	--on-background: var(--on-surface);
 
+	/* Mesh background corner colors (defaults, user-overridable in settings) */
+	--mesh-tl: #7c6cde;
+	--mesh-tr: #5ca0dc;
+	--mesh-br: #e48ab0;
+	--mesh-bl: #6ecdb9;
+
 	--radius: 0.5rem;
 
 	/* Shared markdown rendering tokens */
@@ -354,16 +360,16 @@
 @utility bg-mesh {
 	background-color: #eceaf2;
 	background-image:
-		radial-gradient(58% 52% at 10% 6%, rgba(124, 108, 222, 0.22), transparent 62%),
-		radial-gradient(48% 44% at 93% 9%, rgba(92, 160, 220, 0.2), transparent 62%),
-		radial-gradient(54% 50% at 84% 97%, rgba(228, 138, 176, 0.18), transparent 62%),
-		radial-gradient(48% 48% at 22% 99%, rgba(110, 205, 185, 0.15), transparent 62%);
+		radial-gradient(58% 52% at 10% 6%, color-mix(in srgb, var(--mesh-tl) 22%, transparent), transparent 62%),
+		radial-gradient(48% 44% at 93% 9%, color-mix(in srgb, var(--mesh-tr) 20%, transparent), transparent 62%),
+		radial-gradient(54% 50% at 84% 97%, color-mix(in srgb, var(--mesh-br) 18%, transparent), transparent 62%),
+		radial-gradient(48% 48% at 22% 99%, color-mix(in srgb, var(--mesh-bl) 15%, transparent), transparent 62%);
 }
 @utility bg-mesh-dark {
 	background-color: #0e0d15;
 	background-image:
-		radial-gradient(58% 52% at 10% 6%, rgba(124, 108, 222, 0.22), transparent 62%),
-		radial-gradient(48% 44% at 93% 9%, rgba(92, 160, 220, 0.2), transparent 62%),
-		radial-gradient(54% 50% at 84% 97%, rgba(228, 138, 176, 0.18), transparent 62%),
-		radial-gradient(48% 48% at 22% 99%, rgba(110, 205, 185, 0.15), transparent 62%);
+		radial-gradient(58% 52% at 10% 6%, color-mix(in srgb, var(--mesh-tl) 22%, transparent), transparent 62%),
+		radial-gradient(48% 44% at 93% 9%, color-mix(in srgb, var(--mesh-tr) 20%, transparent), transparent 62%),
+		radial-gradient(54% 50% at 84% 97%, color-mix(in srgb, var(--mesh-br) 18%, transparent), transparent 62%),
+		radial-gradient(48% 48% at 22% 99%, color-mix(in srgb, var(--mesh-bl) 15%, transparent), transparent 62%);
 }
