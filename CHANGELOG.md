@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.26.0](https://github.com/chainlist/balise/compare/v0.25.0...v0.26.0) (2026-06-13)
+
+
+### Features
+
+* **settings:** Unify how settings object is being computed and change its default path to $Balise/.balise folder ([6c80221](https://github.com/chainlist/balise/commit/6c802210d01400fe54f0094bcaad4f9fbfe3b9e2))
+
+
+### Bug Fixes
+
+* **wizzard:** Added theme selection back to wizzard ([b9b9209](https://github.com/chainlist/balise/commit/b9b9209471078a8e08af8ec31b2308e8ae6d19d5))
+* **wizzard:** Added theme selection back to wizzard ([d2673c6](https://github.com/chainlist/balise/commit/d2673c6d20913eb9828d16f3c0174a98da36bb97))
+
 ## [0.25.0](https://github.com/chainlist/balise/compare/v0.24.0...v0.25.0) (2026-06-13)
 
 
