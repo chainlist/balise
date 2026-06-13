@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.27.0](https://github.com/chainlist/balise/compare/v0.26.0...v0.27.0) (2026-06-13)
+
+
+### Features
+
+* added proper keys formatting for shortcuts ([cbf2055](https://github.com/chainlist/balise/commit/cbf205598032a7bda48a21bca60ec9824524d4de))
+* **shortcuts:** Global shortcuts can now be remapped ([bc2dfd4](https://github.com/chainlist/balise/commit/bc2dfd4ee3621287f03b6311029c5d248716e48d))
+
 ## [0.26.0](https://github.com/chainlist/balise/compare/v0.25.0...v0.26.0) (2026-06-13)
 
 
