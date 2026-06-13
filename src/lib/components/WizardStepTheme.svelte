@@ -4,6 +4,8 @@
 	import { cn } from '$lib/utils.js';
 	import { Sun, Moon, Monitor } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
+	import PrimaryColorSettings from './settings/PrimaryColorSettings.svelte';
+	import BackgroundColorsSettings from './settings/BackgroundColorsSettings.svelte';
 
 	let { selectedTheme = $bindable<Theme>() } = $props();
 
@@ -37,4 +39,9 @@
 			<span class="text-sm">{opt.label}</span>
 		</button>
 	{/each}
+</div>
+
+<div class="mt-8 space-y-8">
+	<PrimaryColorSettings />
+	<BackgroundColorsSettings />
 </div>
