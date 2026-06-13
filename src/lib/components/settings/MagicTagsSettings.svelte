@@ -29,7 +29,7 @@
 		}
 	}
 
-	let rules = $state(settingsService.magicTags.map((r) => ({ ...r })));
+	let rules = $state(settingsService.magicTags.tags.map((r) => ({ ...r })));
 
 	function save() {
 		settingsService.setMagicTags(rules.map((r) => ({ ...r })));

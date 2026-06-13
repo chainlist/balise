@@ -5,6 +5,9 @@ const mockStore = vi.hoisted(() => ({ get: vi.fn(), set: vi.fn().mockResolvedVal
 vi.mock('@tauri-apps/plugin-store', () => ({
 	load: vi.fn().mockResolvedValue(mockStore)
 }));
+vi.mock('$lib/services/store-path', () => ({
+	resolveStorePath: vi.fn().mockResolvedValue('ui-state.json')
+}));
 vi.mock('$lib/services/desk', () => ({
 	openDesk: vi.fn().mockResolvedValue(undefined)
 }));

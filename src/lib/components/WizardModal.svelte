@@ -21,9 +21,9 @@
 	const TOTAL_STEPS = 5;
 
 	let step = $state(1);
-	let selectedLang = $state<'en' | 'fr' | 'es'>(settingsService.language);
-	let selectedMarkMode = $state<MarkMode>(settingsService.markdownMarks);
-	let selectedTheme = $state<Theme>(settingsService.theme);
+	let selectedLang = $state<'en' | 'fr' | 'es'>(settingsService.general.language);
+	let selectedMarkMode = $state<MarkMode>(settingsService.editor.markdownMarks);
+	let selectedTheme = $state<Theme>(settingsService.appearance.theme);
 	let baseDir = $state('');
 
 	onMount(async () => {
@@ -33,7 +33,7 @@
 	async function finish() {
 		localStorage.setItem(STORAGE_KEY, 'true');
 		settingsService.setMarkdownMarks(selectedMarkMode);
-		if (selectedLang !== settingsService.language) {
+		if (selectedLang !== settingsService.general.language) {
 			await applyLanguageChange(selectedLang);
 		} else {
 			uiState.modal.isWizardOpen = false;

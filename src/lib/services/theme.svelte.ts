@@ -6,7 +6,7 @@ class ThemeService {
 	#isDark = $state(false);
 
 	get theme(): Theme {
-		return settingsService.theme;
+		return settingsService.appearance.theme;
 	}
 
 	get isDark(): boolean {
@@ -14,7 +14,7 @@ class ThemeService {
 	}
 
 	#resolve(): 'light' | 'dark' {
-		if (settingsService.theme !== 'system') return settingsService.theme;
+		if (settingsService.appearance.theme !== 'system') return settingsService.appearance.theme;
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	}
 
@@ -30,13 +30,13 @@ class ThemeService {
 	}
 
 	#mediaListener = () => {
-		if (settingsService.theme === 'system') this.applyTheme();
+		if (settingsService.appearance.theme === 'system') this.applyTheme();
 	};
 
 	init(): void {
 		this.applyTheme();
 		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.#mediaListener);
-		/* Re-apply when settingsService.theme changes from another window (store onKeyChange) */
+		/* Re-apply when settingsService.appearance.theme changes from another window (store onKeyChange) */
 		$effect.root(() => {
 			$effect(() => {
 				this.applyTheme();

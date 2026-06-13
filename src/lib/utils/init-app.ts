@@ -1,6 +1,7 @@
 import { uiState } from '$lib/services/ui-state.svelte';
 import { themeService } from '$lib/services/theme.svelte';
 import { settingsService } from '$lib/services/settings.svelte';
+import { migrateLegacyStores } from '$lib/services/store-path';
 import { trayService } from '$lib/services/tray';
 import { getVersion } from '@tauri-apps/api/app';
 import { resolveResource } from '@tauri-apps/api/path';
@@ -9,6 +10,7 @@ import { marked } from 'marked';
 
 export async function initApp() {
 	try {
+		await migrateLegacyStores();
 		await settingsService.init();
 		themeService.init();
 		await uiState.init();

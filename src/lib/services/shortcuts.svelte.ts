@@ -11,7 +11,7 @@ export interface ShortcutDefinition {
 
 class ShortcutsService {
 	getBinding(def: ShortcutDefinition): string {
-		return settingsService.customBindings[def.id] ?? def.defaultBinding;
+		return settingsService.shortcuts.customBindings[def.id] ?? def.defaultBinding;
 	}
 
 	buildTinykeysMap(

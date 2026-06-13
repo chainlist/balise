@@ -5,7 +5,9 @@
 	import { settingsService } from '$lib/services/settings.svelte';
 	import * as m from '$paraglide/messages.js';
 
-	const intl = $derived(new Intl.DateTimeFormat(settingsService.language, { dateStyle: 'short' }));
+	const intl = $derived(
+		new Intl.DateTimeFormat(settingsService.general.language, { dateStyle: 'short' })
+	);
 
 	let {
 		note,

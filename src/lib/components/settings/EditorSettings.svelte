@@ -37,7 +37,7 @@
 				min={FONT_MIN}
 				max={FONT_MAX}
 				step="1"
-				value={settingsService.fontSize}
+				value={settingsService.editor.fontSize}
 				oninput={(e) => {
 					const v = Number(e.currentTarget.value);
 					if (v >= FONT_MIN && v <= FONT_MAX) settingsService.setFontSize(v);
@@ -56,7 +56,7 @@
 				min={LH_MIN}
 				max={LH_MAX}
 				step="0.05"
-				value={settingsService.lineHeight}
+				value={settingsService.editor.lineHeight}
 				oninput={(e) => {
 					const v = Number(e.currentTarget.value);
 					if (v >= LH_MIN && v <= LH_MAX) settingsService.setLineHeight(v);
@@ -72,7 +72,7 @@
 			</div>
 			<div class="flex gap-3">
 				{#each markOptions as option (option.value)}
-					{@const isActive = settingsService.markdownMarks === option.value}
+					{@const isActive = settingsService.editor.markdownMarks === option.value}
 					<button
 						onclick={() => settingsService.setMarkdownMarks(option.value)}
 						class={cn(
