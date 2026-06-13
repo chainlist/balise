@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { shortcutsService } from '$lib/services/shortcuts.svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
+	import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
@@ -11,6 +13,15 @@
 	let listeningFor = $state<string | null>(null);
 	let conflictName = $state<string | null>(null);
 	let searchQuery = $state('');
+
+	onMount(() => {
+		void globalShortcutService.recheck(APP_SHORTCUTS);
+	});
+
+	function reapplyIfGlobal(id: string) {
+		const def = APP_SHORTCUTS.find((d) => d.id === id);
+		if (def?.global) void globalShortcutService.apply(def, true);
+	}
 
 	const filteredShortcuts = $derived(
 		searchQuery.trim() === ''
@@ -86,6 +97,7 @@
 
 		conflictName = null;
 		settingsService.setBinding(listeningFor, binding);
+		reapplyIfGlobal(listeningFor);
 		listeningFor = null;
 	}
 </script>
@@ -120,7 +132,16 @@
 					{@const isListening = listeningFor === def.id}
 					{@const hasConflict = isListening && conflictName !== null}
 					<tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
-						<td class="px-6 py-3 text-sm font-medium">{def.name()}</td>
+						<td class="px-6 py-3 text-sm font-medium">
+							{def.name()}
+							{#if def.global}
+								<span
+									class="ml-2 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary"
+								>
+									{m.settings_shortcuts_global_badge()}
+								</span>
+							{/if}
+						</td>
 						<td class="px-3 py-3 text-sm text-muted-foreground">{def.description()}</td>
 						<td class="px-3 py-3">
 							<button
@@ -142,11 +163,19 @@
 									{formatBinding(binding)}
 								{/if}
 							</button>
+							{#if def.global && globalShortcutService.status[def.id] === 'conflict'}
+								<p class="mt-1 text-xs text-destructive">
+									{m.settings_shortcuts_global_conflict()}
+								</p>
+							{/if}
 						</td>
 						<td class="pr-4 py-3">
 							{#if binding !== def.defaultBinding}
 								<button
-									onclick={() => settingsService.resetBinding(def.id)}
+									onclick={() => {
+										settingsService.resetBinding(def.id);
+										reapplyIfGlobal(def.id);
+									}}
 									title={m.settings_shortcuts_reset()}
 									class="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
 								>

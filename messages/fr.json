@@ -140,6 +140,11 @@
 	"settings_shortcuts_listening": "Appuyez sur un raccourci…",
 	"settings_shortcuts_conflict": "Utilisé par {conflictName}",
 	"settings_shortcuts_reset": "Réinitialiser",
+	"settings_shortcuts_global_badge": "Global",
+	"settings_shortcuts_global_conflict": "Utilisé par une autre application",
+	"shortcut_open_quick_capture_name": "Capture rapide",
+	"shortcut_open_quick_capture_desc": "Ouvrir la fenêtre de note rapide depuis n'importe où",
+	"global_shortcut_conflict_title": "Raccourci global indisponible",
 
 	"graph_arc_notes": "{count} notes",
 	"graph_dot_common": "{count} notes en commun",

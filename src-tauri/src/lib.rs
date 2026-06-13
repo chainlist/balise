@@ -1,35 +1,12 @@
 mod commands;
 
 use tauri::Manager;
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, ShortcutState};
 use tauri_plugin_window_state::StateFlags;
-
-fn open_quick_window(app: &tauri::AppHandle) {
-    let handle = app.clone();
-    let _ = app.run_on_main_thread(move || {
-        if let Some(window) = handle.get_webview_window("quick") {
-            if window.is_visible().unwrap_or(false) {
-                let _ = window.set_focus();
-            } else {
-                let _ = window.show();
-                let _ = window.set_focus();
-            }
-        }
-    });
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(
-            tauri_plugin_global_shortcut::Builder::new()
-                .with_handler(|app, _shortcut, event| {
-                    if event.state() == ShortcutState::Pressed {
-                        open_quick_window(app);
-                    }
-                })
-                .build(),
-        )
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
@@ -54,18 +31,6 @@ pub fn run() {
                         .build(),
                 )?;
             }
-
-            #[cfg(target_os = "macos")]
-            let primary_modifier = Modifiers::SUPER;
-            #[cfg(not(target_os = "macos"))]
-            let primary_modifier = Modifiers::CONTROL;
-
-            app.handle().global_shortcut().register(
-                tauri_plugin_global_shortcut::Shortcut::new(
-                    Some(primary_modifier | Modifiers::SHIFT),
-                    Code::Space,
-                ),
-            )?;
 
             let app_handle = app.handle().clone();
             let main_window = app

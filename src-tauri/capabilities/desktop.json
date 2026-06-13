@@ -12,6 +12,8 @@
     "window-state:default",
     "updater:default",
     "global-shortcut:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
     "core:app:allow-default-window-icon"
   ]
 }

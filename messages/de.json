@@ -140,6 +140,11 @@
 	"settings_shortcuts_listening": "Kürzel drücken…",
 	"settings_shortcuts_conflict": "Verwendet von {conflictName}",
 	"settings_shortcuts_reset": "Auf Standard zurücksetzen",
+	"settings_shortcuts_global_badge": "Global",
+	"settings_shortcuts_global_conflict": "Wird von einer anderen App verwendet",
+	"shortcut_open_quick_capture_name": "Schnellerfassung",
+	"shortcut_open_quick_capture_desc": "Das Schnellnotiz-Fenster von überall öffnen",
+	"global_shortcut_conflict_title": "Globaler Shortcut nicht verfügbar",
 
 	"graph_arc_notes": "{count} Notizen",
 	"graph_dot_common": "{count} gemeinsame Notizen",
