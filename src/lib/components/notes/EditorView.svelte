@@ -7,6 +7,7 @@
 	import Editor from './Editor.svelte';
 	import EditorHeader from './EditorHeader.svelte';
 	import * as m from '$paraglide/messages.js';
+	import { fade } from 'svelte/transition';
 
 	let {
 		note,
@@ -47,7 +48,7 @@
 
 <!-- Consumers remount this component per note (keyed by note.id), so the
      debounce timer, pending flush, and loaded content all belong to one note. -->
-<div class="relative h-full overflow-y-auto">
+<div class="relative h-full overflow-y-auto" transition:fade={{ duration: 150 }}>
 	{#await note.content ?? notesService.loadContent(note.id) then content}
 		<EditorHeader
 			readingTime={readingTimeMinutes(liveContent ?? content)}
