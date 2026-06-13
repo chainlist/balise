@@ -279,6 +279,7 @@
 	"settings_sync_pairing_instructions": "Sur votre autre appareil, saisissez cet identifiant ou scannez le QR code pour les associer.",
 	"settings_sync_id_warning": "Ne partagez cet identifiant qu'avec des personnes de confiance. Quiconque le possède peut associer son appareil à vos notes.",
 	"settings_sync_id_error": "Échec du chargement de l'identifiant de l'appareil.",
+	"settings_sync_start_error": "Échec du démarrage de la synchronisation.",
 	"settings_sync_nav_device_id": "Identifiant",
 	"settings_sync_nav_linked": "Appareils liés",
 	"settings_sync_linked_empty_title": "Aucun appareil lié",

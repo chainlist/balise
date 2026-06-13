@@ -1,4 +1,5 @@
 mod commands;
+mod sync;
 
 use tauri::Manager;
 use tauri_plugin_window_state::StateFlags;
@@ -22,13 +23,22 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::file_sync::scan_desk_files,
             commands::file_sync::read_desk_files_content,
-            commands::device::device_id
+            commands::device::device_id,
+            sync::start_sync,
+            sync::stop_sync
         ])
+        .manage(sync::SyncState::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
                         .level(log::LevelFilter::Info)
+                        // iroh's networking crates log every packet at INFO; keep
+                        // only warnings/errors so our own logs stay readable.
+                        .level_for("iroh", log::LevelFilter::Warn)
+                        .level_for("iroh_relay", log::LevelFilter::Warn)
+                        .level_for("netwatch", log::LevelFilter::Warn)
+                        .level_for("portmapper", log::LevelFilter::Warn)
                         .build(),
                 )?;
             }

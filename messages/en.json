@@ -279,6 +279,7 @@
 	"settings_sync_pairing_instructions": "On your other device, enter this ID or scan the QR code to link the two.",
 	"settings_sync_id_warning": "Don't share this ID with anyone you don't trust. Anyone who has it can pair their device with your notes.",
 	"settings_sync_id_error": "Failed to load the device ID.",
+	"settings_sync_start_error": "Failed to start sync.",
 	"settings_sync_nav_device_id": "Device ID",
 	"settings_sync_nav_linked": "Linked devices",
 	"settings_sync_linked_empty_title": "No linked devices yet",

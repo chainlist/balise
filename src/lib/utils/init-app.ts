@@ -5,7 +5,10 @@ import { devicesService } from '$lib/services/devices.svelte';
 import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/store-path';
+import { startSync } from '$lib/utils/sync';
+import { toasterService, errorMessage } from '$lib/services/toaster';
 import { trayService } from '$lib/services/tray';
+import * as m from '$paraglide/messages.js';
 import { getVersion } from '@tauri-apps/api/app';
 import { resolveResource } from '@tauri-apps/api/path';
 import { readTextFile } from '@tauri-apps/plugin-fs';
@@ -15,6 +18,11 @@ export async function initApp() {
 	try {
 		await migrateLegacyStores();
 		await settingsService.init();
+		if (settingsService.sync.enabled) {
+			void startSync().catch((e) =>
+				toasterService.error(m.settings_sync_start_error(), errorMessage(e))
+			);
+		}
 		await devicesService.init();
 		themeService.init();
 		await globalShortcutService.applyAll(APP_SHORTCUTS);

@@ -279,6 +279,7 @@
 	"settings_sync_pairing_instructions": "Geben Sie diese ID auf Ihrem anderen Gerät ein oder scannen Sie den QR-Code, um beide zu verbinden.",
 	"settings_sync_id_warning": "Teilen Sie diese ID nur mit Personen, denen Sie vertrauen. Jeder, der sie besitzt, kann sein Gerät mit Ihren Notizen verbinden.",
 	"settings_sync_id_error": "Laden der Geräte-ID fehlgeschlagen.",
+	"settings_sync_start_error": "Synchronisierung konnte nicht gestartet werden.",
 	"settings_sync_nav_device_id": "Geräte-ID",
 	"settings_sync_nav_linked": "Verbundene Geräte",
 	"settings_sync_linked_empty_title": "Noch keine verbundenen Geräte",
