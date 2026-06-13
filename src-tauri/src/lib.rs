@@ -25,9 +25,12 @@ pub fn run() {
             commands::file_sync::read_desk_files_content,
             commands::device::device_id,
             sync::start_sync,
-            sync::stop_sync
+            sync::stop_sync,
+            sync::pair_device,
+            sync::respond_pairing
         ])
         .manage(sync::SyncState::default())
+        .manage(sync::PairingState::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
