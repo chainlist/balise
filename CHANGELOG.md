@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.25.0](https://github.com/chainlist/balise/compare/v0.24.0...v0.25.0) (2026-06-13)
+
+
+### Features
+
+* **editor:** added image description ([af61042](https://github.com/chainlist/balise/commit/af610427547cd7e172804d4b402e5befffd08442))
+* **ui:** Added the possibility to change the mesh size ([aa30c46](https://github.com/chainlist/balise/commit/aa30c46f8fdd6b01d644154f1633f8c3fecc9682))
+* **ui:** Added the possibility to change the prime color ([2771b98](https://github.com/chainlist/balise/commit/2771b9820cf04ef79023598918a3065586248360))
+* **ui:** Change tags spacing and default UI settings ([f0e3564](https://github.com/chainlist/balise/commit/f0e356443408ae95501050ebdc2c728250cb8bbf))
+
+
+### Bug Fixes
+
+* **note-preview:** Fix link opening inside the webview ([21386f3](https://github.com/chainlist/balise/commit/21386f360782af9557f825c7f7c7c3310b51c64a))
+* **quick:** QuickAdd window now listen to dark mode theme change ([66a6b00](https://github.com/chainlist/balise/commit/66a6b00b466c09f221232f947eb991905c47b33f))
+* **window:** stop saving visibility state to avoid having hidden window on app startup ([06c491d](https://github.com/chainlist/balise/commit/06c491d73cc88e94cf8e14f55762f946854c0429))
+
 ## [0.24.0](https://github.com/chainlist/balise/compare/v0.23.1...v0.24.0) (2026-06-12)
 
 
