@@ -5,7 +5,15 @@ import { noteSignals } from '$lib/services/note-signals';
 import { toasterService, errorMessage } from '$lib/services/toaster';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import * as m from '$paraglide/messages.js';
+
+async function openQuickWindow(): Promise<void> {
+	const win = await WebviewWindow.getByLabel('quick');
+	if (!win) return;
+	await win.show();
+	await win.setFocus();
+}
 
 export const APP_SHORTCUTS: ShortcutDefinition[] = [
 	{
@@ -89,5 +97,13 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		run: () => {
 			uiState.modal.isZenModeActive = !uiState.modal.isZenModeActive;
 		}
+	},
+	{
+		id: 'open-quick-capture',
+		name: m.shortcut_open_quick_capture_name,
+		description: m.shortcut_open_quick_capture_desc,
+		defaultBinding: '$mod+Shift+Space',
+		global: true,
+		run: () => openQuickWindow()
 	}
 ];

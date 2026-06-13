@@ -140,6 +140,11 @@
 	"settings_shortcuts_listening": "Pulsa un atajo…",
 	"settings_shortcuts_conflict": "Usado por {conflictName}",
 	"settings_shortcuts_reset": "Restablecer",
+	"settings_shortcuts_global_badge": "Global",
+	"settings_shortcuts_global_conflict": "En uso por otra aplicación",
+	"shortcut_open_quick_capture_name": "Captura rápida",
+	"shortcut_open_quick_capture_desc": "Abrir la ventana de nota rápida desde cualquier lugar",
+	"global_shortcut_conflict_title": "Atajo global no disponible",
 
 	"graph_arc_notes": "{count} notas",
 	"graph_dot_common": "{count} notas en común",

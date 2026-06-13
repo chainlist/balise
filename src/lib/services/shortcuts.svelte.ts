@@ -6,6 +6,8 @@ export interface ShortcutDefinition {
 	description: () => string;
 	defaultBinding: string;
 	bypassGuard?: boolean;
+	/** OS-level global shortcut (fires app-wide), registered via the global-shortcut plugin instead of tinykeys. */
+	global?: boolean;
 	run: () => void | Promise<void>;
 }
 
@@ -21,6 +23,7 @@ class ShortcutsService {
 	): Record<string, (e: KeyboardEvent) => void> {
 		const map: Record<string, (e: KeyboardEvent) => void> = {};
 		for (const def of definitions) {
+			if (def.global) continue;
 			const binding = this.getBinding(def);
 			if (binding) {
 				map[binding] = (e: KeyboardEvent) => {

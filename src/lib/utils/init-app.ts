@@ -1,6 +1,8 @@
 import { uiState } from '$lib/services/ui-state.svelte';
 import { themeService } from '$lib/services/theme.svelte';
 import { settingsService } from '$lib/services/settings.svelte';
+import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
+import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/store-path';
 import { trayService } from '$lib/services/tray';
 import { getVersion } from '@tauri-apps/api/app';
@@ -13,6 +15,7 @@ export async function initApp() {
 		await migrateLegacyStores();
 		await settingsService.init();
 		themeService.init();
+		await globalShortcutService.applyAll(APP_SHORTCUTS);
 		await uiState.init();
 		await uiState.switchDesk(uiState.activeDesk, uiState.activeTag);
 		uiState.ready = true;

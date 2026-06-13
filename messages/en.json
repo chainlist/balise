@@ -140,6 +140,11 @@
 	"settings_shortcuts_listening": "Press shortcut…",
 	"settings_shortcuts_conflict": "Used by {conflictName}",
 	"settings_shortcuts_reset": "Reset to default",
+	"settings_shortcuts_global_badge": "Global",
+	"settings_shortcuts_global_conflict": "In use by another app",
+	"shortcut_open_quick_capture_name": "Quick capture",
+	"shortcut_open_quick_capture_desc": "Open the quick note window from anywhere",
+	"global_shortcut_conflict_title": "Global shortcut unavailable",
 
 	"graph_arc_notes": "{count} notes",
 	"graph_dot_common": "{count} notes in common",
