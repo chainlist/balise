@@ -11,24 +11,9 @@ export interface LinkedDevice {
 	lastSeen: number;
 }
 
-/* Placeholder devices seeded on first run until the sync backend exists. */
-const SEED: { id: string; name: string; type: DeviceType; minutesAgo: number }[] = [
-	{ id: 'MFRGGZDFMZTWQ2LKNNWG23TPOB', name: 'MacBook Pro', type: 'laptop', minutesAgo: 2 },
-	{ id: 'KRUGS4ZANFZSAYJAORSXG5BPF4', name: 'iPhone 15', type: 'mobile', minutesAgo: 60 },
-	{ id: 'NB2HI4DTHIXS653XO5SWY3DPF5', name: 'Office iMac', type: 'desktop', minutesAgo: 1440 },
-	{ id: 'ORSXG5BAONUW24DBORSXGYTJNZ', name: 'iPad Air', type: 'tablet', minutesAgo: 4320 },
-	{ id: 'PFXGG3DJMQQE2YLOMQQGK4TFP4', name: 'ThinkPad X1', type: 'laptop', minutesAgo: 20160 }
-];
-
-function seedDevices(): LinkedDevice[] {
-	const now = Date.now();
-	return SEED.map(({ minutesAgo, ...rest }) => ({ ...rest, lastSeen: now - minutesAgo * 60_000 }));
-}
-
 /**
  * Local cache of the devices linked to this instance, persisted to
- * devices.json next to settings.json. Once the sync backend exists the
- * server/peer is the source of truth and this becomes an offline cache.
+ * devices.json next to settings.json.
  */
 class DevicesService {
 	linked = $state<LinkedDevice[]>([]);
@@ -37,14 +22,14 @@ class DevicesService {
 
 	async init(): Promise<void> {
 		this.#store = await load(await resolveStorePath('devices.json'), { autoSave: 100 });
+		this.linked = (await this.#store.get<LinkedDevice[]>('linked')) ?? [];
+	}
 
-		const stored = await this.#store.get<LinkedDevice[]>('linked');
-		if (stored) {
-			this.linked = stored;
-		} else {
-			this.linked = seedDevices();
-			this.#persist();
-		}
+	/** Adds a newly paired device, or refreshes an existing one by id. */
+	upsert(device: LinkedDevice): void {
+		const others = this.linked.filter((d) => d.id !== device.id);
+		this.linked = [...others, device];
+		this.#persist();
 	}
 
 	#persist(): void {

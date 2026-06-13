@@ -2,6 +2,7 @@ import { uiState } from '$lib/services/ui-state.svelte';
 import { themeService } from '$lib/services/theme.svelte';
 import { settingsService } from '$lib/services/settings.svelte';
 import { devicesService } from '$lib/services/devices.svelte';
+import { pairingService } from '$lib/services/pairing.svelte';
 import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/store-path';
@@ -18,6 +19,7 @@ export async function initApp() {
 	try {
 		await migrateLegacyStores();
 		await settingsService.init();
+		pairingService.init();
 		if (settingsService.sync.enabled) {
 			void startSync().catch((e) =>
 				toasterService.error(m.settings_sync_start_error(), errorMessage(e))
