@@ -225,6 +225,9 @@
 	"editor_placeholder": "Escribe algo o escribe «/» para ver comandos",
 	"editor_reading_time": "{minutes} min de lectura",
 
+	"image_add_description": "Añadir descripción",
+	"image_not_found": "Imagen no encontrada",
+
 	"wizard_lang_title": "Elige tu idioma",
 	"wizard_lang_subtitle": "Puedes cambiarlo en cualquier momento desde Ajustes.",
 	"wizard_welcome_title": "Bienvenido a Balise",

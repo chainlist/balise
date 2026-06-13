@@ -3,27 +3,89 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range, EditorState } from '@codemirror/state';
 import { StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
+import type { SyntaxNode } from '@lezer/common';
 import ImageViewer from '$lib/components/cm/ImageViewer.svelte';
 import { fsService } from '$lib/services/fs';
-import { SvelteWidget, isRevealed, type MarkMode } from './shared';
+import { SvelteWidget } from './shared';
+
+// --- Alt text ---
+
+// The alt text sits between the first two LinkMark children: `![` and `]`.
+function imageAltRange(node: SyntaxNode): { from: number; to: number } | null {
+	let open: number | null = null;
+	for (let child = node.firstChild; child; child = child.nextSibling) {
+		if (child.name !== 'LinkMark') continue;
+		if (open === null) open = child.to;
+		else return { from: open, to: child.from };
+	}
+	return null;
+}
+
+// Find the alt range of the first Image node overlapping [from, to].
+function findAltRange(
+	state: EditorState,
+	from: number,
+	to: number
+): { from: number; to: number } | null {
+	let range: { from: number; to: number } | null = null;
+	syntaxTree(state).iterate({
+		from,
+		to,
+		enter(node) {
+			if (node.name !== 'Image' || range) return;
+			range = imageAltRange(node.node);
+			return false;
+		}
+	});
+	return range;
+}
+
+// Resolve the Image node from the widget's live DOM position (positions
+// captured at build time go stale as the doc changes) and rewrite its alt.
+function updateAlt(view: EditorView, el: HTMLElement, alt: string): void {
+	const line = view.state.doc.lineAt(view.posAtDOM(el));
+	const range = findAltRange(view.state, line.from, line.to);
+	if (range) view.dispatch({ changes: { from: range.from, to: range.to, insert: alt } });
+}
 
 // --- Widget ---
 
-class ImageWidget extends SvelteWidget<{ path: string }> {
+type ImageProps = { path: string; alt: string; onAltChange: (alt: string) => void };
+
+class ImageWidget extends SvelteWidget<ImageProps> {
 	protected component = ImageViewer;
 	protected tagName = 'div' as const;
-	protected ignoreEvents = false;
+	#el: HTMLElement | null = null;
 
-	constructor(readonly path: string) {
+	constructor(
+		readonly path: string,
+		readonly alt: string
+	) {
 		super();
 	}
 
-	protected getProps() {
-		return { path: this.path };
+	protected setup(el: HTMLElement) {
+		this.#el = el;
+	}
+
+	protected getProps(view: EditorView): ImageProps {
+		return {
+			path: this.path,
+			alt: this.alt,
+			onAltChange: (alt: string) => {
+				if (this.#el) updateAlt(view, this.#el, alt);
+			}
+		};
 	}
 
 	eq(other: ImageWidget): boolean {
-		return other.path === this.path;
+		return other.path === this.path && other.alt === this.alt;
+	}
+
+	// Let the editor ignore events from the description button/input so
+	// clicks and typing there aren't handled as editor interactions.
+	override ignoreEvent(event: Event): boolean {
+		return event.target instanceof Element && event.target.closest('button, input') !== null;
 	}
 }
 
@@ -93,16 +155,15 @@ function handleDrop(event: DragEvent, view: EditorView): boolean {
 
 // Block widgets must come from a StateField. We iterate the full doc (no
 // viewport culling needed — block widgets are cheap and images are sparse).
-function buildDecos(state: EditorState, mode: MarkMode): DecorationSet {
-	if (mode === 'always') return Decoration.none;
-
-	const cursorLine = state.doc.lineAt(state.selection.main.head).number;
+// Images always render as widgets, regardless of mark mode: the raw markdown
+// is never useful to look at, and revealing it on cursor entry makes the
+// document jump.
+function buildDecos(state: EditorState): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
 
 	syntaxTree(state).iterate({
 		enter(node) {
 			if (node.name !== 'Image') return;
-			if (isRevealed(mode, state.doc.lineAt(node.from).number, cursorLine)) return false;
 
 			let path = '';
 			for (let child = node.node.firstChild; child; child = child.nextSibling) {
@@ -113,12 +174,15 @@ function buildDecos(state: EditorState, mode: MarkMode): DecorationSet {
 			}
 			if (!path) return false;
 
+			const altRange = imageAltRange(node.node);
+			const alt = altRange ? state.doc.sliceString(altRange.from, altRange.to) : '';
+
 			const line = state.doc.lineAt(node.to);
 			const lineFrom = state.doc.lineAt(node.from).from;
 			ranges.push(
 				Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
 				Decoration.replace({}).range(lineFrom, line.to),
-				Decoration.widget({ widget: new ImageWidget(path), block: true, side: 1 }).range(line.to)
+				Decoration.widget({ widget: new ImageWidget(path, alt), block: true, side: 1 }).range(line.to)
 			);
 			return false;
 		}
@@ -130,11 +194,11 @@ function buildDecos(state: EditorState, mode: MarkMode): DecorationSet {
 
 // --- Plugin ---
 
-export function mdImagePlugin(mode: MarkMode) {
+export function mdImagePlugin() {
 	const blockField = StateField.define<DecorationSet>({
-		create: (state) => buildDecos(state, mode),
+		create: (state) => buildDecos(state),
 		update(deco, tr) {
-			if (tr.docChanged || tr.selection) return buildDecos(tr.state, mode);
+			if (tr.docChanged) return buildDecos(tr.state);
 			return deco;
 		},
 		provide: (f) => EditorView.decorations.from(f)
