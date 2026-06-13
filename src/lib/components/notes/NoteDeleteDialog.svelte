@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { notesService, type Note } from '$lib/services/notes.svelte';
 	import { toasterService, errorMessage } from '$lib/services/toaster';
-	import * as Sheet from '$lib/components/shadcn/sheet/index.js';
+	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as m from '$paraglide/messages.js';
 
 	let { note, open = $bindable() }: { note: Note; open: boolean } = $props();
 </script>
 
-<Sheet.Root bind:open>
-	<Sheet.Content side="right" class="w-full sm:max-w-md">
-		<Sheet.Header class="gap-2 border-b p-6">
-			<Sheet.Title>{m.note_delete_title()}</Sheet.Title>
-			<Sheet.Description>{m.note_delete_description()}</Sheet.Description>
-		</Sheet.Header>
+<Dialog.Root bind:open>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>{m.note_delete_title()}</Dialog.Title>
+			<Dialog.Description>{m.note_delete_description()}</Dialog.Description>
+		</Dialog.Header>
 		<div class="flex justify-end gap-2 p-6">
 			<Button type="button" variant="outline" onclick={() => (open = false)}
 				>{m.action_cancel()}</Button
@@ -31,5 +31,5 @@
 				}}>{m.action_delete()}</Button
 			>
 		</div>
-	</Sheet.Content>
-</Sheet.Root>
+	</Dialog.Content>
+</Dialog.Root>
