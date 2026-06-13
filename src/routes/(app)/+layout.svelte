@@ -13,9 +13,8 @@
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import NotesPanel from '$lib/components/sidebar/NotesPanel.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
-	import * as Resizable from '$lib/components/shadcn/resizable/index.js';
+	import ResizablePanel from '$lib/components/ResizablePanel.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
-	import TitleBar from '$lib/components/TitleBar.svelte';
 	import UpdateNotifier from '$lib/components/UpdateNotifier.svelte';
 	import WizardModal from '$lib/components/WizardModal.svelte';
 	import NewsModal from '$lib/components/NewsModal.svelte';
@@ -92,18 +91,13 @@
 		<div class="flex h-screen w-full" in:fade={{ duration: 250 }}>
 			{#if !uiState.modal.isZenModeActive}
 				<Sidebar />
+				<ResizablePanel storageKey="balise-notes-panel-width" defaultWidth={280} minWidth={200}>
+					<NotesPanel />
+				</ResizablePanel>
 			{/if}
-			<Resizable.PaneGroup direction="horizontal" autoSaveId="balise-main-layout" class="flex-1">
-				{#if !uiState.modal.isZenModeActive}
-					<Resizable.Pane defaultSize={22} minSize={15} order={1}>
-						<NotesPanel />
-					</Resizable.Pane>
-					<Resizable.Handle />
-				{/if}
-				<Resizable.Pane order={2}>
-					{@render children()}
-				</Resizable.Pane>
-			</Resizable.PaneGroup>
+			<div class="min-w-0 flex-1">
+				{@render children()}
+			</div>
 		</div>
 		<CommandPalette />
 		<UpdateNotifier />
