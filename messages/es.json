@@ -281,6 +281,7 @@
 	"settings_sync_pairing_instructions": "En tu otro dispositivo, introduce este ID o escanea el código QR para vincularlos.",
 	"settings_sync_id_warning": "No compartas este ID con nadie en quien no confíes. Cualquiera que lo tenga puede vincular su dispositivo con tus notas.",
 	"settings_sync_id_error": "No se pudo cargar el ID del dispositivo.",
+	"settings_sync_start_error": "No se pudo iniciar la sincronización.",
 	"settings_sync_nav_device_id": "ID del dispositivo",
 	"settings_sync_nav_linked": "Dispositivos vinculados",
 	"settings_sync_linked_empty_title": "Aún no hay dispositivos vinculados",

@@ -3,10 +3,26 @@
 	import { SmartphoneIcon, MonitorSmartphoneIcon } from '@lucide/svelte';
 	import type { Component } from 'svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
+	import { startSync, stopSync } from '$lib/utils/sync';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { cn } from '$lib/utils.js';
 	import SyncDeviceId from './SyncDeviceId.svelte';
 	import SyncLinkedDevices from './SyncLinkedDevices.svelte';
 	import * as m from '$paraglide/messages.js';
+
+	async function toggleSync(enabled: boolean) {
+		settingsService.setSyncEnabled(enabled);
+		if (!enabled) {
+			void stopSync();
+			return;
+		}
+		try {
+			await startSync();
+		} catch (e) {
+			toasterService.error(m.settings_sync_start_error(), errorMessage(e));
+			settingsService.setSyncEnabled(false);
+		}
+	}
 
 	const navItems: {
 		id: string;
@@ -45,7 +61,7 @@
 		</div>
 		<Switch.Root
 			checked={settingsService.sync.enabled}
-			onCheckedChange={(checked) => settingsService.setSyncEnabled(checked)}
+			onCheckedChange={(checked) => toggleSync(checked)}
 			aria-label={m.settings_sync_enable_label()}
 			class="inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest"
 		>
