@@ -1,4 +1,5 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
+import { resolveStorePath } from './store-path';
 import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
 import { setLocale, locales } from '$paraglide/runtime.js';
@@ -69,7 +70,7 @@ class SettingsService {
 	#store: Store | null = null;
 
 	async init(): Promise<void> {
-		this.#store = await load('settings.json', { autoSave: 100 });
+		this.#store = await load(await resolveStorePath('settings.json'), { autoSave: 100 });
 
 		const [
 			theme,

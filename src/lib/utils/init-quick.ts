@@ -4,9 +4,11 @@ import { uiState } from '$lib/services/ui-state.svelte';
 import { tagsService } from '$lib/services/tags.svelte';
 import { openDesk } from '$lib/services/desk';
 import { fsService } from '$lib/services/fs';
+import { migrateLegacyStores } from '$lib/services/store-path';
 
 export async function initQuickCapture(): Promise<{ error: string | null }> {
 	try {
+		await migrateLegacyStores();
 		await settingsService.init();
 		themeService.init();
 		await uiState.init();

@@ -5,6 +5,7 @@ import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
 import { fsSyncService } from './fs-sync';
 import { fsService } from './fs';
+import { resolveStorePath } from './store-path';
 
 const defaultDesk = 'Personal';
 const defaults = {
@@ -36,7 +37,7 @@ class UIState {
 	#store: Store | null = null;
 
 	async init(): Promise<void> {
-		this.#store = await load('ui-state.json', {
+		this.#store = await load(await resolveStorePath('ui-state.json'), {
 			autoSave: 100,
 			defaults
 		});
