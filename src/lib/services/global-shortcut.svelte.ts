@@ -1,4 +1,4 @@
-import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
+import { register, unregister, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { shortcutsService, type ShortcutDefinition } from './shortcuts.svelte';
 import { toasterService } from './toaster';
 import * as m from '$paraglide/messages.js';
@@ -28,6 +28,16 @@ class GlobalShortcutService {
 	#registered = new Map<string, string>();
 
 	async applyAll(definitions: ShortcutDefinition[]): Promise<void> {
+		/* The Rust process keeps OS registrations across a webview reload (HMR, language
+		   change), which would make re-registration fail as a false "conflict". Clear any
+		   stale registrations first so we always rebind with a live handler. */
+		try {
+			await unregisterAll();
+		} catch {
+			/* nothing registered yet */
+		}
+		this.#registered.clear();
+
 		for (const def of definitions) {
 			if (def.global) await this.apply(def, true);
 		}
@@ -58,7 +68,8 @@ class GlobalShortcutService {
 			});
 			this.#registered.set(def.id, accelerator);
 			this.status[def.id] = 'registered';
-		} catch {
+		} catch (e) {
+			console.error(`Failed to register global shortcut "${accelerator}":`, e);
 			this.status[def.id] = 'conflict';
 			if (notify) toasterService.warning(m.global_shortcut_conflict_title(), def.name());
 		}
