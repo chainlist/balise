@@ -5,6 +5,7 @@
 		type TokenizerAndRendererExtension,
 		type Tokens
 	} from 'marked';
+	import { openUrl } from '@tauri-apps/plugin-opener';
 	import { fsService } from '$lib/services/fs';
 	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
@@ -77,9 +78,20 @@
 			urlCache.clear();
 		};
 	});
+
+	// Links come from {@html}, so intercept clicks here and open them
+	// in the default browser instead of navigating the webview.
+	function onLinkClick(e: MouseEvent) {
+		const anchor = (e.target as HTMLElement).closest('a');
+		if (!anchor) return;
+		e.preventDefault();
+		e.stopPropagation();
+		openUrl(anchor.href);
+	}
 </script>
 
-<div bind:this={container} class="note-preview line-clamp-3">
+<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+<div bind:this={container} class="note-preview line-clamp-3" onclick={onLinkClick}>
 	{@html html}
 </div>
 

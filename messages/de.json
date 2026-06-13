@@ -95,8 +95,16 @@
 	"settings_theme_system": "System",
 	"settings_language_label": "Sprache",
 	"settings_language_helper": "Wähle deine bevorzugte Sprache.",
+	"settings_primary_label": "Primärfarbe",
+	"settings_primary_helper": "Wähle die Akzentfarbe für Schaltflächen, Links und Hervorhebungen.",
+	"settings_primary_aria": "Primärfarbe ändern",
+	"settings_primary_reset": "Auf Standard zurücksetzen",
 	"settings_background_label": "Hintergrundfarben",
-	"settings_background_helper": "Wähle eine Farbe für jede Ecke des App-Hintergrunds.",
+	"settings_background_helper": "Passe die Farben des App-Hintergrunds an.",
+	"settings_background_mode_corners": "Ecken",
+	"settings_background_mode_unified": "Einfarbig",
+	"settings_background_size_label": "Blasengröße",
+	"settings_background_unified_aria": "Hintergrundfarbe ändern",
 	"settings_background_corner_aria": "Eckfarbe ändern",
 	"settings_background_reset": "Auf Standard zurücksetzen",
 	"settings_background_enable_aria": "Hintergrundfarben ein- oder ausschalten",
@@ -216,6 +224,9 @@
 
 	"editor_placeholder": "Schreibe etwas oder tippe „/“ für Befehle",
 	"editor_reading_time": "{minutes} Min. Lesezeit",
+
+	"image_add_description": "Beschreibung hinzufügen",
+	"image_not_found": "Bild nicht gefunden",
 
 	"wizard_lang_title": "Wähle deine Sprache",
 	"wizard_lang_subtitle": "Du kannst dies später in den Einstellungen ändern.",

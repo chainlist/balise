@@ -2,6 +2,7 @@ import { load, type Store } from '@tauri-apps/plugin-store';
 import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
 import { setLocale, locales } from '$paraglide/runtime.js';
+import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/utils/primary-color';
 
 export const SUPPORTED_LOCALES = locales;
 
@@ -27,10 +28,27 @@ export const DEFAULT_MAGIC_TAGS: MagicTag[] = [
 
 /* Order matches the mesh gradients: top-left, top-right, bottom-right, bottom-left */
 export type MeshColors = [string, string, string, string];
+/* Per-corner bubble scale factors, same order as MeshColors */
+export type MeshSizes = [number, number, number, number];
 
-export const DEFAULT_MESH_COLORS: MeshColors = ['#7c6cde', '#5ca0dc', '#e48ab0', '#6ecdb9'];
+export const MESH_MODES = {
+	CORNERS: 'corners',
+	UNIFIED: 'unified'
+} as const;
+
+export type MeshMode = (typeof MESH_MODES)[keyof typeof MESH_MODES];
+
+export const DEFAULT_MESH_COLORS: MeshColors = ['#7c6cde', '#7c6cde', '#7c6cde', '#7c6cde'];
+export const DEFAULT_MESH_SIZES: MeshSizes = [1, 1.9, 1.7, 1];
+export const DEFAULT_MESH_UNIFIED_COLOR = '#7c6cde';
 
 const MESH_CSS_VARS = ['--mesh-tl', '--mesh-tr', '--mesh-br', '--mesh-bl'] as const;
+const MESH_SIZE_CSS_VARS = [
+	'--mesh-tl-size',
+	'--mesh-tr-size',
+	'--mesh-br-size',
+	'--mesh-bl-size'
+] as const;
 
 class SettingsService {
 	theme = $state<Theme>('system');
@@ -42,7 +60,11 @@ class SettingsService {
 	magicTags = $state<MagicTag[]>(DEFAULT_MAGIC_TAGS);
 	closeToTray = $state<boolean | null>(null);
 	meshColors = $state<MeshColors>([...DEFAULT_MESH_COLORS]);
+	meshSizes = $state<MeshSizes>([...DEFAULT_MESH_SIZES]);
+	meshMode = $state<MeshMode>(MESH_MODES.CORNERS);
+	meshUnifiedColor = $state(DEFAULT_MESH_UNIFIED_COLOR);
 	meshEnabled = $state(true);
+	primaryColor = $state<string | null>(null);
 
 	#store: Store | null = null;
 
@@ -59,7 +81,11 @@ class SettingsService {
 			magicTags,
 			closeToTray,
 			meshColors,
-			meshEnabled
+			meshSizes,
+			meshMode,
+			meshUnifiedColor,
+			meshEnabled,
+			primaryColor
 		] = await Promise.all([
 			this.#store.get<Theme>('theme'),
 			this.#store.get<number>('fontSize'),
@@ -70,7 +96,11 @@ class SettingsService {
 			this.#store.get<MagicTag[]>('magicTags'),
 			this.#store.get<boolean>('closeToTray'),
 			this.#store.get<MeshColors>('meshColors'),
-			this.#store.get<boolean>('meshEnabled')
+			this.#store.get<MeshSizes>('meshSizes'),
+			this.#store.get<MeshMode>('meshMode'),
+			this.#store.get<string>('meshUnifiedColor'),
+			this.#store.get<boolean>('meshEnabled'),
+			this.#store.get<string>('primaryColor')
 		]);
 
 		this.theme = theme ?? 'system';
@@ -85,11 +115,21 @@ class SettingsService {
 		}));
 		this.closeToTray = closeToTray ?? null;
 		this.meshColors = meshColors ?? [...DEFAULT_MESH_COLORS];
+		this.meshSizes = meshSizes ?? [...DEFAULT_MESH_SIZES];
+		this.meshMode = meshMode ?? MESH_MODES.CORNERS;
+		this.meshUnifiedColor = meshUnifiedColor ?? DEFAULT_MESH_UNIFIED_COLOR;
 		this.meshEnabled = meshEnabled ?? true;
+		this.primaryColor = primaryColor ?? null;
 
 		setLocale(this.language);
 		this.#applyEditorVars();
 		this.#applyMeshVars();
+		this.#applyPrimaryVars();
+
+		/* Keep theme in sync across windows (main <-> quick add) */
+		void this.#store.onKeyChange<Theme>('theme', (theme) => {
+			this.theme = theme ?? 'system';
+		});
 	}
 
 	#applyEditorVars(): void {
@@ -98,12 +138,20 @@ class SettingsService {
 	}
 
 	#applyMeshVars(): void {
+		const style = document.documentElement.style;
+		const cornersVisible = this.meshEnabled && this.meshMode === MESH_MODES.CORNERS;
 		MESH_CSS_VARS.forEach((cssVar, i) => {
-			document.documentElement.style.setProperty(
-				cssVar,
-				this.meshEnabled ? this.meshColors[i] : 'transparent'
-			);
+			style.setProperty(cssVar, cornersVisible ? this.meshColors[i] : 'transparent');
 		});
+		MESH_SIZE_CSS_VARS.forEach((cssVar, i) => {
+			style.setProperty(cssVar, `${this.meshSizes[i]}`);
+		});
+		style.setProperty(
+			'--mesh-unified',
+			this.meshEnabled && this.meshMode === MESH_MODES.UNIFIED
+				? this.meshUnifiedColor
+				: 'transparent'
+		);
 	}
 
 	setTheme(theme: Theme): void {
@@ -164,16 +212,63 @@ class SettingsService {
 		void this.#store?.set('meshColors', $state.snapshot(this.meshColors));
 	}
 
-	resetMeshColors(): void {
-		this.meshColors = [...DEFAULT_MESH_COLORS];
+	setMeshSize(corner: number, size: number): void {
+		this.meshSizes[corner] = size;
 		this.#applyMeshVars();
+		void this.#store?.set('meshSizes', $state.snapshot(this.meshSizes));
+	}
+
+	setMeshMode(mode: MeshMode): void {
+		this.meshMode = mode;
+		this.#applyMeshVars();
+		void this.#store?.set('meshMode', mode);
+	}
+
+	setMeshUnifiedColor(color: string): void {
+		this.meshUnifiedColor = color;
+		this.#applyMeshVars();
+		void this.#store?.set('meshUnifiedColor', color);
+	}
+
+	resetMesh(): void {
+		this.meshMode = MESH_MODES.CORNERS;
+		this.meshColors = [...DEFAULT_MESH_COLORS];
+		this.meshSizes = [...DEFAULT_MESH_SIZES];
+		this.meshUnifiedColor = DEFAULT_MESH_UNIFIED_COLOR;
+		this.#applyMeshVars();
+		void this.#store?.set('meshMode', this.meshMode);
 		void this.#store?.set('meshColors', $state.snapshot(this.meshColors));
+		void this.#store?.set('meshSizes', $state.snapshot(this.meshSizes));
+		void this.#store?.set('meshUnifiedColor', this.meshUnifiedColor);
 	}
 
 	setMeshEnabled(value: boolean): void {
 		this.meshEnabled = value;
 		this.#applyMeshVars();
 		void this.#store?.set('meshEnabled', value);
+	}
+
+	#applyPrimaryVars(): void {
+		const style = document.documentElement.style;
+		if (this.primaryColor) {
+			Object.entries(primaryColorVars(this.primaryColor)).forEach(([name, value]) => {
+				style.setProperty(name, value);
+			});
+		} else {
+			PRIMARY_COLOR_VARS.forEach((name) => style.removeProperty(name));
+		}
+	}
+
+	setPrimaryColor(color: string): void {
+		this.primaryColor = color;
+		this.#applyPrimaryVars();
+		void this.#store?.set('primaryColor', color);
+	}
+
+	resetPrimaryColor(): void {
+		this.primaryColor = null;
+		this.#applyPrimaryVars();
+		void this.#store?.set('primaryColor', null);
 	}
 }
 

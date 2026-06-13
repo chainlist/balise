@@ -95,8 +95,16 @@
 	"settings_theme_system": "System",
 	"settings_language_label": "Language",
 	"settings_language_helper": "Select your preferred language.",
+	"settings_primary_label": "Primary color",
+	"settings_primary_helper": "Pick the accent color used for buttons, links, and highlights.",
+	"settings_primary_aria": "Change primary color",
+	"settings_primary_reset": "Reset to default",
 	"settings_background_label": "Background colors",
-	"settings_background_helper": "Pick a color for each corner of the app background.",
+	"settings_background_helper": "Customize the colors of the app background.",
+	"settings_background_mode_corners": "Corners",
+	"settings_background_mode_unified": "Single color",
+	"settings_background_size_label": "Bubble size",
+	"settings_background_unified_aria": "Change background color",
 	"settings_background_corner_aria": "Change corner color",
 	"settings_background_reset": "Reset to default",
 	"settings_background_enable_aria": "Toggle background colors",
@@ -216,6 +224,9 @@
 
 	"editor_placeholder": "Write something, or type '/' for commands",
 	"editor_reading_time": "{minutes} min read",
+
+	"image_add_description": "Add description",
+	"image_not_found": "Image not found",
 
 	"wizard_lang_title": "Choose your language",
 	"wizard_lang_subtitle": "You can change this later in Settings.",

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Calendar } from '$lib/components/shadcn/calendar/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
+	import * as Popover from '$lib/components/shadcn/popover';
 	import { Calendar as CalendarIcon } from '@lucide/svelte';
 	import { today, getLocalTimeZone } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
@@ -17,7 +18,6 @@
 	let journalNotes = $state<Note[]>([]);
 	let draftNote = $state<Note | null>(null);
 	let isCalendarOpen = $state(false);
-	let popoverEl = $state<HTMLElement | null>(null);
 	const onSaveHandlers = new SvelteMap<string, (content: string) => Promise<void>>();
 
 	const allNotes = $derived([...journalNotes, ...(draftNote ? [draftNote] : [])]);
@@ -89,44 +89,28 @@
 			loadForDate(toJSDate(selectedDate));
 		}
 	});
-
-	function handleWindowPointerDown(e: PointerEvent) {
-		if (!isCalendarOpen) return;
-		if (popoverEl && !popoverEl.contains(e.target as Node)) {
-			isCalendarOpen = false;
-		}
-	}
-
-	function handleWindowKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape' && isCalendarOpen) isCalendarOpen = false;
-	}
 </script>
 
-<svelte:window onpointerdown={handleWindowPointerDown} onkeydown={handleWindowKeydown} />
-
 <div class="relative h-full">
-	<div class="absolute top-4 left-4 z-10" bind:this={popoverEl}>
-		<Button
-			variant="outline"
-			size="sm"
-			aria-haspopup="dialog"
-			aria-expanded={isCalendarOpen}
-			onclick={() => (isCalendarOpen = !isCalendarOpen)}
-		>
-			<CalendarIcon class="size-4" />
-			{selectedDateLabel}
-		</Button>
-		<div
-			class="frost-surface absolute top-full left-0 mt-1 overflow-hidden rounded-lg shadow-md"
-			class:hidden={!isCalendarOpen}
-		>
-			<Calendar
-				type="single"
-				bind:value={selectedDate}
-				onValueChange={() => (isCalendarOpen = false)}
-				locale={navigator.language}
-			/>
-		</div>
+	<div class="absolute top-4 left-4 z-10">
+		<Popover.Root bind:open={isCalendarOpen}>
+			<Popover.Trigger>
+				{#snippet child({ props })}
+					<Button variant="outline" size="sm" {...props}>
+						<CalendarIcon class="size-4" />
+						{selectedDateLabel}
+					</Button>
+				{/snippet}
+			</Popover.Trigger>
+			<Popover.Content align="start" class="w-auto overflow-hidden frost-surface! p-0">
+				<Calendar
+					type="single"
+					bind:value={selectedDate}
+					onValueChange={() => (isCalendarOpen = false)}
+					locale={navigator.language}
+				/>
+			</Popover.Content>
+		</Popover.Root>
 	</div>
 
 	<div class="h-full space-y-8 overflow-y-auto pb-16">

@@ -60,8 +60,7 @@
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
 			mdCheckboxPlugin(mode),
-			mdTaskTagPlugin(mode),
-			mdImagePlugin(mode)
+			mdTaskTagPlugin(mode)
 		];
 	}
 
@@ -105,6 +104,8 @@
 					mdTagCompletion,
 					mdSlashPlugin,
 					mdPlaceholderPlugin,
+					// Images always render as widgets, independent of mark mode
+					mdImagePlugin(),
 					// Mark visibility (dynamically reconfigured)
 					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
 					// Theme

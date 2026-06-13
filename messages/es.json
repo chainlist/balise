@@ -95,8 +95,16 @@
 	"settings_theme_system": "Sistema",
 	"settings_language_label": "Idioma",
 	"settings_language_helper": "Selecciona tu idioma preferido.",
+	"settings_primary_label": "Color principal",
+	"settings_primary_helper": "Elige el color de acento utilizado para botones, enlaces y resaltados.",
+	"settings_primary_aria": "Cambiar el color principal",
+	"settings_primary_reset": "Restablecer valores predeterminados",
 	"settings_background_label": "Colores de fondo",
-	"settings_background_helper": "Elige un color para cada esquina del fondo de la aplicación.",
+	"settings_background_helper": "Personaliza los colores del fondo de la aplicación.",
+	"settings_background_mode_corners": "Esquinas",
+	"settings_background_mode_unified": "Color único",
+	"settings_background_size_label": "Tamaño de la burbuja",
+	"settings_background_unified_aria": "Cambiar el color de fondo",
 	"settings_background_corner_aria": "Cambiar el color de la esquina",
 	"settings_background_reset": "Restablecer valores predeterminados",
 	"settings_background_enable_aria": "Activar o desactivar los colores de fondo",
@@ -216,6 +224,9 @@
 
 	"editor_placeholder": "Escribe algo o escribe «/» para ver comandos",
 	"editor_reading_time": "{minutes} min de lectura",
+
+	"image_add_description": "Añadir descripción",
+	"image_not_found": "Imagen no encontrada",
 
 	"wizard_lang_title": "Elige tu idioma",
 	"wizard_lang_subtitle": "Puedes cambiarlo en cualquier momento desde Ajustes.",

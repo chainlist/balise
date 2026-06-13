@@ -95,8 +95,16 @@
 	"settings_theme_system": "Système",
 	"settings_language_label": "Langue",
 	"settings_language_helper": "Sélectionnez votre langue préférée.",
+	"settings_primary_label": "Couleur principale",
+	"settings_primary_helper": "Choisissez la couleur d'accent utilisée pour les boutons, les liens et les surlignages.",
+	"settings_primary_aria": "Changer la couleur principale",
+	"settings_primary_reset": "Réinitialiser par défaut",
 	"settings_background_label": "Couleurs d'arrière-plan",
-	"settings_background_helper": "Choisissez une couleur pour chaque coin de l'arrière-plan de l'application.",
+	"settings_background_helper": "Personnalisez les couleurs de l'arrière-plan de l'application.",
+	"settings_background_mode_corners": "Coins",
+	"settings_background_mode_unified": "Couleur unique",
+	"settings_background_size_label": "Taille de la bulle",
+	"settings_background_unified_aria": "Changer la couleur d'arrière-plan",
 	"settings_background_corner_aria": "Changer la couleur du coin",
 	"settings_background_reset": "Réinitialiser par défaut",
 	"settings_background_enable_aria": "Activer ou désactiver les couleurs d'arrière-plan",
@@ -216,6 +224,9 @@
 
 	"editor_placeholder": "Écrivez quelque chose, ou tapez « / » pour les commandes",
 	"editor_reading_time": "{minutes} min de lecture",
+
+	"image_add_description": "Ajouter une description",
+	"image_not_found": "Image introuvable",
 
 	"wizard_lang_title": "Choisissez votre langue",
 	"wizard_lang_subtitle": "Vous pouvez modifier ceci dans les Paramètres.",

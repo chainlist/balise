@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
 @import '@fontsource-variable/inter';
@@ -26,9 +26,22 @@
 	--surface-tint: oklch(49.149% 0.1582 271.66); /* #4355b9 */
 	--surface-variant: oklch(91.496% 0.0203 289.06); /* #e2e1f0 */
 
-	/* Primary */
-	--primary: oklch(31.114% 0.1735 264.03); /* #011d86 */
+	/* Primary (the *-custom vars are set inline by settings when the user picks a custom primary) */
+	--primary: var(--primary-custom, oklch(31.114% 0.1735 264.03)); /* #011d86 */
 	--on-primary: oklch(100% 0 0); /* #ffffff */
+
+	/* Primary scale (user-overridable in settings) */
+	--primary-50: oklch(0.966 0.008 319.7);
+	--primary-100: oklch(0.924 0.015 316.09);
+	--primary-200: oklch(0.856 0.03 317.3);
+	--primary-300: oklch(0.784 0.047 316.75);
+	--primary-400: oklch(0.697 0.066 317.63);
+	--primary-500: oklch(0.603 0.085 317.13);
+	--primary-600: oklch(0.517 0.071 317.54);
+	--primary-700: oklch(0.42 0.058 317.22);
+	--primary-800: oklch(0.323 0.046 317.1);
+	--primary-900: oklch(0.236 0.035 317.52);
+	--primary-950: oklch(0.18 0.025 316.63);
 	--primary-container: oklch(39.402% 0.1636 268.68); /* #24389c */
 	--on-primary-container: oklch(76.333% 0.1215 275.91); /* #9dabff */
 	--inverse-primary: oklch(83.12% 0.0848 277.76); /* #bac3ff */
@@ -74,6 +87,15 @@
 	--mesh-br: #e48ab0;
 	--mesh-bl: #6ecdb9;
 
+	/* Per-corner bubble scale factors (user-overridable in settings) */
+	--mesh-tl-size: 1;
+	--mesh-tr-size: 1;
+	--mesh-br-size: 1;
+	--mesh-bl-size: 1;
+
+	/* Unified mesh mode: a single tint over the whole background (transparent in corners mode) */
+	--mesh-unified: transparent;
+
 	--radius: 0.5rem;
 
 	/* Shared markdown rendering tokens */
@@ -101,8 +123,8 @@
 	--surface-tint: oklch(83.12% 0.0848 277.76); /* #bac3ff */
 	--surface-variant: oklch(39.784% 0.0201 281.67); /* #454652 */
 
-	--primary: oklch(83.12% 0.0848 277.76); /* #bac3ff */
-	--on-primary: oklch(23.54% 0.1326 263.86); /* #00105b */
+	--primary: var(--primary-custom-dark, oklch(83.12% 0.0848 277.76)); /* #bac3ff */
+	--on-primary: var(--on-primary-custom-dark, oklch(23.54% 0.1326 263.86)); /* #00105b */
 	--primary-container: oklch(40.725% 0.163 269.05); /* #283ca0 */
 	--on-primary-container: oklch(91.474% 0.0422 282.6); /* #dee0ff */
 	--inverse-primary: oklch(31.114% 0.1735 264.03); /* #011d86 */
@@ -142,17 +164,17 @@
 @theme inline {
 	--font-sans: 'Inter Variable', 'Inter', sans-serif;
 
-	--color-primary-50: oklch(0.966 0.008 319.7);
-	--color-primary-100: oklch(0.924 0.015 316.09);
-	--color-primary-200: oklch(0.856 0.03 317.3);
-	--color-primary-300: oklch(0.784 0.047 316.75);
-	--color-primary-400: oklch(0.697 0.066 317.63);
-	--color-primary-500: oklch(0.603 0.085 317.13);
-	--color-primary-600: oklch(0.517 0.071 317.54);
-	--color-primary-700: oklch(0.42 0.058 317.22);
-	--color-primary-800: oklch(0.323 0.046 317.1);
-	--color-primary-900: oklch(0.236 0.035 317.52);
-	--color-primary-950: oklch(0.18 0.025 316.63);
+	--color-primary-50: var(--primary-50);
+	--color-primary-100: var(--primary-100);
+	--color-primary-200: var(--primary-200);
+	--color-primary-300: var(--primary-300);
+	--color-primary-400: var(--primary-400);
+	--color-primary-500: var(--primary-500);
+	--color-primary-600: var(--primary-600);
+	--color-primary-700: var(--primary-700);
+	--color-primary-800: var(--primary-800);
+	--color-primary-900: var(--primary-900);
+	--color-primary-950: var(--primary-950);
 
 	--color-surface: var(--surface);
 	--color-surface-dim: var(--surface-dim);
@@ -171,11 +193,11 @@
 	--color-surface-tint: var(--surface-tint);
 	--color-surface-variant: var(--surface-variant);
 
-	--color-primary: var(--color-primary-500);
-	--color-on-primary: var(--color-primary-900);
-	--color-primary-container: var(--color-primary-100);
-	--color-on-primary-container: var(--color-primary-700);
-	--color-inverse-primary: var(--color-primary-200);
+	--color-primary: var(--primary-500);
+	--color-on-primary: var(--primary-900);
+	--color-primary-container: var(--primary-100);
+	--color-on-primary-container: var(--primary-700);
+	--color-inverse-primary: var(--primary-200);
 
 	--color-secondary: var(--secondary);
 	--color-on-secondary: var(--on-secondary);
@@ -210,7 +232,7 @@
 	--color-background: var(--background);
 	--color-on-background: var(--on-background);
 
-	/* shadcn aliases → M3, keeps existing components on theme */
+	/* shadcn aliases â†’ M3, keeps existing components on theme */
 	--color-foreground: var(--on-surface);
 	--color-card: var(--surface-container-lowest);
 	--color-card-foreground: var(--on-surface);
@@ -360,16 +382,56 @@
 @utility bg-mesh {
 	background-color: #eceaf2;
 	background-image:
-		radial-gradient(58% 52% at 10% 6%, color-mix(in srgb, var(--mesh-tl) 22%, transparent), transparent 62%),
-		radial-gradient(48% 44% at 93% 9%, color-mix(in srgb, var(--mesh-tr) 20%, transparent), transparent 62%),
-		radial-gradient(54% 50% at 84% 97%, color-mix(in srgb, var(--mesh-br) 18%, transparent), transparent 62%),
-		radial-gradient(48% 48% at 22% 99%, color-mix(in srgb, var(--mesh-bl) 15%, transparent), transparent 62%);
+		linear-gradient(
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent),
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent)
+		),
+		radial-gradient(
+			calc(58% * var(--mesh-tl-size)) calc(52% * var(--mesh-tl-size)) at 10% 6%,
+			color-mix(in srgb, var(--mesh-tl) 22%, transparent),
+			transparent 62%
+		),
+		radial-gradient(
+			calc(48% * var(--mesh-tr-size)) calc(44% * var(--mesh-tr-size)) at 93% 9%,
+			color-mix(in srgb, var(--mesh-tr) 20%, transparent),
+			transparent 62%
+		),
+		radial-gradient(
+			calc(54% * var(--mesh-br-size)) calc(50% * var(--mesh-br-size)) at 84% 97%,
+			color-mix(in srgb, var(--mesh-br) 18%, transparent),
+			transparent 62%
+		),
+		radial-gradient(
+			calc(48% * var(--mesh-bl-size)) calc(48% * var(--mesh-bl-size)) at 22% 99%,
+			color-mix(in srgb, var(--mesh-bl) 15%, transparent),
+			transparent 62%
+		);
 }
 @utility bg-mesh-dark {
 	background-color: #0e0d15;
 	background-image:
-		radial-gradient(58% 52% at 10% 6%, color-mix(in srgb, var(--mesh-tl) 22%, transparent), transparent 62%),
-		radial-gradient(48% 44% at 93% 9%, color-mix(in srgb, var(--mesh-tr) 20%, transparent), transparent 62%),
-		radial-gradient(54% 50% at 84% 97%, color-mix(in srgb, var(--mesh-br) 18%, transparent), transparent 62%),
-		radial-gradient(48% 48% at 22% 99%, color-mix(in srgb, var(--mesh-bl) 15%, transparent), transparent 62%);
+		linear-gradient(
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent),
+			color-mix(in srgb, var(--mesh-unified) 16%, transparent)
+		),
+		radial-gradient(
+			calc(58% * var(--mesh-tl-size)) calc(52% * var(--mesh-tl-size)) at 10% 6%,
+			color-mix(in srgb, var(--mesh-tl) 22%, transparent),
+			transparent 62%
+		),
+		radial-gradient(
+			calc(48% * var(--mesh-tr-size)) calc(44% * var(--mesh-tr-size)) at 93% 9%,
+			color-mix(in srgb, var(--mesh-tr) 20%, transparent),
+			transparent 62%
+		),
+		radial-gradient(
+			calc(54% * var(--mesh-br-size)) calc(50% * var(--mesh-br-size)) at 84% 97%,
+			color-mix(in srgb, var(--mesh-br) 18%, transparent),
+			transparent 62%
+		),
+		radial-gradient(
+			calc(48% * var(--mesh-bl-size)) calc(48% * var(--mesh-bl-size)) at 22% 99%,
+			color-mix(in srgb, var(--mesh-bl) 15%, transparent),
+			transparent 62%
+		);
 }

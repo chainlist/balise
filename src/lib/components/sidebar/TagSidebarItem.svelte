@@ -31,25 +31,6 @@
 >
 	<div class="flex min-w-0 items-center gap-2">
 		<TagName {tag} untagged={tag.tag === UNTAGGED_FILTER} />
-		<!-- {#if tag.pinned}
-			<PinIcon
-				size="14"
-				style="color: {tag.color ?? 'currentColor'};"
-				class="shrink-0 text-sidebar-foreground/30"
-			/>
-		{:else if tag.tag === UNTAGGED_FILTER}
-			<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"
-			></span>
-		{:else if tag.color}
-			<span class="shrink-0 text-sm" style="color: {tag.color};">
-				<HashIcon size="14" />
-			</span>
-		{:else}
-			<span class="shrink-0 text-sm text-sidebar-foreground/30">
-				<HashIcon size="14" />
-			</span>
-		{/if}
-		<span class="truncate">{tagDisplayName(tag)}</span> -->
 	</div>
 	<div
 		role="button"
