@@ -269,5 +269,18 @@
 	"close_behavior_title": "Close Balise?",
 	"close_behavior_description": "Choose what happens when you close the app. You can change this later in Settings.",
 	"close_behavior_tray": "Minimize to tray",
-	"close_behavior_quit": "Quit application"
+	"close_behavior_quit": "Quit application",
+
+	"settings_sync_heading": "Sync",
+	"settings_sync_description": "Sync your notes across your devices.",
+	"settings_sync_enable_label": "Enable sync",
+	"settings_sync_enable_helper": "Allow this device to be paired with another.",
+	"settings_sync_id_label": "Your device ID",
+	"settings_sync_pairing_instructions": "On your other device, enter this ID or scan the QR code to link the two.",
+	"settings_sync_id_warning": "Don't share this ID with anyone you don't trust. Anyone who has it can pair their device with your notes.",
+	"settings_sync_id_error": "Failed to load the device ID.",
+	"settings_sync_nav_device_id": "Device ID",
+	"settings_sync_nav_linked": "Linked devices",
+	"settings_sync_linked_empty_title": "No linked devices yet",
+	"settings_sync_linked_empty_desc": "Devices you pair with this one will appear here."
 }

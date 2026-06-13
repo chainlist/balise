@@ -21,7 +21,8 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             commands::file_sync::scan_desk_files,
-            commands::file_sync::read_desk_files_content
+            commands::file_sync::read_desk_files_content,
+            commands::device::device_id
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

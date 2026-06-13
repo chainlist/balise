@@ -269,5 +269,18 @@
 	"close_behavior_title": "Fermer Balise ?",
 	"close_behavior_description": "Choisissez ce qui se passe quand vous fermez l'application. Vous pouvez modifier cela dans les paramètres.",
 	"close_behavior_tray": "Réduire dans la barre système",
-	"close_behavior_quit": "Quitter l'application"
+	"close_behavior_quit": "Quitter l'application",
+
+	"settings_sync_heading": "Synchronisation",
+	"settings_sync_description": "Synchronisez vos notes entre vos appareils.",
+	"settings_sync_enable_label": "Activer la synchronisation",
+	"settings_sync_enable_helper": "Autoriser l'association de cet appareil avec un autre.",
+	"settings_sync_id_label": "Identifiant de l'appareil",
+	"settings_sync_pairing_instructions": "Sur votre autre appareil, saisissez cet identifiant ou scannez le QR code pour les associer.",
+	"settings_sync_id_warning": "Ne partagez cet identifiant qu'avec des personnes de confiance. Quiconque le possède peut associer son appareil à vos notes.",
+	"settings_sync_id_error": "Échec du chargement de l'identifiant de l'appareil.",
+	"settings_sync_nav_device_id": "Identifiant",
+	"settings_sync_nav_linked": "Appareils liés",
+	"settings_sync_linked_empty_title": "Aucun appareil lié",
+	"settings_sync_linked_empty_desc": "Les appareils que vous associez à celui-ci apparaîtront ici."
 }
