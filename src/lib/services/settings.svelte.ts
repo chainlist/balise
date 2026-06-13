@@ -51,26 +51,134 @@ const MESH_SIZE_CSS_VARS = [
 	'--mesh-bl-size'
 ] as const;
 
+/* Settings mirror the sections of the settings modal. Each section is its own
+   object, persisted under its own key in settings.json. */
+export interface GeneralSettings {
+	language: 'fr' | 'es' | 'en' | 'de';
+	closeToTray: boolean | null;
+}
+
+export interface AppearanceSettings {
+	theme: Theme;
+	primaryColor: string | null;
+	meshColors: MeshColors;
+	meshSizes: MeshSizes;
+	meshMode: MeshMode;
+	meshUnifiedColor: string;
+	meshEnabled: boolean;
+}
+
+export interface EditorSettings {
+	fontSize: number;
+	lineHeight: number;
+	markdownMarks: MarkMode;
+}
+
+export interface MagicTagsSettings {
+	tags: MagicTag[];
+}
+
+export interface ShortcutsSettings {
+	customBindings: Record<string, string>;
+}
+
+type SectionKey = 'general' | 'appearance' | 'editor' | 'magicTags' | 'shortcuts';
+
+/* Flat keys from before settings were grouped into sections; migrated once. */
+const LEGACY_KEYS = [
+	'theme',
+	'fontSize',
+	'lineHeight',
+	'markdownMarks',
+	'customBindings',
+	'language',
+	'magicTags',
+	'closeToTray',
+	'meshColors',
+	'meshSizes',
+	'meshMode',
+	'meshUnifiedColor',
+	'meshEnabled',
+	'primaryColor'
+] as const;
+
 class SettingsService {
-	theme = $state<Theme>('system');
-	fontSize = $state(16);
-	lineHeight = $state(1.75);
-	markdownMarks = $state<MarkMode>('cursor');
-	customBindings = $state<Record<string, string>>({});
-	language = $state<'fr' | 'es' | 'en' | 'de'>('en');
-	magicTags = $state<MagicTag[]>(DEFAULT_MAGIC_TAGS);
-	closeToTray = $state<boolean | null>(null);
-	meshColors = $state<MeshColors>([...DEFAULT_MESH_COLORS]);
-	meshSizes = $state<MeshSizes>([...DEFAULT_MESH_SIZES]);
-	meshMode = $state<MeshMode>(MESH_MODES.CORNERS);
-	meshUnifiedColor = $state(DEFAULT_MESH_UNIFIED_COLOR);
-	meshEnabled = $state(true);
-	primaryColor = $state<string | null>(null);
+	general = $state<GeneralSettings>({ language: 'en', closeToTray: null });
+	appearance = $state<AppearanceSettings>({
+		theme: 'system',
+		primaryColor: null,
+		meshColors: [...DEFAULT_MESH_COLORS],
+		meshSizes: [...DEFAULT_MESH_SIZES],
+		meshMode: MESH_MODES.CORNERS,
+		meshUnifiedColor: DEFAULT_MESH_UNIFIED_COLOR,
+		meshEnabled: true
+	});
+	editor = $state<EditorSettings>({ fontSize: 16, lineHeight: 1.75, markdownMarks: 'cursor' });
+	magicTags = $state<MagicTagsSettings>({ tags: DEFAULT_MAGIC_TAGS });
+	shortcuts = $state<ShortcutsSettings>({ customBindings: {} });
 
 	#store: Store | null = null;
 
 	async init(): Promise<void> {
 		this.#store = await load(await resolveStorePath('settings.json'), { autoSave: 100 });
+
+		await this.#migrate();
+
+		const [general, appearance, editor, magicTags, shortcuts] = await Promise.all([
+			this.#store.get<GeneralSettings>('general'),
+			this.#store.get<AppearanceSettings>('appearance'),
+			this.#store.get<EditorSettings>('editor'),
+			this.#store.get<MagicTagsSettings>('magicTags'),
+			this.#store.get<ShortcutsSettings>('shortcuts')
+		]);
+
+		this.general = {
+			language: general?.language ?? 'en',
+			closeToTray: general?.closeToTray ?? null
+		};
+		this.appearance = {
+			theme: appearance?.theme ?? 'system',
+			primaryColor: appearance?.primaryColor ?? null,
+			meshColors: appearance?.meshColors ?? [...DEFAULT_MESH_COLORS],
+			meshSizes: appearance?.meshSizes ?? [...DEFAULT_MESH_SIZES],
+			meshMode: appearance?.meshMode ?? MESH_MODES.CORNERS,
+			meshUnifiedColor: appearance?.meshUnifiedColor ?? DEFAULT_MESH_UNIFIED_COLOR,
+			meshEnabled: appearance?.meshEnabled ?? true
+		};
+		this.editor = {
+			fontSize: editor?.fontSize ?? 16,
+			lineHeight: editor?.lineHeight ?? 1.75,
+			markdownMarks: editor?.markdownMarks ?? 'cursor'
+		};
+		this.magicTags = {
+			tags: (magicTags?.tags ?? DEFAULT_MAGIC_TAGS).map(({ matchType, ...rest }) => ({
+				...rest,
+				matchType: (matchType as MagicTagMatchType | undefined) ?? MAGIC_TAG_MATCH_TYPES.CONTAINS
+			}))
+		};
+		this.shortcuts = {
+			customBindings: shortcuts?.customBindings ?? {}
+		};
+
+		setLocale(this.general.language);
+		this.#applyEditorVars();
+		this.#applyMeshVars();
+		this.#applyPrimaryVars();
+
+		/* Keep theme in sync across windows (main <-> quick add) */
+		void this.#store.onKeyChange<AppearanceSettings>('appearance', (appearance) => {
+			this.appearance.theme = appearance?.theme ?? 'system';
+		});
+	}
+
+	/**
+	 * One-time migration of the legacy flat keys (theme, fontSize, ...) into the
+	 * section objects. Runs before load and is idempotent: it skips once the
+	 * section keys exist, and does nothing on a fresh install.
+	 */
+	async #migrate(): Promise<void> {
+		const store = this.#store!;
+		if ((await store.get('appearance')) !== undefined) return;
 
 		const [
 			theme,
@@ -88,171 +196,178 @@ class SettingsService {
 			meshEnabled,
 			primaryColor
 		] = await Promise.all([
-			this.#store.get<Theme>('theme'),
-			this.#store.get<number>('fontSize'),
-			this.#store.get<number>('lineHeight'),
-			this.#store.get<MarkMode>('markdownMarks'),
-			this.#store.get<Record<string, string>>('customBindings'),
-			this.#store.get<'fr' | 'es' | 'en' | 'de'>('language'),
-			this.#store.get<MagicTag[]>('magicTags'),
-			this.#store.get<boolean>('closeToTray'),
-			this.#store.get<MeshColors>('meshColors'),
-			this.#store.get<MeshSizes>('meshSizes'),
-			this.#store.get<MeshMode>('meshMode'),
-			this.#store.get<string>('meshUnifiedColor'),
-			this.#store.get<boolean>('meshEnabled'),
-			this.#store.get<string>('primaryColor')
+			store.get<Theme>('theme'),
+			store.get<number>('fontSize'),
+			store.get<number>('lineHeight'),
+			store.get<MarkMode>('markdownMarks'),
+			store.get<Record<string, string>>('customBindings'),
+			store.get<GeneralSettings['language']>('language'),
+			store.get<MagicTag[]>('magicTags'),
+			store.get<boolean>('closeToTray'),
+			store.get<MeshColors>('meshColors'),
+			store.get<MeshSizes>('meshSizes'),
+			store.get<MeshMode>('meshMode'),
+			store.get<string>('meshUnifiedColor'),
+			store.get<boolean>('meshEnabled'),
+			store.get<string>('primaryColor')
 		]);
 
-		this.theme = theme ?? 'system';
-		this.fontSize = fontSize ?? 16;
-		this.lineHeight = lineHeight ?? 1.75;
-		this.markdownMarks = markdownMarks ?? 'cursor';
-		this.customBindings = customBindings ?? {};
-		this.language = language ?? 'en';
-		this.magicTags = (magicTags ?? DEFAULT_MAGIC_TAGS).map(({ matchType, ...rest }) => ({
-			...rest,
-			matchType: (matchType as MagicTagMatchType | undefined) ?? MAGIC_TAG_MATCH_TYPES.CONTAINS
-		}));
-		this.closeToTray = closeToTray ?? null;
-		this.meshColors = meshColors ?? [...DEFAULT_MESH_COLORS];
-		this.meshSizes = meshSizes ?? [...DEFAULT_MESH_SIZES];
-		this.meshMode = meshMode ?? MESH_MODES.CORNERS;
-		this.meshUnifiedColor = meshUnifiedColor ?? DEFAULT_MESH_UNIFIED_COLOR;
-		this.meshEnabled = meshEnabled ?? true;
-		this.primaryColor = primaryColor ?? null;
+		const hasLegacy = [
+			theme,
+			fontSize,
+			lineHeight,
+			markdownMarks,
+			customBindings,
+			language,
+			magicTags,
+			closeToTray,
+			meshColors,
+			meshSizes,
+			meshMode,
+			meshUnifiedColor,
+			meshEnabled,
+			primaryColor
+		].some((value) => value !== undefined);
+		if (!hasLegacy) return;
 
-		setLocale(this.language);
-		this.#applyEditorVars();
-		this.#applyMeshVars();
-		this.#applyPrimaryVars();
-
-		/* Keep theme in sync across windows (main <-> quick add) */
-		void this.#store.onKeyChange<Theme>('theme', (theme) => {
-			this.theme = theme ?? 'system';
+		await store.set('general', { language, closeToTray });
+		await store.set('appearance', {
+			theme,
+			primaryColor,
+			meshColors,
+			meshSizes,
+			meshMode,
+			meshUnifiedColor,
+			meshEnabled
 		});
+		await store.set('editor', { fontSize, lineHeight, markdownMarks });
+		await store.set('magicTags', { tags: magicTags });
+		await store.set('shortcuts', { customBindings });
+
+		await Promise.all(LEGACY_KEYS.map((key) => store.delete(key)));
+		await store.save();
+	}
+
+	#persist(section: SectionKey): void {
+		void this.#store?.set(section, $state.snapshot(this[section]));
 	}
 
 	#applyEditorVars(): void {
-		document.documentElement.style.setProperty('--editor-font-size', `${this.fontSize}px`);
-		document.documentElement.style.setProperty('--editor-line-height', `${this.lineHeight}`);
+		document.documentElement.style.setProperty('--editor-font-size', `${this.editor.fontSize}px`);
+		document.documentElement.style.setProperty('--editor-line-height', `${this.editor.lineHeight}`);
 	}
 
 	#applyMeshVars(): void {
 		const style = document.documentElement.style;
-		const cornersVisible = this.meshEnabled && this.meshMode === MESH_MODES.CORNERS;
+		const { meshEnabled, meshMode, meshColors, meshSizes, meshUnifiedColor } = this.appearance;
+		const cornersVisible = meshEnabled && meshMode === MESH_MODES.CORNERS;
 		MESH_CSS_VARS.forEach((cssVar, i) => {
-			style.setProperty(cssVar, cornersVisible ? this.meshColors[i] : 'transparent');
+			style.setProperty(cssVar, cornersVisible ? meshColors[i] : 'transparent');
 		});
 		MESH_SIZE_CSS_VARS.forEach((cssVar, i) => {
-			style.setProperty(cssVar, `${this.meshSizes[i]}`);
+			style.setProperty(cssVar, `${meshSizes[i]}`);
 		});
 		style.setProperty(
 			'--mesh-unified',
-			this.meshEnabled && this.meshMode === MESH_MODES.UNIFIED
-				? this.meshUnifiedColor
-				: 'transparent'
+			meshEnabled && meshMode === MESH_MODES.UNIFIED ? meshUnifiedColor : 'transparent'
 		);
 	}
 
 	setTheme(theme: Theme): void {
-		this.theme = theme;
-		void this.#store?.set('theme', theme);
+		this.appearance.theme = theme;
+		this.#persist('appearance');
 	}
 
 	setFontSize(size: number): void {
-		this.fontSize = size;
+		this.editor.fontSize = size;
 		this.#applyEditorVars();
-		void this.#store?.set('fontSize', size);
+		this.#persist('editor');
 	}
 
 	setLineHeight(value: number): void {
-		this.lineHeight = value;
+		this.editor.lineHeight = value;
 		this.#applyEditorVars();
-		void this.#store?.set('lineHeight', value);
+		this.#persist('editor');
 	}
 
 	setMarkdownMarks(value: MarkMode): void {
-		this.markdownMarks = value;
-		void this.#store?.set('markdownMarks', value);
+		this.editor.markdownMarks = value;
+		this.#persist('editor');
 	}
 
 	async setLanguage(lang: string): Promise<void> {
-		this.language = lang;
+		this.general.language = lang as GeneralSettings['language'];
 		if (this.#store) {
-			await this.#store.set('language', lang);
+			await this.#store.set('general', $state.snapshot(this.general));
 			await this.#store.save();
 		}
 	}
 
 	setBinding(id: string, binding: string): void {
-		this.customBindings = { ...this.customBindings, [id]: binding };
-		void this.#store?.set('customBindings', this.customBindings);
+		this.shortcuts.customBindings = { ...this.shortcuts.customBindings, [id]: binding };
+		this.#persist('shortcuts');
 	}
 
 	resetBinding(id: string): void {
-		const next = { ...this.customBindings };
+		const next = { ...this.shortcuts.customBindings };
 		delete next[id];
-		this.customBindings = next;
-		void this.#store?.set('customBindings', next);
+		this.shortcuts.customBindings = next;
+		this.#persist('shortcuts');
 	}
 
 	setMagicTags(tags: MagicTag[]): void {
-		this.magicTags = tags;
-		void this.#store?.set('magicTags', tags);
+		this.magicTags.tags = tags;
+		this.#persist('magicTags');
 	}
 
 	setCloseToTray(value: boolean): void {
-		this.closeToTray = value;
-		void this.#store?.set('closeToTray', value);
+		this.general.closeToTray = value;
+		this.#persist('general');
 	}
 
 	setMeshColor(corner: number, color: string): void {
-		this.meshColors[corner] = color;
+		this.appearance.meshColors[corner] = color;
 		this.#applyMeshVars();
-		void this.#store?.set('meshColors', $state.snapshot(this.meshColors));
+		this.#persist('appearance');
 	}
 
 	setMeshSize(corner: number, size: number): void {
-		this.meshSizes[corner] = size;
+		this.appearance.meshSizes[corner] = size;
 		this.#applyMeshVars();
-		void this.#store?.set('meshSizes', $state.snapshot(this.meshSizes));
+		this.#persist('appearance');
 	}
 
 	setMeshMode(mode: MeshMode): void {
-		this.meshMode = mode;
+		this.appearance.meshMode = mode;
 		this.#applyMeshVars();
-		void this.#store?.set('meshMode', mode);
+		this.#persist('appearance');
 	}
 
 	setMeshUnifiedColor(color: string): void {
-		this.meshUnifiedColor = color;
+		this.appearance.meshUnifiedColor = color;
 		this.#applyMeshVars();
-		void this.#store?.set('meshUnifiedColor', color);
+		this.#persist('appearance');
 	}
 
 	resetMesh(): void {
-		this.meshMode = MESH_MODES.CORNERS;
-		this.meshColors = [...DEFAULT_MESH_COLORS];
-		this.meshSizes = [...DEFAULT_MESH_SIZES];
-		this.meshUnifiedColor = DEFAULT_MESH_UNIFIED_COLOR;
+		this.appearance.meshMode = MESH_MODES.CORNERS;
+		this.appearance.meshColors = [...DEFAULT_MESH_COLORS];
+		this.appearance.meshSizes = [...DEFAULT_MESH_SIZES];
+		this.appearance.meshUnifiedColor = DEFAULT_MESH_UNIFIED_COLOR;
 		this.#applyMeshVars();
-		void this.#store?.set('meshMode', this.meshMode);
-		void this.#store?.set('meshColors', $state.snapshot(this.meshColors));
-		void this.#store?.set('meshSizes', $state.snapshot(this.meshSizes));
-		void this.#store?.set('meshUnifiedColor', this.meshUnifiedColor);
+		this.#persist('appearance');
 	}
 
 	setMeshEnabled(value: boolean): void {
-		this.meshEnabled = value;
+		this.appearance.meshEnabled = value;
 		this.#applyMeshVars();
-		void this.#store?.set('meshEnabled', value);
+		this.#persist('appearance');
 	}
 
 	#applyPrimaryVars(): void {
 		const style = document.documentElement.style;
-		if (this.primaryColor) {
-			Object.entries(primaryColorVars(this.primaryColor)).forEach(([name, value]) => {
+		if (this.appearance.primaryColor) {
+			Object.entries(primaryColorVars(this.appearance.primaryColor)).forEach(([name, value]) => {
 				style.setProperty(name, value);
 			});
 		} else {
@@ -261,15 +376,15 @@ class SettingsService {
 	}
 
 	setPrimaryColor(color: string): void {
-		this.primaryColor = color;
+		this.appearance.primaryColor = color;
 		this.#applyPrimaryVars();
-		void this.#store?.set('primaryColor', color);
+		this.#persist('appearance');
 	}
 
 	resetPrimaryColor(): void {
-		this.primaryColor = null;
+		this.appearance.primaryColor = null;
 		this.#applyPrimaryVars();
-		void this.#store?.set('primaryColor', null);
+		this.#persist('appearance');
 	}
 }
 

@@ -14,7 +14,7 @@
 		<p class="text-xs text-muted-foreground">{m.settings_primary_helper()}</p>
 	</div>
 	<div class="flex items-center gap-2">
-		{#if settingsService.primaryColor}
+		{#if settingsService.appearance.primaryColor}
 			<Button
 				variant="ghost"
 				size="sm"
@@ -40,7 +40,7 @@
 						<Popover.Close
 							class={cn(
 								'size-6 rounded-full transition-transform hover:scale-110',
-								settingsService.primaryColor === color &&
+								settingsService.appearance.primaryColor === color &&
 									'ring-2 ring-primary ring-offset-2 ring-offset-popover'
 							)}
 							style="background-color: {color}"

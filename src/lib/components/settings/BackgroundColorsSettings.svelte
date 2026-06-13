@@ -15,7 +15,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { RotateCcwIcon } from '@lucide/svelte';
 
-	/* Order matches settingsService.meshColors: top-left, top-right, bottom-right, bottom-left */
+	/* Order matches settingsService.appearance.meshColors: top-left, top-right, bottom-right, bottom-left */
 	const corners = [
 		{ index: 0, position: 'top-2 left-2' },
 		{ index: 1, position: 'top-2 right-2' },
@@ -29,10 +29,10 @@
 	];
 
 	const isCustomized = $derived(
-		settingsService.meshMode !== MESH_MODES.CORNERS ||
-			settingsService.meshUnifiedColor !== DEFAULT_MESH_UNIFIED_COLOR ||
-			settingsService.meshColors.some((color, i) => color !== DEFAULT_MESH_COLORS[i]) ||
-			settingsService.meshSizes.some((size, i) => size !== DEFAULT_MESH_SIZES[i])
+		settingsService.appearance.meshMode !== MESH_MODES.CORNERS ||
+			settingsService.appearance.meshUnifiedColor !== DEFAULT_MESH_UNIFIED_COLOR ||
+			settingsService.appearance.meshColors.some((color, i) => color !== DEFAULT_MESH_COLORS[i]) ||
+			settingsService.appearance.meshSizes.some((size, i) => size !== DEFAULT_MESH_SIZES[i])
 	);
 </script>
 
@@ -72,7 +72,7 @@
 			{/if}
 
 			<Switch.Root
-				checked={settingsService.meshEnabled}
+				checked={settingsService.appearance.meshEnabled}
 				onCheckedChange={(checked) => settingsService.setMeshEnabled(checked)}
 				aria-label={m.settings_background_enable_aria()}
 				class="inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest"
@@ -87,17 +87,17 @@
 	<div
 		class={cn(
 			'space-y-3 transition-opacity duration-300',
-			!settingsService.meshEnabled && 'pointer-events-none opacity-50'
+			!settingsService.appearance.meshEnabled && 'pointer-events-none opacity-50'
 		)}
 	>
 		<SegmentedToggle
 			options={modes}
-			value={settingsService.meshMode}
+			value={settingsService.appearance.meshMode}
 			onValueChange={(mode) => settingsService.setMeshMode(mode)}
 		/>
 
 		<div class="relative mx-auto h-44 max-w-md rounded-xl border bg-mesh dark:bg-mesh-dark">
-			{#if settingsService.meshMode === MESH_MODES.CORNERS}
+			{#if settingsService.appearance.meshMode === MESH_MODES.CORNERS}
 				{#each corners as corner (corner.index)}
 					<Popover.Root>
 						<Popover.Trigger
@@ -105,7 +105,7 @@
 								'absolute size-6 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110 dark:border-white/70',
 								corner.position
 							)}
-							style="background-color: {settingsService.meshColors[corner.index]}"
+							style="background-color: {settingsService.appearance.meshColors[corner.index]}"
 							aria-label={m.settings_background_corner_aria()}
 						/>
 						<Popover.Portal>
@@ -113,7 +113,7 @@
 								sideOffset={6}
 								class="z-50 space-y-3 rounded-xl bg-popover p-3 shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
 							>
-								{@render palette(settingsService.meshColors[corner.index], (color) =>
+								{@render palette(settingsService.appearance.meshColors[corner.index], (color) =>
 									settingsService.setMeshColor(corner.index, color)
 								)}
 								<label class="block space-y-1">
@@ -125,7 +125,7 @@
 										min="50"
 										max="200"
 										step="10"
-										value={settingsService.meshSizes[corner.index] * 100}
+										value={settingsService.appearance.meshSizes[corner.index] * 100}
 										oninput={(e) =>
 											settingsService.setMeshSize(
 												corner.index,
@@ -142,7 +142,7 @@
 				<Popover.Root>
 					<Popover.Trigger
 						class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110 dark:border-white/70"
-						style="background-color: {settingsService.meshUnifiedColor}"
+						style="background-color: {settingsService.appearance.meshUnifiedColor}"
 						aria-label={m.settings_background_unified_aria()}
 					/>
 					<Popover.Portal>
@@ -150,7 +150,7 @@
 							sideOffset={6}
 							class="z-50 rounded-xl bg-popover p-3 shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
 						>
-							{@render palette(settingsService.meshUnifiedColor, (color) =>
+							{@render palette(settingsService.appearance.meshUnifiedColor, (color) =>
 								settingsService.setMeshUnifiedColor(color)
 							)}
 						</Popover.Content>

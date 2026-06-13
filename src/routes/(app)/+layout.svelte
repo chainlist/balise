@@ -39,7 +39,7 @@
 		const win = getCurrentWindow();
 		await win.onCloseRequested(async (event) => {
 			event.preventDefault();
-			const pref = settingsService.closeToTray;
+			const pref = settingsService.general.closeToTray;
 			if (pref === null) {
 				showCloseDialog = true;
 			} else if (pref) {

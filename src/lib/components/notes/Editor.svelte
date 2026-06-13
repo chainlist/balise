@@ -65,7 +65,7 @@
 	}
 
 	$effect(() => {
-		const mode = settingsService.markdownMarks;
+		const mode = settingsService.editor.markdownMarks;
 		const effectiveMode: MarkMode = mode === 'cursor' && !focused ? 'never' : mode;
 		if (editorView) {
 			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(effectiveMode)) });
@@ -107,7 +107,7 @@
 					// Images always render as widgets, independent of mark mode
 					mdImagePlugin(),
 					// Mark visibility (dynamically reconfigured)
-					markCompartment.of(makeMarkPlugins(settingsService.markdownMarks)),
+					markCompartment.of(makeMarkPlugins(settingsService.editor.markdownMarks)),
 					// Theme
 					noteEditorTheme,
 					// Focus + change listener

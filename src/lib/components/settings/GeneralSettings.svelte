@@ -12,21 +12,21 @@
 	};
 
 	const languageLabel = $derived(
-		localeLabels[settingsService.language] ?? settingsService.language
+		localeLabels[settingsService.general.language] ?? settingsService.general.language
 	);
 
 	const closeBehaviorValue = $derived(
-		settingsService.closeToTray === true
+		settingsService.general.closeToTray === true
 			? 'tray'
-			: settingsService.closeToTray === false
+			: settingsService.general.closeToTray === false
 				? 'quit'
 				: undefined
 	);
 
 	const closeBehaviorLabel = $derived(
-		settingsService.closeToTray === true
+		settingsService.general.closeToTray === true
 			? m.close_behavior_tray()
-			: settingsService.closeToTray === false
+			: settingsService.general.closeToTray === false
 				? m.close_behavior_quit()
 				: '—'
 	);
@@ -46,7 +46,7 @@
 			</div>
 			<Select.Root
 				type="single"
-				value={settingsService.language}
+				value={settingsService.general.language}
 				onValueChange={(v) => v && applyLanguageChange(v)}
 			>
 				<Select.Trigger class="w-auto whitespace-nowrap">{languageLabel}</Select.Trigger>

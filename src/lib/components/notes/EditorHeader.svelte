@@ -4,7 +4,9 @@
 
 	let { readingTime, date }: { readingTime: number; date: Date } = $props();
 
-	const intl = $derived(new Intl.DateTimeFormat(settingsService.language, { dateStyle: 'medium' }));
+	const intl = $derived(
+		new Intl.DateTimeFormat(settingsService.general.language, { dateStyle: 'medium' })
+	);
 </script>
 
 <div

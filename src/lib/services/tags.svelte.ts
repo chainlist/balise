@@ -35,7 +35,7 @@ function escapeRegex(s: string): string {
 }
 
 function extractMagicTags(content: string): string[] {
-	const magicTags = settingsService.magicTags;
+	const magicTags = settingsService.magicTags.tags;
 	if (magicTags.length === 0) return [];
 
 	const found = new Set<string>();
