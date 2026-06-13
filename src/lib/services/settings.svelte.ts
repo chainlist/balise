@@ -83,7 +83,11 @@ export interface ShortcutsSettings {
 	customBindings: Record<string, string>;
 }
 
-type SectionKey = 'general' | 'appearance' | 'editor' | 'magicTags' | 'shortcuts';
+export interface SyncSettings {
+	enabled: boolean;
+}
+
+type SectionKey = 'general' | 'appearance' | 'editor' | 'magicTags' | 'shortcuts' | 'sync';
 
 /* Flat keys from before settings were grouped into sections; migrated once. */
 const LEGACY_KEYS = [
@@ -117,6 +121,7 @@ class SettingsService {
 	editor = $state<EditorSettings>({ fontSize: 16, lineHeight: 1.75, markdownMarks: 'cursor' });
 	magicTags = $state<MagicTagsSettings>({ tags: DEFAULT_MAGIC_TAGS });
 	shortcuts = $state<ShortcutsSettings>({ customBindings: {} });
+	sync = $state<SyncSettings>({ enabled: false });
 
 	#store: Store | null = null;
 
@@ -125,12 +130,13 @@ class SettingsService {
 
 		await this.#migrate();
 
-		const [general, appearance, editor, magicTags, shortcuts] = await Promise.all([
+		const [general, appearance, editor, magicTags, shortcuts, sync] = await Promise.all([
 			this.#store.get<GeneralSettings>('general'),
 			this.#store.get<AppearanceSettings>('appearance'),
 			this.#store.get<EditorSettings>('editor'),
 			this.#store.get<MagicTagsSettings>('magicTags'),
-			this.#store.get<ShortcutsSettings>('shortcuts')
+			this.#store.get<ShortcutsSettings>('shortcuts'),
+			this.#store.get<SyncSettings>('sync')
 		]);
 
 		this.general = {
@@ -160,6 +166,9 @@ class SettingsService {
 		};
 		this.shortcuts = {
 			customBindings: shortcuts?.customBindings ?? {}
+		};
+		this.sync = {
+			enabled: sync?.enabled ?? false
 		};
 
 		setLocale(this.general.language);
@@ -330,6 +339,11 @@ class SettingsService {
 	setAutoUpdate(value: boolean): void {
 		this.general.autoUpdate = value;
 		this.#persist('general');
+	}
+
+	setSyncEnabled(value: boolean): void {
+		this.sync.enabled = value;
+		this.#persist('sync');
 	}
 
 	setMeshColor(corner: number, color: string): void {

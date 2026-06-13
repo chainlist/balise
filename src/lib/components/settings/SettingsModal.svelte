@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog } from 'bits-ui';
-	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon, SparklesIcon, SlidersHorizontalIcon } from '@lucide/svelte';
+	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon, SparklesIcon, SlidersHorizontalIcon, RefreshCwIcon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
@@ -9,6 +9,7 @@
 	import AboutSettings from './AboutSettings.svelte';
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
 	import GeneralSettings from './GeneralSettings.svelte';
+	import SyncSettings from './SyncSettings.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -56,6 +57,12 @@
 			label: m.settings_shortcuts_heading(),
 			icon: KeyboardIcon,
 			component: ShortcutsSettings
+		},
+		{
+			id: 'sync',
+			label: m.settings_sync_heading(),
+			icon: RefreshCwIcon,
+			component: SyncSettings
 		},
 		{
 			id: 'about',
