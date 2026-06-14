@@ -1,14 +1,10 @@
 <script lang="ts">
 	import { Switch } from 'bits-ui';
-	import { SmartphoneIcon, MonitorSmartphoneIcon } from '@lucide/svelte';
-	import type { Component } from 'svelte';
 	import { settingsService, SYNC_INTERVAL_OPTIONS } from '$lib/services/settings.svelte';
 	import { startSync, stopSync } from '$lib/utils/sync';
 	import { deviceSyncService } from '$lib/services/device-sync.svelte';
 	import { toasterService, errorMessage } from '$lib/services/toaster';
-	import { cn } from '$lib/utils.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
-	import SyncDeviceId from './SyncDeviceId.svelte';
 	import SyncLinkedDevices from './SyncLinkedDevices.svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -38,29 +34,6 @@
 	const intervalLabel = $derived(
 		m.settings_sync_interval_option({ minutes: settingsService.sync.intervalMinutes })
 	);
-
-	const navItems: {
-		id: string;
-		label: string;
-		icon: typeof SmartphoneIcon;
-		component: Component;
-	}[] = [
-		{
-			id: 'device-id',
-			label: m.settings_sync_nav_device_id(),
-			icon: SmartphoneIcon,
-			component: SyncDeviceId
-		},
-		{
-			id: 'linked',
-			label: m.settings_sync_nav_linked(),
-			icon: MonitorSmartphoneIcon,
-			component: SyncLinkedDevices
-		}
-	];
-
-	let activeSection = $state(navItems[0]);
-	const ActiveSection = $derived(activeSection.component);
 </script>
 
 <div class="flex h-full flex-col">
@@ -108,26 +81,8 @@
 				</Select.Content>
 			</Select.Root>
 		</div>
-		<div class="flex min-h-0 flex-1">
-			<div class="flex w-44 shrink-0 flex-col gap-1 border-r bg-muted/30 p-3">
-				{#each navItems as item (item.id)}
-					<button
-						onclick={() => (activeSection = item)}
-						class={cn(
-							'flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
-							activeSection.component === item.component
-								? 'bg-sidebar-accent font-medium text-on-surface'
-								: 'text-muted-foreground hover:bg-muted hover:text-foreground'
-						)}
-					>
-						<item.icon size="15" />
-						{item.label}
-					</button>
-				{/each}
-			</div>
-			<div class="min-w-0 flex-1 overflow-y-auto px-6 py-6">
-				<ActiveSection />
-			</div>
+		<div class="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+			<SyncLinkedDevices />
 		</div>
 	{/if}
 </div>

@@ -18,7 +18,6 @@
 	import UpdateNotifier from '$lib/components/UpdateNotifier.svelte';
 	import WizardModal from '$lib/components/WizardModal.svelte';
 	import NewsModal from '$lib/components/NewsModal.svelte';
-	import PairingRequestDialog from '$lib/components/PairingRequestDialog.svelte';
 	import { LoaderCircle } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import { fade } from 'svelte/transition';
@@ -108,7 +107,6 @@
 		{#if uiState.modal.isNewsOpen}
 			<NewsModal />
 		{/if}
-		<PairingRequestDialog />
 	{/if}
 </SidebarProvider>
 

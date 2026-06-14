@@ -5,9 +5,12 @@ export function getDeviceId(): Promise<string> {
 	return invoke<string>('device_id');
 }
 
-/** Splits a raw id into groups of 4 characters for readable display. */
-export function deviceIdGroups(id: string): string[] {
-	return id.match(/.{1,4}/g) ?? [];
+/**
+ * Converts a peer's hex-encoded public key (as the sync server stores it) into
+ * the Base32 device id used to dial it over iroh.
+ */
+export function deviceIdFromPublicKey(publicKeyHex: string): Promise<string> {
+	return invoke<string>('device_id_from_public_key', { publicKeyHex });
 }
 
 /** Formats a raw id into hyphen-separated groups of 4 for display. */

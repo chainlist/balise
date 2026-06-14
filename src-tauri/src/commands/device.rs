@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use data_encoding::BASE32_NOPAD;
-use ed25519_dalek::SigningKey;
+use data_encoding::{BASE32_NOPAD, HEXLOWER, HEXLOWER_PERMISSIVE};
+use ed25519_dalek::{Signer, SigningKey};
 use tauri::Manager;
 
 /// Path to this device's private key, kept machine-local (not in the
@@ -42,4 +42,38 @@ pub(crate) fn load_or_create_signing_key(app: &tauri::AppHandle) -> Result<Signi
 pub fn device_id(app: tauri::AppHandle) -> Result<String, String> {
     let key = load_or_create_signing_key(&app)?;
     Ok(BASE32_NOPAD.encode(key.verifying_key().as_bytes()))
+}
+
+/// Returns this device's public key as lowercase hex (64 chars). The sync server
+/// identifies devices by the hex-encoded key, so registration sends this form.
+#[tauri::command]
+pub fn public_key_hex(app: tauri::AppHandle) -> Result<String, String> {
+    let key = load_or_create_signing_key(&app)?;
+    Ok(HEXLOWER.encode(key.verifying_key().as_bytes()))
+}
+
+/// Signs a server challenge with this device's Ed25519 key, proving ownership of
+/// the key without revealing it. `nonce` is the hex-encoded nonce from the
+/// server; the returned signature is hex-encoded.
+#[tauri::command]
+pub fn sign_challenge(app: tauri::AppHandle, nonce: String) -> Result<String, String> {
+    let key = load_or_create_signing_key(&app)?;
+    let message = HEXLOWER_PERMISSIVE
+        .decode(nonce.as_bytes())
+        .map_err(|_| "invalid nonce".to_string())?;
+    let signature = key.sign(&message);
+    Ok(HEXLOWER.encode(&signature.to_bytes()))
+}
+
+/// Converts a hex-encoded public key (as returned by the sync server for a peer)
+/// into the Base32 device id the rest of the app uses to dial over iroh.
+#[tauri::command]
+pub fn device_id_from_public_key(public_key_hex: String) -> Result<String, String> {
+    let bytes = HEXLOWER_PERMISSIVE
+        .decode(public_key_hex.as_bytes())
+        .map_err(|_| "invalid public key".to_string())?;
+    if bytes.len() != 32 {
+        return Err("invalid public key".to_string());
+    }
+    Ok(BASE32_NOPAD.encode(&bytes))
 }
