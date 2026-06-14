@@ -120,14 +120,17 @@ checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 name = "app"
 version = "0.26.0"
 dependencies = [
+ "chrono",
  "data-encoding",
  "ed25519-dalek 2.2.0",
  "getrandom 0.2.17",
  "iroh",
  "libsqlite3-sys",
  "log",
+ "regex",
  "serde",
  "serde_json",
+ "sqlx",
  "tauri",
  "tauri-build",
  "tauri-plugin-fs",
@@ -754,8 +757,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327"
 dependencies = [
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link 0.2.1",
 ]
 

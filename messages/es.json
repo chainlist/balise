@@ -26,6 +26,8 @@
 	"task_update_error_failed": "Error al actualizar la tarea.",
 	"updater_install_error_failed": "Error al instalar la actualización.",
 
+	"sync_external_changes": "{count} notas actualizadas por cambios realizados fuera de la aplicación",
+
 	"command_palette_placeholder": "Buscar notas, etiquetas, comandos...",
 	"command_palette_no_results": "No se encontraron resultados.",
 	"command_palette_group_notes": "Notas",

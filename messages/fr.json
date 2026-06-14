@@ -26,6 +26,8 @@
 	"task_update_error_failed": "Impossible de mettre à jour la tâche.",
 	"updater_install_error_failed": "Impossible d'installer la mise à jour.",
 
+	"sync_external_changes": "{count} notes mises à jour suite à des modifications faites hors de l'application",
+
 	"command_palette_placeholder": "Rechercher des notes, tags, commandes...",
 	"command_palette_no_results": "Aucun résultat.",
 	"command_palette_group_notes": "Notes",

@@ -3,29 +3,6 @@ import { fsService } from '$lib/services/fs';
 import { parseDbTimestamp } from '$lib/utils/time';
 import type { Note } from '$lib/models/note';
 
-export type DeskFileMeta = {
-	name: string;
-	id: string;
-	pinned: boolean;
-	archived: boolean;
-	created_at: string;
-	updated_at: string;
-	mtime_ms: number;
-};
-
-export type DeskFileContent = { name: string; content: string };
-
-export async function scanDeskFiles(deskName: string): Promise<DeskFileMeta[]> {
-	return invoke<DeskFileMeta[]>('scan_desk_files', { deskName });
-}
-
-export async function readDeskFilesContent(
-	deskName: string,
-	names: string[]
-): Promise<DeskFileContent[]> {
-	return invoke<DeskFileContent[]>('read_desk_files_content', { deskName, names });
-}
-
 function toFrontmatter(note: Note & { content: string }): string {
 	const meta = [
 		'---',
