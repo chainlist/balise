@@ -6,17 +6,22 @@
 		TabletIcon,
 		MonitorSmartphoneIcon,
 		PlusIcon,
-		RefreshCwIcon
+		RefreshCwIcon,
+		Trash2Icon
 	} from '@lucide/svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
-	import { devicesService } from '$lib/services/devices.svelte';
+	import { devicesService, type LinkedDevice } from '$lib/services/devices.svelte';
 	import { deviceSyncService } from '$lib/services/device-sync.svelte';
 	import { formatDeviceId } from '$lib/utils/device-id';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import AddDeviceDialog from './AddDeviceDialog.svelte';
+	import DeviceEditDialog from './DeviceEditDialog.svelte';
+	import DeviceDeleteDialog from './DeviceDeleteDialog.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	let addOpen = $state(false);
+	let editDevice = $state<LinkedDevice | null>(null);
+	let deleteDevice = $state<LinkedDevice | null>(null);
 
 	const icons = {
 		desktop: MonitorIcon,
@@ -65,21 +70,35 @@
 		<div class="flex flex-col gap-2">
 			{#each devicesService.linked as device (device.id)}
 				{@const Icon = icons[device.type]}
-				<div class="flex items-center gap-3 rounded-lg border px-3 py-2.5">
-					<Icon size="20" class="shrink-0 text-muted-foreground" />
-					<div class="min-w-0 flex-1">
-						{#if device.name}
-							<p class="truncate text-sm font-medium">{device.name}</p>
-							<p class="truncate font-mono text-xs text-muted-foreground">
-								{formatDeviceId(device.id)}
-							</p>
-						{:else}
-							<p class="truncate font-mono text-sm">{formatDeviceId(device.id)}</p>
-						{/if}
-					</div>
+				<div class="group flex items-center gap-3 rounded-lg border px-3 py-2.5">
+					<button
+						type="button"
+						class="flex min-w-0 flex-1 items-center gap-3 text-left"
+						onclick={() => (editDevice = device)}
+					>
+						<Icon size="20" class="shrink-0 text-muted-foreground" />
+						<div class="min-w-0 flex-1">
+							{#if device.name}
+								<p class="truncate text-sm font-medium">{device.name}</p>
+								<p class="truncate font-mono text-xs text-muted-foreground">
+									{formatDeviceId(device.id)}
+								</p>
+							{:else}
+								<p class="truncate font-mono text-sm">{formatDeviceId(device.id)}</p>
+							{/if}
+						</div>
+					</button>
 					<p class="shrink-0 text-xs whitespace-nowrap text-muted-foreground">
 						{relativeLabel(device.lastSeen, settingsService.general.language)}
 					</p>
+					<Button
+						size="icon"
+						variant="ghost"
+						class="size-8 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+						onclick={() => (deleteDevice = device)}
+					>
+						<Trash2Icon size="15" />
+					</Button>
 				</div>
 			{/each}
 		</div>
@@ -87,3 +106,5 @@
 </div>
 
 <AddDeviceDialog bind:open={addOpen} />
+<DeviceEditDialog bind:device={editDevice} ondelete={(device) => (deleteDevice = device)} />
+<DeviceDeleteDialog bind:device={deleteDevice} />

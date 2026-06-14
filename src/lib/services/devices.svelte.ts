@@ -5,6 +5,9 @@ export type DeviceType = 'desktop' | 'laptop' | 'mobile' | 'tablet';
 
 export interface LinkedDevice {
 	id: string;
+	/** The sync server's id for this peer, used to unpair it. Absent for
+	 * devices paired before this field existed. */
+	serverId?: string;
 	name: string;
 	type: DeviceType;
 	/** Epoch milliseconds of the last successful sync with this device. */
@@ -29,6 +32,18 @@ class DevicesService {
 	upsert(device: LinkedDevice): void {
 		const others = this.linked.filter((d) => d.id !== device.id);
 		this.linked = [...others, device];
+		this.#persist();
+	}
+
+	/** Renames a linked device. */
+	rename(id: string, name: string): void {
+		this.linked = this.linked.map((d) => (d.id === id ? { ...d, name } : d));
+		this.#persist();
+	}
+
+	/** Removes a linked device by id. */
+	remove(id: string): void {
+		this.linked = this.linked.filter((d) => d.id !== id);
 		this.#persist();
 	}
 

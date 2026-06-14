@@ -46,7 +46,13 @@
 			stopPolling();
 			for (const peer of fresh) {
 				const id = await deviceIdFromPublicKey(peer.publicKey);
-				devicesService.upsert({ id, name: '', type: 'desktop', lastSeen: Date.now() });
+				devicesService.upsert({
+					id,
+					serverId: peer.deviceId,
+					name: '',
+					type: 'desktop',
+					lastSeen: Date.now()
+				});
 			}
 			toasterService.success(m.settings_sync_add_accepted());
 			onpaired();

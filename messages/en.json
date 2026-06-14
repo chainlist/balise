@@ -315,5 +315,11 @@
 	"settings_sync_show_generate": "Generate a code",
 	"settings_sync_show_new": "New code",
 	"settings_sync_show_waiting": "Waiting for the other device…",
-	"settings_sync_show_expired": "This code has expired."
+	"settings_sync_show_expired": "This code has expired.",
+	"settings_sync_edit_title": "Edit device",
+	"settings_sync_edit_description": "Change the name of this device.",
+	"settings_sync_edit_error_failed": "Couldn't update the device.",
+	"settings_sync_delete_title": "Remove device",
+	"settings_sync_delete_description": "This device will no longer sync with this one. You can pair it again later.",
+	"settings_sync_unpair_warning": "Device removed, but the server couldn't be reached to unpair it."
 }
