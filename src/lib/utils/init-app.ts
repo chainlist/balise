@@ -7,6 +7,7 @@ import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/store-path';
 import { deviceSyncService } from '$lib/services/device-sync.svelte';
+import { syncConnectionService } from '$lib/services/sync-connection.svelte';
 import { trayService } from '$lib/services/tray';
 import { getVersion } from '@tauri-apps/api/app';
 import { resolveResource } from '@tauri-apps/api/path';
@@ -20,6 +21,7 @@ export async function initApp() {
 		await deviceSyncService.init();
 		await devicesService.init();
 		await syncService.init();
+		syncConnectionService.start();
 		themeService.init();
 		await globalShortcutService.applyAll(APP_SHORTCUTS);
 		await uiState.init();

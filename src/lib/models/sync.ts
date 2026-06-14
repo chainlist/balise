@@ -23,3 +23,22 @@ export interface SyncedNote {
 export type SyncMessage =
 	| { type: 'manifest'; entries: ManifestEntry[] }
 	| { type: 'notes'; notes: SyncedNote[] };
+
+/** An iroh node address as carried by the control-plane server. */
+export interface NodeAddr {
+	nodeId: string;
+	relayUrl?: string;
+	directAddresses: string[];
+}
+
+/**
+ * Messages the balise-sync control plane pushes over the /sync WebSocket.
+ * Mirrors the server's ServerMessage contract.
+ */
+export type SignalMessage =
+	| { type: 'challenge'; nonce: string }
+	| { type: 'hello'; deviceId: string }
+	| { type: 'wake'; from: string; node: NodeAddr }
+	| { type: 'peer-ready'; from: string; node: NodeAddr }
+	| { type: 'sync-targets'; online: string[]; offline: string[] }
+	| { type: 'error'; message: string };
