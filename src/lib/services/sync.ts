@@ -93,6 +93,15 @@ class SyncService {
 		return peer;
 	}
 
+	/** Removes the pairing edge with a peer, identified by its server device id. */
+	async unpair(peerDeviceId: string): Promise<void> {
+		await this.register();
+		const res = await this.#authedFetch(`/peers/${encodeURIComponent(peerDeviceId)}`, {
+			method: 'DELETE'
+		});
+		if (!res.ok) throw new Error(`unpair failed (${res.status})`);
+	}
+
 	/** Lists this device's paired peers (used to detect a freshly claimed code). */
 	async getPeers(): Promise<Peer[]> {
 		await this.register();

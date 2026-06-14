@@ -313,5 +313,11 @@
 	"settings_sync_show_generate": "Générer un code",
 	"settings_sync_show_new": "Nouveau code",
 	"settings_sync_show_waiting": "En attente de l'autre appareil…",
-	"settings_sync_show_expired": "Ce code a expiré."
+	"settings_sync_show_expired": "Ce code a expiré.",
+	"settings_sync_edit_title": "Modifier l'appareil",
+	"settings_sync_edit_description": "Changez le nom de cet appareil.",
+	"settings_sync_edit_error_failed": "Impossible de mettre à jour l'appareil.",
+	"settings_sync_delete_title": "Supprimer l'appareil",
+	"settings_sync_delete_description": "Cet appareil ne sera plus synchronisé avec celui-ci. Vous pourrez le réassocier plus tard.",
+	"settings_sync_unpair_warning": "Appareil supprimé, mais le serveur n'a pas pu être joint pour le dissocier."
 }

@@ -51,7 +51,13 @@
 		try {
 			const peer = await syncService.claim(trimmed);
 			const id = await deviceIdFromPublicKey(peer.publicKey);
-			devicesService.upsert({ id, name: name.trim(), type, lastSeen: Date.now() });
+			devicesService.upsert({
+				id,
+				serverId: peer.deviceId,
+				name: name.trim(),
+				type,
+				lastSeen: Date.now()
+			});
 			toasterService.success(m.settings_sync_add_accepted());
 			onpaired();
 		} catch (e) {

@@ -313,5 +313,11 @@
 	"settings_sync_show_generate": "Code erzeugen",
 	"settings_sync_show_new": "Neuer Code",
 	"settings_sync_show_waiting": "Warten auf das andere Gerät…",
-	"settings_sync_show_expired": "Dieser Code ist abgelaufen."
+	"settings_sync_show_expired": "Dieser Code ist abgelaufen.",
+	"settings_sync_edit_title": "Gerät bearbeiten",
+	"settings_sync_edit_description": "Ändere den Namen dieses Geräts.",
+	"settings_sync_edit_error_failed": "Gerät konnte nicht aktualisiert werden.",
+	"settings_sync_delete_title": "Gerät entfernen",
+	"settings_sync_delete_description": "Dieses Gerät wird nicht mehr mit diesem synchronisiert. Du kannst es später erneut koppeln.",
+	"settings_sync_unpair_warning": "Gerät entfernt, aber der Server war nicht erreichbar, um die Kopplung aufzuheben."
 }

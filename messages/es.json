@@ -313,5 +313,11 @@
 	"settings_sync_show_generate": "Generar un código",
 	"settings_sync_show_new": "Nuevo código",
 	"settings_sync_show_waiting": "Esperando al otro dispositivo…",
-	"settings_sync_show_expired": "Este código ha caducado."
+	"settings_sync_show_expired": "Este código ha caducado.",
+	"settings_sync_edit_title": "Editar dispositivo",
+	"settings_sync_edit_description": "Cambia el nombre de este dispositivo.",
+	"settings_sync_edit_error_failed": "No se pudo actualizar el dispositivo.",
+	"settings_sync_delete_title": "Eliminar dispositivo",
+	"settings_sync_delete_description": "Este dispositivo dejará de sincronizarse con este. Podrás volver a vincularlo más tarde.",
+	"settings_sync_unpair_warning": "Dispositivo eliminado, pero no se pudo contactar al servidor para desvincularlo."
 }
