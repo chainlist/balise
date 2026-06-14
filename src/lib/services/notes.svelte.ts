@@ -11,6 +11,7 @@ import {
 	queryNoteContent,
 	queryNoteUpdatedAt,
 	deleteNoteById,
+	insertDeletion,
 	queryJournalNotesByDate,
 	insertNote,
 	updateNote
@@ -142,7 +143,11 @@ class NotesService {
 	}
 
 	async delete(id: string): Promise<void> {
-		await deleteNoteById(getDB(), id);
+		const db = getDB();
+		// Tombstone before the hard delete so the deletion can propagate to paired
+		// devices; otherwise sync would see the note "missing" and resurrect it.
+		await insertDeletion(db, id);
+		await deleteNoteById(db, id);
 		this.notes = this.notes.filter((n) => n.id !== id);
 		await Promise.all([tagsService.load(), deleteNoteFile(id)]);
 	}

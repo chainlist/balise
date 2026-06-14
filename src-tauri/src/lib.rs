@@ -23,14 +23,20 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::file_sync::scan_desk_files,
             commands::file_sync::read_desk_files_content,
+            commands::file_sync::set_desk_file_mtime,
             commands::device::device_id,
             sync::start_sync,
             sync::stop_sync,
             sync::pair_device,
-            sync::respond_pairing
+            sync::respond_pairing,
+            sync::sync_open,
+            sync::sync_send,
+            sync::sync_recv,
+            sync::sync_close
         ])
         .manage(sync::SyncState::default())
         .manage(sync::PairingState::default())
+        .manage(sync::SyncSessions::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

@@ -7,6 +7,7 @@ import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/store-path';
 import { startSync } from '$lib/utils/sync';
+import { deviceSyncService } from '$lib/services/device-sync.svelte';
 import { toasterService, errorMessage } from '$lib/services/toaster';
 import { trayService } from '$lib/services/tray';
 import * as m from '$paraglide/messages.js';
@@ -20,12 +21,13 @@ export async function initApp() {
 		await migrateLegacyStores();
 		await settingsService.init();
 		pairingService.init();
-		if (settingsService.sync.enabled) {
-			void startSync().catch((e) =>
-				toasterService.error(m.settings_sync_start_error(), errorMessage(e))
-			);
-		}
+		await deviceSyncService.init();
 		await devicesService.init();
+		if (settingsService.sync.enabled) {
+			startSync()
+				.then(() => deviceSyncService.startInterval())
+				.catch((e) => toasterService.error(m.settings_sync_start_error(), errorMessage(e)));
+		}
 		themeService.init();
 		await globalShortcutService.applyAll(APP_SHORTCUTS);
 		await uiState.init();

@@ -2,10 +2,12 @@
 	import { Switch } from 'bits-ui';
 	import { SmartphoneIcon, MonitorSmartphoneIcon } from '@lucide/svelte';
 	import type { Component } from 'svelte';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { settingsService, SYNC_INTERVAL_OPTIONS } from '$lib/services/settings.svelte';
 	import { startSync, stopSync } from '$lib/utils/sync';
+	import { deviceSyncService } from '$lib/services/device-sync.svelte';
 	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { cn } from '$lib/utils.js';
+	import * as Select from '$lib/components/shadcn/select/index.js';
 	import SyncDeviceId from './SyncDeviceId.svelte';
 	import SyncLinkedDevices from './SyncLinkedDevices.svelte';
 	import * as m from '$paraglide/messages.js';
@@ -13,16 +15,29 @@
 	async function toggleSync(enabled: boolean) {
 		settingsService.setSyncEnabled(enabled);
 		if (!enabled) {
+			deviceSyncService.stopInterval();
 			void stopSync();
 			return;
 		}
 		try {
 			await startSync();
+			deviceSyncService.startInterval();
 		} catch (e) {
 			toasterService.error(m.settings_sync_start_error(), errorMessage(e));
 			settingsService.setSyncEnabled(false);
 		}
 	}
+
+	function changeInterval(value: string) {
+		const minutes = Number(value);
+		if (!Number.isFinite(minutes)) return;
+		settingsService.setSyncInterval(minutes);
+		deviceSyncService.reschedule();
+	}
+
+	const intervalLabel = $derived(
+		m.settings_sync_interval_option({ minutes: settingsService.sync.intervalMinutes })
+	);
 
 	const navItems: {
 		id: string;
@@ -72,6 +87,27 @@
 	</div>
 
 	{#if settingsService.sync.enabled}
+		<div class="flex items-center justify-between border-b px-6 py-4">
+			<div class="space-y-0.5">
+				<p class="text-sm font-medium">{m.settings_sync_interval_label()}</p>
+				<p class="text-xs text-muted-foreground">{m.settings_sync_interval_helper()}</p>
+			</div>
+			<Select.Root
+				type="single"
+				value={String(settingsService.sync.intervalMinutes)}
+				onValueChange={(v) => v && changeInterval(v)}
+			>
+				<Select.Trigger class="w-auto whitespace-nowrap">{intervalLabel}</Select.Trigger>
+				<Select.Content>
+					{#each SYNC_INTERVAL_OPTIONS as minutes (minutes)}
+						<Select.Item
+							value={String(minutes)}
+							label={m.settings_sync_interval_option({ minutes })}
+						/>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
 		<div class="flex min-h-0 flex-1">
 			<div class="flex w-44 shrink-0 flex-col gap-1 border-r bg-muted/30 p-3">
 				{#each navItems as item (item.id)}

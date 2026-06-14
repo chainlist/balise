@@ -29,21 +29,23 @@ describe('migrate', () => {
 		const db = makeMockDB([]);
 		await migrate(db as never);
 		const calls = insertCalls(db);
-		expect(calls).toHaveLength(2);
+		expect(calls).toHaveLength(3);
 		expect(calls[0][1]).toEqual([1]);
 		expect(calls[1][1]).toEqual([2]);
+		expect(calls[2][1]).toEqual([3]);
 	});
 
 	it('skips migrations that have already been applied', async () => {
 		const db = makeMockDB([1]);
 		await migrate(db as never);
 		const calls = insertCalls(db);
-		expect(calls).toHaveLength(1);
+		expect(calls).toHaveLength(2);
 		expect(calls[0][1]).toEqual([2]);
+		expect(calls[1][1]).toEqual([3]);
 	});
 
 	it('runs nothing when all migrations are applied', async () => {
-		const db = makeMockDB([1, 2]);
+		const db = makeMockDB([1, 2, 3]);
 		await migrate(db as never);
 		expect(insertCalls(db)).toHaveLength(0);
 	});
@@ -53,6 +55,6 @@ describe('migrate', () => {
 		await migrate(db as never);
 		const calls = insertCalls(db);
 		const versions = calls.map((args) => (args[1] as number[])[0]);
-		expect(versions).toEqual([1, 2]);
+		expect(versions).toEqual([1, 2, 3]);
 	});
 });

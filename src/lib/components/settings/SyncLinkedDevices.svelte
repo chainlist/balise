@@ -5,10 +5,12 @@
 		SmartphoneIcon,
 		TabletIcon,
 		MonitorSmartphoneIcon,
-		PlusIcon
+		PlusIcon,
+		RefreshCwIcon
 	} from '@lucide/svelte';
 	import { settingsService } from '$lib/services/settings.svelte';
 	import { devicesService } from '$lib/services/devices.svelte';
+	import { deviceSyncService } from '$lib/services/device-sync.svelte';
 	import { formatDeviceId } from '$lib/utils/device-id';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import AddDeviceDialog from './AddDeviceDialog.svelte';
@@ -36,10 +38,21 @@
 <div class="flex flex-col gap-4">
 	<div class="flex items-center justify-between">
 		<p class="text-sm font-medium">{m.settings_sync_nav_linked()}</p>
-		<Button size="sm" onclick={() => (addOpen = true)}>
-			<PlusIcon size="15" />
-			{m.settings_sync_add_device()}
-		</Button>
+		<div class="flex items-center gap-2">
+			<Button
+				size="sm"
+				variant="outline"
+				disabled={devicesService.linked.length === 0 || deviceSyncService.syncing}
+				onclick={() => void deviceSyncService.syncAll()}
+			>
+				<RefreshCwIcon size="15" class={deviceSyncService.syncing ? 'animate-spin' : ''} />
+				{m.settings_sync_now()}
+			</Button>
+			<Button size="sm" onclick={() => (addOpen = true)}>
+				<PlusIcon size="15" />
+				{m.settings_sync_add_device()}
+			</Button>
+		</div>
 	</div>
 
 	{#if devicesService.linked.length === 0}
