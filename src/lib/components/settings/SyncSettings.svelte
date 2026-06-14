@@ -1,26 +1,20 @@
 <script lang="ts">
 	import { Switch } from 'bits-ui';
 	import { settingsService, SYNC_INTERVAL_OPTIONS } from '$lib/services/settings.svelte';
-	import { startSync, stopSync } from '$lib/utils/sync';
+	import { stopSync } from '$lib/utils/sync';
 	import { deviceSyncService } from '$lib/services/device-sync.svelte';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 	import SyncLinkedDevices from './SyncLinkedDevices.svelte';
 	import * as m from '$paraglide/messages.js';
 
-	async function toggleSync(enabled: boolean) {
+	function toggleSync(enabled: boolean) {
 		settingsService.setSyncEnabled(enabled);
+		// The iroh endpoint stays dormant until a paired device's sync request comes
+		// in over the WS control plane (not built yet), so enabling sync only turns
+		// the feature on. Tear down any running endpoint when it's switched off.
 		if (!enabled) {
 			deviceSyncService.stopInterval();
 			void stopSync();
-			return;
-		}
-		try {
-			await startSync();
-			deviceSyncService.startInterval();
-		} catch (e) {
-			toasterService.error(m.settings_sync_start_error(), errorMessage(e));
-			settingsService.setSyncEnabled(false);
 		}
 	}
 
