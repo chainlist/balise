@@ -25,17 +25,17 @@ pub fn run() {
             commands::file_sync::read_desk_files_content,
             commands::file_sync::set_desk_file_mtime,
             commands::device::device_id,
+            commands::device::public_key_hex,
+            commands::device::sign_challenge,
+            commands::device::device_id_from_public_key,
             sync::start_sync,
             sync::stop_sync,
-            sync::pair_device,
-            sync::respond_pairing,
             sync::sync_open,
             sync::sync_send,
             sync::sync_recv,
             sync::sync_close
         ])
         .manage(sync::SyncState::default())
-        .manage(sync::PairingState::default())
         .manage(sync::SyncSessions::default())
         .setup(|app| {
             if cfg!(debug_assertions) {

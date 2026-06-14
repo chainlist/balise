@@ -2,15 +2,12 @@ import { uiState } from '$lib/services/ui-state.svelte';
 import { themeService } from '$lib/services/theme.svelte';
 import { settingsService } from '$lib/services/settings.svelte';
 import { devicesService } from '$lib/services/devices.svelte';
-import { pairingService } from '$lib/services/pairing.svelte';
+import { syncService } from '$lib/services/sync';
 import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/store-path';
-import { startSync } from '$lib/utils/sync';
 import { deviceSyncService } from '$lib/services/device-sync.svelte';
-import { toasterService, errorMessage } from '$lib/services/toaster';
 import { trayService } from '$lib/services/tray';
-import * as m from '$paraglide/messages.js';
 import { getVersion } from '@tauri-apps/api/app';
 import { resolveResource } from '@tauri-apps/api/path';
 import { readTextFile } from '@tauri-apps/plugin-fs';
@@ -20,14 +17,9 @@ export async function initApp() {
 	try {
 		await migrateLegacyStores();
 		await settingsService.init();
-		pairingService.init();
 		await deviceSyncService.init();
 		await devicesService.init();
-		if (settingsService.sync.enabled) {
-			startSync()
-				.then(() => deviceSyncService.startInterval())
-				.catch((e) => toasterService.error(m.settings_sync_start_error(), errorMessage(e)));
-		}
+		await syncService.init();
 		themeService.init();
 		await globalShortcutService.applyAll(APP_SHORTCUTS);
 		await uiState.init();

@@ -1,45 +1,22 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 use data_encoding::BASE32_NOPAD;
 use iroh::endpoint::{presets, Connection, RecvStream, SendStream};
 use iroh::{Endpoint, EndpointAddr, PublicKey, SecretKey};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
-use tokio::sync::{oneshot, Mutex as AsyncMutex};
+use tokio::sync::Mutex as AsyncMutex;
 
 use crate::commands::device::load_or_create_signing_key;
 
-/// ALPN identifying Balise's pairing handshake over QUIC.
-const SYNC_ALPN: &[u8] = b"balise/sync/0";
-
 /// ALPN identifying the data-sync stream (manifest + note bodies) over QUIC.
+/// Pairing no longer runs over iroh; it goes through the sync server.
 const SYNC_DATA_ALPN: &[u8] = b"balise/sync-data/0";
 
 /// Hard cap on a single framed sync message, guarding the recv allocation.
 const MAX_SYNC_MESSAGE: usize = 64 * 1024 * 1024;
-
-/// How long each side waits for the pairing handshake to complete. The
-/// accepting side spends most of this waiting for the user to tap accept/reject.
-const PAIRING_TIMEOUT: Duration = Duration::from_secs(120);
-
-/// Reply the accepting side sends back to the dialer.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct PairingReply {
-    accepted: bool,
-}
-
-/// `pairing-request` event payload: an incoming request awaiting the user's
-/// decision, which the frontend answers via [`respond_pairing`]. Only the
-/// authenticated peer key is shared; the user names the device locally.
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct PairingRequest {
-    request_id: String,
-    device_id: String,
-}
 
 /// Holds the running iroh endpoint while sync is enabled, `None` when it is off.
 #[derive(Default)]
@@ -95,16 +72,8 @@ impl SyncSessions {
     }
 }
 
-/// Pending incoming pairing requests keyed by request id, each holding the
-/// channel the user's accept/reject decision is delivered on.
-#[derive(Default)]
-pub struct PairingState {
-    next_id: AtomicU64,
-    pending: Mutex<HashMap<String, oneshot::Sender<bool>>>,
-}
-
 /// Starts the iroh networking layer using this device's persisted Ed25519 seed
-/// as its node identity, then spawns the loop that accepts pairing requests.
+/// as its node identity, then spawns the loop that accepts data-sync streams.
 /// No-op if already running.
 async fn start(app: &AppHandle) -> Result<(), String> {
     if app.state::<SyncState>().0.lock().unwrap().is_some() {
@@ -136,14 +105,14 @@ async fn bind(app: &AppHandle) -> Result<Endpoint, String> {
 
     Endpoint::builder(presets::N0)
         .secret_key(secret_key)
-        .alpns(vec![SYNC_ALPN.to_vec(), SYNC_DATA_ALPN.to_vec()])
+        .alpns(vec![SYNC_DATA_ALPN.to_vec()])
         .bind()
         .await
         .map_err(|e| e.to_string())
 }
 
-/// Accepts incoming pairing connections until the endpoint is closed, handling
-/// each on its own task so a slow user decision can't block other peers.
+/// Accepts incoming data-sync connections until the endpoint is closed, handling
+/// each on its own task so a slow peer can't block others.
 fn spawn_accept_loop(app: AppHandle, endpoint: Endpoint) {
     tauri::async_runtime::spawn(async move {
         while let Some(incoming) = endpoint.accept().await {
@@ -157,35 +126,15 @@ fn spawn_accept_loop(app: AppHandle, endpoint: Endpoint) {
     });
 }
 
-/// Routes an incoming connection by its negotiated ALPN: the pairing handshake
-/// or a data-sync stream.
+/// Routes an incoming connection by its negotiated ALPN. Only data-sync streams
+/// are accepted now that pairing goes through the sync server.
 async fn handle_incoming(app: &AppHandle, incoming: iroh::endpoint::Incoming) -> Result<(), String> {
     let connection = incoming.await.map_err(|e| e.to_string())?;
-    let alpn = connection.alpn();
-    if alpn == SYNC_ALPN {
-        handle_pairing(app, connection).await
-    } else if alpn == SYNC_DATA_ALPN {
+    if connection.alpn() == SYNC_DATA_ALPN {
         handle_sync_session(app, connection).await
     } else {
         Err("unknown protocol".to_string())
     }
-}
-
-/// Identifies the dialing peer, asks the user, and replies with the decision.
-async fn handle_pairing(app: &AppHandle, connection: Connection) -> Result<(), String> {
-    let device_id = BASE32_NOPAD.encode(connection.remote_id().as_bytes());
-    let (mut send, mut recv) = connection.accept_bi().await.map_err(|e| e.to_string())?;
-
-    // Drain the dialer's hello so the stream is fully established.
-    recv.read_to_end(1024).await.map_err(|e| e.to_string())?;
-
-    let accepted = ask_user(app, device_id).await;
-    let bytes = serde_json::to_vec(&PairingReply { accepted }).map_err(|e| e.to_string())?;
-    send.write_all(&bytes).await.map_err(|e| e.to_string())?;
-    send.finish().map_err(|e| e.to_string())?;
-    // Give the dialer time to read the reply before the connection drops.
-    let _ = tokio::time::timeout(Duration::from_secs(10), connection.closed()).await;
-    Ok(())
 }
 
 /// Registers an incoming data-sync stream as a session and notifies the
@@ -199,53 +148,6 @@ async fn handle_sync_session(app: &AppHandle, connection: Connection) -> Result<
     let session_id = app.state::<SyncSessions>().insert(connection, send, recv);
     app.emit("sync-session", SyncSessionOpened { session_id, device_id })
         .map_err(|e| e.to_string())
-}
-
-/// Emits a `pairing-request` event and blocks until the user responds via
-/// [`respond_pairing`] or the timeout elapses (treated as a rejection).
-async fn ask_user(app: &AppHandle, device_id: String) -> bool {
-    let state = app.state::<PairingState>();
-    let request_id = state.next_id.fetch_add(1, Ordering::Relaxed).to_string();
-    let (tx, rx) = oneshot::channel();
-    state.pending.lock().unwrap().insert(request_id.clone(), tx);
-
-    let emitted = app.emit(
-        "pairing-request",
-        PairingRequest {
-            request_id: request_id.clone(),
-            device_id,
-        },
-    );
-    if emitted.is_err() {
-        state.pending.lock().unwrap().remove(&request_id);
-        return false;
-    }
-
-    match tokio::time::timeout(PAIRING_TIMEOUT, rx).await {
-        Ok(Ok(decision)) => decision,
-        _ => {
-            state.pending.lock().unwrap().remove(&request_id);
-            false
-        }
-    }
-}
-
-/// Dials a peer by its device id and runs the pairing handshake, returning
-/// whether the peer accepted.
-async fn dial_and_pair(endpoint: &Endpoint, peer_id: PublicKey) -> Result<bool, String> {
-    let conn = endpoint
-        .connect(EndpointAddr::from(peer_id), SYNC_ALPN)
-        .await
-        .map_err(|e| e.to_string())?;
-    let (mut send, mut recv) = conn.open_bi().await.map_err(|e| e.to_string())?;
-
-    send.write_all(b"pair").await.map_err(|e| e.to_string())?;
-    send.finish().map_err(|e| e.to_string())?;
-
-    let bytes = recv.read_to_end(1024).await.map_err(|e| e.to_string())?;
-    let reply: PairingReply = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
-    conn.close(0u32.into(), b"done");
-    Ok(reply.accepted)
 }
 
 /// Decodes a Base32 device id into the Ed25519 public key used as a node id.
@@ -271,29 +173,6 @@ pub async fn start_sync(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub async fn stop_sync(app: AppHandle) {
     stop(&app).await;
-}
-
-/// Dials another device by its id and asks it to pair. Resolves to whether the
-/// other end accepted; errors if sync is off, the id is invalid, or the peer is
-/// unreachable.
-#[tauri::command]
-pub async fn pair_device(app: AppHandle, device_id: String) -> Result<bool, String> {
-    let endpoint = app
-        .state::<SyncState>()
-        .0
-        .lock()
-        .unwrap()
-        .clone()
-        .ok_or_else(|| "sync is not running".to_string())?;
-
-    let peer_id = parse_device_id(&device_id)?;
-    if peer_id == endpoint.id() {
-        return Err("cannot pair with this device".to_string());
-    }
-
-    tokio::time::timeout(PAIRING_TIMEOUT, dial_and_pair(&endpoint, peer_id))
-        .await
-        .map_err(|_| "pairing timed out".to_string())?
 }
 
 /// Opens a data-sync stream to a paired peer, returning the session id the
@@ -358,18 +237,4 @@ pub async fn sync_close(app: AppHandle, session_id: String) {
         let _ = session.send.lock().await.finish();
     }
     app.state::<SyncSessions>().remove(&session_id);
-}
-
-/// Delivers the user's accept/reject decision to the waiting accept-side task.
-#[tauri::command]
-pub fn respond_pairing(app: AppHandle, request_id: String, accept: bool) {
-    let sender = app
-        .state::<PairingState>()
-        .pending
-        .lock()
-        .unwrap()
-        .remove(&request_id);
-    if let Some(sender) = sender {
-        let _ = sender.send(accept);
-    }
 }
