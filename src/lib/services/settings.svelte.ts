@@ -84,7 +84,12 @@ export interface ShortcutsSettings {
 
 export interface SyncSettings {
 	enabled: boolean;
+	/** How often to sync with linked devices, in minutes. */
+	intervalMinutes: number;
 }
+
+/** Selectable sync cadences, in minutes. */
+export const SYNC_INTERVAL_OPTIONS = [1, 5, 15, 30, 60] as const;
 
 type SectionKey = 'general' | 'appearance' | 'editor' | 'magicTags' | 'shortcuts' | 'sync';
 
@@ -120,7 +125,7 @@ class SettingsService {
 	editor = $state<EditorSettings>({ fontSize: 16, lineHeight: 1.75, markdownMarks: 'cursor' });
 	magicTags = $state<MagicTagsSettings>({ tags: DEFAULT_MAGIC_TAGS });
 	shortcuts = $state<ShortcutsSettings>({ customBindings: {} });
-	sync = $state<SyncSettings>({ enabled: false });
+	sync = $state<SyncSettings>({ enabled: false, intervalMinutes: 5 });
 
 	#store: Store | null = null;
 
@@ -166,7 +171,8 @@ class SettingsService {
 			customBindings: shortcuts?.customBindings ?? {}
 		};
 		this.sync = {
-			enabled: sync?.enabled ?? false
+			enabled: sync?.enabled ?? false,
+			intervalMinutes: sync?.intervalMinutes ?? 5
 		};
 
 		setLocale(this.general.language);
@@ -336,6 +342,11 @@ class SettingsService {
 
 	setSyncEnabled(value: boolean): void {
 		this.sync.enabled = value;
+		this.#persist('sync');
+	}
+
+	setSyncInterval(minutes: number): void {
+		this.sync.intervalMinutes = minutes;
 		this.#persist('sync');
 	}
 

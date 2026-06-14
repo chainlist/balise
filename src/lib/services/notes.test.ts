@@ -7,7 +7,8 @@ vi.mock('$lib/repositories/notes.repo', () => ({
 	insertNote: vi.fn(),
 	updateNote: vi.fn(),
 	queryNoteUpdatedAt: vi.fn(),
-	deleteNoteById: vi.fn()
+	deleteNoteById: vi.fn(),
+	insertDeletion: vi.fn()
 }));
 vi.mock('$lib/utils/db', () => ({ getDB: vi.fn(() => ({})) }));
 vi.mock('$lib/repositories/tags.repo', () => ({

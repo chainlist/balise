@@ -67,8 +67,17 @@ const MIGRATIONS: Migration[] = [
       ALTER TABLE notes ADD COLUMN preview TEXT NOT NULL DEFAULT '';
       UPDATE notes SET preview = TRIM(SUBSTR(TRIM(SUBSTR(content, INSTR(content, CHAR(10)))), 1, 140));
     `
+	},
+	{
+		version: 3,
+		sql: `
+      CREATE TABLE IF NOT EXISTS deletions (
+        id         TEXT PRIMARY KEY,
+        deleted_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `
 	}
-	// add future migrations here as { version: 3, sql: '...' }
+	// add future migrations here as { version: 4, sql: '...' }
 ];
 
 export async function migrate(db: Database): Promise<void> {

@@ -1,6 +1,7 @@
 import type Database from '@tauri-apps/plugin-sql';
 import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import type { Note, NoteSearchResult } from '$lib/models/note';
+import type { ManifestEntry, SyncedNote } from '$lib/models/sync';
 import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
 export type { Note, NoteSearchResult } from '$lib/models/note';
 
@@ -150,6 +151,108 @@ export async function queryNoteUpdatedAt(db: Database, id: string): Promise<stri
 
 export async function deleteNoteById(db: Database, id: string): Promise<void> {
 	await db.execute('DELETE FROM notes WHERE id = $1', [id]);
+}
+
+/**
+ * Records a tombstone so a deletion can propagate during device sync. Kept in a
+ * separate table (not a column on `notes`) so the row can be hard-deleted and
+ * every existing read query and fs-sync stays unaware of it. Pass `deletedAt`
+ * to preserve a peer's deletion time when applying a synced tombstone; omit it
+ * for a local delete (stamped now).
+ */
+export async function insertDeletion(db: Database, id: string, deletedAt?: string): Promise<void> {
+	if (deletedAt === undefined) {
+		await db.execute(
+			`INSERT INTO deletions (id) VALUES ($1)
+			 ON CONFLICT(id) DO UPDATE SET deleted_at = datetime('now')`,
+			[id]
+		);
+	} else {
+		await db.execute(
+			`INSERT INTO deletions (id, deleted_at) VALUES ($1, $2)
+			 ON CONFLICT(id) DO UPDATE SET deleted_at = $2`,
+			[id, deletedAt]
+		);
+	}
+}
+
+/** Drops a tombstone, e.g. when a synced peer re-created a previously deleted note. */
+export async function clearDeletion(db: Database, id: string): Promise<void> {
+	await db.execute('DELETE FROM deletions WHERE id = $1', [id]);
+}
+
+/**
+ * The device-sync manifest: every live note plus every tombstone, each as
+ * `[id, updatedAt, deleted]`. `updatedAt` is the LWW clock (deletion time for
+ * tombstones). Compare entries via parseDbTimestamp - the column mixes SQLite
+ * and ISO timestamp forms.
+ */
+export async function queryManifest(db: Database): Promise<ManifestEntry[]> {
+	const rows = await db.select<{ id: string; updated_at: string; deleted: number }[]>(
+		`SELECT id, updated_at, 0 AS deleted FROM notes
+		 UNION ALL
+		 SELECT id, deleted_at AS updated_at, 1 AS deleted FROM deletions`
+	);
+	return rows.map((r) => ({ id: r.id, updatedAt: r.updated_at, deleted: r.deleted === 1 }));
+}
+
+/** Local LWW clock for one id: the live note, else a tombstone, else null. */
+export async function queryClock(
+	db: Database,
+	id: string
+): Promise<{ updatedAt: string; deleted: boolean } | null> {
+	const live = await db.select<{ updated_at: string }[]>(
+		'SELECT updated_at FROM notes WHERE id = $1',
+		[id]
+	);
+	if (live[0]) return { updatedAt: live[0].updated_at, deleted: false };
+	const dead = await db.select<{ deleted_at: string }[]>(
+		'SELECT deleted_at FROM deletions WHERE id = $1',
+		[id]
+	);
+	if (dead[0]) return { updatedAt: dead[0].deleted_at, deleted: true };
+	return null;
+}
+
+/**
+ * Builds the [`SyncedNote`] bodies to transmit for the given ids: live notes
+ * carry their content, tombstoned ids carry `deleted: true` with the deletion
+ * time as `updatedAt`.
+ */
+export async function querySyncNotes(db: Database, ids: string[]): Promise<SyncedNote[]> {
+	if (ids.length === 0) return [];
+	const ph = ids.map((_, i) => `$${i + 1}`).join(', ');
+	const [live, dead] = await Promise.all([
+		db.select<(RawNote & { content: string })[]>(
+			`SELECT ${NOTE_COLS}, content FROM notes WHERE id IN (${ph})`,
+			ids
+		),
+		db.select<{ id: string; deleted_at: string }[]>(
+			`SELECT id, deleted_at FROM deletions WHERE id IN (${ph})`,
+			ids
+		)
+	]);
+	const notes: SyncedNote[] = live.map((r) => ({
+		id: r.id,
+		content: r.content ?? '',
+		pinned: r.pinned === 1,
+		archived: r.archived === 1,
+		createdAt: r.created_at,
+		updatedAt: r.updated_at,
+		deleted: false
+	}));
+	for (const d of dead) {
+		notes.push({
+			id: d.id,
+			content: '',
+			pinned: false,
+			archived: false,
+			createdAt: '',
+			updatedAt: d.deleted_at,
+			deleted: true
+		});
+	}
+	return notes;
 }
 
 export async function queryJournalNotesByDate(

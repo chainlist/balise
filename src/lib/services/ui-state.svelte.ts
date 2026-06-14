@@ -5,6 +5,7 @@ import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
 import { fsSyncService } from './fs-sync';
 import { fsService } from './fs';
+import { noteSignals } from './note-signals';
 import { resolveStorePath } from './store-path';
 
 const defaultDesk = 'Personal';
@@ -59,6 +60,16 @@ class UIState {
 		if (!this.desks.includes(this.activeDesk)) {
 			this.desks = [...this.desks, this.activeDesk];
 		}
+
+		// Reload the visible list when a background device sync applies changes.
+		noteSignals.onNotesSynced(() => void this.#reloadView());
+	}
+
+	async #reloadView(): Promise<void> {
+		await Promise.all([
+			notesService.load(this.activeTag, this.composedTags),
+			tagsService.loadRelated(this.activeTag, this.composedTags)
+		]);
 	}
 
 	async setActiveDesk(desk: string): Promise<void> {
