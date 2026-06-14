@@ -26,6 +26,8 @@
 	"task_update_error_failed": "Failed to update task.",
 	"updater_install_error_failed": "Failed to install update.",
 
+	"sync_external_changes": "{count} notes updated from changes made outside the app",
+
 	"command_palette_placeholder": "Search notes, tags, commands...",
 	"command_palette_no_results": "No results found.",
 	"command_palette_group_notes": "Notes",

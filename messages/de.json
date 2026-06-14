@@ -26,6 +26,8 @@
 	"task_update_error_failed": "Aufgabe konnte nicht aktualisiert werden.",
 	"updater_install_error_failed": "Update konnte nicht installiert werden.",
 
+	"sync_external_changes": "{count} Notizen durch Änderungen außerhalb der App aktualisiert",
+
 	"command_palette_placeholder": "Notizen, Tags, Befehle suchen…",
 	"command_palette_no_results": "Keine Ergebnisse gefunden.",
 	"command_palette_group_notes": "Notizen",
