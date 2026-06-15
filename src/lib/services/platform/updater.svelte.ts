@@ -25,6 +25,11 @@ class UpdaterService {
 
 	async checkManually() {
 		await this._check();
+		if (this.status === 'up_to_date') {
+			toasterService.success(m.settings_about_up_to_date());
+		} else if (this.status === 'error') {
+			toasterService.error(m.settings_about_check_failed());
+		}
 	}
 
 	private async _check() {
