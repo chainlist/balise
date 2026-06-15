@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="flex flex-1 scrollbar-none flex-col gap-1 overflow-y-auto px-3 pb-3">
+<div class="flex flex-1 scrollbar-thin flex-col gap-1 overflow-y-auto px-3 pb-3">
 	<TagSidebarItem
 		tag={{
 			tag: UNTAGGED_FILTER,

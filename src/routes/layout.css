@@ -365,6 +365,32 @@
 	}
 }
 
+/* Thin, themed scrollbar to replace the WebView default. Works in all Tauri
+   webviews (Chromium/WebKit) via ::-webkit-scrollbar; scrollbar-width/color is
+   a fallback. Drop `scrollbar-thin` on any scroll container. */
+@utility scrollbar-thin {
+	scrollbar-width: thin;
+	scrollbar-color: var(--outline-variant) transparent;
+
+	&::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	&::-webkit-scrollbar-track,
+	&::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 9999px;
+		border: 3px solid transparent;
+		background-clip: padding-box;
+		background-color: var(--outline-variant);
+	}
+	&::-webkit-scrollbar-thumb:hover {
+		background-color: var(--outline);
+	}
+}
+
 @utility frost {
 	@apply bg-white/40 backdrop-blur-[30px] backdrop-saturate-[1.6] dark:bg-[#0e0d15]/40;
 }

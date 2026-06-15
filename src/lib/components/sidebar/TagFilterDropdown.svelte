@@ -44,7 +44,7 @@
 			/>
 		</div>
 		<DropdownMenu.Separator />
-		<div class="max-h-60 overflow-auto">
+		<div class="max-h-60 overflow-auto scrollbar-thin">
 			{#each filteredRelatedTags as tag (tag.tag)}
 				<DropdownMenu.Item
 					onclick={() => uiState.toggleComposedTag(tag.tag)}

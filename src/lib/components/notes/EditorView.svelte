@@ -48,7 +48,7 @@
 
 <!-- Consumers remount this component per note (keyed by note.id), so the
      debounce timer, pending flush, and loaded content all belong to one note. -->
-<div class="relative h-full overflow-y-auto">
+<div class="relative h-full overflow-y-auto scrollbar-thin">
 	{#await note.content ?? notesService.loadContent(note.id) then content}
 		<EditorHeader
 			readingTime={readingTimeMinutes(liveContent ?? content)}

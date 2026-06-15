@@ -113,7 +113,7 @@
 		</Popover.Root>
 	</div>
 
-	<div class="h-full space-y-8 overflow-y-auto pb-16">
+	<div class="h-full space-y-8 overflow-y-auto scrollbar-thin pb-16">
 		{#each allNotes as note (note.id)}
 			<div class="relative" class:h-full={!hasMultipleNotes} class:min-h-min={hasMultipleNotes}>
 				<NoteEditor {note} onSave={onSaveHandlers.get(note.id)} />
