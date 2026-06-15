@@ -85,6 +85,8 @@
 	"settings_general_description": "Configurez le comportement de l'application.",
 	"settings_close_behavior_label": "Fermeture de l'application",
 	"settings_close_behavior_helper": "Ce qui se passe quand vous fermez la fenêtre.",
+	"settings_auto_update_label": "Mises à jour automatiques",
+	"settings_auto_update_helper": "Vérifier les mises à jour automatiquement au démarrage de l'application.",
 
 	"settings_appearance_heading": "Apparence",
 	"settings_appearance_description": "Choisissez l'aspect de l'application.",
