@@ -4,6 +4,7 @@ import type { MarkMode } from '$lib/utils/cm';
 import type { Theme } from './theme.svelte';
 import { setLocale, locales } from '$paraglide/runtime.js';
 import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/utils/primary-color';
+import { sanitizeDeskName } from './desk';
 
 export const SUPPORTED_LOCALES = locales;
 
@@ -89,6 +90,13 @@ export interface SyncSettings {
 	intervalMinutes: number;
 	/** Custom pairing server URL; empty falls back to the build-time default. */
 	syncUrl: string;
+	/** Whether this device shares its app settings (everything except sync
+	 *  settings) with paired devices. */
+	shareSettings: boolean;
+	/** Desk names this device excludes from sync. Empty shares every desk,
+	 *  including any added later. Stored sanitized so the sync gate (which only
+	 *  knows the sanitized desk name) and the settings UI agree. */
+	unsharedDesks: string[];
 }
 
 /** Selectable sync cadences, in minutes. */
@@ -128,7 +136,13 @@ class SettingsService {
 	editor = $state<EditorSettings>({ fontSize: 16, lineHeight: 1.75, markdownMarks: 'cursor' });
 	magicTags = $state<MagicTagsSettings>({ tags: DEFAULT_MAGIC_TAGS });
 	shortcuts = $state<ShortcutsSettings>({ customBindings: {} });
-	sync = $state<SyncSettings>({ enabled: false, intervalMinutes: 5, syncUrl: '' });
+	sync = $state<SyncSettings>({
+		enabled: false,
+		intervalMinutes: 5,
+		syncUrl: '',
+		shareSettings: true,
+		unsharedDesks: []
+	});
 
 	#store: Store | null = null;
 
@@ -177,7 +191,9 @@ class SettingsService {
 		this.sync = {
 			enabled: sync?.enabled ?? false,
 			intervalMinutes: sync?.intervalMinutes ?? 5,
-			syncUrl: sync?.syncUrl ?? ''
+			syncUrl: sync?.syncUrl ?? '',
+			shareSettings: sync?.shareSettings ?? true,
+			unsharedDesks: sync?.unsharedDesks ?? []
 		};
 
 		setLocale(this.general.language);
@@ -362,6 +378,41 @@ class SettingsService {
 
 	setSyncUrl(url: string): void {
 		this.sync.syncUrl = url;
+		this.#persist('sync');
+	}
+
+	setShareSettings(value: boolean): void {
+		this.sync.shareSettings = value;
+		this.#persist('sync');
+	}
+
+	/** Whether `desk` syncs with paired devices. Unknown/empty desks default to shared. */
+	isDeskShared(desk: string): boolean {
+		if (!desk.trim()) return true;
+		return !this.sync.unsharedDesks.includes(sanitizeDeskName(desk));
+	}
+
+	setDeskShared(desk: string, shared: boolean): void {
+		const safe = sanitizeDeskName(desk);
+		const without = this.sync.unsharedDesks.filter((d) => d !== safe);
+		this.sync.unsharedDesks = shared ? without : [...without, safe];
+		this.#persist('sync');
+	}
+
+	/** Carries a desk's share choice across a rename. */
+	renameSharedDesk(oldDesk: string, newDesk: string): void {
+		const oldSafe = sanitizeDeskName(oldDesk);
+		if (!this.sync.unsharedDesks.includes(oldSafe)) return;
+		const newSafe = sanitizeDeskName(newDesk);
+		this.sync.unsharedDesks = this.sync.unsharedDesks.map((d) => (d === oldSafe ? newSafe : d));
+		this.#persist('sync');
+	}
+
+	/** Drops a deleted desk's stale share entry. */
+	forgetDesk(desk: string): void {
+		const safe = sanitizeDeskName(desk);
+		if (!this.sync.unsharedDesks.includes(safe)) return;
+		this.sync.unsharedDesks = this.sync.unsharedDesks.filter((d) => d !== safe);
 		this.#persist('sync');
 	}
 

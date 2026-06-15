@@ -7,6 +7,7 @@ import { notesService } from '$lib/services/notes.svelte';
 import { tagsService } from '$lib/services/tags.svelte';
 import { devicesService } from '$lib/services/devices.svelte';
 import { settingsService } from '$lib/services/settings.svelte';
+import { fsService } from '$lib/services/fs';
 import { noteSignals } from '$lib/services/note-signals';
 import { writeNoteFile, deleteNoteFile } from '$lib/repositories/notes.fs.repo';
 import {
@@ -77,6 +78,10 @@ class DeviceSyncService {
 	/** Dials every linked device in turn. One peer's failure can't abort the rest. */
 	async syncAll(): Promise<void> {
 		if (this.#running) return;
+		// Sync currently covers only the active desk's DB; when it's unshared this
+		// device neither pushes nor pulls it. A future multi-desk loop will apply
+		// the same isDeskShared gate per desk.
+		if (!settingsService.isDeskShared(fsService.currentDesk)) return;
 		this.#running = true;
 		this.syncing = true;
 		try {
@@ -96,9 +101,13 @@ class DeviceSyncService {
 		}
 	}
 
-	/** Accept side: only talk to paired peers; drop the stream otherwise. */
+	/**
+	 * Accept side: only talk to paired peers, and only while the active desk (the
+	 * one this session would reconcile) is shared. Drop the stream otherwise.
+	 */
 	async #handleIncoming({ sessionId, deviceId }: SyncSessionOpened): Promise<void> {
-		if (!devicesService.linked.some((d) => d.id === deviceId)) {
+		const paired = devicesService.linked.some((d) => d.id === deviceId);
+		if (!paired || !settingsService.isDeskShared(fsService.currentDesk)) {
 			void syncClose(sessionId);
 			return;
 		}

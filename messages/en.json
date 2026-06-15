@@ -332,5 +332,11 @@
 	"settings_sync_advanced_label": "Advanced settings",
 	"settings_sync_advanced_warning": "These settings are for advanced users. Changing them without knowing what you're doing will break syncing.",
 	"settings_sync_server_label": "Pairing server",
-	"settings_sync_server_helper": "URL of the server used to pair your devices. Leave empty to use the default."
+	"settings_sync_server_helper": "URL of the server used to pair your devices. Leave empty to use the default.",
+	"settings_sync_nav_sharing": "Sharing",
+	"settings_sync_sharing_description": "Choose what this device shares with your other devices.",
+	"settings_sync_share_settings_label": "Share settings",
+	"settings_sync_share_settings_helper": "Sync your app settings, except sync settings, to paired devices.",
+	"settings_sync_share_desks_label": "Shared desks",
+	"settings_sync_share_desks_helper": "Turn a desk off to keep it on this device only."
 }

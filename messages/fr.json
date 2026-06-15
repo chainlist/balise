@@ -332,5 +332,11 @@
 	"settings_sync_advanced_label": "Paramètres avancés",
 	"settings_sync_advanced_warning": "Ces paramètres sont réservés aux utilisateurs avertis. Les modifier sans savoir ce que vous faites cassera la synchronisation.",
 	"settings_sync_server_label": "Serveur de jumelage",
-	"settings_sync_server_helper": "URL du serveur utilisé pour jumeler vos appareils. Laissez vide pour utiliser celui par défaut."
+	"settings_sync_server_helper": "URL du serveur utilisé pour jumeler vos appareils. Laissez vide pour utiliser celui par défaut.",
+	"settings_sync_nav_sharing": "Partage",
+	"settings_sync_sharing_description": "Choisissez ce que cet appareil partage avec vos autres appareils.",
+	"settings_sync_share_settings_label": "Partager les paramètres",
+	"settings_sync_share_settings_helper": "Synchronisez vos paramètres, hors paramètres de synchronisation, vers les appareils associés.",
+	"settings_sync_share_desks_label": "Bureaux partagés",
+	"settings_sync_share_desks_helper": "Désactivez un bureau pour le garder uniquement sur cet appareil."
 }

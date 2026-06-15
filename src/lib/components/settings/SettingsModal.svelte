@@ -11,6 +11,7 @@
 	import GeneralSettings from './GeneralSettings.svelte';
 	import SyncSettings from './SyncSettings.svelte';
 	import SyncPairedDevices from './SyncPairedDevices.svelte';
+	import SyncSharingSettings from './SyncSharingSettings.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -67,7 +68,8 @@
 			icon: RefreshCwIcon,
 			children: [
 				{ id: 'sync-general', label: m.settings_sync_nav_general(), component: SyncSettings },
-				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices }
+				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices },
+				{ id: 'sync-sharing', label: m.settings_sync_nav_sharing(), component: SyncSharingSettings }
 			]
 		},
 		{

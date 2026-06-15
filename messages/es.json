@@ -332,5 +332,11 @@
 	"settings_sync_advanced_label": "Configuración avanzada",
 	"settings_sync_advanced_warning": "Esta configuración es para usuarios avanzados. Cambiarla sin saber lo que haces romperá la sincronización.",
 	"settings_sync_server_label": "Servidor de emparejamiento",
-	"settings_sync_server_helper": "URL del servidor usado para emparejar tus dispositivos. Déjalo vacío para usar el predeterminado."
+	"settings_sync_server_helper": "URL del servidor usado para emparejar tus dispositivos. Déjalo vacío para usar el predeterminado.",
+	"settings_sync_nav_sharing": "Compartir",
+	"settings_sync_sharing_description": "Elige qué comparte este dispositivo con tus otros dispositivos.",
+	"settings_sync_share_settings_label": "Compartir ajustes",
+	"settings_sync_share_settings_helper": "Sincroniza tus ajustes, salvo los de sincronización, con los dispositivos emparejados.",
+	"settings_sync_share_desks_label": "Escritorios compartidos",
+	"settings_sync_share_desks_helper": "Desactiva un escritorio para mantenerlo solo en este dispositivo."
 }

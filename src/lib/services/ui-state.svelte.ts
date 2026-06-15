@@ -5,6 +5,7 @@ import { tagsService } from './tags.svelte';
 import { notesService } from './notes.svelte';
 import { fsSyncService } from './fs-sync';
 import { fsService } from './fs';
+import { settingsService } from './settings.svelte';
 import { noteSignals } from './note-signals';
 import { resolveStorePath } from './store-path';
 
@@ -89,6 +90,7 @@ class UIState {
 
 	async renameDesk(oldDesk: string, newDesk: string): Promise<void> {
 		await renameDeskFiles(oldDesk, newDesk);
+		settingsService.renameSharedDesk(oldDesk, newDesk);
 		const next = this.desks.map((d) => (d === oldDesk ? newDesk : d));
 		await this.setDesks(next);
 		if (this.activeDesk === oldDesk) {
@@ -104,6 +106,7 @@ class UIState {
 
 		const next = this.desks.filter((value) => value !== desk);
 		await this.setDesks(next);
+		settingsService.forgetDesk(desk);
 
 		if (this.activeDesk === desk) {
 			await this.setActiveDesk(next[0]);

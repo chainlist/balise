@@ -332,5 +332,11 @@
 	"settings_sync_advanced_label": "Erweiterte Einstellungen",
 	"settings_sync_advanced_warning": "Diese Einstellungen sind für fortgeschrittene Benutzer. Sie ohne entsprechende Kenntnisse zu ändern, wird die Synchronisierung beschädigen.",
 	"settings_sync_server_label": "Kopplungsserver",
-	"settings_sync_server_helper": "URL des Servers zum Koppeln deiner Geräte. Leer lassen, um den Standard zu verwenden."
+	"settings_sync_server_helper": "URL des Servers zum Koppeln deiner Geräte. Leer lassen, um den Standard zu verwenden.",
+	"settings_sync_nav_sharing": "Teilen",
+	"settings_sync_sharing_description": "Lege fest, was dieses Gerät mit deinen anderen Geräten teilt.",
+	"settings_sync_share_settings_label": "Einstellungen teilen",
+	"settings_sync_share_settings_helper": "Synchronisiere deine App-Einstellungen, außer den Sync-Einstellungen, mit gekoppelten Geräten.",
+	"settings_sync_share_desks_label": "Geteilte Schreibtische",
+	"settings_sync_share_desks_helper": "Schalte einen Schreibtisch aus, um ihn nur auf diesem Gerät zu behalten."
 }
