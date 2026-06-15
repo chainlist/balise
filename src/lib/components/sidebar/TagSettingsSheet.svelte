@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { Toggle } from '$lib/components/shadcn/toggle/index.js';
-	import { tagDisplayName, tagsService } from '$lib/services/tags.svelte';
+	import { tagDisplayName, tagsService } from '$lib/services/content/tags.svelte';
 	import type { Tag } from '$lib/models/tag';
 	import { PinIcon, PinOffIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';

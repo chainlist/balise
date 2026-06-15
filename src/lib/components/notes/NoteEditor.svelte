@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Note } from '$lib/services/notes.svelte';
-	import { noteSignals } from '$lib/services/note-signals';
+	import type { Note } from '$lib/services/content/notes.svelte';
+	import { noteSignals } from '$lib/services/content/note-signals';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon, PinIcon } from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';

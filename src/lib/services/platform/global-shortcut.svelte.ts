@@ -1,6 +1,6 @@
 import { register, unregister, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { shortcutsService, type ShortcutDefinition } from './shortcuts.svelte';
-import { toasterService } from './toaster';
+import { toasterService } from '../app/toaster';
 import * as m from '$paraglide/messages.js';
 
 export type GlobalShortcutStatus = 'registered' | 'conflict';

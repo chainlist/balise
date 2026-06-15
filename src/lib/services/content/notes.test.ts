@@ -14,8 +14,8 @@ vi.mock('$lib/utils/db', () => ({ getDB: vi.fn(() => ({})) }));
 vi.mock('$lib/repositories/tags.repo', () => ({
 	setNoteTags: vi.fn().mockResolvedValue(undefined)
 }));
-vi.mock('$lib/services/tags.svelte', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('$lib/services/tags.svelte')>();
+vi.mock('$lib/services/content/tags.svelte', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('$lib/services/content/tags.svelte')>();
 	return {
 		...actual,
 		tagsService: {
@@ -24,8 +24,16 @@ vi.mock('$lib/services/tags.svelte', async (importOriginal) => {
 	};
 });
 
+vi.mock('$lib/services/settings/settings.svelte', async () => {
+	const { MAGIC_TAG_MATCH_TYPES } = await import('$lib/services/settings/magic-tags.svelte');
+	return {
+		MAGIC_TAG_MATCH_TYPES,
+		settingsService: { magicTags: { state: { tags: [] } } }
+	};
+});
+
 import { notesService } from './notes.svelte';
-import { UNTAGGED_FILTER, tagsService } from '$lib/services/tags.svelte';
+import { UNTAGGED_FILTER, tagsService } from '$lib/services/content/tags.svelte';
 import * as repo from '$lib/repositories/notes.repo';
 import { setNoteTags } from '$lib/repositories/tags.repo';
 

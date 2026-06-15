@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
-import { fsService } from './fs';
-import { settingsService } from './settings.svelte';
-import { toasterService } from './toaster';
+import { fsService } from '../platform/fs';
+import { settingsService } from '../settings/settings.svelte';
+import { toasterService } from '../app/toaster';
 import * as m from '$paraglide/messages.js';
 
 class FsSyncService {
@@ -15,7 +15,7 @@ class FsSyncService {
 		if (!fsService.currentDesk) return;
 		const updated = await invoke<number>('sync_desk_files', {
 			deskName: fsService.currentDesk,
-			magicTags: settingsService.magicTags.tags
+			magicTags: settingsService.magicTags.state.tags
 		});
 		if (updated > 0) toasterService.info(m.sync_external_changes({ count: updated }));
 	}

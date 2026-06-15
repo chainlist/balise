@@ -4,10 +4,11 @@
 		MAGIC_TAG_MATCH_TYPES,
 		type MagicTag,
 		type MagicTagMatchType
-	} from '$lib/services/settings.svelte';
+	} from '$lib/services/settings/settings.svelte';
 	import { PlusIcon, Trash2Icon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
+	import SettingsSection from './SettingsSection.svelte';
 
 	const matchTypeLabels: Record<MagicTagMatchType, () => string> = {
 		[MAGIC_TAG_MATCH_TYPES.STARTS_WITH]: m.settings_magic_tags_match_starts_with,
@@ -29,10 +30,10 @@
 		}
 	}
 
-	let rules = $state(settingsService.magicTags.tags.map((r) => ({ ...r })));
+	let rules = $state(settingsService.magicTags.state.tags.map((r) => ({ ...r })));
 
 	function save() {
-		settingsService.setMagicTags(rules.map((r) => ({ ...r })));
+		settingsService.magicTags.setMagicTags(rules.map((r) => ({ ...r })));
 	}
 
 	function addRule() {
@@ -54,14 +55,12 @@
 		'rounded-md border border-input bg-background px-2 py-1 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary';
 </script>
 
-<div class="flex h-full flex-col">
-	<div class="border-b px-6 py-4">
-		<h2 class="text-base font-semibold">{m.settings_magic_tags_heading()}</h2>
-		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_magic_tags_description()}</p>
-	</div>
-
-	<div class="flex-1 space-y-4 overflow-y-auto scrollbar-thin px-6 py-6">
-		{#each rules as rule, i (i)}
+<SettingsSection
+	title={m.settings_magic_tags_heading()}
+	description={m.settings_magic_tags_description()}
+	bodyClass="space-y-4"
+>
+	{#each rules as rule, i (i)}
 			{@const ex = buildExample(rule.matchType)}
 			<div class="space-y-1.5">
 				<div class="flex items-center gap-2">
@@ -118,5 +117,4 @@
 			<PlusIcon size="14" />
 			{m.settings_magic_tags_add()}
 		</button>
-	</div>
-</div>
+</SettingsSection>

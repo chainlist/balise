@@ -4,8 +4,8 @@
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ChevronsUpDownIcon, PlusIcon, LayoutListIcon, Settings } from '@lucide/svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeskSettingsSheet from '$lib/components/sidebar/DeskSettingsSheet.svelte';
 	import * as m from '$paraglide/messages.js';

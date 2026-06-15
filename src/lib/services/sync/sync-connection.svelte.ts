@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/core';
 import { syncServerUrl } from '$lib/config/sync';
-import { settingsService } from '$lib/services/settings.svelte';
-import { devicesService } from '$lib/services/devices.svelte';
-import { syncService } from '$lib/services/sync';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { devicesService } from '$lib/services/sync/devices.svelte';
+import { syncService } from '$lib/services/sync/sync';
 import type { SignalMessage } from '$lib/models/sync';
 
 /** Reconnect backoff bounds for a dropped control-plane connection. */
@@ -30,7 +30,8 @@ class SyncConnectionService {
 	start(): void {
 		$effect.root(() => {
 			$effect(() => {
-				const shouldConnect = settingsService.sync.enabled && devicesService.linked.length > 0;
+				const shouldConnect =
+					settingsService.sync.state.enabled && devicesService.linked.length > 0;
 				if (shouldConnect) this.#connect();
 				else this.#disconnect();
 			});

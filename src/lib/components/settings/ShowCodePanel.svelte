@@ -2,10 +2,10 @@
 	import { onDestroy } from 'svelte';
 	import { Loader2Icon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { devicesService } from '$lib/services/devices.svelte';
-	import { syncService } from '$lib/services/sync';
+	import { devicesService } from '$lib/services/sync/devices.svelte';
+	import { syncService } from '$lib/services/sync/sync';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import * as m from '$paraglide/messages.js';
 
 	let { onpaired }: { onpaired: () => void } = $props();

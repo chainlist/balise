@@ -12,6 +12,13 @@ vi.mock('$lib/repositories/tags.repo', () => ({
 	queryRelatedTags: vi.fn()
 }));
 vi.mock('$lib/utils/db', () => ({ getDB: vi.fn(() => ({})) }));
+vi.mock('$lib/services/settings/settings.svelte', async () => {
+	const { MAGIC_TAG_MATCH_TYPES } = await import('$lib/services/settings/magic-tags.svelte');
+	return {
+		MAGIC_TAG_MATCH_TYPES,
+		settingsService: { magicTags: { state: { tags: [] } } }
+	};
+});
 
 import { tagsService, extractTags, tagDisplayName } from './tags.svelte';
 import * as repo from '$lib/repositories/tags.repo';

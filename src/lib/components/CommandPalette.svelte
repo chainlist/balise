@@ -1,11 +1,11 @@
 <script lang="ts">
 	import * as Command from '$lib/components/shadcn/command/index.js';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { tagsService, tagDisplayName } from '$lib/services/content/tags.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { searchNotes } from '$lib/repositories/notes.repo';
 	import type { NoteSearchResult } from '$lib/models/note';
-	import { noteSignals } from '$lib/services/note-signals';
+	import { noteSignals } from '$lib/services/content/note-signals';
 	import { getDB } from '$lib/utils/db';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';

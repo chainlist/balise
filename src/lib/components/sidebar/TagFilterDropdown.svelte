@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { tagsService, tagDisplayName } from '$lib/services/content/tags.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';

@@ -6,7 +6,7 @@
 		type Tokens
 	} from 'marked';
 	import { openUrl } from '@tauri-apps/plugin-opener';
-	import { fsService } from '$lib/services/fs';
+	import { fsService } from '$lib/services/platform/fs';
 	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
 	let { content }: { content: string } = $props();

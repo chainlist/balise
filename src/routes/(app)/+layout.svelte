@@ -2,13 +2,13 @@
 	import { onMount } from 'svelte';
 	import { tinykeys } from 'tinykeys';
 	import { initApp } from '$lib/utils/init-app';
-	import { trayService } from '$lib/services/tray';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { trayService } from '$lib/services/platform/tray';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { exit } from '@tauri-apps/plugin-process';
 	import CloseToTrayDialog from '$lib/components/CloseToTrayDialog.svelte';
-	import { shortcutsService } from '$lib/services/shortcuts.svelte';
+	import { shortcutsService } from '$lib/services/platform/shortcuts.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import NotesPanel from '$lib/components/sidebar/NotesPanel.svelte';
@@ -38,7 +38,7 @@
 		const win = getCurrentWindow();
 		await win.onCloseRequested(async (event) => {
 			event.preventDefault();
-			const pref = settingsService.general.closeToTray;
+			const pref = settingsService.general.state.closeToTray;
 			if (pref === null) {
 				showCloseDialog = true;
 			} else if (pref) {
@@ -52,7 +52,7 @@
 
 	async function handleCloseBehaviorChoice(choice: 'tray' | 'quit') {
 		showCloseDialog = false;
-		settingsService.setCloseToTray(choice === 'tray');
+		settingsService.general.setCloseToTray(choice === 'tray');
 		if (choice === 'tray') {
 			await getCurrentWindow().hide();
 			await trayService.show();
@@ -62,6 +62,7 @@
 	}
 
 	$effect(() => {
+		if (!ready) return;
 		return tinykeys(
 			window,
 			shortcutsService.buildTinykeysMap(

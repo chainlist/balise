@@ -9,9 +9,9 @@
 		RefreshCwIcon,
 		Trash2Icon
 	} from '@lucide/svelte';
-	import { settingsService } from '$lib/services/settings.svelte';
-	import { devicesService, type LinkedDevice } from '$lib/services/devices.svelte';
-	import { deviceSyncService } from '$lib/services/device-sync.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { devicesService, type LinkedDevice } from '$lib/services/sync/devices.svelte';
+	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import { formatDeviceId } from '$lib/utils/device-id';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import AddDeviceDialog from './AddDeviceDialog.svelte';
@@ -89,7 +89,7 @@
 						</div>
 					</button>
 					<p class="shrink-0 text-xs whitespace-nowrap text-muted-foreground">
-						{relativeLabel(device.lastSeen, settingsService.general.language)}
+						{relativeLabel(device.lastSeen, settingsService.general.state.language)}
 					</p>
 					<Button
 						size="icon"

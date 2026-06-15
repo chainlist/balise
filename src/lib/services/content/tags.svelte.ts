@@ -1,7 +1,7 @@
 import { getDB } from '$lib/utils/db';
 import { TAG_PATTERN_SOURCE } from '$lib/utils/tag-parser';
 import { FENCE_LANG_SOURCE } from '$lib/utils/markdown-patterns';
-import { settingsService, MAGIC_TAG_MATCH_TYPES } from './settings.svelte';
+import { settingsService, MAGIC_TAG_MATCH_TYPES } from '../settings/settings.svelte';
 
 import {
 	queryTagsWithCounts,
@@ -35,7 +35,7 @@ function escapeRegex(s: string): string {
 }
 
 function extractMagicTags(content: string): string[] {
-	const magicTags = settingsService.magicTags.tags;
+	const magicTags = settingsService.magicTags.state.tags;
 	if (magicTags.length === 0) return [];
 
 	const found = new Set<string>();

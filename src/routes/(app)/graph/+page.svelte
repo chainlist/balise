@@ -2,11 +2,11 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { tagDisplayName } from '$lib/services/tags.svelte';
-	import { graphService } from '$lib/services/graph.svelte';
-	import { themeService } from '$lib/services/theme.svelte';
+	import { tagDisplayName } from '$lib/services/content/tags.svelte';
+	import { graphService } from '$lib/services/content/graph.svelte';
+	import { themeService } from '$lib/services/app/theme.svelte';
 	import type { Tag } from '$lib/models/tag';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import Sunburst from '$lib/components/graph/Sunburst.svelte';
 	import ForceGraph from '$lib/components/graph/ForceGraph.svelte';
 	import GraphSettings from '$lib/components/graph/GraphSettings.svelte';

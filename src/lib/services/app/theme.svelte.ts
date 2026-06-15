@@ -1,4 +1,4 @@
-import { settingsService } from './settings.svelte';
+import { settingsService } from '../settings/settings.svelte';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -6,7 +6,7 @@ class ThemeService {
 	#isDark = $state(false);
 
 	get theme(): Theme {
-		return settingsService.appearance.theme;
+		return settingsService.appearance.state.theme;
 	}
 
 	get isDark(): boolean {
@@ -14,7 +14,8 @@ class ThemeService {
 	}
 
 	#resolve(): 'light' | 'dark' {
-		if (settingsService.appearance.theme !== 'system') return settingsService.appearance.theme;
+		if (settingsService.appearance.state.theme !== 'system')
+			return settingsService.appearance.state.theme;
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	}
 
@@ -25,12 +26,12 @@ class ThemeService {
 	}
 
 	setTheme(theme: Theme): void {
-		settingsService.setTheme(theme);
+		settingsService.appearance.setTheme(theme);
 		this.applyTheme();
 	}
 
 	#mediaListener = () => {
-		if (settingsService.appearance.theme === 'system') this.applyTheme();
+		if (settingsService.appearance.state.theme === 'system') this.applyTheme();
 	};
 
 	init(): void {

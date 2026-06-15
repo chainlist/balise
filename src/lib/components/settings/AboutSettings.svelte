@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getVersion } from '@tauri-apps/api/app';
-	import { updaterService } from '$lib/services/updater.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { updaterService } from '$lib/services/platform/updater.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { checkForNews } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
+	import SettingsSection from './SettingsSection.svelte';
 
 	const DEPS = [
 		{ name: 'Tauri', desc: 'Desktop application framework' },
@@ -26,14 +27,8 @@
 	});
 </script>
 
-<div class="flex h-full flex-col">
-	<div class="border-b px-6 py-4">
-		<h2 class="text-base font-semibold">{m.settings_about_heading()}</h2>
-		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_about_description()}</p>
-	</div>
-
-	<div class="flex-1 space-y-8 overflow-y-auto scrollbar-thin px-6 py-6">
-		<!-- App info -->
+<SettingsSection title={m.settings_about_heading()} description={m.settings_about_description()}>
+	<!-- App info -->
 		<div>
 			<p class="text-sm font-semibold">Balise</p>
 			<p class="mt-1 text-xs text-muted-foreground">{m.settings_about_version()} {version}</p>
@@ -113,5 +108,4 @@
 				{/each}
 			</ul>
 		</div>
-	</div>
-</div>
+</SettingsSection>

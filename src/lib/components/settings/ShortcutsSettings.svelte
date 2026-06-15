@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { shortcutsService } from '$lib/services/shortcuts.svelte';
-	import { settingsService } from '$lib/services/settings.svelte';
-	import { globalShortcutService } from '$lib/services/global-shortcut.svelte';
+	import { shortcutsService } from '$lib/services/platform/shortcuts.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { globalShortcutService } from '$lib/services/platform/global-shortcut.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Kbd, KbdGroup } from '$lib/components/shadcn/kbd/index.js';
+	import SettingsSection from './SettingsSection.svelte';
 
 	let listeningFor = $state<string | null>(null);
 	let conflictName = $state<string | null>(null);
@@ -119,7 +120,7 @@
 		}
 
 		conflictName = null;
-		settingsService.setBinding(listeningFor, binding);
+		settingsService.shortcuts.setBinding(listeningFor, binding);
 		reapplyIfGlobal(listeningFor);
 		listeningFor = null;
 	}
@@ -127,12 +128,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="flex h-full flex-col">
-	<div class="border-b px-6 py-4">
-		<h2 class="text-base font-semibold">{m.settings_shortcuts_heading()}</h2>
-		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_shortcuts_description()}</p>
+<SettingsSection
+	title={m.settings_shortcuts_heading()}
+	description={m.settings_shortcuts_description()}
+	bodyClass={null}
+>
+	{#snippet header()}
 		<Input type="search" bind:value={searchQuery} placeholder="Search shortcuts..." class="mt-3" />
-	</div>
+	{/snippet}
 
 	<div class="flex-1 overflow-y-auto scrollbar-thin">
 		<table class="w-full">
@@ -208,7 +211,7 @@
 							{#if binding !== def.defaultBinding}
 								<button
 									onclick={() => {
-										settingsService.resetBinding(def.id);
+										settingsService.shortcuts.resetBinding(def.id);
 										reapplyIfGlobal(def.id);
 									}}
 									title={m.settings_shortcuts_reset()}
@@ -223,4 +226,4 @@
 			</tbody>
 		</table>
 	</div>
-</div>
+</SettingsSection>

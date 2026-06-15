@@ -1,11 +1,11 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 
 	let { readingTime, date }: { readingTime: number; date: Date } = $props();
 
 	const intl = $derived(
-		new Intl.DateTimeFormat(settingsService.general.language, { dateStyle: 'medium' })
+		new Intl.DateTimeFormat(settingsService.general.state.language, { dateStyle: 'medium' })
 	);
 </script>
 

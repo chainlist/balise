@@ -30,7 +30,7 @@
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 
 	let {
 		content,
@@ -66,7 +66,7 @@
 	}
 
 	$effect(() => {
-		const mode = settingsService.editor.markdownMarks;
+		const mode = settingsService.editor.state.markdownMarks;
 		const effectiveMode: MarkMode = mode === 'cursor' && !focused ? 'never' : mode;
 		if (editorView) {
 			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(effectiveMode)) });
@@ -112,7 +112,7 @@
 					// Images always render as widgets, independent of mark mode
 					mdImagePlugin(),
 					// Mark visibility (dynamically reconfigured)
-					markCompartment.of(makeMarkPlugins(settingsService.editor.markdownMarks)),
+					markCompartment.of(makeMarkPlugins(settingsService.editor.state.markdownMarks)),
 					// Theme
 					noteEditorTheme,
 					// Focus + change listener

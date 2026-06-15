@@ -5,40 +5,49 @@ const mockStore = vi.hoisted(() => ({ get: vi.fn(), set: vi.fn().mockResolvedVal
 vi.mock('@tauri-apps/plugin-store', () => ({
 	load: vi.fn().mockResolvedValue(mockStore)
 }));
-vi.mock('$lib/services/store-path', () => ({
+vi.mock('$lib/services/platform/store-path', () => ({
 	resolveStorePath: vi.fn().mockResolvedValue('ui-state.json')
 }));
-vi.mock('$lib/services/desk', () => ({
+vi.mock('$lib/services/platform/desk', () => ({
 	openDesk: vi.fn().mockResolvedValue(undefined)
 }));
-vi.mock('$lib/services/notes.svelte', () => ({
+vi.mock('$lib/services/content/notes.svelte', () => ({
 	notesService: {
 		load: vi.fn().mockResolvedValue(undefined)
 	}
 }));
-vi.mock('$lib/services/tags.svelte', () => ({
+vi.mock('$lib/services/content/tags.svelte', () => ({
 	tagsService: {
 		load: vi.fn().mockResolvedValue(undefined),
 		loadRelated: vi.fn().mockResolvedValue(undefined)
 	}
 }));
-vi.mock('$lib/services/fs-sync', () => ({
+vi.mock('$lib/services/sync/fs-sync', () => ({
 	fsSyncService: {
 		syncDeskFiles: vi.fn().mockResolvedValue(undefined)
 	}
 }));
-vi.mock('$lib/services/fs', () => ({
+vi.mock('$lib/services/platform/fs', () => ({
 	fsService: {
 		setDesk: vi.fn()
 	}
 }));
 
+vi.mock('$lib/services/settings/settings.svelte', () => ({
+	settingsService: {
+		sync: {
+			renameSharedDesk: vi.fn(),
+			forgetDesk: vi.fn()
+		}
+	}
+}));
+
 import { uiState } from './ui-state.svelte';
-import { openDesk } from '$lib/services/desk';
-import { notesService } from '$lib/services/notes.svelte';
-import { tagsService } from '$lib/services/tags.svelte';
-import { fsSyncService } from '$lib/services/fs-sync';
-import { fsService } from '$lib/services/fs';
+import { openDesk } from '$lib/services/platform/desk';
+import { notesService } from '$lib/services/content/notes.svelte';
+import { tagsService } from '$lib/services/content/tags.svelte';
+import { fsSyncService } from '$lib/services/sync/fs-sync';
+import { fsService } from '$lib/services/platform/fs';
 
 // Initialise the store once so the #store field is non-null,
 // making store?.set(...) calls observable in every test.

@@ -1,4 +1,4 @@
-import { settingsService } from '$lib/services/settings.svelte';
+import { settingsService } from '$lib/services/settings/settings.svelte';
 
 /**
  * Default base URL of the balise-sync control-plane server (pairing + wake
@@ -14,5 +14,5 @@ export const SYNC_SERVER_URL = import.meta.env.VITE_SYNC_URL ?? 'http://localhos
  * lazily so a server change in settings takes effect on the next request.
  */
 export function syncServerUrl(): string {
-	return settingsService.sync.syncUrl.trim() || SYNC_SERVER_URL;
+	return settingsService.sync.state.syncUrl.trim() || SYNC_SERVER_URL;
 }

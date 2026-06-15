@@ -1,7 +1,7 @@
 import { check, type Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { toasterService, errorMessage } from './toaster';
-import { settingsService } from './settings.svelte';
+import { toasterService, errorMessage } from '../app/toaster';
+import { settingsService } from '../settings/settings.svelte';
 import * as m from '$paraglide/messages.js';
 
 type UpdateStatus =
@@ -19,7 +19,7 @@ class UpdaterService {
 	progress = $state(0);
 
 	async checkOnStartup() {
-		if (!import.meta.env.PROD || !settingsService.general.autoUpdate) return;
+		if (!import.meta.env.PROD || !settingsService.general.state.autoUpdate) return;
 		await this._check();
 	}
 

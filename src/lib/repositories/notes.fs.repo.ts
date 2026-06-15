@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { fsService } from '$lib/services/fs';
+import { fsService } from '$lib/services/platform/fs';
 import { parseDbTimestamp } from '$lib/utils/time';
 import type { Note } from '$lib/models/note';
 

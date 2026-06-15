@@ -2,10 +2,10 @@
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
-	import { devicesService, type DeviceType } from '$lib/services/devices.svelte';
-	import { syncService, ClaimError } from '$lib/services/sync';
+	import { devicesService, type DeviceType } from '$lib/services/sync/devices.svelte';
+	import { syncService, ClaimError } from '$lib/services/sync/sync';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import * as m from '$paraglide/messages.js';
 
 	let { onpaired }: { onpaired: () => void } = $props();

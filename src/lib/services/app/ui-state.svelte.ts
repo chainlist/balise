@@ -1,13 +1,13 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
 import { ModalState } from './modal-state.svelte';
-import { openDesk, renameDeskFiles } from './desk';
-import { tagsService } from './tags.svelte';
-import { notesService } from './notes.svelte';
-import { fsSyncService } from './fs-sync';
-import { fsService } from './fs';
-import { settingsService } from './settings.svelte';
-import { noteSignals } from './note-signals';
-import { resolveStorePath } from './store-path';
+import { openDesk, renameDeskFiles } from '../platform/desk';
+import { tagsService } from '../content/tags.svelte';
+import { notesService } from '../content/notes.svelte';
+import { fsSyncService } from '../sync/fs-sync';
+import { fsService } from '../platform/fs';
+import { settingsService } from '../settings/settings.svelte';
+import { noteSignals } from '../content/note-signals';
+import { resolveStorePath } from '../platform/store-path';
 
 const defaultDesk = 'Personal';
 const defaults = {
@@ -90,7 +90,7 @@ class UIState {
 
 	async renameDesk(oldDesk: string, newDesk: string): Promise<void> {
 		await renameDeskFiles(oldDesk, newDesk);
-		settingsService.renameSharedDesk(oldDesk, newDesk);
+		settingsService.sync.renameSharedDesk(oldDesk, newDesk);
 		const next = this.desks.map((d) => (d === oldDesk ? newDesk : d));
 		await this.setDesks(next);
 		if (this.activeDesk === oldDesk) {
@@ -106,7 +106,7 @@ class UIState {
 
 		const next = this.desks.filter((value) => value !== desk);
 		await this.setDesks(next);
-		settingsService.forgetDesk(desk);
+		settingsService.sync.forgetDesk(desk);
 
 		if (this.activeDesk === desk) {
 			await this.setActiveDesk(next[0]);

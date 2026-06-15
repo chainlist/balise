@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Popover } from 'bits-ui';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { COLOR_PALETTE } from '$lib/utils/color-palette';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
@@ -14,12 +14,12 @@
 		<p class="text-xs text-muted-foreground">{m.settings_primary_helper()}</p>
 	</div>
 	<div class="flex items-center gap-2">
-		{#if settingsService.appearance.primaryColor}
+		{#if settingsService.appearance.state.primaryColor}
 			<Button
 				variant="ghost"
 				size="sm"
 				class="text-muted-foreground"
-				onclick={() => settingsService.resetPrimaryColor()}
+				onclick={() => settingsService.appearance.resetPrimaryColor()}
 			>
 				<RotateCcwIcon size="14" />
 				{m.settings_primary_reset()}
@@ -40,12 +40,12 @@
 						<Popover.Close
 							class={cn(
 								'size-6 rounded-full transition-transform hover:scale-110',
-								settingsService.appearance.primaryColor === color &&
+								settingsService.appearance.state.primaryColor === color &&
 									'ring-2 ring-primary ring-offset-2 ring-offset-popover'
 							)}
 							style="background-color: {color}"
 							aria-label={color}
-							onclick={() => settingsService.setPrimaryColor(color)}
+							onclick={() => settingsService.appearance.setPrimaryColor(color)}
 						/>
 					{/each}
 				</Popover.Content>

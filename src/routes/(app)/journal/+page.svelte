@@ -5,12 +5,12 @@
 	import { Calendar as CalendarIcon } from '@lucide/svelte';
 	import { today, getLocalTimeZone } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
-	import { notesService } from '$lib/services/notes.svelte';
+	import { notesService } from '$lib/services/content/notes.svelte';
 	import type { Note } from '$lib/models/note';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 
 	const JOURNAL_TAG = 'journal';
 

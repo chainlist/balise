@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { load, type Store } from '@tauri-apps/plugin-store';
-import { resolveStorePath } from './store-path';
+import { resolveStorePath } from '../platform/store-path';
 import { syncServerUrl } from '$lib/config/sync';
 
 /** A paired peer as returned by the server. */

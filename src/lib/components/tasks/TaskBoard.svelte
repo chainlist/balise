@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
-	import { tasksService, type TaskItem, type TaskStatus } from '$lib/services/tasks.svelte';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { tasksService, type TaskItem, type TaskStatus } from '$lib/services/content/tasks.svelte';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import TaskBoardCard from './TaskBoardCard.svelte';
 	import { TASK_STATUS_COLOR as ACCENT } from '$lib/utils/task-colors';
 	import * as m from '$paraglide/messages.js';

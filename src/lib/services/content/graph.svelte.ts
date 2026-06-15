@@ -1,6 +1,6 @@
 import { getDB } from '$lib/utils/db';
 import { queryTagCooccurrences } from '$lib/repositories/tags.repo';
-import { tagsService } from '$lib/services/tags.svelte';
+import { tagsService } from '$lib/services/content/tags.svelte';
 import type { Tag } from '$lib/models/tag';
 
 interface TagCooccurrence {

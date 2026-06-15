@@ -1,4 +1,4 @@
-import { settingsService } from './settings.svelte';
+import { settingsService } from '../settings/settings.svelte';
 
 export interface ShortcutDefinition {
 	id: string;
@@ -13,7 +13,7 @@ export interface ShortcutDefinition {
 
 class ShortcutsService {
 	getBinding(def: ShortcutDefinition): string {
-		return settingsService.shortcuts.customBindings[def.id] ?? def.defaultBinding;
+		return settingsService.shortcuts.state.customBindings[def.id] ?? def.defaultBinding;
 	}
 
 	buildTinykeysMap(

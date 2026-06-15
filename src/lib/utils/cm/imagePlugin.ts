@@ -5,7 +5,7 @@ import { StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
 import ImageViewer from '$lib/components/cm/ImageViewer.svelte';
-import { fsService } from '$lib/services/fs';
+import { fsService } from '$lib/services/platform/fs';
 import { SvelteWidget } from './shared';
 
 // --- Alt text ---

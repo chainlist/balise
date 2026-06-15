@@ -1,5 +1,5 @@
 ﻿import { getDB } from '$lib/utils/db';
-import { tagsService, extractTags, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
+import { tagsService, extractTags, UNTAGGED_FILTER } from '$lib/services/content/tags.svelte';
 import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import { toSqliteUtc } from '$lib/utils/time';
 import { writeNoteFile, deleteNoteFile } from '$lib/repositories/notes.fs.repo';
