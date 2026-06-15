@@ -56,6 +56,7 @@ const MESH_SIZE_CSS_VARS = [
 export interface GeneralSettings {
 	language: 'fr' | 'es' | 'en' | 'de';
 	closeToTray: boolean | null;
+	autoUpdate: boolean;
 }
 
 export interface AppearanceSettings {
@@ -103,7 +104,7 @@ const LEGACY_KEYS = [
 ] as const;
 
 class SettingsService {
-	general = $state<GeneralSettings>({ language: 'en', closeToTray: null });
+	general = $state<GeneralSettings>({ language: 'en', closeToTray: null, autoUpdate: true });
 	appearance = $state<AppearanceSettings>({
 		theme: 'system',
 		primaryColor: null,
@@ -134,7 +135,8 @@ class SettingsService {
 
 		this.general = {
 			language: general?.language ?? 'en',
-			closeToTray: general?.closeToTray ?? null
+			closeToTray: general?.closeToTray ?? null,
+			autoUpdate: general?.autoUpdate ?? true
 		};
 		this.appearance = {
 			theme: appearance?.theme ?? 'system',
@@ -322,6 +324,11 @@ class SettingsService {
 
 	setCloseToTray(value: boolean): void {
 		this.general.closeToTray = value;
+		this.#persist('general');
+	}
+
+	setAutoUpdate(value: boolean): void {
+		this.general.autoUpdate = value;
 		this.#persist('general');
 	}
 

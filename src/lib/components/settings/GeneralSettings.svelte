@@ -3,6 +3,7 @@
 	import { applyLanguageChange } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
+	import { Switch } from 'bits-ui';
 
 	const localeLabels: Record<string, string> = {
 		en: 'English',
@@ -74,6 +75,23 @@
 					<Select.Item value="quit" label={m.close_behavior_quit()} />
 				</Select.Content>
 			</Select.Root>
+		</div>
+
+		<div class="flex items-center justify-between">
+			<div class="space-y-0.5">
+				<p class="text-sm font-medium">{m.settings_auto_update_label()}</p>
+				<p class="text-xs text-muted-foreground">{m.settings_auto_update_helper()}</p>
+			</div>
+			<Switch.Root
+				checked={settingsService.general.autoUpdate}
+				onCheckedChange={(checked) => settingsService.setAutoUpdate(checked)}
+				aria-label={m.settings_auto_update_label()}
+				class="inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest"
+			>
+				<Switch.Thumb
+					class="pointer-events-none block size-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0.5"
+				/>
+			</Switch.Root>
 		</div>
 	</div>
 </div>
