@@ -90,8 +90,26 @@ export const noteEditorTheme = EditorView.theme({
 		padding: '0 0.75rem'
 	},
 	'.cm-md-codeblock-begin': {
+		position: 'relative',
 		borderTopLeftRadius: '6px',
 		borderTopRightRadius: '6px'
+	},
+	'.cm-md-codeblock-begin[data-lang]::after': {
+		content: 'attr(data-lang)',
+		position: 'absolute',
+		top: '0.25rem',
+		right: '0.4rem',
+		padding: '0.05rem 0.45rem',
+		borderRadius: '999px',
+		background: 'color-mix(in oklch, var(--muted-foreground) 14%, transparent)',
+		color: 'var(--muted-foreground)',
+		fontFamily: 'var(--md-font-mono)',
+		fontSize: '0.7rem',
+		lineHeight: '1.4',
+		textTransform: 'uppercase',
+		letterSpacing: '0.06em',
+		pointerEvents: 'none',
+		userSelect: 'none'
 	},
 	'.cm-md-codeblock-end': {
 		borderBottomLeftRadius: '6px',

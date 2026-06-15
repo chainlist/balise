@@ -25,6 +25,14 @@ function buildCodeDecos(state: EditorState, mode: MarkMode): DecorationSet {
 			const endLine = state.doc.lineAt(node.to).number;
 			const revealed = isMarkRevealed(mode, node.from, node.to, cursorPos);
 
+			let lang = '';
+			for (let child = node.node.firstChild; child; child = child.nextSibling) {
+				if (child.name === 'CodeInfo') {
+					lang = state.doc.sliceString(child.from, child.to).trim();
+					break;
+				}
+			}
+
 			for (let n = startLine; n <= endLine; n++) {
 				const line = state.doc.line(n);
 				const isFence = n === startLine || n === endLine;
@@ -32,7 +40,9 @@ function buildCodeDecos(state: EditorState, mode: MarkMode): DecorationSet {
 				let cls = 'cm-md-codeblock';
 				if (n === startLine) cls += ' cm-md-codeblock-begin';
 				if (n === endLine) cls += ' cm-md-codeblock-end';
-				ranges.push(Decoration.line({ class: cls }).range(line.from));
+				const spec: { class: string; attributes?: Record<string, string> } = { class: cls };
+				if (n === startLine && lang) spec.attributes = { 'data-lang': lang };
+				ranges.push(Decoration.line(spec).range(line.from));
 
 				// Keep the fence row, but hide the ``` + language glyphs unless revealed.
 				if (isFence && !revealed && line.to > line.from) {

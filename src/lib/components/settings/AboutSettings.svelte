@@ -14,7 +14,6 @@
 		{ name: 'SvelteKit', desc: 'Web application framework' },
 		{ name: 'Tailwind CSS', desc: 'Utility-first CSS framework' },
 		{ name: 'CodeMirror', desc: 'Extensible code editor' },
-		{ name: 'Shiki', desc: 'Syntax highlighting' },
 		{ name: 'Lucide', desc: 'Icon library' },
 		{ name: 'Paraglide', desc: 'Internationalization' },
 		{ name: 'nanoid', desc: 'Unique ID generation' },
