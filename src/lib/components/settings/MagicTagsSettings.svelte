@@ -70,7 +70,7 @@
 						onValueChange={(v) => v && updateRule(i, 'matchType', v)}
 					>
 						<Select.Trigger class="w-36 shrink-0">
-							<Select.Value />
+							{matchTypeLabels[rule.matchType]()}
 						</Select.Trigger>
 						<Select.Content>
 							{#each Object.values(MAGIC_TAG_MATCH_TYPES) as type (type)}
