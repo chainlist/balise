@@ -26,6 +26,7 @@
 		mdMarkNavPlugin,
 		mdImagePlugin,
 		mdTagCompletion,
+		spaceRequiredHeadings,
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
@@ -83,7 +84,11 @@
 					// Language / syntax
 					markdown({
 						base: markdownLanguage,
-						extensions: [GFM, { props: [foldNodeProp.add({ Paragraph: () => null })] }],
+						extensions: [
+							GFM,
+							spaceRequiredHeadings,
+							{ props: [foldNodeProp.add({ Paragraph: () => null })] }
+						],
 						codeLanguages: languages
 					}),
 					mdSyntaxHighlighting,
