@@ -14,5 +14,6 @@ export { mdSlashPlugin } from './slashPlugin';
 export { mdImagePlugin } from './imagePlugin';
 export { mdPlaceholderPlugin } from './placeholderPlugin';
 export { mdTagCompletion } from './tagCompletion';
+export { spaceRequiredHeadings } from './headingParser';
 export { noteEditorTheme, mdSyntaxHighlighting } from './theme';
 export type { MarkMode } from './shared';
