@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.1](https://github.com/chainlist/balise/compare/v0.27.0...v0.27.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **editor:** Now heading marks require a space to be treated as headings ([#58](https://github.com/chainlist/balise/issues/58)) ([6365f8b](https://github.com/chainlist/balise/commit/6365f8b681207234d47065292a98439d2807fe7c))
+
 ## [0.27.0](https://github.com/chainlist/balise/compare/v0.26.0...v0.27.0) (2026-06-13)
 
 
