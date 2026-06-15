@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { SYNC_SERVER_URL } from '$lib/config/sync';
+import { syncServerUrl } from '$lib/config/sync';
 import { settingsService } from '$lib/services/settings.svelte';
 import { devicesService } from '$lib/services/devices.svelte';
 import { syncService } from '$lib/services/sync';
@@ -38,7 +38,7 @@ class SyncConnectionService {
 	}
 
 	#wsUrl(): string {
-		return `${SYNC_SERVER_URL.replace(/^http/, 'ws')}/sync`;
+		return `${syncServerUrl().replace(/^http/, 'ws')}/sync`;
 	}
 
 	#connect(): void {

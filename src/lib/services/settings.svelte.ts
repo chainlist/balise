@@ -87,6 +87,8 @@ export interface SyncSettings {
 	enabled: boolean;
 	/** How often to sync with linked devices, in minutes. */
 	intervalMinutes: number;
+	/** Custom pairing server URL; empty falls back to the build-time default. */
+	syncUrl: string;
 }
 
 /** Selectable sync cadences, in minutes. */
@@ -126,7 +128,7 @@ class SettingsService {
 	editor = $state<EditorSettings>({ fontSize: 16, lineHeight: 1.75, markdownMarks: 'cursor' });
 	magicTags = $state<MagicTagsSettings>({ tags: DEFAULT_MAGIC_TAGS });
 	shortcuts = $state<ShortcutsSettings>({ customBindings: {} });
-	sync = $state<SyncSettings>({ enabled: false, intervalMinutes: 5 });
+	sync = $state<SyncSettings>({ enabled: false, intervalMinutes: 5, syncUrl: '' });
 
 	#store: Store | null = null;
 
@@ -174,7 +176,8 @@ class SettingsService {
 		};
 		this.sync = {
 			enabled: sync?.enabled ?? false,
-			intervalMinutes: sync?.intervalMinutes ?? 5
+			intervalMinutes: sync?.intervalMinutes ?? 5,
+			syncUrl: sync?.syncUrl ?? ''
 		};
 
 		setLocale(this.general.language);
@@ -354,6 +357,11 @@ class SettingsService {
 
 	setSyncInterval(minutes: number): void {
 		this.sync.intervalMinutes = minutes;
+		this.#persist('sync');
+	}
+
+	setSyncUrl(url: string): void {
+		this.sync.syncUrl = url;
 		this.#persist('sync');
 	}
 

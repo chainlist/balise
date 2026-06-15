@@ -286,6 +286,11 @@
 	"settings_sync_interval_option": "{minutes} min",
 	"settings_sync_start_error": "Échec du démarrage de la synchronisation.",
 	"settings_sync_nav_linked": "Appareils liés",
+	"settings_sync_nav_general": "Général",
+	"settings_sync_nav_paired": "Appareils jumelés",
+	"settings_sync_paired_description": "Les appareils liés à celui-ci.",
+	"settings_sync_disabled_notice": "La synchronisation est désactivée, activez-la pour accéder à cette section.",
+	"settings_sync_enable_action": "Activer",
 	"settings_sync_now": "Synchroniser",
 	"settings_sync_linked_empty_title": "Aucun appareil lié",
 	"settings_sync_linked_empty_desc": "Les appareils que vous associez à celui-ci apparaîtront ici.",
@@ -323,5 +328,9 @@
 	"settings_sync_edit_error_failed": "Impossible de mettre à jour l'appareil.",
 	"settings_sync_delete_title": "Supprimer l'appareil",
 	"settings_sync_delete_description": "Cet appareil ne sera plus synchronisé avec celui-ci. Vous pourrez le réassocier plus tard.",
-	"settings_sync_unpair_warning": "Appareil supprimé, mais le serveur n'a pas pu être joint pour le dissocier."
+	"settings_sync_unpair_warning": "Appareil supprimé, mais le serveur n'a pas pu être joint pour le dissocier.",
+	"settings_sync_advanced_label": "Paramètres avancés",
+	"settings_sync_advanced_warning": "Ces paramètres sont réservés aux utilisateurs avertis. Les modifier sans savoir ce que vous faites cassera la synchronisation.",
+	"settings_sync_server_label": "Serveur de jumelage",
+	"settings_sync_server_helper": "URL du serveur utilisé pour jumeler vos appareils. Laissez vide pour utiliser celui par défaut."
 }

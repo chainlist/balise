@@ -4,7 +4,7 @@
 	import { stopSync } from '$lib/utils/sync';
 	import { deviceSyncService } from '$lib/services/device-sync.svelte';
 	import * as Select from '$lib/components/shadcn/select/index.js';
-	import SyncLinkedDevices from './SyncLinkedDevices.svelte';
+	import SyncAdvancedSettings from './SyncAdvancedSettings.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	function toggleSync(enabled: boolean) {
@@ -75,8 +75,6 @@
 				</Select.Content>
 			</Select.Root>
 		</div>
-		<div class="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-			<SyncLinkedDevices />
-		</div>
+		<SyncAdvancedSettings />
 	{/if}
 </div>

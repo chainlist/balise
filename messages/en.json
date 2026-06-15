@@ -286,6 +286,11 @@
 	"settings_sync_interval_option": "{minutes} min",
 	"settings_sync_start_error": "Failed to start sync.",
 	"settings_sync_nav_linked": "Linked devices",
+	"settings_sync_nav_general": "General",
+	"settings_sync_nav_paired": "Paired devices",
+	"settings_sync_paired_description": "Devices linked to this one.",
+	"settings_sync_disabled_notice": "Sync is disabled, enable it to access this section.",
+	"settings_sync_enable_action": "Enable",
 	"settings_sync_now": "Sync now",
 	"settings_sync_linked_empty_title": "No linked devices yet",
 	"settings_sync_linked_empty_desc": "Devices you pair with this one will appear here.",
@@ -323,5 +328,9 @@
 	"settings_sync_edit_error_failed": "Couldn't update the device.",
 	"settings_sync_delete_title": "Remove device",
 	"settings_sync_delete_description": "This device will no longer sync with this one. You can pair it again later.",
-	"settings_sync_unpair_warning": "Device removed, but the server couldn't be reached to unpair it."
+	"settings_sync_unpair_warning": "Device removed, but the server couldn't be reached to unpair it.",
+	"settings_sync_advanced_label": "Advanced settings",
+	"settings_sync_advanced_warning": "These settings are for advanced users. Changing them without knowing what you're doing will break syncing.",
+	"settings_sync_server_label": "Pairing server",
+	"settings_sync_server_helper": "URL of the server used to pair your devices. Leave empty to use the default."
 }

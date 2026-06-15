@@ -286,6 +286,11 @@
 	"settings_sync_interval_option": "{minutes} min",
 	"settings_sync_start_error": "No se pudo iniciar la sincronización.",
 	"settings_sync_nav_linked": "Dispositivos vinculados",
+	"settings_sync_nav_general": "General",
+	"settings_sync_nav_paired": "Dispositivos emparejados",
+	"settings_sync_paired_description": "Dispositivos vinculados a este.",
+	"settings_sync_disabled_notice": "La sincronización está desactivada, actívala para acceder a esta sección.",
+	"settings_sync_enable_action": "Activar",
 	"settings_sync_now": "Sincronizar ahora",
 	"settings_sync_linked_empty_title": "Aún no hay dispositivos vinculados",
 	"settings_sync_linked_empty_desc": "Los dispositivos que vincules con este aparecerán aquí.",
@@ -323,5 +328,9 @@
 	"settings_sync_edit_error_failed": "No se pudo actualizar el dispositivo.",
 	"settings_sync_delete_title": "Eliminar dispositivo",
 	"settings_sync_delete_description": "Este dispositivo dejará de sincronizarse con este. Podrás volver a vincularlo más tarde.",
-	"settings_sync_unpair_warning": "Dispositivo eliminado, pero no se pudo contactar al servidor para desvincularlo."
+	"settings_sync_unpair_warning": "Dispositivo eliminado, pero no se pudo contactar al servidor para desvincularlo.",
+	"settings_sync_advanced_label": "Configuración avanzada",
+	"settings_sync_advanced_warning": "Esta configuración es para usuarios avanzados. Cambiarla sin saber lo que haces romperá la sincronización.",
+	"settings_sync_server_label": "Servidor de emparejamiento",
+	"settings_sync_server_helper": "URL del servidor usado para emparejar tus dispositivos. Déjalo vacío para usar el predeterminado."
 }

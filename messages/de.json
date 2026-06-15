@@ -286,6 +286,11 @@
 	"settings_sync_interval_option": "{minutes} Min.",
 	"settings_sync_start_error": "Synchronisierung konnte nicht gestartet werden.",
 	"settings_sync_nav_linked": "Verbundene Geräte",
+	"settings_sync_nav_general": "Allgemein",
+	"settings_sync_nav_paired": "Gekoppelte Geräte",
+	"settings_sync_paired_description": "Mit diesem Gerät verbundene Geräte.",
+	"settings_sync_disabled_notice": "Die Synchronisierung ist deaktiviert. Aktiviere sie, um auf diesen Bereich zuzugreifen.",
+	"settings_sync_enable_action": "Aktivieren",
 	"settings_sync_now": "Jetzt synchronisieren",
 	"settings_sync_linked_empty_title": "Noch keine verbundenen Geräte",
 	"settings_sync_linked_empty_desc": "Geräte, die Sie mit diesem verbinden, erscheinen hier.",
@@ -323,5 +328,9 @@
 	"settings_sync_edit_error_failed": "Gerät konnte nicht aktualisiert werden.",
 	"settings_sync_delete_title": "Gerät entfernen",
 	"settings_sync_delete_description": "Dieses Gerät wird nicht mehr mit diesem synchronisiert. Du kannst es später erneut koppeln.",
-	"settings_sync_unpair_warning": "Gerät entfernt, aber der Server war nicht erreichbar, um die Kopplung aufzuheben."
+	"settings_sync_unpair_warning": "Gerät entfernt, aber der Server war nicht erreichbar, um die Kopplung aufzuheben.",
+	"settings_sync_advanced_label": "Erweiterte Einstellungen",
+	"settings_sync_advanced_warning": "Diese Einstellungen sind für fortgeschrittene Benutzer. Sie ohne entsprechende Kenntnisse zu ändern, wird die Synchronisierung beschädigen.",
+	"settings_sync_server_label": "Kopplungsserver",
+	"settings_sync_server_helper": "URL des Servers zum Koppeln deiner Geräte. Leer lassen, um den Standard zu verwenden."
 }

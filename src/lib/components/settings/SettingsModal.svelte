@@ -10,6 +10,7 @@
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
 	import GeneralSettings from './GeneralSettings.svelte';
 	import SyncSettings from './SyncSettings.svelte';
+	import SyncPairedDevices from './SyncPairedDevices.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
@@ -22,12 +23,14 @@
 
 	let { open = false }: { open?: boolean } = $props();
 
-	const navItems: {
+	type NavView = { id: string; label: string; component: Component };
+	type NavItem = {
 		id: string;
 		label: string;
 		icon: typeof KeyboardIcon;
-		component: Component;
-	}[] = [
+	} & ({ component: Component } | { children: NavView[] });
+
+	const navItems: NavItem[] = [
 		{
 			id: 'general',
 			label: m.settings_general_heading(),
@@ -62,7 +65,10 @@
 			id: 'sync',
 			label: m.settings_sync_heading(),
 			icon: RefreshCwIcon,
-			component: SyncSettings
+			children: [
+				{ id: 'sync-general', label: m.settings_sync_nav_general(), component: SyncSettings },
+				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices }
+			]
 		},
 		{
 			id: 'about',
@@ -72,8 +78,21 @@
 		}
 	];
 
-	let activeSection = $state(navItems[0]);
-	const ActiveSection = $derived(activeSection.component);
+	let activeView = $state<NavView>(navItems[0] as NavView);
+	const ActiveSection = $derived(activeView.component);
+
+	function selectItem(item: NavItem): void {
+		activeView = 'children' in item ? item.children[0] : item;
+	}
+
+	/* Only leaf items take the solid active highlight, so the selected subsection
+	   is unambiguous; a parent group is never highlighted on its own. */
+	function isItemActive(item: NavItem): boolean {
+		return !('children' in item) && activeView === item;
+	}
+
+	const ACTIVE_CLASS = 'bg-sidebar-accent font-medium text-on-surface';
+	const INACTIVE_CLASS = 'text-muted-foreground hover:bg-muted hover:text-foreground';
 </script>
 
 <Dialog.Root {open} onOpenChange={(v) => (uiState.modal.isSettingsOpen = v)}>
@@ -98,19 +117,32 @@
 				>
 					{m.nav_settings()}
 				</Dialog.Title>
-				{#each navItems as item (item.label)}
+				{#each navItems as item (item.id)}
 					<button
-						onclick={() => (activeSection = item)}
+						onclick={() => selectItem(item)}
 						class={cn(
-							'flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
-							activeSection.component === item.component
-								? 'bg-sidebar-accent font-medium text-on-surface'
-								: 'text-muted-foreground hover:bg-muted hover:text-foreground'
+							'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
+							isItemActive(item) ? ACTIVE_CLASS : INACTIVE_CLASS
 						)}
 					>
-						<item.icon size="15" />
-						{item.label}
+						<item.icon size="15" class="shrink-0" />
+						<span class="truncate">{item.label}</span>
 					</button>
+					{#if 'children' in item}
+						<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
+							{#each item.children as child (child.id)}
+								<button
+									onclick={() => (activeView = child)}
+									class={cn(
+										'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
+										activeView === child ? ACTIVE_CLASS : INACTIVE_CLASS
+									)}
+								>
+									<span class="truncate">{child.label}</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
 				{/each}
 				<div class="flex-1"></div>
 				<button

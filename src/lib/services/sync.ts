@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { load, type Store } from '@tauri-apps/plugin-store';
 import { resolveStorePath } from './store-path';
-import { SYNC_SERVER_URL } from '$lib/config/sync';
+import { syncServerUrl } from '$lib/config/sync';
 
 /** A paired peer as returned by the server. */
 export interface Peer {
@@ -133,12 +133,12 @@ class SyncService {
 			headers.set('X-Device-Id', this.#deviceId!);
 		}
 
-		return fetch(`${SYNC_SERVER_URL}${path}`, { ...init, headers });
+		return fetch(`${syncServerUrl()}${path}`, { ...init, headers });
 	}
 
 	/** Fetches a one-time challenge nonce to sign. */
 	async #challenge(): Promise<string> {
-		const res = await fetch(`${SYNC_SERVER_URL}/auth/challenge`, { method: 'POST' });
+		const res = await fetch(`${syncServerUrl()}/auth/challenge`, { method: 'POST' });
 		if (!res.ok) throw new Error(`challenge failed (${res.status})`);
 		const { nonce } = (await res.json()) as { nonce: string };
 		return nonce;
