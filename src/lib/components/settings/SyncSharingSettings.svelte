@@ -7,20 +7,12 @@
 	import * as m from '$paraglide/messages.js';
 
 	const disabled = $derived(!settingsService.sync.enabled);
-</script>
 
-{#snippet toggle(checked: boolean, onChange: (value: boolean) => void, label: string)}
-	<Switch.Root
-		{checked}
-		onCheckedChange={onChange}
-		aria-label={label}
-		class="inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest"
-	>
-		<Switch.Thumb
-			class="pointer-events-none block size-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0.5"
-		/>
-	</Switch.Root>
-{/snippet}
+	const ROOT_CLASS =
+		'inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest';
+	const THUMB_CLASS =
+		'pointer-events-none block size-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0.5';
+</script>
 
 <div class="flex h-full flex-col">
 	<div class="border-b px-6 py-4">
@@ -46,11 +38,14 @@
 					<p class="text-sm font-medium">{m.settings_sync_share_settings_label()}</p>
 					<p class="text-xs text-muted-foreground">{m.settings_sync_share_settings_helper()}</p>
 				</div>
-				{@render toggle(
-					settingsService.sync.shareSettings,
-					(v) => settingsService.setShareSettings(v),
-					m.settings_sync_share_settings_label()
-				)}
+				<Switch.Root
+					checked={settingsService.sync.shareSettings}
+					onCheckedChange={(v) => settingsService.setShareSettings(v)}
+					aria-label={m.settings_sync_share_settings_label()}
+					class={ROOT_CLASS}
+				>
+					<Switch.Thumb class={THUMB_CLASS} />
+				</Switch.Root>
 			</div>
 
 			<div class="px-6 py-4">
@@ -60,13 +55,23 @@
 				</div>
 				<div class="mt-3 space-y-1">
 					{#each uiState.desks as desk (desk)}
-						<div class="flex items-center justify-between gap-3 rounded px-3 py-2 hover:bg-muted/40">
-							<span class="truncate text-sm">{desk}</span>
-							{@render toggle(
-								settingsService.isDeskShared(desk),
-								(v) => settingsService.setDeskShared(desk, v),
-								desk
-							)}
+						<div
+							class="flex items-center justify-between gap-3 rounded px-3 py-2 hover:bg-muted/40"
+						>
+							<span
+								class={cn(
+									'truncate text-sm',
+									!settingsService.isDeskShared(desk) && 'text-muted-foreground/50'
+								)}>{desk}</span
+							>
+							<Switch.Root
+								checked={settingsService.isDeskShared(desk)}
+								onCheckedChange={(v) => settingsService.setDeskShared(desk, v)}
+								aria-label={desk}
+								class={ROOT_CLASS}
+							>
+								<Switch.Thumb class={THUMB_CLASS} />
+							</Switch.Root>
 						</div>
 					{/each}
 				</div>
