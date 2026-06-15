@@ -21,3 +21,16 @@ export async function initQuickCapture(): Promise<{ error: string | null }> {
 	}
 	return { error: null };
 }
+
+/**
+ * Re-point the quick window at the currently active desk. The window is long-lived
+ * (shown/hidden, never reloaded), so the main window may have switched desks or
+ * closed the shared SQLite pool since init. Force-reopening reconnects a closed
+ * pool and follows the active desk. Called whenever the window regains focus.
+ */
+export async function resyncQuickCapture(): Promise<void> {
+	const desk = await uiState.refreshActiveDesk();
+	await openDesk(desk, { force: true });
+	fsService.setDesk(desk);
+	await tagsService.load();
+}

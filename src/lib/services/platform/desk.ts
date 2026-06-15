@@ -29,9 +29,9 @@ async function ensureDeskFolder(desk: string): Promise<string> {
 	return safeDesk;
 }
 
-export async function openDesk(desk: string): Promise<Database> {
+export async function openDesk(desk: string, options?: { force?: boolean }): Promise<Database> {
 	const safeDesk = await ensureDeskFolder(desk);
-	return loadDB(safeDesk);
+	return loadDB(safeDesk, options);
 }
 
 async function removeIfExists(

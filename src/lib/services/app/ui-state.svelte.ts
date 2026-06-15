@@ -78,6 +78,13 @@ class UIState {
 		await this.#store?.set('activeDesk', desk);
 	}
 
+	/** Re-read the active desk from the shared store (another window may have changed it). */
+	async refreshActiveDesk(): Promise<string> {
+		const desk = (await this.#store?.get<string>('activeDesk')) ?? this.activeDesk;
+		this.activeDesk = desk;
+		return desk;
+	}
+
 	async setDesks(desks: string[]): Promise<void> {
 		this.desks = desks;
 		await this.#store?.set('desks', desks);
