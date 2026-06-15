@@ -38,7 +38,7 @@
 		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_general_description()}</p>
 	</div>
 
-	<div class="flex-1 space-y-8 overflow-y-auto px-6 py-6">
+	<div class="flex-1 space-y-8 overflow-y-auto scrollbar-thin px-6 py-6">
 		<div class="flex items-center justify-between">
 			<div class="space-y-0.5">
 				<p class="text-sm font-medium">{m.settings_language_label()}</p>

@@ -62,7 +62,7 @@
 				<span class="text-xs text-muted-foreground">{columns[status].length}</span>
 			</header>
 			<div
-				class="zone flex-1 space-y-2 overflow-y-auto p-3"
+				class="zone flex-1 space-y-2 overflow-y-auto scrollbar-thin p-3"
 				use:dndzone={{
 					items: columns[status],
 					type: 'task',

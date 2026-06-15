@@ -60,7 +60,7 @@
 		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_magic_tags_description()}</p>
 	</div>
 
-	<div class="flex-1 space-y-4 overflow-y-auto px-6 py-6">
+	<div class="flex-1 space-y-4 overflow-y-auto scrollbar-thin px-6 py-6">
 		{#each rules as rule, i (i)}
 			{@const ex = buildExample(rule.matchType)}
 			<div class="space-y-1.5">

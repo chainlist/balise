@@ -99,7 +99,7 @@
 		onOpenAutoFocus={(e) => e.preventDefault()}
 		onCloseAutoFocus={(e) => e.preventDefault()}
 		role="menu"
-		class="max-h-[min(24rem,var(--bits-floating-available-height))] w-auto min-w-48 overflow-y-auto frost-surface! p-1.5"
+		class="max-h-[min(24rem,var(--bits-floating-available-height))] w-auto min-w-48 overflow-y-auto scrollbar-thin frost-surface! p-1.5"
 	>
 		{#each filtered as action, i (action.id)}
 			<button

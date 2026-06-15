@@ -134,7 +134,7 @@
 		<Input type="search" bind:value={searchQuery} placeholder="Search shortcuts..." class="mt-3" />
 	</div>
 
-	<div class="flex-1 overflow-y-auto">
+	<div class="flex-1 overflow-y-auto scrollbar-thin">
 		<table class="w-full">
 			<thead>
 				<tr class="border-b">

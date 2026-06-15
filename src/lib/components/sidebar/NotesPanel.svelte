@@ -93,7 +93,7 @@
 		</div>
 	{/if}
 
-	<div class="flex flex-1 scrollbar-none flex-col gap-2 overflow-y-auto px-3 pb-3">
+	<div class="flex flex-1 scrollbar-thin flex-col gap-2 overflow-y-auto px-3 pb-3">
 		{#if notesService.notes.length === 0}
 			<p class="px-2 py-6 text-center text-sm text-muted-foreground">{m.no_notes_yet()}</p>
 		{:else}
