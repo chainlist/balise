@@ -4,6 +4,7 @@
 	import { EyeIcon, EyeOffIcon, MousePointerIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
+	import Stepper from '$lib/components/Stepper.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingRow from './SettingRow.svelte';
 
@@ -18,8 +19,11 @@
 		{ value: 'never', label: m.settings_marks_never, icon: EyeOffIcon }
 	];
 
-	const inputClass =
-		'w-20 rounded-md border border-input bg-background px-2 py-1 text-sm font-mono tabular-nums text-right focus:outline-none focus:ring-1 focus:ring-primary';
+	const setFontSize = (v: number) =>
+		settingsService.editor.setFontSize(Math.min(FONT_MAX, Math.max(FONT_MIN, Math.round(v))));
+
+	const setLineHeight = (v: number) =>
+		settingsService.editor.setLineHeight(Math.min(LH_MAX, Math.max(LH_MIN, Math.round(v * 20) / 20)));
 </script>
 
 <SettingsSection
@@ -28,32 +32,24 @@
 	bodyClass="space-y-6"
 >
 	<SettingRow title={m.settings_font_size_label()} description={m.settings_font_size_helper()}>
-		<input
-			type="number"
+		<Stepper
+			value={settingsService.editor.state.fontSize}
 			min={FONT_MIN}
 			max={FONT_MAX}
-			step="1"
-			value={settingsService.editor.state.fontSize}
-			oninput={(e) => {
-				const v = Number(e.currentTarget.value);
-				if (v >= FONT_MIN && v <= FONT_MAX) settingsService.editor.setFontSize(v);
-			}}
-			class={inputClass}
+			step={1}
+			onValueChange={setFontSize}
+			label={m.settings_font_size_label()}
 		/>
 	</SettingRow>
 
 	<SettingRow title={m.settings_line_height_label()} description={m.settings_line_height_helper()}>
-		<input
-			type="number"
+		<Stepper
+			value={settingsService.editor.state.lineHeight}
 			min={LH_MIN}
 			max={LH_MAX}
-			step="0.05"
-			value={settingsService.editor.state.lineHeight}
-			oninput={(e) => {
-				const v = Number(e.currentTarget.value);
-				if (v >= LH_MIN && v <= LH_MAX) settingsService.editor.setLineHeight(v);
-			}}
-			class={inputClass}
+			step={0.05}
+			onValueChange={setLineHeight}
+			label={m.settings_line_height_label()}
 		/>
 	</SettingRow>
 

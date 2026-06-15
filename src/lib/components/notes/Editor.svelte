@@ -54,6 +54,7 @@
 		return [
 			mdHidePlugin(mode),
 			mdMarkNavPlugin(mode),
+			mdCodePlugin(mode),
 			mdBulletPlugin(mode),
 			mdHrPlugin(mode),
 			mdHeaderPlugin(mode),
@@ -94,7 +95,6 @@
 					mdSyntaxHighlighting,
 					codeFolding(),
 					foldGutter(),
-					mdCodePlugin,
 					// Keybindings
 					mdFormatPlugin,
 					keymap.of([

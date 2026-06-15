@@ -1,59 +1,44 @@
 import { StateField } from '@codemirror/state';
-import type { EditorState } from '@codemirror/state';
-import type { Range } from '@codemirror/state';
+import type { EditorState, Range } from '@codemirror/state';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { syntaxTree } from '@codemirror/language';
-import CodeBlock from '$lib/components/cm/CodeBlock.svelte';
-import { SvelteWidget } from './shared';
+import { isMarkRevealed, type MarkMode } from './shared';
 
-class CodeBlockWidget extends SvelteWidget<{ lang: string; code: string }> {
-	protected component = CodeBlock;
-	protected override tagName = 'div' as const;
-	// Allow clicks through so CodeMirror places the cursor and triggers edit mode
-	protected override ignoreEvents = false;
-	constructor(
-		readonly lang: string,
-		readonly code: string
-	) {
-		super();
-	}
-	protected getProps() {
-		return { lang: this.lang, code: this.code };
-	}
-	eq(other: CodeBlockWidget) {
-		return other.lang === this.lang && other.code === this.code;
-	}
-}
+// Obsidian-style fenced code: the block stays as live, editable text. We paint a
+// per-line background across the fenced range (begin/end lines get rounded
+// corners). The opening/closing ``` lines stay as rows in the panel, but their
+// ``` + language glyphs are hidden (mode-dependent) by replacing the text while
+// keeping the line. Token colors come from the syntax highlighter, since the
+// markdown parser is configured with `codeLanguages`.
+const hideContent = Decoration.replace({});
 
-function buildCodeDecos(state: EditorState): DecorationSet {
-	const cursorPos = state.selection.main.head;
+function buildCodeDecos(state: EditorState, mode: MarkMode): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
+	const cursorPos = state.selection.main.head;
 
 	syntaxTree(state).iterate({
 		enter(node) {
 			if (node.name !== 'FencedCode') return;
-			// Cursor anywhere inside the block → show raw markdown for editing
-			if (cursorPos >= node.from && cursorPos <= node.to) return false;
 
-			let lang = '';
-			const openLine = state.doc.lineAt(node.from);
-			const closeLine = state.doc.lineAt(node.to);
+			const startLine = state.doc.lineAt(node.from).number;
+			const endLine = state.doc.lineAt(node.to).number;
+			const revealed = isMarkRevealed(mode, node.from, node.to, cursorPos);
 
-			for (let child = node.node.firstChild; child; child = child.nextSibling) {
-				if (child.name === 'CodeInfo') {
-					lang = state.doc.sliceString(child.from, child.to);
+			for (let n = startLine; n <= endLine; n++) {
+				const line = state.doc.line(n);
+				const isFence = n === startLine || n === endLine;
+
+				let cls = 'cm-md-codeblock';
+				if (n === startLine) cls += ' cm-md-codeblock-begin';
+				if (n === endLine) cls += ' cm-md-codeblock-end';
+				ranges.push(Decoration.line({ class: cls }).range(line.from));
+
+				// Keep the fence row, but hide the ``` + language glyphs unless revealed.
+				if (isFence && !revealed && line.to > line.from) {
+					ranges.push(hideContent.range(line.from, line.to));
 				}
 			}
-
-			const code = state.doc.sliceString(openLine.to + 1, closeLine.from).trimEnd();
-			const to = Math.min(closeLine.to + 1, state.doc.length);
-			ranges.push(
-				Decoration.replace({ widget: new CodeBlockWidget(lang, code), block: true }).range(
-					openLine.from,
-					to
-				)
-			);
 
 			return false;
 		}
@@ -63,17 +48,18 @@ function buildCodeDecos(state: EditorState): DecorationSet {
 	return Decoration.set(ranges, true);
 }
 
-export const mdCodePlugin = StateField.define<DecorationSet>({
-	create(state) {
-		return buildCodeDecos(state);
-	},
-	update(decos, tr) {
-		if (tr.docChanged || tr.selection) {
-			return buildCodeDecos(tr.state);
+export const mdCodePlugin = (mode: MarkMode) =>
+	StateField.define<DecorationSet>({
+		create(state) {
+			return buildCodeDecos(state, mode);
+		},
+		update(decos, tr) {
+			if (tr.docChanged || tr.selection) {
+				return buildCodeDecos(tr.state, mode);
+			}
+			return decos.map(tr.changes);
+		},
+		provide(field) {
+			return EditorView.decorations.from(field);
 		}
-		return decos.map(tr.changes);
-	},
-	provide(field) {
-		return EditorView.decorations.from(field);
-	}
-});
+	});
