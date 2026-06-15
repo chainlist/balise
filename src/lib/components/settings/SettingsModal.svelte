@@ -88,7 +88,7 @@
 	/* Only leaf items take the solid active highlight, so the selected subsection
 	   is unambiguous; a parent group is never highlighted on its own. */
 	function isItemActive(item: NavItem): boolean {
-		return !('children' in item) && activeView === item;
+		return !('children' in item) && activeView.id === item.id;
 	}
 
 	const ACTIVE_CLASS = 'bg-sidebar-accent font-medium text-on-surface';
@@ -135,7 +135,7 @@
 									onclick={() => (activeView = child)}
 									class={cn(
 										'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
-										activeView === child ? ACTIVE_CLASS : INACTIVE_CLASS
+										activeView.id === child.id ? ACTIVE_CLASS : INACTIVE_CLASS
 									)}
 								>
 									<span class="truncate">{child.label}</span>
