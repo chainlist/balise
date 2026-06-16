@@ -1,53 +1,70 @@
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { getDB } from '$lib/utils/db';
-import { getDeviceId } from '$lib/utils/device-id';
-import { syncOpen, syncSend, syncRecv, syncClose } from '$lib/utils/sync';
-import { notesToSend, incomingWins } from '$lib/utils/sync-reconcile';
-import { notesService } from '$lib/services/content/notes.svelte';
+import { runSync, setSyncConfig } from '$lib/utils/sync';
 import { tagsService } from '$lib/services/content/tags.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { settingsService } from '$lib/services/settings/settings.svelte';
 import { fsService } from '$lib/services/platform/fs';
 import { noteSignals } from '$lib/services/content/note-signals';
-import { writeNoteFile, deleteNoteFile } from '$lib/repositories/notes.fs.repo';
-import {
-	queryManifest,
-	querySyncNotes,
-	queryClock,
-	queryNoteById,
-	insertDeletion,
-	clearDeletion,
-	deleteNoteById
-} from '$lib/repositories/notes.repo';
-import type { SyncedNote } from '$lib/models/sync';
 
-/** `sync-session` event payload emitted by the backend for an incoming stream. */
-interface SyncSessionOpened {
-	sessionId: string;
+/** `sync-result` event payload: what one peer's protocol run changed locally. */
+interface SyncResult {
 	deviceId: string;
+	createdDesk: boolean;
+	changedDesks: string[];
 }
 
 /**
- * Drives device-to-device note sync over the iroh transport. Runs a manifest
- * exchange on a timer (dialer side) and answers incoming sessions (accept side),
- * reconciling with last-write-wins. The networking layer itself is started and
- * stopped separately via startSync/stopSync.
+ * Frontend side of device sync. The protocol itself runs entirely in the Rust
+ * backend (dialer + autonomous accept loop) so note content never crosses the
+ * IPC bridge and a large sync can't freeze the UI. This service only: pushes the
+ * trust/share config the backend needs, kicks off dial cycles on a timer, and
+ * reacts to `sync-result` events to refresh the active desk and desk list.
  */
 class DeviceSyncService {
 	syncing = $state(false);
 
 	#interval: ReturnType<typeof setInterval> | null = null;
 	#unlisten: UnlistenFn | null = null;
-	#deviceId: string | null = null;
-	/** Guards against overlapping cycles (a slow peer outliving the interval). */
-	#running = false;
 
-	/** Registers the accept-side listener once; safe to call on every launch. */
+	/** Registers the result listener and starts mirroring config to the backend. */
 	async init(): Promise<void> {
 		if (this.#unlisten) return;
-		this.#unlisten = await listen<SyncSessionOpened>('sync-session', (event) => {
-			void this.#handleIncoming(event.payload);
+		this.#unlisten = await listen<SyncResult>('sync-result', (event) =>
+			this.#onResult(event.payload)
+		);
+		this.#mirrorConfig();
+	}
+
+	/**
+	 * Keeps the backend's config in sync with the stores. The root effect re-pushes
+	 * whenever the paired devices, unshared desks, or magic tags change, so the
+	 * accept loop (which runs without any frontend call) always has fresh state.
+	 */
+	#mirrorConfig(): void {
+		$effect.root(() => {
+			$effect(() => {
+				const peers = devicesService.linked.map((d) => d.id);
+				const unshared = [...settingsService.sync.state.unsharedDesks];
+				const magicTags = $state.snapshot(settingsService.magicTags.state.tags);
+				void setSyncConfig({ peers, unshared, magicTags });
+			});
 		});
+	}
+
+	/** Refreshes the active desk / desk list from a backend sync result. */
+	#onResult(result: SyncResult): void {
+		const device = devicesService.linked.find((d) => d.id === result.deviceId);
+		if (device) devicesService.upsert({ ...device, lastSeen: Date.now() });
+
+		if (result.createdDesk) noteSignals.signalDesksChanged();
+		if (result.changedDesks.includes(fsService.currentDesk)) {
+			void this.#refreshActiveDesk();
+		}
+	}
+
+	async #refreshActiveDesk(): Promise<void> {
+		await tagsService.load();
+		noteSignals.signalNotesSynced();
 	}
 
 	/** Begins periodic sync. Runs one cycle immediately, then every interval. */
@@ -75,139 +92,17 @@ class DeviceSyncService {
 		return Math.max(1, settingsService.sync.state.intervalMinutes) * 60_000;
 	}
 
-	/** Dials every linked device in turn. One peer's failure can't abort the rest. */
+	/** Triggers one backend dial cycle. The backend also guards against overlap. */
 	async syncAll(): Promise<void> {
-		if (this.#running) return;
-		// Sync currently covers only the active desk's DB; when it's unshared this
-		// device neither pushes nor pulls it. A future multi-desk loop will apply
-		// the same isDeskShared gate per desk.
-		if (!settingsService.sync.isDeskShared(fsService.currentDesk)) return;
-		this.#running = true;
+		if (this.syncing) return;
 		this.syncing = true;
 		try {
-			for (const device of devicesService.linked) {
-				try {
-					const sessionId = await syncOpen(device.id);
-					await this.#runProtocol(sessionId, device.id);
-				} catch (e) {
-					// Best-effort: a peer that's offline or unreachable is expected and
-					// must not spam the user with a toast every cycle.
-					console.warn(`sync with ${device.id} failed:`, e);
-				}
-			}
+			await runSync();
+		} catch (e) {
+			console.warn('sync failed:', e);
 		} finally {
-			this.#running = false;
 			this.syncing = false;
 		}
-	}
-
-	/**
-	 * Accept side: only talk to paired peers, and only while the active desk (the
-	 * one this session would reconcile) is shared. Drop the stream otherwise.
-	 */
-	async #handleIncoming({ sessionId, deviceId }: SyncSessionOpened): Promise<void> {
-		const paired = devicesService.linked.some((d) => d.id === deviceId);
-		if (!paired || !settingsService.sync.isDeskShared(fsService.currentDesk)) {
-			void syncClose(sessionId);
-			return;
-		}
-		try {
-			await this.#runProtocol(sessionId, deviceId);
-		} catch (e) {
-			console.warn(`incoming sync from ${deviceId} failed:`, e);
-		}
-	}
-
-	/**
-	 * One full exchange on a session: swap manifests, then swap the note bodies
-	 * each side wins. Send and receive run concurrently so neither stalls on the
-	 * other's flow control. Symmetric, so both peers run this same routine.
-	 */
-	async #runProtocol(sessionId: string, remoteDeviceId: string): Promise<void> {
-		try {
-			const localDeviceId = await this.#localDeviceId();
-			const db = getDB();
-			const localManifest = await queryManifest(db);
-
-			const [, manifestMsg] = await Promise.all([
-				syncSend(sessionId, { type: 'manifest', entries: localManifest }),
-				syncRecv(sessionId)
-			]);
-			if (manifestMsg.type !== 'manifest') throw new Error('expected manifest');
-
-			const sendIds = notesToSend(
-				localManifest,
-				manifestMsg.entries,
-				localDeviceId,
-				remoteDeviceId
-			);
-			const payload = await querySyncNotes(db, sendIds);
-
-			const [, notesMsg] = await Promise.all([
-				syncSend(sessionId, { type: 'notes', notes: payload }),
-				syncRecv(sessionId)
-			]);
-			if (notesMsg.type !== 'notes') throw new Error('expected notes');
-
-			await this.#applyIncoming(notesMsg.notes, remoteDeviceId, localDeviceId);
-			this.#touchDevice(remoteDeviceId);
-		} finally {
-			void syncClose(sessionId);
-		}
-	}
-
-	/** Applies received bodies under the same LWW guard used to select them. */
-	async #applyIncoming(
-		notes: SyncedNote[],
-		remoteDeviceId: string,
-		localDeviceId: string
-	): Promise<void> {
-		const db = getDB();
-		let changed = 0;
-
-		for (const note of notes) {
-			const local = await queryClock(db, note.id);
-			if (local && !incomingWins(note.updatedAt, local.updatedAt, remoteDeviceId, localDeviceId)) {
-				continue;
-			}
-
-			if (note.deleted) {
-				// Preserve the peer's deletion time as the tombstone's clock.
-				await insertDeletion(db, note.id, note.updatedAt);
-				if (!local?.deleted) {
-					await deleteNoteById(db, note.id);
-					await deleteNoteFile(note.id);
-				}
-			} else {
-				const exists = local !== null && !local.deleted;
-				await clearDeletion(db, note.id); // in case the peer re-created a deleted note
-				await notesService.importNote(note.id, note.content, {
-					create: !exists,
-					pinned: note.pinned,
-					archived: note.archived,
-					createdAt: note.createdAt,
-					updatedAt: note.updatedAt
-				});
-				const saved = await queryNoteById(db, note.id);
-				if (saved) await writeNoteFile({ ...saved, content: note.content });
-			}
-			changed++;
-		}
-
-		if (changed > 0) {
-			await tagsService.load();
-			noteSignals.signalNotesSynced();
-		}
-	}
-
-	#touchDevice(deviceId: string): void {
-		const device = devicesService.linked.find((d) => d.id === deviceId);
-		if (device) devicesService.upsert({ ...device, lastSeen: Date.now() });
-	}
-
-	async #localDeviceId(): Promise<string> {
-		if (!this.#deviceId) this.#deviceId = await getDeviceId();
-		return this.#deviceId;
 	}
 }
 

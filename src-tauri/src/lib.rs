@@ -30,20 +30,20 @@ pub fn run() {
     builder
         .invoke_handler(tauri::generate_handler![
             commands::file_sync::set_desk_file_mtime,
-            commands::sync_fs::sync_desk_files,
+            sync::sync_desk_files,
+            sync::migrate_desk_db,
             commands::device::device_id,
             commands::device::public_key_hex,
             commands::device::sign_challenge,
             commands::device::device_id_from_public_key,
             sync::start_sync,
             sync::stop_sync,
-            sync::sync_open,
-            sync::sync_send,
-            sync::sync_recv,
-            sync::sync_close
+            sync::set_sync_config,
+            sync::run_sync
         ])
         .manage(sync::SyncState::default())
-        .manage(sync::SyncSessions::default())
+        .manage(sync::SyncConfig::default())
+        .manage(sync::SyncRunning::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

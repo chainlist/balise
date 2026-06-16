@@ -1,4 +1,4 @@
-import { BaseDirectory, exists, mkdir, remove, rename } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, exists, mkdir, readDir, remove, rename } from '@tauri-apps/plugin-fs';
 import type Database from '@tauri-apps/plugin-sql';
 import { closeDBIfMatches, loadDB } from '$lib/utils/db';
 import { documentDir, join } from '@tauri-apps/api/path';
@@ -32,6 +32,19 @@ async function ensureDeskFolder(desk: string): Promise<string> {
 export async function openDesk(desk: string, options?: { force?: boolean }): Promise<Database> {
 	const safeDesk = await ensureDeskFolder(desk);
 	return loadDB(safeDesk, options);
+}
+
+/** Every desk that exists on disk, by folder name. Desks *are* folders, so the
+ *  `Balise/` subdirectories are the source of truth. Empty if the root is absent.
+ *  Dot-prefixed entries (e.g. the `.balise` settings folder) are app data, not
+ *  desks, so they're skipped. */
+export async function listDesks(): Promise<string[]> {
+	try {
+		const entries = await readDir(DESKS_ROOT_DIR, { baseDir: BaseDirectory.Document });
+		return entries.filter((e) => e.isDirectory && !e.name.startsWith('.')).map((e) => e.name);
+	} catch {
+		return [];
+	}
 }
 
 async function removeIfExists(

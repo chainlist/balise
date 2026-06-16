@@ -1,6 +1,6 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
 import { ModalState } from './modal-state.svelte';
-import { openDesk, renameDeskFiles } from '../platform/desk';
+import { listDesks, openDesk, renameDeskFiles } from '../platform/desk';
 import { tagsService } from '../content/tags.svelte';
 import { notesService } from '../content/notes.svelte';
 import { fsSyncService } from '../sync/fs-sync';
@@ -64,6 +64,18 @@ class UIState {
 
 		// Reload the visible list when a background device sync applies changes.
 		noteSignals.onNotesSynced(() => void this.#reloadView());
+		// Surface desks a background sync materialised from a peer.
+		noteSignals.onDesksChanged(() => void this.#mergeDesksFromDisk());
+	}
+
+	/** Folds any on-disk desks not yet in the list into it (e.g. one a peer just
+	 *  synced over). Persisted, so a synced desk survives a restart. Drops any
+	 *  dot-prefixed name (e.g. a `.balise` settings folder wrongly persisted by an
+	 *  earlier build) so the stored list self-heals. */
+	async #mergeDesksFromDisk(): Promise<void> {
+		const found = await listDesks();
+		const merged = [...new Set([...this.desks, ...found])].filter((d) => !d.startsWith('.'));
+		if (merged.length !== this.desks.length) await this.setDesks(merged);
 	}
 
 	async #reloadView(): Promise<void> {

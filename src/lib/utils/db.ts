@@ -1,5 +1,5 @@
 import Database from '@tauri-apps/plugin-sql';
-import { migrate } from './migrations';
+import { invoke } from '@tauri-apps/api/core';
 
 let db = null as Database | null;
 let currentDBName = null as string | null;
@@ -38,9 +38,13 @@ export async function loadDB(dbName: string, options?: { force?: boolean }): Pro
 		await closeDB();
 	}
 
+	// Migrations live entirely in Rust now: bring the desk DB to the current
+	// schema (creating it if missing) before opening it for queries here. Runs
+	// on its own connection that closes before Database.load, so there's no
+	// overlap with the plugin-sql pool.
+	await invoke('migrate_desk_db', { deskName: dbName });
 	db = await Database.load(`sqlite:${dbName}.db`);
 	currentDBName = dbName;
-	await migrate(db);
 	return db;
 }
 

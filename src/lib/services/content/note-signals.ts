@@ -6,6 +6,7 @@ class NoteSignals {
 	#selectNote = new Set<IdHandler>();
 	#deleteNote = new Set<IdHandler>();
 	#notesSynced = new Set<VoidHandler>();
+	#desksChanged = new Set<VoidHandler>();
 
 	onSelectNote(fn: IdHandler): () => void {
 		this.#selectNote.add(fn);
@@ -23,6 +24,13 @@ class NoteSignals {
 		return () => this.#notesSynced.delete(fn);
 	}
 
+	/** Fires when device sync created a desk that wasn't here before, so the
+	 *  desk list can pick it up. */
+	onDesksChanged(fn: VoidHandler): () => void {
+		this.#desksChanged.add(fn);
+		return () => this.#desksChanged.delete(fn);
+	}
+
 	signalSelectNote(id: string): void {
 		this.#selectNote.forEach((fn) => fn(id));
 	}
@@ -33,6 +41,10 @@ class NoteSignals {
 
 	signalNotesSynced(): void {
 		this.#notesSynced.forEach((fn) => fn());
+	}
+
+	signalDesksChanged(): void {
+		this.#desksChanged.forEach((fn) => fn());
 	}
 }
 
