@@ -4,10 +4,11 @@ import { resolveStorePath } from '../platform/store-path';
 export type DeviceType = 'desktop' | 'laptop' | 'mobile' | 'tablet';
 
 export interface LinkedDevice {
+	/** Base32 device id (iroh node id), used to dial this peer. */
 	id: string;
-	/** The sync server's id for this peer, used to unpair it. Absent for
+	/** This peer's hex public key, used to unpair it on the server. Absent for
 	 * devices paired before this field existed. */
-	serverId?: string;
+	publicKey?: string;
 	name: string;
 	type: DeviceType;
 	/** Epoch milliseconds of the last successful sync with this device. */

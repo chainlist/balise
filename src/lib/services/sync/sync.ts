@@ -1,12 +1,8 @@
 import { invoke } from '@tauri-apps/api/core';
-import { load, type Store } from '@tauri-apps/plugin-store';
-import { resolveStorePath } from '../platform/store-path';
 import { syncServerUrl } from '$lib/config/sync';
 
-/** A paired peer as returned by the server. */
+/** A paired peer as returned by the server, identified by its public key. */
 export interface Peer {
-	/** The server's id for the device (used for its own bookkeeping). */
-	deviceId: string;
 	/** Raw Ed25519 public key, hex-encoded. Convert to a Base32 id to dial it. */
 	publicKey: string;
 }
@@ -33,44 +29,29 @@ export class ClaimError extends Error {
 }
 
 /**
- * Talks to the balise-sync control-plane server for device pairing. Every
- * authenticated endpoint requires a fresh signed challenge, so all calls go
- * through {@link SyncService.authedFetch}, which fetches a nonce, signs it with
- * this device's key, and attaches the auth headers before issuing the request.
+ * Talks to the balise-sync control-plane server for device pairing. This device
+ * is identified solely by its Ed25519 public key: every authenticated endpoint
+ * requires a fresh signed challenge, so all calls go through
+ * {@link SyncService.authedFetch}, which fetches a nonce, signs it with this
+ * device's key, and presents the key for verification. There is no server-minted
+ * id to cache, so a server reset or redeploy self-heals on the next request.
  */
 class SyncService {
-	#store: Store | null = null;
-	/** Server-assigned id for this device, cached after registration. */
-	#deviceId: string | null = null;
+	/** This device's public key, hex-encoded. Loaded once from the backend. */
+	#publicKey: string | null = null;
 
 	async init(): Promise<void> {
-		this.#store = await load(await resolveStorePath('sync.json'), { autoSave: 100 });
-		this.#deviceId = (await this.#store.get<string>('deviceId')) ?? null;
+		this.#publicKey = await invoke<string>('public_key_hex');
 	}
 
-	/**
-	 * Registers this device with the server, proving ownership of its key, and
-	 * caches the assigned id. Idempotent: the server returns the same id for a
-	 * known key, so this is cheap to call before any authenticated request.
-	 */
-	async register(): Promise<string> {
-		if (this.#deviceId) return this.#deviceId;
-		const publicKey = await invoke<string>('public_key_hex');
-		const res = await this.#authedFetch(
-			'/devices',
-			{ method: 'POST' },
-			{ 'X-Public-Key': publicKey }
-		);
-		if (!res.ok) throw new Error(`registration failed (${res.status})`);
-		const { deviceId } = (await res.json()) as { deviceId: string };
-		this.#deviceId = deviceId;
-		void this.#store?.set('deviceId', deviceId);
-		return deviceId;
+	/** This device's hex public key — its identity to the sync server. */
+	async publicKey(): Promise<string> {
+		if (!this.#publicKey) this.#publicKey = await invoke<string>('public_key_hex');
+		return this.#publicKey;
 	}
 
 	/** Mints a short-lived, single-use pairing code for another device to claim. */
 	async createPairingCode(): Promise<PairingCode> {
-		await this.register();
 		const res = await this.#authedFetch('/pairing/codes', { method: 'POST' });
 		if (!res.ok) throw new Error(`could not create a pairing code (${res.status})`);
 		return (await res.json()) as PairingCode;
@@ -78,7 +59,6 @@ class SyncService {
 
 	/** Redeems a pairing code, pairing this device with the code's owner. */
 	async claim(code: string): Promise<Peer> {
-		await this.register();
 		const res = await this.#authedFetch('/pairing/claim', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -93,10 +73,9 @@ class SyncService {
 		return peer;
 	}
 
-	/** Removes the pairing edge with a peer, identified by its server device id. */
-	async unpair(peerDeviceId: string): Promise<void> {
-		await this.register();
-		const res = await this.#authedFetch(`/peers/${encodeURIComponent(peerDeviceId)}`, {
+	/** Removes the pairing edge with a peer, identified by its hex public key. */
+	async unpair(peerPublicKey: string): Promise<void> {
+		const res = await this.#authedFetch(`/peers/${encodeURIComponent(peerPublicKey)}`, {
 			method: 'DELETE'
 		});
 		if (!res.ok) throw new Error(`unpair failed (${res.status})`);
@@ -104,7 +83,6 @@ class SyncService {
 
 	/** Lists this device's paired peers (used to detect a freshly claimed code). */
 	async getPeers(): Promise<Peer[]> {
-		await this.register();
 		const res = await this.#authedFetch('/peers', { method: 'GET' });
 		if (!res.ok) throw new Error(`could not load peers (${res.status})`);
 		return (await res.json()) as Peer[];
@@ -113,25 +91,17 @@ class SyncService {
 	/**
 	 * The challenge/sign/call dance every authenticated endpoint needs: fetch a
 	 * one-time nonce, sign it with this device's key, then issue `path` with the
-	 * signature attached. `identity` overrides the default `X-Device-Id` header,
-	 * e.g. registration sends `X-Public-Key` since it has no id yet.
+	 * signature and this device's public key attached. The server verifies the
+	 * signature against the presented key, so identity needs no prior lookup.
 	 */
-	async #authedFetch(
-		path: string,
-		init: RequestInit = {},
-		identity?: Record<string, string>
-	): Promise<Response> {
+	async #authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
 		const nonce = await this.#challenge();
 		const signature = await invoke<string>('sign_challenge', { nonce });
 
 		const headers = new Headers(init.headers);
 		headers.set('X-Nonce', nonce);
 		headers.set('X-Signature', signature);
-		if (identity) {
-			for (const [key, value] of Object.entries(identity)) headers.set(key, value);
-		} else {
-			headers.set('X-Device-Id', this.#deviceId!);
-		}
+		headers.set('X-Public-Key', await this.publicKey());
 
 		return fetch(`${syncServerUrl()}${path}`, { ...init, headers });
 	}

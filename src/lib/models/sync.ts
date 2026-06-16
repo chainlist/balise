@@ -37,7 +37,7 @@ export interface NodeAddr {
  */
 export type SignalMessage =
 	| { type: 'challenge'; nonce: string }
-	| { type: 'hello'; deviceId: string }
+	| { type: 'hello' }
 	| { type: 'wake'; from: string; node: NodeAddr }
 	| { type: 'peer-ready'; from: string; node: NodeAddr }
 	| { type: 'sync-targets'; online: string[]; offline: string[] }

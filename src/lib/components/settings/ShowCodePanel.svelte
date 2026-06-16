@@ -19,7 +19,7 @@
 	let generating = $state(false);
 	let error = $state<string | null>(null);
 
-	/** Server device ids already paired before this code, to spot the new one. */
+	/** Peer public keys already paired before this code, to spot the new one. */
 	let baseline = new Set<string>();
 	let poll: ReturnType<typeof setInterval> | null = null;
 
@@ -40,7 +40,7 @@
 		}
 		try {
 			const peers = await syncService.getPeers();
-			const fresh = peers.filter((p) => !baseline.has(p.deviceId));
+			const fresh = peers.filter((p) => !baseline.has(p.publicKey));
 			if (fresh.length === 0) return;
 
 			stopPolling();
@@ -48,7 +48,7 @@
 				const id = await deviceIdFromPublicKey(peer.publicKey);
 				devicesService.upsert({
 					id,
-					serverId: peer.deviceId,
+					publicKey: peer.publicKey,
 					name: '',
 					type: 'desktop',
 					lastSeen: Date.now()
@@ -67,7 +67,7 @@
 		generating = true;
 		try {
 			const peers = await syncService.getPeers();
-			baseline = new Set(peers.map((p) => p.deviceId));
+			baseline = new Set(peers.map((p) => p.publicKey));
 			const pairing = await syncService.createPairingCode();
 			code = pairing.code;
 			expiresAt = pairing.expiresAt;

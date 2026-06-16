@@ -91,10 +91,10 @@ class SyncConnectionService {
 	/** Sign the server's nonce with this device's key and send the auth message. */
 	async #authenticate(socket: WebSocket, nonce: string): Promise<void> {
 		try {
-			const deviceId = await syncService.register();
+			const publicKey = await syncService.publicKey();
 			const signature = await invoke<string>('sign_challenge', { nonce });
 			if (socket.readyState === WebSocket.OPEN) {
-				socket.send(JSON.stringify({ type: 'auth', deviceId, signature }));
+				socket.send(JSON.stringify({ type: 'auth', publicKey, signature }));
 			}
 		} catch (e) {
 			console.warn('sync control auth failed:', e);

@@ -14,7 +14,7 @@
 		device = null;
 		// Best-effort unpair on the server; the device is always removed locally.
 		try {
-			if (target.serverId) await syncService.unpair(target.serverId);
+			if (target.publicKey) await syncService.unpair(target.publicKey);
 		} catch (e) {
 			toasterService.warning(m.settings_sync_unpair_warning(), errorMessage(e));
 		}

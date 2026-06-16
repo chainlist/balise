@@ -53,7 +53,7 @@
 			const id = await deviceIdFromPublicKey(peer.publicKey);
 			devicesService.upsert({
 				id,
-				serverId: peer.deviceId,
+				publicKey: peer.publicKey,
 				name: name.trim(),
 				type,
 				lastSeen: Date.now()
