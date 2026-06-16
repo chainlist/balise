@@ -14,5 +14,6 @@ export type SignalMessage =
 	| { type: 'challenge'; nonce: string }
 	| { type: 'hello' }
 	| { type: 'wake'; from: string }
+	| { type: 'peer-ready'; from: string }
 	| { type: 'sync-targets'; online: string[]; offline: string[] }
 	| { type: 'error'; message: string };

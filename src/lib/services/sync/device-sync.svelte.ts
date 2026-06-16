@@ -1,18 +1,14 @@
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { syncPeers, setSyncConfig } from '$lib/utils/sync';
-import { deviceIdFromPublicKey } from '$lib/utils/device-id';
+import { syncPeers, setSyncConfig, startSync } from '$lib/utils/sync';
+import { deviceIdFromPublicKey, getDeviceId } from '$lib/utils/device-id';
 import { tagsService } from '$lib/services/content/tags.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { settingsService } from '$lib/services/settings/settings.svelte';
-import { syncConnectionService, type SyncTargets } from '$lib/services/sync/sync-connection.svelte';
+import { syncConnectionService } from '$lib/services/sync/sync-connection.svelte';
 import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { fsService } from '$lib/services/platform/fs';
 import { noteSignals } from '$lib/services/content/note-signals';
 import * as m from '$paraglide/messages.js';
-
-/** How long to wait after waking peers before dialing, so they have time to
- *  bring up their iroh endpoint. Fixed delay (no readiness handshake). */
-const WAKE_DIAL_DELAY_MS = 10_000;
 
 /** `sync-result` event payload: what one peer's protocol run changed locally. */
 interface SyncResult {
@@ -33,6 +29,11 @@ class DeviceSyncService {
 
 	#interval: ReturnType<typeof setInterval> | null = null;
 	#unlisten: UnlistenFn | null = null;
+	/** Peers with a dial in flight, so overlapping dial triggers for the same peer
+	 *  don't dial it twice; also drives the {@link syncing} flag. */
+	#dialing = new Set<string>();
+	/** This device's Base32 id, cached for the dial-direction tiebreak. */
+	#localId: string | null = null;
 
 	/** Registers the result listener and starts mirroring config to the backend. */
 	async init(): Promise<void> {
@@ -41,7 +42,8 @@ class DeviceSyncService {
 			this.#onResult(event.payload)
 		);
 		this.#mirrorConfig();
-		syncConnectionService.onSyncTargets((targets) => void this.#onSyncTargets(targets));
+		syncConnectionService.onPeerReady((peerKey) => void this.#onPeerReady(peerKey));
+		syncConnectionService.onWake((initiatorKey) => void this.#onWake(initiatorKey));
 	}
 
 	/**
@@ -103,9 +105,9 @@ class DeviceSyncService {
 
 	/**
 	 * Asks the control plane to wake our online peers. The actual dial happens in
-	 * {@link #onSyncTargets} once the server replies. `notify` surfaces a toast when
-	 * a user-initiated sync can't be sent (e.g. the control plane is unreachable);
-	 * the periodic call stays silent.
+	 * {@link #onPeerReady} as each peer reports its endpoint is up. `notify` surfaces
+	 * a toast when a user-initiated sync can't be sent (e.g. the control plane is
+	 * unreachable); the periodic call stays silent.
 	 */
 	async syncAll(notify = false): Promise<void> {
 		try {
@@ -118,22 +120,55 @@ class DeviceSyncService {
 	}
 
 	/**
-	 * Dials the peers the server reported online, after a short delay so freshly
-	 * woken peers have time to bring up iroh. Skips if a dial is already running or
-	 * no peer is online.
+	 * A peer reports its endpoint is up (`peer-ready`). Only the lower-id side of a
+	 * pair is ever asked to dial (the higher-id side sends `ready` instead), so by
+	 * construction we're the dialer here. Dial it now, no fixed wait.
 	 */
-	async #onSyncTargets({ online }: SyncTargets): Promise<void> {
-		if (this.syncing || online.length === 0) return;
+	async #onPeerReady(peerKey: string): Promise<void> {
+		await this.#dial(await deviceIdFromPublicKey(peerKey));
+	}
+
+	/**
+	 * A paired peer woke us to sync. Bring up our endpoint, then break the tie so a
+	 * pair never dials both ways: the lower-id device dials, the higher-id device
+	 * sends `ready` and waits to be dialed. The id order is a stable total order
+	 * both ends compute identically, so exactly one connection is made per pair.
+	 */
+	async #onWake(initiatorKey: string): Promise<void> {
+		try {
+			await startSync();
+			const [localId, initiatorId] = await Promise.all([
+				this.#deviceId(),
+				deviceIdFromPublicKey(initiatorKey)
+			]);
+			if (localId < initiatorId) await this.#dial(initiatorId);
+			else syncConnectionService.sendReady(initiatorKey);
+		} catch (e) {
+			console.warn('sync wake failed:', e);
+		}
+	}
+
+	/**
+	 * Dials one peer and reconciles every shared desk over the one connection.
+	 * Dedupes concurrent dials of the same peer and drives the {@link syncing} flag.
+	 */
+	async #dial(id: string): Promise<void> {
+		if (this.#dialing.has(id)) return;
+		this.#dialing.add(id);
 		this.syncing = true;
 		try {
-			await new Promise((resolve) => setTimeout(resolve, WAKE_DIAL_DELAY_MS));
-			const ids = await Promise.all(online.map((key) => deviceIdFromPublicKey(key)));
-			await syncPeers(ids);
+			await syncPeers([id]);
 		} catch (e) {
 			console.warn('sync dial failed:', e);
 		} finally {
-			this.syncing = false;
+			this.#dialing.delete(id);
+			if (this.#dialing.size === 0) this.syncing = false;
 		}
+	}
+
+	async #deviceId(): Promise<string> {
+		if (!this.#localId) this.#localId = await getDeviceId();
+		return this.#localId;
 	}
 }
 

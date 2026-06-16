@@ -14,7 +14,7 @@ use tauri::{AppHandle, Emitter};
 
 use super::desk_db::{ensure_desk_db, list_desks};
 use super::extract::MagicTag;
-use super::manifest::{apply_notes, build_manifest, select_notes, SyncedNote};
+use super::manifest::{apply_notes, build_manifest, gc_tombstones, select_notes, SyncedNote};
 use super::paths::resolve_desk_dir;
 use super::reconcile::{agreed_desks, notes_to_send, ManifestEntry};
 
@@ -91,6 +91,9 @@ pub(crate) async fn run_protocol(
         let mut conn = ensure_desk_db(app, desk).await?;
         let desk_dir = resolve_desk_dir(app, desk)?;
 
+        // Drop expired tombstones before advertising them, so a delete doesn't ride
+        // in every manifest forever.
+        gc_tombstones(&mut conn).await?;
         let local_manifest = build_manifest(&mut conn).await?;
         let manifest_msg = SyncMessage::Manifest {
             desk: desk.clone(),

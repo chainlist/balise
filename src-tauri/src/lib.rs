@@ -43,7 +43,7 @@ pub fn run() {
         ])
         .manage(sync::SyncState::default())
         .manage(sync::SyncConfig::default())
-        .manage(sync::SyncRunning::default())
+        .manage(sync::InFlightPeers::default())
         .manage(sync::SyncActivity::default())
         .setup(|app| {
             if cfg!(debug_assertions) {

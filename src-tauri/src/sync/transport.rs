@@ -1,7 +1,8 @@
 //! The iroh networking layer: managed sync state, endpoint lifecycle, device-id
 //! helpers, and the autonomous accept loop (the responder side).
 
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::collections::HashSet;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -41,29 +42,38 @@ pub(crate) struct SyncConfigData {
     pub(crate) magic_tags: Vec<MagicTag>,
 }
 
-/// Guards against overlapping dial cycles (a slow peer outliving the interval).
+/// Tracks which peers currently have a dial in flight. Dials are now triggered
+/// per peer (one `peer-ready` signal each), so the guard is per peer rather than
+/// a single global flag: a slow dial to one peer must not drop a concurrent dial
+/// to another. A second dial to a peer already in flight is skipped.
 #[derive(Default)]
-pub struct SyncRunning(AtomicBool);
+pub struct InFlightPeers(Mutex<HashSet<String>>);
 
-impl SyncRunning {
-    /// Marks a dial cycle as in progress, returning a guard that clears the flag
-    /// when dropped (so it is released on every exit path, including a panic).
-    /// `None` if a cycle is already running.
-    pub(crate) fn try_begin(&self) -> Option<SyncRunningGuard<'_>> {
-        if self.0.swap(true, Ordering::SeqCst) {
-            None
-        } else {
-            Some(SyncRunningGuard(&self.0))
+impl InFlightPeers {
+    /// Marks a peer's dial as in progress, returning a guard that clears it when
+    /// dropped (on every exit path, including a panic). `None` if that peer is
+    /// already being dialed.
+    pub(crate) fn try_begin<'a>(&'a self, peer: &str) -> Option<InFlightGuard<'a>> {
+        let mut set = self.0.lock().unwrap();
+        if !set.insert(peer.to_string()) {
+            return None;
         }
+        Some(InFlightGuard {
+            set: &self.0,
+            peer: peer.to_string(),
+        })
     }
 }
 
-/// Clears the [`SyncRunning`] flag on drop.
-pub(crate) struct SyncRunningGuard<'a>(&'a AtomicBool);
+/// Clears a peer's [`InFlightPeers`] entry on drop.
+pub(crate) struct InFlightGuard<'a> {
+    set: &'a Mutex<HashSet<String>>,
+    peer: String,
+}
 
-impl Drop for SyncRunningGuard<'_> {
+impl Drop for InFlightGuard<'_> {
     fn drop(&mut self) {
-        self.0.store(false, Ordering::SeqCst);
+        self.set.lock().unwrap().remove(&self.peer);
     }
 }
 
@@ -150,8 +160,9 @@ pub(crate) async fn stop(app: &AppHandle) {
 
 /// How long the endpoint may sit with no exchange in flight before it is torn down,
 /// so iroh's QUIC socket, relay link and discovery only stay up around real sync
-/// activity. Must exceed the dialer's wake->dial gap (`WAKE_DIAL_DELAY_MS`, 10s) so
-/// the endpoint a cycle just brought up isn't closed out from under the pending dial.
+/// activity. Must comfortably exceed the wake->ready->dial round trip (a few network
+/// hops) so the endpoint an initiator just brought up isn't closed out from under
+/// the dial it's waiting to make once a peer signals `ready`.
 const IDLE_TIMEOUT: Duration = Duration::from_secs(30);
 /// How often the idle supervisor re-checks for inactivity.
 const IDLE_CHECK_INTERVAL: Duration = Duration::from_secs(5);

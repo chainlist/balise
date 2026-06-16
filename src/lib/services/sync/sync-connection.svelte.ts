@@ -6,12 +6,6 @@ import { syncService } from '$lib/services/sync/sync';
 import { startSync } from '$lib/utils/sync';
 import type { SignalMessage } from '$lib/models/sync';
 
-/** The server's reply to a `sync-request`: which paired peers are reachable. */
-export interface SyncTargets {
-	online: string[];
-	offline: string[];
-}
-
 /** Reconnect backoff bounds for a dropped control-plane connection. */
 const RECONNECT_MIN_MS = 1_000;
 const RECONNECT_MAX_MS = 30_000;
@@ -21,8 +15,8 @@ const RECONNECT_MAX_MS = 30_000;
  * is enabled and at least one device is paired. It proves this device's identity
  * by signing the server's challenge, then drives the wake handshake: it asks the
  * server to wake this device's online peers ({@link requestSync}), brings up iroh
- * when a peer wakes us, and forwards the `sync-targets` reply to subscribers so
- * the dialer can reach the peers that are online.
+ * and signals `ready` when a peer wakes us, and forwards each `peer-ready` reply
+ * to subscribers so the dialer reaches a peer the moment its endpoint is up.
  */
 class SyncConnectionService {
 	#socket: WebSocket | null = null;
@@ -32,8 +26,10 @@ class SyncConnectionService {
 	#wanted = false;
 	/** True once the server accepts our auth (`hello`); gates signaling sends. */
 	#authed = false;
-	/** Subscribers notified of each `sync-targets` reply to our `sync-request`. */
-	#syncTargetsHandlers = new Set<(targets: SyncTargets) => void>();
+	/** Subscribers notified each time a woken peer reports its endpoint is up. */
+	#peerReadyHandlers = new Set<(peerKey: string) => void>();
+	/** Subscribers notified when a paired peer asks us to sync (a `wake`). */
+	#wakeHandlers = new Set<(initiatorKey: string) => void>();
 
 	/**
 	 * Reactively open or close the connection as the sync toggle and the paired
@@ -53,8 +49,8 @@ class SyncConnectionService {
 	/**
 	 * Asks the control plane to wake this device's online peers, after bringing up
 	 * our own iroh endpoint so we can dial them. Resolves `true` if the request was
-	 * sent, `false` if we're not connected/authenticated. The `sync-targets` reply
-	 * arrives asynchronously and is delivered to {@link onSyncTargets} subscribers.
+	 * sent, `false` if we're not connected/authenticated. Each woken peer replies
+	 * with a `peer-ready` once its endpoint is up, delivered to {@link onPeerReady}.
 	 */
 	async requestSync(): Promise<boolean> {
 		const socket = this.#socket;
@@ -64,10 +60,23 @@ class SyncConnectionService {
 		return true;
 	}
 
-	/** Subscribes to `sync-targets` replies. Returns an unsubscribe function. */
-	onSyncTargets(handler: (targets: SyncTargets) => void): () => void {
-		this.#syncTargetsHandlers.add(handler);
-		return () => this.#syncTargetsHandlers.delete(handler);
+	/** Subscribes to `peer-ready` notifications. Returns an unsubscribe function. */
+	onPeerReady(handler: (peerKey: string) => void): () => void {
+		this.#peerReadyHandlers.add(handler);
+		return () => this.#peerReadyHandlers.delete(handler);
+	}
+
+	/** Subscribes to `wake` notifications. Returns an unsubscribe function. */
+	onWake(handler: (initiatorKey: string) => void): () => void {
+		this.#wakeHandlers.add(handler);
+		return () => this.#wakeHandlers.delete(handler);
+	}
+
+	/** Tells a peer our iroh endpoint is up so it dials us. No-op if not connected. */
+	sendReady(toKey: string): void {
+		if (this.#authed && this.#socket?.readyState === WebSocket.OPEN) {
+			this.#socket.send(JSON.stringify({ type: 'ready', to: toKey }));
+		}
 	}
 
 	#wsUrl(): string {
@@ -115,15 +124,13 @@ class SyncConnectionService {
 				void this.requestSync().catch((e) => console.warn('sync on connect failed:', e));
 				break;
 			case 'wake':
-				// A paired peer wants to sync: bring up our iroh endpoint so it can
-				// dial us. The server only wakes paired peers and the accept loop gates
-				// the actual exchange, so this is safe to act on without a reply.
-				void startSync().catch((e) => console.warn('sync wake failed:', e));
+				// A paired peer wants to sync. The orchestrator brings up our endpoint
+				// and decides who dials (see DeviceSyncService). The server only wakes
+				// paired peers and the accept loop gates the exchange, so this is safe.
+				for (const handler of this.#wakeHandlers) handler(message.from);
 				break;
-			case 'sync-targets':
-				for (const handler of this.#syncTargetsHandlers) {
-					handler({ online: message.online, offline: message.offline });
-				}
+			case 'peer-ready':
+				for (const handler of this.#peerReadyHandlers) handler(message.from);
 				break;
 			case 'error':
 				console.warn('sync control error:', message.message);

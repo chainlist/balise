@@ -3,6 +3,7 @@
 	import { Loader2Icon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { devicesService } from '$lib/services/sync/devices.svelte';
+	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import { syncService } from '$lib/services/sync/sync';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
@@ -54,6 +55,9 @@
 					lastSeen: Date.now()
 				});
 			}
+			// Restart the periodic countdown from this pairing, so the next tick is a
+			// full interval away rather than landing right after the connect-time sync.
+			deviceSyncService.reschedule();
 			toasterService.success(m.settings_sync_add_accepted());
 			onpaired();
 		} catch {

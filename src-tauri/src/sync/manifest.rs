@@ -31,6 +31,27 @@ pub(crate) struct SyncedNote {
     deleted: bool,
 }
 
+/// How long a tombstone is kept before it is garbage-collected. A delete only
+/// needs to outlive the longest realistic gap before every peer has seen it;
+/// after that the tombstone is dead weight in every manifest exchange. The
+/// trade-off: a device offline longer than this that still holds the live note
+/// will resurrect it on its next sync, since we no longer carry the delete. 90
+/// days is well past any normal offline window for a personal device set.
+const TOMBSTONE_RETENTION_DAYS: i64 = 90;
+
+/// Prunes tombstones older than [`TOMBSTONE_RETENTION_DAYS`] so `deletions` (and
+/// thus every manifest) doesn't grow without bound. `julianday` parses both DB
+/// timestamp forms (`YYYY-MM-DD HH:MM:SS` and ISO 8601), so it copes with locally
+/// written and synced-in deletion times alike.
+pub(crate) async fn gc_tombstones(conn: &mut SqliteConnection) -> Result<(), String> {
+    sqlx::query("DELETE FROM deletions WHERE julianday(deleted_at) < julianday('now') - ?")
+        .bind(TOMBSTONE_RETENTION_DAYS)
+        .execute(&mut *conn)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 /// The desk's manifest: every live note plus every tombstone as
 /// `[id, updatedAt, deleted]`.
 pub(crate) async fn build_manifest(
