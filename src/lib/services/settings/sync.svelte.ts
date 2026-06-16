@@ -17,7 +17,7 @@ export interface SyncSettings {
 }
 
 /** Selectable sync cadences, in minutes. */
-export const SYNC_INTERVAL_OPTIONS = [1, 5, 15, 30, 60] as const;
+export const SYNC_INTERVAL_OPTIONS = [5, 15, 30, 60] as const;
 
 export class SyncSettingsService extends SettingsGroup<SyncSettings> {
 	readonly key = 'sync';
