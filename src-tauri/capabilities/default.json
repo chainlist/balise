@@ -22,7 +22,6 @@
 		"store:default",
 		"fs:default",
 		"opener:allow-default-urls",
-		"window-state:default",
 		{
 			"identifier": "fs:allow-exists",
 			"allow": [

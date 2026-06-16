@@ -35,11 +35,11 @@
 >
 	<!-- Hero + actions -->
 	<div class="rounded-xl border bg-card p-4">
-		<div class="flex items-center justify-between gap-4">
+		<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
 			<!-- App identity -->
-			<div class="flex items-center justify-center gap-3">
+			<div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
 				<img src={appIcon} alt="Balise" class="size-14 rounded-2xl shadow-sm" />
-				<div class="space-y-1">
+				<div class="space-y-1 text-center sm:text-left">
 					<p class="text-lg leading-none font-semibold">Balise</p>
 					{#if version}
 						<span
