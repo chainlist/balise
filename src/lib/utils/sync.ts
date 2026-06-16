@@ -25,10 +25,11 @@ export function setSyncConfig(config: {
 }
 
 /**
- * Runs one sync cycle entirely in the backend: dials every paired peer and
- * reconciles all shared desks over iroh. Note content never crosses into the
+ * Dials the given paired peers (Base32 device ids) and reconciles all shared
+ * desks with each, entirely in the backend. Called after the wake handshake with
+ * the peers the server reported online. Note content never crosses into the
  * webview, so a large sync can't jank the UI. Resolves when the cycle finishes.
  */
-export function runSync(): Promise<void> {
-	return invoke('run_sync');
+export function syncPeers(peerIds: string[]): Promise<void> {
+	return invoke('sync_peers', { peerIds });
 }

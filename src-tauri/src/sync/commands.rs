@@ -7,8 +7,8 @@ use tauri::{AppHandle, Manager};
 use super::extract::MagicTag;
 use super::protocol::{emit_result, run_protocol};
 use super::transport::{
-    local_device_id, parse_device_id, start, stop, SyncConfig, SyncConfigData, SyncRunning,
-    SyncState, SYNC_DATA_ALPN,
+    local_device_id, parse_device_id, start, stop, SyncActivity, SyncConfig, SyncConfigData,
+    SyncRunning, SyncState, SYNC_DATA_ALPN,
 };
 
 /// Starts sync. Invoked by the frontend when the user enables sync and, on
@@ -40,18 +40,18 @@ pub fn set_sync_config(
     };
 }
 
-/// Dials every paired peer in turn and reconciles all shared desks. Best-effort:
-/// one peer being offline can't abort the rest. Skips if a cycle is already running.
+/// Dials the given peers and reconciles all shared desks with each. The frontend
+/// calls this after the wake handshake, passing the peers the server reported
+/// online. Best-effort and trust-gated: ids not in the paired set are skipped,
+/// and one unreachable peer can't abort the rest. Skips if a cycle is running.
 #[tauri::command]
-pub async fn run_sync(app: AppHandle) -> Result<(), String> {
+pub async fn sync_peers(app: AppHandle, peer_ids: Vec<String>) -> Result<(), String> {
     let running = app.state::<SyncRunning>();
     let Some(_guard) = running.try_begin() else {
         return Ok(()); // a cycle is already running
     };
-    run_sync_inner(&app).await
-}
+    let _activity = app.state::<SyncActivity>().begin(); // holds the endpoint open until the dial cycle ends
 
-async fn run_sync_inner(app: &AppHandle) -> Result<(), String> {
     let endpoint = app
         .state::<SyncState>()
         .0
@@ -59,11 +59,14 @@ async fn run_sync_inner(app: &AppHandle) -> Result<(), String> {
         .unwrap()
         .clone()
         .ok_or_else(|| "sync is not running".to_string())?;
-    let local_id = local_device_id(app)?;
+    let local_id = local_device_id(&app)?;
     let cfg = app.state::<SyncConfig>().0.lock().unwrap().clone();
 
-    for peer_id in &cfg.peers {
-        if let Err(e) = sync_with_peer(app, &endpoint, &local_id, peer_id, &cfg).await {
+    for peer_id in &peer_ids {
+        if !cfg.peers.iter().any(|p| p == peer_id) {
+            continue; // not a paired peer: never dial an id we don't trust
+        }
+        if let Err(e) = sync_with_peer(&app, &endpoint, &local_id, peer_id, &cfg).await {
             // A peer that's offline or unreachable is expected; don't surface it.
             log::warn!("sync with {peer_id} failed: {e}");
         }

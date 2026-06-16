@@ -1,9 +1,9 @@
 //! The iroh networking layer: managed sync state, endpoint lifecycle, device-id
 //! helpers, and the autonomous accept loop (the responder side).
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use data_encoding::BASE32_NOPAD;
 use iroh::endpoint::presets;
@@ -67,18 +67,74 @@ impl Drop for SyncRunningGuard<'_> {
     }
 }
 
+/// Tracks sync exchanges in flight (dialer and responder) and the time of the last
+/// activity, so the idle supervisor can tear the endpoint down once sync goes quiet.
+#[derive(Clone)]
+pub struct SyncActivity(Arc<ActivityInner>);
+
+struct ActivityInner {
+    in_flight: AtomicUsize,
+    last_active: Mutex<Instant>,
+}
+
+impl Default for SyncActivity {
+    fn default() -> Self {
+        Self(Arc::new(ActivityInner {
+            in_flight: AtomicUsize::new(0),
+            last_active: Mutex::new(Instant::now()),
+        }))
+    }
+}
+
+impl SyncActivity {
+    /// Refreshes the activity clock, e.g. when a wake (re)starts the endpoint.
+    fn touch(&self) {
+        *self.0.last_active.lock().unwrap() = Instant::now();
+    }
+
+    fn in_flight(&self) -> usize {
+        self.0.in_flight.load(Ordering::SeqCst)
+    }
+
+    fn idle_for(&self) -> Duration {
+        self.0.last_active.lock().unwrap().elapsed()
+    }
+
+    /// Marks one exchange as in progress, returning a guard that decrements the
+    /// count and refreshes the clock when dropped (on every exit path, incl. panic).
+    pub(crate) fn begin(&self) -> ActivityGuard {
+        self.0.in_flight.fetch_add(1, Ordering::SeqCst);
+        self.touch();
+        ActivityGuard(self.0.clone())
+    }
+}
+
+/// Decrements the in-flight count and refreshes the idle clock on drop.
+pub(crate) struct ActivityGuard(Arc<ActivityInner>);
+
+impl Drop for ActivityGuard {
+    fn drop(&mut self) {
+        self.0.in_flight.fetch_sub(1, Ordering::SeqCst);
+        *self.0.last_active.lock().unwrap() = Instant::now();
+    }
+}
+
 /// Starts the iroh networking layer using this device's persisted Ed25519 seed
 /// as its node identity, then spawns the loop that accepts data-sync streams.
 /// No-op if already running.
 pub(crate) async fn start(app: &AppHandle) -> Result<(), String> {
+    let activity = app.state::<SyncActivity>().inner().clone();
     if app.state::<SyncState>().0.lock().unwrap().is_some() {
+        activity.touch(); // a wake while already up extends the idle grace
         return Ok(());
     }
 
     let endpoint = bind(app).await?;
     log::info!("iroh endpoint started: {}", endpoint.id());
     spawn_accept_loop(app.clone(), endpoint.clone());
+    activity.touch();
     *app.state::<SyncState>().0.lock().unwrap() = Some(endpoint);
+    spawn_idle_supervisor(app.clone(), activity);
     Ok(())
 }
 
@@ -90,6 +146,50 @@ pub(crate) async fn stop(app: &AppHandle) {
         endpoint.close().await;
         log::info!("iroh endpoint stopped");
     }
+}
+
+/// How long the endpoint may sit with no exchange in flight before it is torn down,
+/// so iroh's QUIC socket, relay link and discovery only stay up around real sync
+/// activity. Must exceed the dialer's wake->dial gap (`WAKE_DIAL_DELAY_MS`, 10s) so
+/// the endpoint a cycle just brought up isn't closed out from under the pending dial.
+const IDLE_TIMEOUT: Duration = Duration::from_secs(30);
+/// How often the idle supervisor re-checks for inactivity.
+const IDLE_CHECK_INTERVAL: Duration = Duration::from_secs(5);
+
+/// Watches sync activity and closes the endpoint once it has been idle for
+/// [`IDLE_TIMEOUT`]. Spawned by [`start`]; exits when it closes the endpoint or when
+/// the endpoint was already stopped externally (e.g. sync disabled), so a later
+/// [`start`] owns the only live supervisor.
+fn spawn_idle_supervisor(app: AppHandle, activity: SyncActivity) {
+    tauri::async_runtime::spawn(async move {
+        loop {
+            tokio::time::sleep(IDLE_CHECK_INTERVAL).await;
+
+            if app.state::<SyncState>().0.lock().unwrap().is_none() {
+                break; // stopped externally; nothing to supervise
+            }
+            if activity.in_flight() > 0 || activity.idle_for() < IDLE_TIMEOUT {
+                continue;
+            }
+
+            // Idle long enough: take the endpoint under the lock so a dial starting
+            // concurrently either keeps it (we observe in_flight > 0 and bail) or
+            // finds it gone and re-binds on its next cycle.
+            let endpoint = {
+                let state = app.state::<SyncState>();
+                let mut guard = state.0.lock().unwrap();
+                if activity.in_flight() > 0 {
+                    None
+                } else {
+                    guard.take()
+                }
+            };
+            let Some(endpoint) = endpoint else { continue };
+            endpoint.close().await;
+            log::info!("iroh endpoint idle-closed after sync");
+            break;
+        }
+    });
 }
 
 /// Binds an iroh endpoint on n0's default relays and discovery.
@@ -153,6 +253,7 @@ fn spawn_accept_loop(app: AppHandle, endpoint: Endpoint) {
             let app = app.clone();
             tauri::async_runtime::spawn(async move {
                 let _permit = permit; // released on task exit, freeing the slot
+                let _activity = app.state::<SyncActivity>().begin(); // holds the endpoint open while this runs
                 match tokio::time::timeout(INBOUND_TIMEOUT, handle_incoming(&app, incoming)).await {
                     Ok(Err(e)) => log::warn!("incoming sync failed: {e}"),
                     Err(_) => log::warn!("incoming sync timed out"),

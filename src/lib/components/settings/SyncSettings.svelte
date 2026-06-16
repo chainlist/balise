@@ -10,10 +10,12 @@
 
 	function toggleSync(enabled: boolean) {
 		settingsService.sync.setSyncEnabled(enabled);
-		// The iroh endpoint stays dormant until a paired device's sync request comes
-		// in over the WS control plane (not built yet), so enabling sync only turns
-		// the feature on. Tear down any running endpoint when it's switched off.
-		if (!enabled) {
+		// The iroh endpoint stays dormant until we initiate a sync or a paired peer
+		// wakes us over the WS control plane. Enabling starts the periodic wake loop;
+		// disabling stops the loop and tears down any running endpoint.
+		if (enabled) {
+			deviceSyncService.startInterval();
+		} else {
 			deviceSyncService.stopInterval();
 			void stopSync();
 		}

@@ -1,10 +1,18 @@
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { runSync, setSyncConfig } from '$lib/utils/sync';
+import { syncPeers, setSyncConfig } from '$lib/utils/sync';
+import { deviceIdFromPublicKey } from '$lib/utils/device-id';
 import { tagsService } from '$lib/services/content/tags.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { settingsService } from '$lib/services/settings/settings.svelte';
+import { syncConnectionService, type SyncTargets } from '$lib/services/sync/sync-connection.svelte';
+import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { fsService } from '$lib/services/platform/fs';
 import { noteSignals } from '$lib/services/content/note-signals';
+import * as m from '$paraglide/messages.js';
+
+/** How long to wait after waking peers before dialing, so they have time to
+ *  bring up their iroh endpoint. Fixed delay (no readiness handshake). */
+const WAKE_DIAL_DELAY_MS = 10_000;
 
 /** `sync-result` event payload: what one peer's protocol run changed locally. */
 interface SyncResult {
@@ -33,6 +41,7 @@ class DeviceSyncService {
 			this.#onResult(event.payload)
 		);
 		this.#mirrorConfig();
+		syncConnectionService.onSyncTargets((targets) => void this.#onSyncTargets(targets));
 	}
 
 	/**
@@ -67,10 +76,10 @@ class DeviceSyncService {
 		noteSignals.signalNotesSynced();
 	}
 
-	/** Begins periodic sync. Runs one cycle immediately, then every interval. */
+	/** Begins periodic sync. The first cycle is triggered on WS connect (`hello`),
+	 *  so this only sets the recurring timer. */
 	startInterval(): void {
 		if (this.#interval) return;
-		void this.syncAll();
 		this.#interval = setInterval(() => void this.syncAll(), this.#intervalMs());
 	}
 
@@ -92,14 +101,36 @@ class DeviceSyncService {
 		return Math.max(1, settingsService.sync.state.intervalMinutes) * 60_000;
 	}
 
-	/** Triggers one backend dial cycle. The backend also guards against overlap. */
-	async syncAll(): Promise<void> {
-		if (this.syncing) return;
+	/**
+	 * Asks the control plane to wake our online peers. The actual dial happens in
+	 * {@link #onSyncTargets} once the server replies. `notify` surfaces a toast when
+	 * a user-initiated sync can't be sent (e.g. the control plane is unreachable);
+	 * the periodic call stays silent.
+	 */
+	async syncAll(notify = false): Promise<void> {
+		try {
+			const sent = await syncConnectionService.requestSync();
+			if (!sent && notify) toasterService.warning(m.settings_sync_start_error());
+		} catch (e) {
+			if (notify) toasterService.error(m.settings_sync_start_error(), errorMessage(e));
+			else console.warn('sync request failed:', e);
+		}
+	}
+
+	/**
+	 * Dials the peers the server reported online, after a short delay so freshly
+	 * woken peers have time to bring up iroh. Skips if a dial is already running or
+	 * no peer is online.
+	 */
+	async #onSyncTargets({ online }: SyncTargets): Promise<void> {
+		if (this.syncing || online.length === 0) return;
 		this.syncing = true;
 		try {
-			await runSync();
+			await new Promise((resolve) => setTimeout(resolve, WAKE_DIAL_DELAY_MS));
+			const ids = await Promise.all(online.map((key) => deviceIdFromPublicKey(key)));
+			await syncPeers(ids);
 		} catch (e) {
-			console.warn('sync failed:', e);
+			console.warn('sync dial failed:', e);
 		} finally {
 			this.syncing = false;
 		}

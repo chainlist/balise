@@ -39,11 +39,12 @@ pub fn run() {
             sync::start_sync,
             sync::stop_sync,
             sync::set_sync_config,
-            sync::run_sync
+            sync::sync_peers
         ])
         .manage(sync::SyncState::default())
         .manage(sync::SyncConfig::default())
         .manage(sync::SyncRunning::default())
+        .manage(sync::SyncActivity::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

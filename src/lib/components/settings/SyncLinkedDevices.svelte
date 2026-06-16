@@ -48,7 +48,7 @@
 				size="sm"
 				variant="outline"
 				disabled={devicesService.linked.length === 0 || deviceSyncService.syncing}
-				onclick={() => void deviceSyncService.syncAll()}
+				onclick={() => void deviceSyncService.syncAll(true)}
 			>
 				<RefreshCwIcon size="15" class={deviceSyncService.syncing ? 'animate-spin' : ''} />
 				{m.settings_sync_now()}

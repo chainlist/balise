@@ -29,4 +29,4 @@ mod transport;
 pub use commands::*;
 pub use desk_db::*;
 pub use fs_sync::*;
-pub use transport::{SyncConfig, SyncRunning, SyncState};
+pub use transport::{SyncActivity, SyncConfig, SyncRunning, SyncState};
