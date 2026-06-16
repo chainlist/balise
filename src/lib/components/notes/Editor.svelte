@@ -14,6 +14,8 @@
 		mdBulletPlugin,
 		mdHrPlugin,
 		mdHeaderPlugin,
+		mdQuotePlugin,
+		quoteExitKeymap,
 		mdCodePlugin,
 		mdTagPlugin,
 		mdCheckboxPlugin,
@@ -58,6 +60,7 @@
 			mdBulletPlugin(mode),
 			mdHrPlugin(mode),
 			mdHeaderPlugin(mode),
+			mdQuotePlugin(mode),
 			mdHighlightPlugin(mode),
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
@@ -97,6 +100,7 @@
 					foldGutter(),
 					// Keybindings
 					mdFormatPlugin,
+					quoteExitKeymap,
 					keymap.of([
 						...defaultKeymap,
 						...historyKeymap,

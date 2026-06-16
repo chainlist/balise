@@ -147,6 +147,11 @@ export const noteEditorTheme = EditorView.theme({
 		lineHeight: '1.5',
 		color: 'var(--primary)'
 	},
+	'.cm-md-quote': {
+		borderLeft: '3px solid color-mix(in oklch, var(--primary) 45%, transparent)',
+		paddingLeft: '0.75rem',
+		color: 'var(--muted-foreground)'
+	},
 	'.cm-md-list-item': { paddingLeft: '1.5em', textIndent: '-1.5em' },
 	'.cm-md-bullet': { color: 'oklch(0.6 0.22 300)' },
 	'.cm-md-hr': {
