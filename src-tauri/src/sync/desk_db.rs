@@ -35,22 +35,6 @@ pub(crate) fn list_desks(app: &tauri::AppHandle) -> Vec<String> {
     desks
 }
 
-/// Opens an existing desk DB. `create_if_missing(false)`: callers that may face a
-/// missing desk use [`ensure_desk_db`] instead.
-pub(crate) async fn open_desk_db(
-    app: &tauri::AppHandle,
-    desk_name: &str,
-) -> Result<SqliteConnection, String> {
-    let db_path = resolve_desk_db_path(app, desk_name)?;
-    let opts = SqliteConnectOptions::new()
-        .filename(&db_path)
-        .create_if_missing(false)
-        .busy_timeout(Duration::from_secs(5));
-    SqliteConnection::connect_with(&opts)
-        .await
-        .map_err(|e| e.to_string())
-}
-
 /// Creates a desk's folder + migrated DB if absent, returning an open connection.
 /// Used when a peer shares a desk we've never seen, so it can be reconciled in the
 /// same cycle without the frontend.

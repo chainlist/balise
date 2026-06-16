@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::Connection;
 use tauri::{AppHandle, Emitter};
 
-use super::desk_db::{ensure_desk_db, list_desks, open_desk_db};
+use super::desk_db::{ensure_desk_db, list_desks};
 use super::extract::MagicTag;
 use super::manifest::{apply_notes, build_manifest, select_notes, SyncedNote};
 use super::paths::resolve_desk_dir;
@@ -81,12 +81,14 @@ pub(crate) async fn run_protocol(
     let mut changed_desks = Vec::new();
 
     for desk in &agreed {
-        let mut conn = if have.contains(desk) {
-            open_desk_db(app, desk).await?
-        } else {
+        // A desk's folder (what `list_desks` reports) and its DB live under
+        // different roots, so a listed desk can still be missing its DB. Ensure it
+        // rather than failing the whole exchange; `created_desk` still tracks only
+        // desks whose folder we hadn't seen, which is what the frontend refreshes on.
+        if !have.contains(desk) {
             created_desk = true;
-            ensure_desk_db(app, desk).await?
-        };
+        }
+        let mut conn = ensure_desk_db(app, desk).await?;
         let desk_dir = resolve_desk_dir(app, desk)?;
 
         let local_manifest = build_manifest(&mut conn).await?;
