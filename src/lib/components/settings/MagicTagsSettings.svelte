@@ -4,10 +4,12 @@
 		MAGIC_TAG_MATCH_TYPES,
 		type MagicTag,
 		type MagicTagMatchType
-	} from '$lib/services/settings.svelte';
-	import { PlusIcon, Trash2Icon } from '@lucide/svelte';
+	} from '$lib/services/settings/settings.svelte';
+	import { ArrowRightIcon, PlusIcon, Trash2Icon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
+	import { Button } from '$lib/components/shadcn/button/index.js';
+	import SettingsSection from './SettingsSection.svelte';
 
 	const matchTypeLabels: Record<MagicTagMatchType, () => string> = {
 		[MAGIC_TAG_MATCH_TYPES.STARTS_WITH]: m.settings_magic_tags_match_starts_with,
@@ -29,10 +31,10 @@
 		}
 	}
 
-	let rules = $state(settingsService.magicTags.tags.map((r) => ({ ...r })));
+	let rules = $state(settingsService.magicTags.state.tags.map((r) => ({ ...r })));
 
 	function save() {
-		settingsService.setMagicTags(rules.map((r) => ({ ...r })));
+		settingsService.magicTags.setMagicTags(rules.map((r) => ({ ...r })));
 	}
 
 	function addRule() {
@@ -51,19 +53,17 @@
 	}
 
 	const inputClass =
-		'rounded-md border border-input bg-background px-2 py-1 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary';
+		'h-[30px] flex-1 rounded border border-input bg-surface-container-lowest px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary';
 </script>
 
-<div class="flex h-full flex-col">
-	<div class="border-b px-6 py-4">
-		<h2 class="text-base font-semibold">{m.settings_magic_tags_heading()}</h2>
-		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_magic_tags_description()}</p>
-	</div>
-
-	<div class="flex-1 space-y-4 overflow-y-auto scrollbar-thin px-6 py-6">
-		{#each rules as rule, i (i)}
+<SettingsSection
+	title={m.settings_magic_tags_heading()}
+	description={m.settings_magic_tags_description()}
+	bodyClass="space-y-4"
+>
+	{#each rules as rule, i (i)}
 			{@const ex = buildExample(rule.matchType)}
-			<div class="space-y-1.5">
+			<div class="rounded-lg border bg-muted/30 p-2.5">
 				<div class="flex items-center gap-2">
 					<Select.Root
 						type="single"
@@ -71,7 +71,7 @@
 						onValueChange={(v) => v && updateRule(i, 'matchType', v)}
 					>
 						<Select.Trigger class="w-36 shrink-0">
-							<Select.Value />
+							{matchTypeLabels[rule.matchType]()}
 						</Select.Trigger>
 						<Select.Content>
 							{#each Object.values(MAGIC_TAG_MATCH_TYPES) as type (type)}
@@ -84,39 +84,42 @@
 						value={rule.pattern}
 						placeholder={m.settings_magic_tags_pattern_placeholder()}
 						oninput={(e) => updateRule(i, 'pattern', e.currentTarget.value)}
-						class="{inputClass} flex-1"
+						class="{inputClass} font-mono"
 					/>
-					<span class="text-xs text-muted-foreground">→</span>
+					<ArrowRightIcon size="14" class="shrink-0 text-muted-foreground" />
 					<input
 						type="text"
 						value={rule.tag}
 						placeholder={m.settings_magic_tags_tag_placeholder()}
 						oninput={(e) => updateRule(i, 'tag', e.currentTarget.value)}
-						class="{inputClass} flex-1"
+						class={inputClass}
 					/>
-					<button
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						class="shrink-0 text-muted-foreground hover:text-destructive"
 						onclick={() => removeRule(i)}
-						class="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
 					>
 						<Trash2Icon size="14" />
-					</button>
+					</Button>
 				</div>
 
 				{#if rule.pattern}
-					<p class="pl-1 font-mono text-xs text-muted-foreground">
-						{ex.before}<span class="rounded bg-primary/15 px-0.5 text-primary">{rule.pattern}</span
+					<p class="mt-2 border-t pt-2 pl-0.5 font-mono text-xs text-muted-foreground">
+						{ex.before}<span class="rounded bg-primary/15 px-1 py-0.5 text-primary">{rule.pattern}</span
 						>{ex.after}
 					</p>
 				{/if}
 			</div>
 		{/each}
 
-		<button
+		<Button
+			variant="outline"
+			size="sm"
 			onclick={addRule}
-			class="flex items-center gap-1.5 rounded px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+			class="w-full border-dashed text-muted-foreground"
 		>
 			<PlusIcon size="14" />
 			{m.settings_magic_tags_add()}
-		</button>
-	</div>
-</div>
+		</Button>
+</SettingsSection>

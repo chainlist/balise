@@ -2,11 +2,11 @@
 	import type { Note } from '$lib/models/note';
 	import NotePreview from '$lib/components/notes/NotePreview.svelte';
 	import { parseDbTimestamp } from '$lib/utils/time';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const intl = $derived(
-		new Intl.DateTimeFormat(settingsService.general.language, { dateStyle: 'short' })
+		new Intl.DateTimeFormat(settingsService.general.state.language, { dateStyle: 'short' })
 	);
 
 	let {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, type Snippet } from 'svelte';
-	import { notesService, type Note } from '$lib/services/notes.svelte';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { notesService, type Note } from '$lib/services/content/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import { readingTimeMinutes } from '$lib/utils/note-utils';
 	import { parseDbTimestamp } from '$lib/utils/time';
 	import Editor from './Editor.svelte';

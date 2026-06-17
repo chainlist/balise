@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog } from 'bits-ui';
-	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon, SparklesIcon, SlidersHorizontalIcon } from '@lucide/svelte';
+	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon, SparklesIcon, SlidersHorizontalIcon, RefreshCwIcon, LayoutListIcon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
@@ -9,7 +9,12 @@
 	import AboutSettings from './AboutSettings.svelte';
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
 	import GeneralSettings from './GeneralSettings.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import DesksSettings from './DesksSettings.svelte';
+	import SyncSettings from './SyncSettings.svelte';
+	import SyncPairedDevices from './SyncPairedDevices.svelte';
+	import SyncSharingSettings from './SyncSharingSettings.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -21,17 +26,28 @@
 
 	let { open = false }: { open?: boolean } = $props();
 
-	const navItems: {
+	type NavView = { id: string; label: string; component: Component };
+	type NavItem = {
 		id: string;
 		label: string;
 		icon: typeof KeyboardIcon;
-		component: Component;
-	}[] = [
+		component?: Component;
+		children?: NavView[];
+		comingSoon?: boolean;
+	};
+
+	const navItems: NavItem[] = [
 		{
 			id: 'general',
 			label: m.settings_general_heading(),
 			icon: SlidersHorizontalIcon,
 			component: GeneralSettings
+		},
+		{
+			id: 'desks',
+			label: m.settings_desks_heading(),
+			icon: LayoutListIcon,
+			component: DesksSettings
 		},
 		{
 			id: 'appearance',
@@ -58,6 +74,19 @@
 			component: ShortcutsSettings
 		},
 		{
+			id: 'sync',
+			label: m.settings_sync_heading(),
+			icon: RefreshCwIcon,
+			component: SyncSettings,
+			// Sync isn't ready to ship: greyed out in production builds, but kept
+			// reachable in local dev (`pnpm dev`) for continued work.
+			comingSoon: import.meta.env.PROD,
+			children: [
+				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices },
+				{ id: 'sync-sharing', label: m.settings_sync_nav_sharing(), component: SyncSharingSettings }
+			]
+		},
+		{
 			id: 'about',
 			label: m.settings_about_heading(),
 			icon: InfoIcon,
@@ -65,8 +94,27 @@
 		}
 	];
 
-	let activeSection = $state(navItems[0]);
-	const ActiveSection = $derived(activeSection.component);
+	let activeView = $state<NavView>(navItems[0] as NavView);
+	const ActiveSection = $derived(activeView.component);
+
+	function selectItem(item: NavItem): void {
+		if (item.component) {
+			activeView = { id: item.id, label: item.label, component: item.component };
+		} else if (item.children?.length) {
+			activeView = item.children[0];
+		}
+	}
+
+	/* An item is active when its own view is showing. A parent with its own
+	   component (Sync) highlights when selected; its children highlight in the
+	   sub-list below. */
+	function isItemActive(item: NavItem): boolean {
+		return activeView.id === item.id;
+	}
+
+	const ACTIVE_CLASS = 'bg-sidebar-accent font-medium text-on-surface';
+	const INACTIVE_CLASS = 'text-muted-foreground hover:bg-muted hover:text-foreground';
+	const DISABLED_CLASS = 'cursor-not-allowed text-muted-foreground/50';
 </script>
 
 <Dialog.Root {open} onOpenChange={(v) => (uiState.modal.isSettingsOpen = v)}>
@@ -91,19 +139,40 @@
 				>
 					{m.nav_settings()}
 				</Dialog.Title>
-				{#each navItems as item (item.label)}
+				{#each navItems as item (item.id)}
 					<button
-						onclick={() => (activeSection = item)}
+						onclick={() => selectItem(item)}
+						disabled={item.comingSoon}
 						class={cn(
-							'flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
-							activeSection.component === item.component
-								? 'bg-sidebar-accent font-medium text-on-surface'
-								: 'text-muted-foreground hover:bg-muted hover:text-foreground'
+							'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
+							item.comingSoon
+								? DISABLED_CLASS
+								: isItemActive(item)
+									? ACTIVE_CLASS
+									: INACTIVE_CLASS
 						)}
 					>
-						<item.icon size="15" />
-						{item.label}
+						<item.icon size="15" class="shrink-0" />
+						<span class="truncate">{item.label}</span>
+						{#if item.comingSoon}
+							<Badge class="ml-auto">{m.settings_sync_soon()}</Badge>
+						{/if}
 					</button>
+					{#if item.children && !item.comingSoon}
+						<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
+							{#each item.children as child (child.id)}
+								<button
+									onclick={() => (activeView = child)}
+									class={cn(
+										'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
+										activeView.id === child.id ? ACTIVE_CLASS : INACTIVE_CLASS
+									)}
+								>
+									<span class="truncate">{child.label}</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
 				{/each}
 				<div class="flex-1"></div>
 				<button

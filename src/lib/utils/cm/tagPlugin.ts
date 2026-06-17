@@ -2,7 +2,7 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import TagChip from '$lib/components/cm/TagChip.svelte';
-import { tagsService } from '$lib/services/tags.svelte';
+import { tagsService } from '$lib/services/content/tags.svelte';
 import { parseAllHashtags } from '$lib/utils/tag-parser';
 import { makePlugin, SvelteWidget, isMarkRevealed, type MarkMode } from './shared';
 

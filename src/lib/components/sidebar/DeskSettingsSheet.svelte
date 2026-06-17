@@ -2,9 +2,12 @@
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
+	import { Switch } from 'bits-ui';
 	import { Trash2Icon } from '@lucide/svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { sanitizeDeskName } from '$lib/services/desk';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { sanitizeDeskName } from '$lib/services/platform/desk';
+	import { cn } from '$lib/utils.js';
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -19,6 +22,13 @@
 	let isDeleteOpen = $state(false);
 
 	let currentName = $derived(draftName ?? deskName ?? '');
+	let syncEnabled = $derived(settingsService.sync.state.enabled);
+	let shared = $derived(deskName ? settingsService.sync.isDeskShared(deskName) : false);
+
+	const SWITCH_ROOT_CLASS =
+		'inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest';
+	const SWITCH_THUMB_CLASS =
+		'pointer-events-none block size-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0.5';
 
 	function reset() {
 		draftName = null;
@@ -107,6 +117,28 @@
 					<p class="text-sm text-destructive">{renameError}</p>
 				{/if}
 			</div>
+
+			{#if deskName}
+				<div class="flex items-center justify-between gap-4">
+					<div class="space-y-0.5">
+						<p class="text-sm font-medium">{m.desk_share_label()}</p>
+						<p class="text-xs text-muted-foreground">
+							{syncEnabled ? m.desk_share_helper() : m.desk_share_sync_off()}
+						</p>
+					</div>
+					<Switch.Root
+						checked={shared}
+						disabled={!syncEnabled}
+						onCheckedChange={(v) => {
+							if (deskName) settingsService.sync.setDeskShared(deskName, v);
+						}}
+						aria-label={m.desk_share_label()}
+						class={cn(SWITCH_ROOT_CLASS, !syncEnabled && 'cursor-not-allowed opacity-50')}
+					>
+						<Switch.Thumb class={SWITCH_THUMB_CLASS} />
+					</Switch.Root>
+				</div>
+			{/if}
 
 			<div class="flex items-center justify-between">
 				<Button

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
+	import { tagsService, tagDisplayName } from '$lib/services/content/tags.svelte';
 	import type { Tag, RelatedTag } from '$lib/models/tag';
 
 	let { tag, untagged }: { tag: string | Tag | RelatedTag; untagged?: boolean } = $props();

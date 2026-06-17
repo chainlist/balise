@@ -14,6 +14,8 @@
 		mdBulletPlugin,
 		mdHrPlugin,
 		mdHeaderPlugin,
+		mdQuotePlugin,
+		quoteExitKeymap,
 		mdCodePlugin,
 		mdTagPlugin,
 		mdCheckboxPlugin,
@@ -30,7 +32,7 @@
 		noteEditorTheme,
 		type MarkMode
 	} from '$lib/utils/cm';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 
 	let {
 		content,
@@ -54,9 +56,11 @@
 		return [
 			mdHidePlugin(mode),
 			mdMarkNavPlugin(mode),
+			mdCodePlugin(mode),
 			mdBulletPlugin(mode),
 			mdHrPlugin(mode),
 			mdHeaderPlugin(mode),
+			mdQuotePlugin(mode),
 			mdHighlightPlugin(mode),
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
@@ -66,7 +70,7 @@
 	}
 
 	$effect(() => {
-		const mode = settingsService.editor.markdownMarks;
+		const mode = settingsService.editor.state.markdownMarks;
 		const effectiveMode: MarkMode = mode === 'cursor' && !focused ? 'never' : mode;
 		if (editorView) {
 			editorView.dispatch({ effects: markCompartment.reconfigure(makeMarkPlugins(effectiveMode)) });
@@ -94,9 +98,9 @@
 					mdSyntaxHighlighting,
 					codeFolding(),
 					foldGutter(),
-					mdCodePlugin,
 					// Keybindings
 					mdFormatPlugin,
+					quoteExitKeymap,
 					keymap.of([
 						...defaultKeymap,
 						...historyKeymap,
@@ -112,7 +116,7 @@
 					// Images always render as widgets, independent of mark mode
 					mdImagePlugin(),
 					// Mark visibility (dynamically reconfigured)
-					markCompartment.of(makeMarkPlugins(settingsService.editor.markdownMarks)),
+					markCompartment.of(makeMarkPlugins(settingsService.editor.state.markdownMarks)),
 					// Theme
 					noteEditorTheme,
 					// Focus + change listener

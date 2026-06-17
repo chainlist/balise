@@ -152,6 +152,29 @@ export async function deleteNoteById(db: Database, id: string): Promise<void> {
 	await db.execute('DELETE FROM notes WHERE id = $1', [id]);
 }
 
+/**
+ * Records a tombstone so a deletion can propagate during device sync. Kept in a
+ * separate table (not a column on `notes`) so the row can be hard-deleted and
+ * every existing read query and fs-sync stays unaware of it. Pass `deletedAt`
+ * to preserve a peer's deletion time when applying a synced tombstone; omit it
+ * for a local delete (stamped now).
+ */
+export async function insertDeletion(db: Database, id: string, deletedAt?: string): Promise<void> {
+	if (deletedAt === undefined) {
+		await db.execute(
+			`INSERT INTO deletions (id) VALUES ($1)
+			 ON CONFLICT(id) DO UPDATE SET deleted_at = datetime('now')`,
+			[id]
+		);
+	} else {
+		await db.execute(
+			`INSERT INTO deletions (id, deleted_at) VALUES ($1, $2)
+			 ON CONFLICT(id) DO UPDATE SET deleted_at = $2`,
+			[id, deletedAt]
+		);
+	}
+}
+
 export async function queryJournalNotesByDate(
 	db: Database,
 	utcFrom: string,

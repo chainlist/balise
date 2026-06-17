@@ -3,6 +3,7 @@ export { mdMarkNavPlugin } from './markNavPlugin';
 export { mdBulletPlugin } from './bulletPlugin';
 export { mdHrPlugin } from './hrPlugin';
 export { mdHeaderPlugin } from './headerPlugin';
+export { mdQuotePlugin, quoteExitKeymap } from './quotePlugin';
 export { mdCodePlugin } from './codePlugin';
 export { mdLinkPlugin } from './linkPlugin';
 export { mdTagPlugin } from './tagPlugin';

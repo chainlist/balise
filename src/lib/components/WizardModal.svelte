@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from 'bits-ui';
 	import type { MarkMode } from '$lib/utils/cm';
-	import type { Theme } from '$lib/services/theme.svelte';
-	import { settingsService } from '$lib/services/settings.svelte';
+	import type { Theme } from '$lib/services/app/theme.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { applyLanguageChange } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 	import Button from '$lib/components/shadcn/button/button.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import { getBaseDir } from '$lib/services/desk';
+	import { getBaseDir } from '$lib/services/platform/desk';
 	import WizardStepLanguage from './WizardStepLanguage.svelte';
 	import WizardStepWelcome from './WizardStepWelcome.svelte';
 	import WizardStepMarks from './WizardStepMarks.svelte';
@@ -21,9 +21,9 @@
 	const TOTAL_STEPS = 5;
 
 	let step = $state(1);
-	let selectedLang = $state<'en' | 'fr' | 'es'>(settingsService.general.language);
-	let selectedMarkMode = $state<MarkMode>(settingsService.editor.markdownMarks);
-	let selectedTheme = $state<Theme>(settingsService.appearance.theme);
+	let selectedLang = $state<'en' | 'fr' | 'es'>(settingsService.general.state.language);
+	let selectedMarkMode = $state<MarkMode>(settingsService.editor.state.markdownMarks);
+	let selectedTheme = $state<Theme>(settingsService.appearance.state.theme);
 	let baseDir = $state('');
 
 	onMount(async () => {
@@ -32,8 +32,8 @@
 
 	async function finish() {
 		localStorage.setItem(STORAGE_KEY, 'true');
-		settingsService.setMarkdownMarks(selectedMarkMode);
-		if (selectedLang !== settingsService.general.language) {
+		settingsService.editor.setMarkdownMarks(selectedMarkMode);
+		if (selectedLang !== settingsService.general.state.language) {
 			await applyLanguageChange(selectedLang);
 		} else {
 			uiState.modal.isWizardOpen = false;

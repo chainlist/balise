@@ -1,15 +1,25 @@
 import { EditorView } from '@codemirror/view';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
-import { tags } from '@lezer/highlight';
+import { tags as t } from '@lezer/highlight';
 
 const mdHighlightStyle = HighlightStyle.define([
-	{ tag: tags.strong, class: 'cm-md-bold' },
-	{ tag: tags.emphasis, class: 'cm-md-italic' },
-	{ tag: tags.monospace, class: 'cm-md-code' },
-	{ tag: tags.strikethrough, class: 'cm-md-strike' },
-	{ tag: tags.heading1, class: 'cm-md-h1' },
-	{ tag: tags.heading2, class: 'cm-md-h2' },
-	{ tag: tags.heading3, class: 'cm-md-h3' }
+	{ tag: t.strong, class: 'cm-md-bold' },
+	{ tag: t.emphasis, class: 'cm-md-italic' },
+	{ tag: t.monospace, class: 'cm-md-code' },
+	{ tag: t.strikethrough, class: 'cm-md-strike' },
+	{ tag: t.heading1, class: 'cm-md-h1' },
+	{ tag: t.heading2, class: 'cm-md-h2' },
+	{ tag: t.heading3, class: 'cm-md-h3' },
+
+	// Code tokens (scoped to fenced blocks via the `.cm-md-codeblock` line class in CSS).
+	{ tag: [t.keyword, t.modifier, t.controlKeyword, t.operatorKeyword, t.definitionKeyword, t.moduleKeyword], class: 'cm-tok-keyword' },
+	{ tag: [t.string, t.special(t.string), t.regexp, t.character], class: 'cm-tok-string' },
+	{ tag: [t.comment, t.lineComment, t.blockComment, t.docComment], class: 'cm-tok-comment' },
+	{ tag: [t.number, t.bool, t.null, t.atom, t.literal], class: 'cm-tok-number' },
+	{ tag: [t.function(t.variableName), t.function(t.propertyName), t.macroName, t.labelName], class: 'cm-tok-function' },
+	{ tag: [t.typeName, t.className, t.namespace, t.tagName], class: 'cm-tok-type' },
+	{ tag: [t.propertyName, t.attributeName], class: 'cm-tok-property' },
+	{ tag: [t.escape, t.meta, t.documentMeta, t.processingInstruction], class: 'cm-tok-meta' }
 ]);
 
 export const mdSyntaxHighlighting = syntaxHighlighting(mdHighlightStyle);
@@ -70,6 +80,51 @@ export const noteEditorTheme = EditorView.theme({
 		borderRadius: '3px',
 		padding: '1px 3px'
 	},
+
+	// Fenced code: per-line background, kept as editable text (no widget).
+	'.cm-md-codeblock': {
+		fontFamily: 'var(--md-font-mono)',
+		fontSize: '14px',
+		lineHeight: '1.5',
+		background: 'var(--md-code-block-bg)',
+		padding: '0 0.75rem'
+	},
+	'.cm-md-codeblock-begin': {
+		position: 'relative',
+		borderTopLeftRadius: '6px',
+		borderTopRightRadius: '6px'
+	},
+	'.cm-md-codeblock-begin[data-lang]::after': {
+		content: 'attr(data-lang)',
+		position: 'absolute',
+		top: '0.25rem',
+		right: '0.4rem',
+		padding: '0.05rem 0.45rem',
+		borderRadius: '999px',
+		background: 'color-mix(in oklch, var(--muted-foreground) 14%, transparent)',
+		color: 'var(--muted-foreground)',
+		fontFamily: 'var(--md-font-mono)',
+		fontSize: '0.7rem',
+		lineHeight: '1.4',
+		textTransform: 'uppercase',
+		letterSpacing: '0.06em',
+		pointerEvents: 'none',
+		userSelect: 'none'
+	},
+	'.cm-md-codeblock-end': {
+		borderBottomLeftRadius: '6px',
+		borderBottomRightRadius: '6px'
+	},
+
+	// Code token colors (only apply inside fenced blocks).
+	'.cm-md-codeblock .cm-tok-keyword': { color: 'var(--cm-t-keyword)' },
+	'.cm-md-codeblock .cm-tok-string': { color: 'var(--cm-t-string)' },
+	'.cm-md-codeblock .cm-tok-comment': { color: 'var(--cm-t-comment)', fontStyle: 'italic' },
+	'.cm-md-codeblock .cm-tok-number': { color: 'var(--cm-t-number)' },
+	'.cm-md-codeblock .cm-tok-function': { color: 'var(--cm-t-function)' },
+	'.cm-md-codeblock .cm-tok-type': { color: 'var(--cm-t-type)' },
+	'.cm-md-codeblock .cm-tok-property': { color: 'var(--cm-t-property)' },
+	'.cm-md-codeblock .cm-tok-meta': { color: 'var(--cm-t-meta)' },
 	'.cm-md-h1': {
 		fontSize: '1.65em',
 		fontWeight: '700',
@@ -91,6 +146,11 @@ export const noteEditorTheme = EditorView.theme({
 		fontWeight: '600',
 		lineHeight: '1.5',
 		color: 'var(--primary)'
+	},
+	'.cm-md-quote': {
+		borderLeft: '3px solid color-mix(in oklch, var(--primary) 45%, transparent)',
+		paddingLeft: '0.75rem',
+		color: 'var(--muted-foreground)'
 	},
 	'.cm-md-list-item': { paddingLeft: '1.5em', textIndent: '-1.5em' },
 	'.cm-md-bullet': { color: 'oklch(0.6 0.22 300)' },

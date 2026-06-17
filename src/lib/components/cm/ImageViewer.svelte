@@ -10,7 +10,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Pencil } from '@lucide/svelte';
-	import { fsService } from '$lib/services/fs';
+	import { fsService } from '$lib/services/platform/fs';
 	import { Input } from '$lib/components/shadcn/input';
 	import { Button } from '$lib/components/shadcn/button';
 	import * as m from '$paraglide/messages.js';

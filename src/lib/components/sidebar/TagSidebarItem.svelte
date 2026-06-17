@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { tagDisplayName, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { tagDisplayName, UNTAGGED_FILTER } from '$lib/services/content/tags.svelte';
 	import type { Tag } from '$lib/models/tag';
 	import { Settings2Icon, PinIcon, HashIcon } from '@lucide/svelte';
 	import TagName from '../TagName.svelte';

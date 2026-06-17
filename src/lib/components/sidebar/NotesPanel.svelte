@@ -2,11 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { notesService, newNoteContent } from '$lib/services/notes.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { tagsService } from '$lib/services/tags.svelte';
-	import { noteSignals } from '$lib/services/note-signals';
-	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { tagsService } from '$lib/services/content/tags.svelte';
+	import { noteSignals } from '$lib/services/content/note-signals';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import TagName from '$lib/components/TagName.svelte';
 	import NoteCard from '$lib/components/sidebar/NoteCard.svelte';
 	import TagFilterDropdown from '$lib/components/sidebar/TagFilterDropdown.svelte';

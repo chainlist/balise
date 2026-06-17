@@ -1,8 +1,8 @@
-import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
-import { notesService, newNoteContent } from '$lib/services/notes.svelte';
-import { uiState } from '$lib/services/ui-state.svelte';
-import { noteSignals } from '$lib/services/note-signals';
-import { toasterService, errorMessage } from '$lib/services/toaster';
+import type { ShortcutDefinition } from '$lib/services/platform/shortcuts.svelte';
+import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
+import { uiState } from '$lib/services/app/ui-state.svelte';
+import { noteSignals } from '$lib/services/content/note-signals';
+import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';

@@ -1,15 +1,16 @@
 <script lang="ts">
 	import * as Command from '$lib/components/shadcn/command/index.js';
-	import { uiState } from '$lib/services/ui-state.svelte';
-	import { tagsService, tagDisplayName } from '$lib/services/tags.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
+	import { tagsService, tagDisplayName } from '$lib/services/content/tags.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { searchNotes } from '$lib/repositories/notes.repo';
 	import type { NoteSearchResult } from '$lib/models/note';
-	import { noteSignals } from '$lib/services/note-signals';
+	import { noteSignals } from '$lib/services/content/note-signals';
 	import { getDB } from '$lib/utils/db';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { FileTextIcon, TagIcon, ZapIcon } from '@lucide/svelte';
+	import { FileTextIcon, TagIcon, ZapIcon, LayoutListIcon } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -37,6 +38,15 @@
 		).slice(0, 3)
 	);
 
+	let filteredDesks = $derived(
+		(query.trim()
+			? uiState.desks.filter((d) => d.toLowerCase().includes(query.toLowerCase()))
+			: uiState.desks
+		)
+			.filter((d) => d !== uiState.activeDesk)
+			.slice(0, 3)
+	);
+
 	async function handleInput(value: string) {
 		query = value;
 		noteResults = value.trim().length >= 3 ? await searchNotes(getDB(), value) : [];
@@ -59,6 +69,16 @@
 		uiState.modal.isCommandPaletteOpen = false;
 		uiState.setActiveTag(tag);
 		goto(resolve('/'));
+	}
+
+	async function selectDesk(desk: string) {
+		uiState.modal.isCommandPaletteOpen = false;
+		try {
+			await uiState.switchDesk(desk);
+			await goto(resolve('/'));
+		} catch (e) {
+			toasterService.error(m.desk_switch_error_failed(), errorMessage(e));
+		}
 	}
 
 	function runCommand(run: () => void | Promise<void>) {
@@ -103,6 +123,22 @@
 					<Command.Item value={tag.tag} onSelect={() => selectTag(tag.tag)}>
 						<TagIcon />
 						{tagDisplayName(tag)}
+					</Command.Item>
+				{/each}
+			</Command.Group>
+		{/if}
+
+		{#if filteredDesks.length > 0}
+			<Command.Group heading={m.command_palette_group_desks()}>
+				{#each filteredDesks as desk (desk)}
+					<Command.Item value={`desk:${desk}`} onSelect={() => selectDesk(desk)}>
+						<LayoutListIcon />
+						<span class="min-w-0 flex-1 truncate">{desk}</span>
+						<span
+							class="shrink-0 text-xs text-muted-foreground opacity-0 group-data-[selected]/command-item:opacity-100"
+						>
+							{m.command_palette_switch_desk()}
+						</span>
 					</Command.Item>
 				{/each}
 			</Command.Group>

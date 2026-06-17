@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getVersion } from '@tauri-apps/api/app';
-	import { updaterService } from '$lib/services/updater.svelte';
-	import { uiState } from '$lib/services/ui-state.svelte';
+	import { RefreshCwIcon, SparklesIcon, DownloadIcon, HeartIcon } from '@lucide/svelte';
+	import appIcon from '$lib/assets/app-icon.png';
+	import { updaterService } from '$lib/services/platform/updater.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { checkForNews } from '$lib/utils/init-app';
 	import * as m from '$paraglide/messages.js';
+	import SettingsSection from './SettingsSection.svelte';
 
 	const DEPS = [
 		{ name: 'Tauri', desc: 'Desktop application framework' },
 		{ name: 'SvelteKit', desc: 'Web application framework' },
 		{ name: 'Tailwind CSS', desc: 'Utility-first CSS framework' },
 		{ name: 'CodeMirror', desc: 'Extensible code editor' },
-		{ name: 'Shiki', desc: 'Syntax highlighting' },
 		{ name: 'Lucide', desc: 'Icon library' },
 		{ name: 'Paraglide', desc: 'Internationalization' },
 		{ name: 'nanoid', desc: 'Unique ID generation' },
@@ -26,92 +28,95 @@
 	});
 </script>
 
-<div class="flex h-full flex-col">
-	<div class="border-b px-6 py-4">
-		<h2 class="text-base font-semibold">{m.settings_about_heading()}</h2>
-		<p class="mt-0.5 text-sm text-muted-foreground">{m.settings_about_description()}</p>
-	</div>
-
-	<div class="flex-1 space-y-8 overflow-y-auto scrollbar-thin px-6 py-6">
-		<!-- App info -->
-		<div>
-			<p class="text-sm font-semibold">Balise</p>
-			<p class="mt-1 text-xs text-muted-foreground">{m.settings_about_version()} {version}</p>
-		</div>
-
-		<!-- Updates -->
-		<div>
-			<div class="mb-4 space-y-1.5">
-				<p class="text-sm font-medium">{m.settings_about_updates_label()}</p>
+<SettingsSection
+	title={m.settings_about_heading()}
+	description={m.settings_about_description()}
+	bodyClass="space-y-6"
+>
+	<!-- Hero + actions -->
+	<div class="rounded-xl border bg-card p-4">
+		<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+			<!-- App identity -->
+			<div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+				<img src={appIcon} alt="Balise" class="size-14 rounded-2xl shadow-sm" />
+				<div class="space-y-1 text-center sm:text-left">
+					<p class="text-lg leading-none font-semibold">Balise</p>
+					{#if version}
+						<span
+							class="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+						>
+							{m.settings_about_version()}
+							{version}
+						</span>
+					{/if}
+				</div>
 			</div>
 
-			{#if updaterService.status === 'idle' || updaterService.status === 'up_to_date' || updaterService.status === 'error'}
-				<button
-					onclick={() => updaterService.checkManually()}
-					class="rounded border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
-				>
-					{m.settings_about_check_updates()}
-				</button>
-				{#if updaterService.status === 'up_to_date'}
-					<p class="mt-2 text-xs text-muted-foreground">{m.settings_about_up_to_date()}</p>
-				{:else if updaterService.status === 'error'}
-					<p class="mt-2 text-xs text-destructive">{m.settings_about_check_failed()}</p>
-				{/if}
-			{:else if updaterService.status === 'checking'}
-				<p class="text-sm text-muted-foreground">{m.settings_about_checking()}</p>
-			{:else if updaterService.status === 'available'}
-				<div class="space-y-2">
-					<p class="text-sm">
+			<!-- Updates + What's new -->
+			<div class="flex flex-col items-end gap-2">
+				{#if updaterService.status === 'idle' || updaterService.status === 'up_to_date' || updaterService.status === 'error' || updaterService.status === 'checking'}
+					<button
+						onclick={() => updaterService.checkManually()}
+						disabled={updaterService.status === 'checking'}
+						class="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-70"
+					>
+						<RefreshCwIcon
+							class="size-4 {updaterService.status === 'checking' ? 'animate-spin' : ''}"
+						/>
+						{m.settings_about_check_updates()}
+					</button>
+				{:else if updaterService.status === 'available'}
+					<p class="text-right text-sm">
 						{m.updater_available_title()} - v{updaterService.updateInfo?.version}
 					</p>
 					<button
 						onclick={() => updaterService.install()}
-						class="rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
+						class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 					>
+						<DownloadIcon class="size-4" />
 						{m.updater_action_install()}
 					</button>
-				</div>
-			{:else if updaterService.status === 'downloading'}
-				<div class="space-y-2">
+				{:else if updaterService.status === 'downloading'}
 					<p class="text-sm font-medium">{m.updater_downloading()}</p>
-					<div class="h-1.5 w-full max-w-xs rounded-full bg-muted">
+					<div class="h-1.5 w-40 rounded-full bg-muted">
 						<div
 							class="h-1.5 rounded-full bg-primary transition-all"
 							style="width: {updaterService.progress}%"
 						></div>
 					</div>
 					<p class="text-xs text-muted-foreground">{updaterService.progress}%</p>
-				</div>
-			{:else if updaterService.status === 'done'}
-				<p class="text-sm font-medium">{m.updater_installed()}</p>
-				<p class="mt-1 text-xs text-muted-foreground">{m.updater_restarting()}</p>
-			{/if}
-		</div>
+				{:else if updaterService.status === 'done'}
+					<p class="text-sm font-medium">{m.updater_installed()}</p>
+					<p class="text-xs text-muted-foreground">{m.updater_restarting()}</p>
+				{/if}
 
-		<!-- What's new -->
-			<div>
-				<div class="mb-4 space-y-1.5">
-					<p class="text-sm font-medium">{m.settings_about_news_label()}</p>
-				</div>
 				<button
-					onclick={async () => { uiState.modal.setLastSeenVersion(''); await checkForNews(); }}
-					class="rounded border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
+					onclick={async () => {
+						uiState.modal.setLastSeenVersion('');
+						await checkForNews();
+					}}
+					class="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
 				>
+					<SparklesIcon class="size-4" />
 					{m.settings_about_read_news()}
 				</button>
 			</div>
-
-			<!-- Thanks to -->
-		<div>
-			<p class="mb-3 text-sm font-medium">{m.settings_about_thanks_heading()}</p>
-			<ul class="space-y-2">
-				{#each DEPS as dep (dep.name)}
-					<li class="flex items-baseline gap-2">
-						<span class="text-sm font-medium">{dep.name}</span>
-						<span class="text-xs text-muted-foreground">{dep.desc}</span>
-					</li>
-				{/each}
-			</ul>
 		</div>
 	</div>
-</div>
+
+	<!-- Built with -->
+	<div class="rounded-xl border bg-card p-4">
+		<div class="flex items-center gap-2">
+			<HeartIcon class="size-4 text-muted-foreground" />
+			<p class="text-sm font-medium">{m.settings_about_thanks_heading()}</p>
+		</div>
+		<div class="mt-3 grid gap-2 sm:grid-cols-2">
+			{#each DEPS as dep (dep.name)}
+				<div class="rounded-lg bg-muted/60 px-3 py-2">
+					<p class="text-sm leading-tight font-medium">{dep.name}</p>
+					<p class="mt-0.5 text-xs text-muted-foreground">{dep.desc}</p>
+				</div>
+			{/each}
+		</div>
+	</div>
+</SettingsSection>

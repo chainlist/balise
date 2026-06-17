@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tagsService, UNTAGGED_FILTER } from '$lib/services/tags.svelte';
+	import { tagsService, UNTAGGED_FILTER } from '$lib/services/content/tags.svelte';
 	import type { Tag } from '$lib/models/tag';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
