@@ -29,7 +29,9 @@
 		id: string;
 		label: string;
 		icon: typeof KeyboardIcon;
-	} & ({ component: Component } | { children: NavView[] });
+		component?: Component;
+		children?: NavView[];
+	};
 
 	const navItems: NavItem[] = [
 		{
@@ -66,8 +68,8 @@
 			id: 'sync',
 			label: m.settings_sync_heading(),
 			icon: RefreshCwIcon,
+			component: SyncSettings,
 			children: [
-				{ id: 'sync-general', label: m.settings_sync_nav_general(), component: SyncSettings },
 				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices },
 				{ id: 'sync-sharing', label: m.settings_sync_nav_sharing(), component: SyncSharingSettings }
 			]
@@ -84,13 +86,18 @@
 	const ActiveSection = $derived(activeView.component);
 
 	function selectItem(item: NavItem): void {
-		activeView = 'children' in item ? item.children[0] : item;
+		if (item.component) {
+			activeView = { id: item.id, label: item.label, component: item.component };
+		} else if (item.children?.length) {
+			activeView = item.children[0];
+		}
 	}
 
-	/* Only leaf items take the solid active highlight, so the selected subsection
-	   is unambiguous; a parent group is never highlighted on its own. */
+	/* An item is active when its own view is showing. A parent with its own
+	   component (Sync) highlights when selected; its children highlight in the
+	   sub-list below. */
 	function isItemActive(item: NavItem): boolean {
-		return !('children' in item) && activeView.id === item.id;
+		return activeView.id === item.id;
 	}
 
 	const ACTIVE_CLASS = 'bg-sidebar-accent font-medium text-on-surface';
@@ -130,7 +137,7 @@
 						<item.icon size="15" class="shrink-0" />
 						<span class="truncate">{item.label}</span>
 					</button>
-					{#if 'children' in item}
+					{#if item.children}
 						<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
 							{#each item.children as child (child.id)}
 								<button

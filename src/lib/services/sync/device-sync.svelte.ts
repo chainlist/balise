@@ -17,6 +17,18 @@ interface SyncResult {
 	changedDesks: string[];
 }
 
+/** Once the throttle would allow a sync, wait for a typing gap this long first,
+ *  so we fire between thoughts rather than mid-sentence (a thinking pause is
+ *  shorter than this). The throttle window itself is the configurable
+ *  `sync.intervalMinutes` setting. */
+const SYNC_DEBOUNCE_MS = 15_000;
+/** Backoff bounds for retrying a sync that failed to send or to dial. */
+const RETRY_MIN_MS = 1_000;
+const RETRY_MAX_MS = 30_000;
+/** Give up active retries after this many tries; a later reconnect or peer wake
+ *  then reconciles the still-pending changes. */
+const MAX_RETRIES = 5;
+
 /**
  * Frontend side of device sync. The protocol itself runs entirely in the Rust
  * backend (dialer + autonomous accept loop) so note content never crosses the
@@ -27,8 +39,17 @@ interface SyncResult {
 class DeviceSyncService {
 	syncing = $state(false);
 
-	#interval: ReturnType<typeof setInterval> | null = null;
 	#unlisten: UnlistenFn | null = null;
+	/** True while we hold local edits not yet confirmed synced by a `sync-result`.
+	 *  Drives the retry loop; cleared in {@link #onResult}. */
+	#pending = false;
+	/** Throttled + debounced trigger for the next edit-driven sync. */
+	#syncTimer: ReturnType<typeof setTimeout> | null = null;
+	/** When the last sync completed; the throttle floor is measured from here. */
+	#lastSyncAt = 0;
+	#retryTimer: ReturnType<typeof setTimeout> | null = null;
+	#retryDelay = RETRY_MIN_MS;
+	#retries = 0;
 	/** Peers with a dial in flight, so overlapping dial triggers for the same peer
 	 *  don't dial it twice; also drives the {@link syncing} flag. */
 	#dialing = new Set<string>();
@@ -44,6 +65,7 @@ class DeviceSyncService {
 		this.#mirrorConfig();
 		syncConnectionService.onPeerReady((peerKey) => void this.#onPeerReady(peerKey));
 		syncConnectionService.onWake((initiatorKey) => void this.#onWake(initiatorKey));
+		noteSignals.onLocalChange(() => this.#onLocalChange());
 	}
 
 	/**
@@ -64,6 +86,12 @@ class DeviceSyncService {
 
 	/** Refreshes the active desk / desk list from a backend sync result. */
 	#onResult(result: SyncResult): void {
+		// A reconcile completed: our pending edits have gone out, and the throttle
+		// clock restarts from now.
+		this.#pending = false;
+		this.#lastSyncAt = Date.now();
+		this.#clearRetry();
+
 		const device = devicesService.linked.find((d) => d.id === result.deviceId);
 		if (device) devicesService.upsert({ ...device, lastSeen: Date.now() });
 
@@ -78,44 +106,70 @@ class DeviceSyncService {
 		noteSignals.signalNotesSynced();
 	}
 
-	/** Begins periodic sync. The first cycle is triggered on WS connect (`hello`),
-	 *  so this only sets the recurring timer. */
-	startInterval(): void {
-		if (this.#interval) return;
-		this.#interval = setInterval(() => void this.syncAll(), this.#intervalMs());
+	/**
+	 * A local note write happened. Mark us dirty and (re)arm the trigger: it fires
+	 * at the first typing gap of {@link SYNC_DEBOUNCE_MS} once at least the throttle
+	 * window (`sync.intervalMinutes`) has passed since the last sync. The `max` makes
+	 * one timer do both jobs - throttle floor while the window is closed, plain
+	 * debounce once it has opened. No-op when sync can't do anything (off / no peers).
+	 */
+	#onLocalChange(): void {
+		if (!settingsService.sync.state.enabled || devicesService.linked.length === 0) return;
+		this.#pending = true;
+		if (this.#syncTimer) clearTimeout(this.#syncTimer);
+		const throttleMs = Math.max(1, settingsService.sync.state.intervalMinutes) * 60_000;
+		const sinceLast = Date.now() - this.#lastSyncAt;
+		const wait = Math.max(SYNC_DEBOUNCE_MS, throttleMs - sinceLast);
+		this.#syncTimer = setTimeout(() => {
+			this.#syncTimer = null;
+			void this.#attemptSync();
+		}, wait);
 	}
 
-	stopInterval(): void {
-		if (this.#interval) {
-			clearInterval(this.#interval);
-			this.#interval = null;
+	/** Fires one sync; a failure to even send arms the retry backoff. A failed dial
+	 *  re-arms it from {@link #dial}; a `sync-result` clears it in {@link #onResult}. */
+	async #attemptSync(): Promise<void> {
+		if (!(await this.syncAll())) this.#scheduleRetry();
+	}
+
+	/** Retries a failed sync with capped backoff while we're still dirty, then gives
+	 *  up so an absent peer isn't poked forever; a reconnect/wake reconciles us. */
+	#scheduleRetry(): void {
+		if (!this.#pending || this.#retryTimer || this.#retries >= MAX_RETRIES) return;
+		this.#retries++;
+		const delay = this.#retryDelay;
+		this.#retryDelay = Math.min(this.#retryDelay * 2, RETRY_MAX_MS);
+		this.#retryTimer = setTimeout(() => {
+			this.#retryTimer = null;
+			void this.#attemptSync();
+		}, delay);
+	}
+
+	#clearRetry(): void {
+		if (this.#retryTimer) {
+			clearTimeout(this.#retryTimer);
+			this.#retryTimer = null;
 		}
-	}
-
-	/** Picks up a changed interval setting without forcing an immediate sync. */
-	reschedule(): void {
-		if (!this.#interval) return;
-		clearInterval(this.#interval);
-		this.#interval = setInterval(() => void this.syncAll(), this.#intervalMs());
-	}
-
-	#intervalMs(): number {
-		return Math.max(1, settingsService.sync.state.intervalMinutes) * 60_000;
+		this.#retryDelay = RETRY_MIN_MS;
+		this.#retries = 0;
 	}
 
 	/**
 	 * Asks the control plane to wake our online peers. The actual dial happens in
 	 * {@link #onPeerReady} as each peer reports its endpoint is up. `notify` surfaces
 	 * a toast when a user-initiated sync can't be sent (e.g. the control plane is
-	 * unreachable); the periodic call stays silent.
+	 * unreachable); the edit-driven and retry calls stay silent. Returns whether the
+	 * request was sent, so the caller can arm a retry.
 	 */
-	async syncAll(notify = false): Promise<void> {
+	async syncAll(notify = false): Promise<boolean> {
 		try {
 			const sent = await syncConnectionService.requestSync();
 			if (!sent && notify) toasterService.warning(m.settings_sync_start_error());
+			return sent;
 		} catch (e) {
 			if (notify) toasterService.error(m.settings_sync_start_error(), errorMessage(e));
 			else console.warn('sync request failed:', e);
+			return false;
 		}
 	}
 
@@ -160,6 +214,7 @@ class DeviceSyncService {
 			await syncPeers([id]);
 		} catch (e) {
 			console.warn('sync dial failed:', e);
+			this.#scheduleRetry();
 		} finally {
 			this.#dialing.delete(id);
 			if (this.#dialing.size === 0) this.syncing = false;

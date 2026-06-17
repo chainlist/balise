@@ -1,9 +1,9 @@
 //! The symmetric sync wire protocol over a single QUIC stream.
 //!
 //! One full exchange agrees on the desk set via a preamble, then reconciles each
-//! agreed desk: a `manifest` swap followed by `notes`. Dialer and responder run
-//! the same [`run_protocol`], so they stay in lockstep. Messages are
-//! length-prefixed JSON.
+//! agreed desk: a `digest` swap that skips the desk when both sides already match,
+//! else a `manifest` swap followed by `notes`. Dialer and responder run the same
+//! [`run_protocol`], so they stay in lockstep. Messages are length-prefixed JSON.
 
 use std::collections::HashSet;
 
@@ -16,17 +16,20 @@ use super::desk_db::{ensure_desk_db, list_desks};
 use super::extract::MagicTag;
 use super::manifest::{apply_notes, build_manifest, gc_tombstones, select_notes, SyncedNote};
 use super::paths::resolve_desk_dir;
-use super::reconcile::{agreed_desks, notes_to_send, ManifestEntry};
+use super::reconcile::{agreed_desks, manifest_digest, notes_to_send, ManifestEntry};
 
 /// Hard cap on a single framed sync message, guarding the recv allocation.
 const MAX_SYNC_MESSAGE: usize = 64 * 1024 * 1024;
 
 /// Messages exchanged over the sync stream: a `desks` preamble to agree on the
-/// set to reconcile, then per agreed desk a `manifest` swap followed by `notes`.
+/// set to reconcile, then per agreed desk a `digest` swap (which skips the desk
+/// when both fingerprints match) and, if they differ, a `manifest` swap followed
+/// by `notes`.
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum SyncMessage {
     Desks { share: Vec<String>, unshared: Vec<String> },
+    Digest { desk: String, digest: String },
     Manifest { desk: String, entries: Vec<ManifestEntry> },
     Notes { desk: String, notes: Vec<SyncedNote> },
 }
@@ -89,12 +92,33 @@ pub(crate) async fn run_protocol(
             created_desk = true;
         }
         let mut conn = ensure_desk_db(app, desk).await?;
-        let desk_dir = resolve_desk_dir(app, desk)?;
 
         // Drop expired tombstones before advertising them, so a delete doesn't ride
         // in every manifest forever.
         gc_tombstones(&mut conn).await?;
         let local_manifest = build_manifest(&mut conn).await?;
+
+        // Digest gate: a desk both sides already hold identically reconciles to a
+        // no-op, so swap just a fingerprint of the manifest first and skip the desk
+        // outright when they match. Both ends derive the same decision from the same
+        // two digests, so they stay in lockstep on whether to go on to the manifest.
+        let local_digest = manifest_digest(&local_manifest);
+        let digest_msg = SyncMessage::Digest {
+            desk: desk.clone(),
+            digest: local_digest.clone(),
+        };
+        let (w, r) = tokio::join!(write_msg(send, &digest_msg), read_msg(recv));
+        w?;
+        let peer_digest = match r? {
+            SyncMessage::Digest { digest, .. } => digest,
+            _ => return Err("expected digest".to_string()),
+        };
+        if local_digest == peer_digest {
+            let _ = conn.close().await;
+            continue;
+        }
+
+        let desk_dir = resolve_desk_dir(app, desk)?;
         let manifest_msg = SyncMessage::Manifest {
             desk: desk.clone(),
             entries: local_manifest.clone(),

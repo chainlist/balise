@@ -5,6 +5,7 @@
 
 use std::collections::{BTreeSet, HashMap, HashSet};
 
+use data_encoding::HEXLOWER;
 use serde::{Deserialize, Serialize};
 
 use super::timestamps::parse_db_timestamp;
@@ -65,6 +66,22 @@ pub(crate) fn notes_to_send(
         }
     }
     send
+}
+
+/// Order-independent fingerprint of a desk's manifest: the XOR of a per-entry
+/// hash, so two devices holding the same `(id, updated_at, deleted)` set digest
+/// equal regardless of row order (the manifest query is unordered). Swapping just
+/// this code lets two already-synced desks skip the manifest and notes exchange.
+pub(crate) fn manifest_digest(entries: &[ManifestEntry]) -> String {
+    let mut acc = [0u8; 32];
+    for e in entries {
+        let h =
+            blake3::hash(format!("{}\0{}\0{}", e.id, e.updated_at, e.deleted as u8).as_bytes());
+        for (a, b) in acc.iter_mut().zip(h.as_bytes()) {
+            *a ^= *b;
+        }
+    }
+    HEXLOWER.encode(&acc)
 }
 
 /// The desks two peers reconcile this session, computed identically on both ends
@@ -176,5 +193,29 @@ mod tests {
             agreed_desks(&["A".into(), "B".into()], &[], &["A".into()], &["B".into()]),
             vec!["A"]
         );
+    }
+
+    #[test]
+    fn manifest_digest_ignores_order_but_tracks_content() {
+        let a = [entry("1", "2026-06-13 12:00:00"), entry("2", "2026-06-13 13:00:00")];
+        let reordered = [entry("2", "2026-06-13 13:00:00"), entry("1", "2026-06-13 12:00:00")];
+        // same set, different row order -> identical digest
+        assert_eq!(manifest_digest(&a), manifest_digest(&reordered));
+        // a changed timestamp -> different digest
+        let changed = [entry("1", "2026-06-13 12:00:05"), entry("2", "2026-06-13 13:00:00")];
+        assert_ne!(manifest_digest(&a), manifest_digest(&changed));
+        // empty is stable
+        assert_eq!(manifest_digest(&[]), manifest_digest(&[]));
+    }
+
+    #[test]
+    fn manifest_digest_distinguishes_tombstone_from_live() {
+        let live = [entry("1", "2026-06-13 12:00:00")];
+        let dead = [ManifestEntry {
+            id: "1".into(),
+            updated_at: "2026-06-13 12:00:00".into(),
+            deleted: true,
+        }];
+        assert_ne!(manifest_digest(&live), manifest_digest(&dead));
     }
 }

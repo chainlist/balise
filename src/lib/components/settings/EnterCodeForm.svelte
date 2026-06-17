@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import * as Select from '$lib/components/shadcn/select/index.js';
+	import DeviceFields from './DeviceFields.svelte';
 	import { devicesService, type DeviceType } from '$lib/services/sync/devices.svelte';
 	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import { syncService, ClaimError } from '$lib/services/sync/sync';
@@ -10,13 +10,6 @@
 	import * as m from '$paraglide/messages.js';
 
 	let { onpaired }: { onpaired: () => void } = $props();
-
-	const typeLabels: Record<DeviceType, string> = {
-		desktop: m.device_type_desktop(),
-		laptop: m.device_type_laptop(),
-		mobile: m.device_type_mobile(),
-		tablet: m.device_type_tablet()
-	};
 
 	let code = $state('');
 	let name = $state('');
@@ -59,9 +52,8 @@
 				type,
 				lastSeen: Date.now()
 			});
-			// Restart the periodic countdown from this pairing, so the next tick is a
-			// full interval away rather than landing right after the connect-time sync.
-			deviceSyncService.reschedule();
+			// Sync right away with the device we just paired.
+			void deviceSyncService.syncAll();
 			toasterService.success(m.settings_sync_add_accepted());
 			onpaired();
 		} catch (e) {
@@ -94,34 +86,7 @@
 		{/if}
 	</div>
 
-	<div class="flex flex-col gap-2">
-		<label class="text-sm font-medium" for="pair-name">{m.settings_sync_add_name_label()}</label>
-		<Input
-			id="pair-name"
-			bind:value={name}
-			placeholder={m.settings_sync_add_name_placeholder()}
-			disabled={isPairing}
-		/>
-	</div>
-
-	<div class="flex flex-col gap-2">
-		<label class="text-sm font-medium" for="pair-type">{m.settings_sync_add_type_label()}</label>
-		<Select.Root
-			type="single"
-			value={type}
-			onValueChange={(v) => {
-				if (v) type = v as DeviceType;
-			}}
-			disabled={isPairing}
-		>
-			<Select.Trigger id="pair-type" class="w-full">{typeLabels[type]}</Select.Trigger>
-			<Select.Content>
-				{#each Object.entries(typeLabels) as [value, label] (value)}
-					<Select.Item {value} {label} />
-				{/each}
-			</Select.Content>
-		</Select.Root>
-	</div>
+	<DeviceFields bind:name bind:type disabled={isPairing} />
 
 	<div class="flex justify-end">
 		<Button type="submit" disabled={isPairing}>

@@ -2,7 +2,6 @@
 	import { Switch } from 'bits-ui';
 	import { settingsService, SYNC_INTERVAL_OPTIONS } from '$lib/services/settings/settings.svelte';
 	import { stopSync } from '$lib/utils/sync';
-	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 	import SyncAdvancedSettings from './SyncAdvancedSettings.svelte';
 	import SettingsSection from './SettingsSection.svelte';
@@ -10,22 +9,16 @@
 
 	function toggleSync(enabled: boolean) {
 		settingsService.sync.setSyncEnabled(enabled);
-		// The iroh endpoint stays dormant until we initiate a sync or a paired peer
-		// wakes us over the WS control plane. Enabling starts the periodic wake loop;
-		// disabling stops the loop and tears down any running endpoint.
-		if (enabled) {
-			deviceSyncService.startInterval();
-		} else {
-			deviceSyncService.stopInterval();
-			void stopSync();
-		}
+		// The WS control-plane connection follows `enabled` reactively; syncs are
+		// driven by edits and the on-connect handshake, so there's no loop to start.
+		// On disable, tear down any running iroh endpoint.
+		if (!enabled) void stopSync();
 	}
 
 	function changeInterval(value: string) {
 		const minutes = Number(value);
 		if (!Number.isFinite(minutes)) return;
 		settingsService.sync.setSyncInterval(minutes);
-		deviceSyncService.reschedule();
 	}
 
 	const intervalLabel = $derived(

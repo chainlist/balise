@@ -1,6 +1,8 @@
 //! The Tauri command surface for sync: enable/disable, push config, and the
 //! best-effort dial cycle (the initiator side).
 
+use std::time::Duration;
+
 use iroh::{Endpoint, EndpointAddr};
 use tauri::{AppHandle, Manager};
 
@@ -40,6 +42,12 @@ pub fn set_sync_config(
     };
 }
 
+/// Upper bound on one outbound dial + exchange. Mirrors the responder's
+/// `INBOUND_TIMEOUT`: a dial that connects then stalls mid-protocol would otherwise
+/// hold the activity guard open, keeping the whole endpoint (and its relay link)
+/// alive indefinitely and leaking keepalive traffic long after the app went idle.
+const DIAL_TIMEOUT: Duration = Duration::from_secs(120);
+
 /// Dials the given peers and reconciles all shared desks with each. The frontend
 /// calls this per peer as it signals `ready`. Best-effort and trust-gated: ids not
 /// in the paired set are skipped, a peer already being dialed is skipped, and one
@@ -66,9 +74,18 @@ pub async fn sync_peers(app: AppHandle, peer_ids: Vec<String>) -> Result<(), Str
             continue; // already dialing this peer
         };
         let _activity = activity.begin(); // holds the endpoint open for this dial
-        if let Err(e) = sync_with_peer(&app, &endpoint, &local_id, peer_id, &cfg).await {
+        // Cap the dial so a peer that connects then stalls mid-protocol can't pin the
+        // activity guard (and thus the endpoint) open forever.
+        match tokio::time::timeout(
+            DIAL_TIMEOUT,
+            sync_with_peer(&app, &endpoint, &local_id, peer_id, &cfg),
+        )
+        .await
+        {
             // A peer that's offline or unreachable is expected; don't surface it.
-            log::warn!("sync with {peer_id} failed: {e}");
+            Ok(Err(e)) => log::warn!("sync with {peer_id} failed: {e}"),
+            Err(_) => log::warn!("sync with {peer_id} timed out"),
+            Ok(Ok(())) => {}
         }
     }
     Ok(())

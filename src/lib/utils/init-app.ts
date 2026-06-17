@@ -22,7 +22,6 @@ export async function initApp() {
 		await devicesService.init();
 		await syncService.init();
 		syncConnectionService.start();
-		if (settingsService.sync.state.enabled) deviceSyncService.startInterval();
 		themeService.init();
 		await globalShortcutService.applyAll(APP_SHORTCUTS);
 		await uiState.init();

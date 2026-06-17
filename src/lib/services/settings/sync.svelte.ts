@@ -3,7 +3,7 @@ import { sanitizeDeskName } from '../platform/desk';
 
 export interface SyncSettings {
 	enabled: boolean;
-	/** How often to sync with linked devices, in minutes. */
+	/** Throttle: the shortest time between automatic syncs, in minutes. */
 	intervalMinutes: number;
 	/** Custom pairing server URL; empty falls back to the build-time default. */
 	syncUrl: string;
@@ -16,8 +16,8 @@ export interface SyncSettings {
 	unsharedDesks: string[];
 }
 
-/** Selectable sync cadences, in minutes. */
-export const SYNC_INTERVAL_OPTIONS = [10, 30, 60] as const;
+/** Selectable throttle windows, in minutes. */
+export const SYNC_INTERVAL_OPTIONS = [5, 10, 30, 60] as const;
 
 export class SyncSettingsService extends SettingsGroup<SyncSettings> {
 	readonly key = 'sync';

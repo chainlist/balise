@@ -7,6 +7,7 @@ class NoteSignals {
 	#deleteNote = new Set<IdHandler>();
 	#notesSynced = new Set<VoidHandler>();
 	#desksChanged = new Set<VoidHandler>();
+	#localChange = new Set<VoidHandler>();
 
 	onSelectNote(fn: IdHandler): () => void {
 		this.#selectNote.add(fn);
@@ -31,6 +32,13 @@ class NoteSignals {
 		return () => this.#desksChanged.delete(fn);
 	}
 
+	/** Fires after a user-initiated note write, so device sync can schedule a push.
+	 *  Never fired by the sync-apply path, which would loop. */
+	onLocalChange(fn: VoidHandler): () => void {
+		this.#localChange.add(fn);
+		return () => this.#localChange.delete(fn);
+	}
+
 	signalSelectNote(id: string): void {
 		this.#selectNote.forEach((fn) => fn(id));
 	}
@@ -45,6 +53,10 @@ class NoteSignals {
 
 	signalDesksChanged(): void {
 		this.#desksChanged.forEach((fn) => fn());
+	}
+
+	signalLocalChange(): void {
+		this.#localChange.forEach((fn) => fn());
 	}
 }
 

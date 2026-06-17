@@ -2,7 +2,12 @@
 	import { onDestroy } from 'svelte';
 	import { Loader2Icon } from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { devicesService } from '$lib/services/sync/devices.svelte';
+	import DeviceFields from './DeviceFields.svelte';
+	import {
+		devicesService,
+		type LinkedDevice,
+		type DeviceType
+	} from '$lib/services/sync/devices.svelte';
 	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import { syncService } from '$lib/services/sync/sync';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
@@ -19,6 +24,11 @@
 	let expired = $state(false);
 	let generating = $state(false);
 	let error = $state<string | null>(null);
+
+	/** Set once a peer claims the code, switching the panel to the naming step. */
+	let paired = $state<LinkedDevice | null>(null);
+	let name = $state('');
+	let type = $state<DeviceType>('desktop');
 
 	/** Peer public keys already paired before this code, to spot the new one. */
 	let baseline = new Set<string>();
@@ -45,24 +55,37 @@
 			if (fresh.length === 0) return;
 
 			stopPolling();
+			let firstPaired: LinkedDevice | null = null;
 			for (const peer of fresh) {
 				const id = await deviceIdFromPublicKey(peer.publicKey);
-				devicesService.upsert({
+				const device: LinkedDevice = {
 					id,
 					publicKey: peer.publicKey,
 					name: '',
 					type: 'desktop',
 					lastSeen: Date.now()
-				});
+				};
+				// Persist immediately so the pairing isn't lost if the dialog closes
+				// before the user names it.
+				devicesService.upsert(device);
+				firstPaired ??= device;
 			}
-			// Restart the periodic countdown from this pairing, so the next tick is a
-			// full interval away rather than landing right after the connect-time sync.
-			deviceSyncService.reschedule();
-			toasterService.success(m.settings_sync_add_accepted());
-			onpaired();
+			// Sync right away with the device we just paired.
+			void deviceSyncService.syncAll();
+			// Hold on a naming step so the new device can be named here.
+			paired = firstPaired;
 		} catch {
 			// Transient poll failures are expected; keep trying until expiry.
 		}
+	}
+
+	function save() {
+		if (!paired) return;
+		const trimmed = name.trim();
+		if (!trimmed) return;
+		devicesService.upsert({ ...paired, name: trimmed, type });
+		toasterService.success(m.settings_sync_add_accepted());
+		onpaired();
 	}
 
 	async function generate() {
@@ -87,7 +110,23 @@
 </script>
 
 <div class="flex flex-col items-center gap-5 py-2">
-	{#if code}
+	{#if paired}
+		<form
+			class="flex w-full flex-col gap-4"
+			onsubmit={(event) => {
+				event.preventDefault();
+				save();
+			}}
+		>
+			<p class="text-center text-sm text-muted-foreground">
+				{m.settings_sync_show_name_prompt()}
+			</p>
+			<DeviceFields bind:name bind:type />
+			<div class="flex justify-end">
+				<Button type="submit" disabled={!name.trim()}>{m.settings_sync_show_save()}</Button>
+			</div>
+		</form>
+	{:else if code}
 		<div class="flex flex-col items-center gap-2">
 			<p class="text-xs font-medium tracking-wider text-muted-foreground uppercase">
 				{m.settings_sync_code_label()}
