@@ -154,6 +154,7 @@ class NotesService {
 		await deleteNoteById(db, id);
 		this.notes = this.notes.filter((n) => n.id !== id);
 		await Promise.all([tagsService.load(), deleteNoteFile(id)]);
+		noteSignals.signalNoteDeleted(id);
 		noteSignals.signalLocalChange();
 	}
 }

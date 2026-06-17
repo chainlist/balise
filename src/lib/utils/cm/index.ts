@@ -17,4 +17,6 @@ export { mdPlaceholderPlugin } from './placeholderPlugin';
 export { mdTagCompletion } from './tagCompletion';
 export { spaceRequiredHeadings } from './headingParser';
 export { noteEditorTheme, mdSyntaxHighlighting } from './theme';
+export { readFolds, restoreFolds } from './folds';
 export type { MarkMode } from './shared';
+export type { FoldRange } from './folds';

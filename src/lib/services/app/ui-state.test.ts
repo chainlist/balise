@@ -43,6 +43,7 @@ vi.mock('$lib/services/settings/settings.svelte', () => ({
 }));
 
 import { uiState } from './ui-state.svelte';
+import { noteSignals } from '$lib/services/content/note-signals';
 import { openDesk } from '$lib/services/platform/desk';
 import { notesService } from '$lib/services/content/notes.svelte';
 import { tagsService } from '$lib/services/content/tags.svelte';
@@ -66,6 +67,7 @@ beforeEach(() => {
 	uiState.activeTag = null;
 	uiState.composedTags = [];
 	uiState.ready = false;
+	uiState.noteFolds = {};
 });
 
 // ─── addDesk ──────────────────────────────────────────────────────────────────
@@ -269,5 +271,38 @@ describe('switchDesk', () => {
 		await expect(uiState.switchDesk('Work')).rejects.toThrow();
 		expect(openDesk).toHaveBeenLastCalledWith('Personal');
 		expect(fsService.setDesk).toHaveBeenLastCalledWith('Personal');
+	});
+});
+
+// ─── noteFolds ────────────────────────────────────────────────────────────────
+
+describe('noteFolds', () => {
+	it('round-trips folds for a note', () => {
+		uiState.setNoteFolds('note-a', [{ from: 4, to: 20 }]);
+		expect(uiState.getNoteFolds('note-a')).toEqual([{ from: 4, to: 20 }]);
+	});
+
+	it('returns an empty array for a note with no saved folds', () => {
+		expect(uiState.getNoteFolds('unknown')).toEqual([]);
+	});
+
+	it('persists the folds map to the store', () => {
+		uiState.setNoteFolds('note-a', [{ from: 0, to: 5 }]);
+		expect(mockStore.set).toHaveBeenCalledWith(
+			'noteFolds',
+			expect.objectContaining({ 'note-a': [{ from: 0, to: 5 }] })
+		);
+	});
+
+	it('drops the entry when set to an empty list', () => {
+		uiState.setNoteFolds('note-a', [{ from: 0, to: 5 }]);
+		uiState.setNoteFolds('note-a', []);
+		expect('note-a' in uiState.noteFolds).toBe(false);
+	});
+
+	it('prunes remembered folds when a note is deleted', () => {
+		uiState.setNoteFolds('note-a', [{ from: 0, to: 5 }]);
+		noteSignals.signalNoteDeleted('note-a');
+		expect(uiState.getNoteFolds('note-a')).toEqual([]);
 	});
 });

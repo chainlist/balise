@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, type Snippet } from 'svelte';
 	import { notesService, type Note } from '$lib/services/content/notes.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import { readingTimeMinutes } from '$lib/utils/note-utils';
 	import { parseDbTimestamp } from '$lib/utils/time';
@@ -12,8 +13,14 @@
 	let {
 		note,
 		onSave,
+		persistFolds = true,
 		children
-	}: { note: Note; onSave?: (content: string) => Promise<void>; children?: Snippet } = $props();
+	}: {
+		note: Note;
+		onSave?: (content: string) => Promise<void>;
+		persistFolds?: boolean;
+		children?: Snippet;
+	} = $props();
 
 	let saveTimer: ReturnType<typeof setTimeout>;
 	let pending: string | null = null;
@@ -54,7 +61,13 @@
 			readingTime={readingTimeMinutes(liveContent ?? content)}
 			date={new Date(parseDbTimestamp(note.created_at))}
 		/>
-		<Editor {content} autofocus onchange={handleChange} />
+		<Editor
+			{content}
+			autofocus
+			initialFolds={persistFolds ? uiState.getNoteFolds(note.id) : []}
+			onchange={handleChange}
+			onfoldchange={persistFolds ? (folds) => uiState.setNoteFolds(note.id, folds) : undefined}
+		/>
 	{/await}
 	{@render children?.()}
 </div>
