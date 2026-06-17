@@ -71,8 +71,8 @@ pub fn run() {
             });
             main_window.show()?;
 
-            if let Some(_) = app.get_webview_window("quick") {
-                #[cfg(target_os = "macos")]
+            #[cfg(target_os = "macos")]
+            if let Some(quick_window) = app.get_webview_window("quick") {
                 let _ = window_vibrancy::apply_vibrancy(
                     &quick_window,
                     window_vibrancy::NSVisualEffectMaterial::HudWindow,
