@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/chainlist/balise/compare/v0.27.1...v0.28.0) (2026-06-17)
+
+
+### Features
+
+* **auto-updater:** You have now the possibility to turn off auto-updates ([#61](https://github.com/chainlist/balise/issues/61)) ([5501a63](https://github.com/chainlist/balise/commit/5501a63eae79983a0bdda422c6935fab0412d4eb))
+
 ## [0.27.1](https://github.com/chainlist/balise/compare/v0.27.0...v0.27.1) (2026-06-15)
 
 
