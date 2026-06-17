@@ -8,6 +8,7 @@ import { fsService } from '../platform/fs';
 import { settingsService } from '../settings/settings.svelte';
 import { noteSignals } from '../content/note-signals';
 import { resolveStorePath } from '../platform/store-path';
+import type { FoldRange } from '$lib/utils/cm';
 
 const defaultDesk = 'Personal';
 const defaults = {
@@ -25,6 +26,10 @@ class UIState {
 	composedTags = $state<string[]>([]);
 	graphMode = $state<GraphMode>('sunburst');
 	ready = $state(false);
+
+	/** Per-note folded ranges, keyed by note id, persisted so a note reopens with
+	 *  the same sections collapsed. Local to this device (not synced). */
+	noteFolds = $state<Record<string, FoldRange[]>>({});
 
 	#noteSelection = $state<{ noteId: string; tag: string | null; composedKey: string } | null>(null);
 	#composedKey = $derived([...this.composedTags].sort().join('\x00'));
@@ -44,18 +49,20 @@ class UIState {
 			defaults
 		});
 
-		const [activeDesk, desks, activeTag, graphMode, lastSeenVersion] = await Promise.all([
+		const [activeDesk, desks, activeTag, graphMode, lastSeenVersion, noteFolds] = await Promise.all([
 			this.#store.get<string>('activeDesk'),
 			this.#store.get<string[]>('desks'),
 			this.#store.get<string>('activeTag'),
 			this.#store.get<GraphMode>('graphMode'),
-			this.#store.get<string>('lastSeenVersion')
+			this.#store.get<string>('lastSeenVersion'),
+			this.#store.get<Record<string, FoldRange[]>>('noteFolds')
 		]);
 
 		this.activeDesk = activeDesk ?? defaultDesk;
 		this.desks = desks ?? [defaultDesk];
 		this.activeTag = activeTag ?? null;
 		this.graphMode = graphMode ?? 'sunburst';
+		this.noteFolds = noteFolds ?? {};
 		this.modal.init(this.#store, lastSeenVersion ?? '');
 
 		if (!this.desks.includes(this.activeDesk)) {
@@ -66,6 +73,23 @@ class UIState {
 		noteSignals.onNotesSynced(() => void this.#reloadView());
 		// Surface desks a background sync materialised from a peer.
 		noteSignals.onDesksChanged(() => void this.#mergeDesksFromDisk());
+		// Drop a deleted note's remembered folds so the store can't grow forever.
+		noteSignals.onNoteDeleted((id) => this.setNoteFolds(id, []));
+	}
+
+	getNoteFolds(id: string): FoldRange[] {
+		return this.noteFolds[id] ?? [];
+	}
+
+	/** Persist a note's folded ranges; an empty list drops the entry entirely. */
+	setNoteFolds(id: string, folds: FoldRange[]): void {
+		if (folds.length === 0) {
+			if (!(id in this.noteFolds)) return;
+			delete this.noteFolds[id];
+		} else {
+			this.noteFolds[id] = folds;
+		}
+		void this.#store?.set('noteFolds', this.noteFolds);
 	}
 
 	/** Folds any on-disk desks not yet in the list into it (e.g. one a peer just

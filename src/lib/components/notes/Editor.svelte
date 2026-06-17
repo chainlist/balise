@@ -5,7 +5,14 @@
 	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 	import { GFM } from '@lezer/markdown';
 	import { languages } from '@codemirror/language-data';
-	import { codeFolding, foldGutter, foldKeymap, foldNodeProp } from '@codemirror/language';
+	import {
+		codeFolding,
+		foldGutter,
+		foldKeymap,
+		foldNodeProp,
+		foldEffect,
+		unfoldEffect
+	} from '@codemirror/language';
 	import { untrack } from 'svelte';
 	import { closeBrackets, completionKeymap } from '@codemirror/autocomplete';
 	import {
@@ -30,26 +37,36 @@
 		mdTagCompletion,
 		spaceRequiredHeadings,
 		noteEditorTheme,
-		type MarkMode
+		readFolds,
+		restoreFolds,
+		type MarkMode,
+		type FoldRange
 	} from '$lib/utils/cm';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 
 	let {
 		content,
 		autofocus = false,
+		initialFolds = [],
 		onchange,
+		onfoldchange,
 		onfocus,
 		onblur
 	}: {
 		content: string;
 		autofocus?: boolean;
+		initialFolds?: FoldRange[];
 		onchange?: (val: string) => void;
+		onfoldchange?: (folds: FoldRange[]) => void;
 		onfocus?: () => void;
 		onblur?: () => void;
 	} = $props();
 
 	let editorView = $state<EditorView | null>(null);
 	let focused = $state(false);
+	// Serialised last-reported folds, so we only emit when the set actually changes
+	// (a doc edit that shifts a fold's offsets counts; typing elsewhere doesn't).
+	let lastFoldKey = '';
 	const markCompartment = new Compartment();
 
 	function makeMarkPlugins(mode: MarkMode) {
@@ -133,12 +150,27 @@
 						if (u.docChanged) {
 							onchange?.(u.state.doc.toString());
 						}
+						const foldsTouched = u.transactions.some((tr) =>
+							tr.effects.some((e) => e.is(foldEffect) || e.is(unfoldEffect))
+						);
+						if (foldsTouched || u.docChanged) {
+							const folds = readFolds(u.state);
+							const key = JSON.stringify(folds);
+							if (key !== lastFoldKey) {
+								lastFoldKey = key;
+								onfoldchange?.(folds);
+							}
+						}
 					})
 				],
 				parent: container
 			});
 
 			editorView = view;
+			// Seed the dedupe key with what we're about to restore so re-applying the
+			// saved folds doesn't immediately echo back through onfoldchange.
+			lastFoldKey = JSON.stringify(initialFolds);
+			restoreFolds(view, initialFolds);
 			if (autofocus) view.focus();
 
 			return () => {

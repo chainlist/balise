@@ -12,8 +12,14 @@
 	let {
 		note,
 		onSave,
-		pinnable = false
-	}: { note: Note; onSave?: (content: string) => Promise<void>; pinnable?: boolean } = $props();
+		pinnable = false,
+		persistFolds = true
+	}: {
+		note: Note;
+		onSave?: (content: string) => Promise<void>;
+		pinnable?: boolean;
+		persistFolds?: boolean;
+	} = $props();
 
 	let alwaysOnTop = $state(false);
 
@@ -33,7 +39,7 @@
 	}));
 </script>
 
-<EditorView {note} {onSave}>
+<EditorView {note} {onSave} {persistFolds}>
 	<div class="absolute top-5 right-5 -translate-y-1/2">
 		{#if pinnable}
 			<button

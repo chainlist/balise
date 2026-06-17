@@ -78,6 +78,6 @@
 
 <div class="frost h-screen w-full" in:fade={{ duration: 250 }}>
 	{#key draftNote.id}
-		<NoteEditor note={draftNote} onSave={handleSave} pinnable />
+		<NoteEditor note={draftNote} onSave={handleSave} pinnable persistFolds={false} />
 	{/key}
 </div>

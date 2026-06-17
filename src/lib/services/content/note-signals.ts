@@ -5,6 +5,7 @@ type VoidHandler = () => void;
 class NoteSignals {
 	#selectNote = new Set<IdHandler>();
 	#deleteNote = new Set<IdHandler>();
+	#noteDeleted = new Set<IdHandler>();
 	#notesSynced = new Set<VoidHandler>();
 	#desksChanged = new Set<VoidHandler>();
 	#localChange = new Set<VoidHandler>();
@@ -17,6 +18,13 @@ class NoteSignals {
 	onDeleteNote(fn: IdHandler): () => void {
 		this.#deleteNote.add(fn);
 		return () => this.#deleteNote.delete(fn);
+	}
+
+	/** Fires after a note is actually deleted (not the delete-dialog intent above),
+	 *  so per-note local state like remembered folds can be pruned. */
+	onNoteDeleted(fn: IdHandler): () => void {
+		this.#noteDeleted.add(fn);
+		return () => this.#noteDeleted.delete(fn);
 	}
 
 	/** Fires after device sync applied remote changes, so the view can reload. */
@@ -45,6 +53,10 @@ class NoteSignals {
 
 	signalDeleteNote(id: string): void {
 		this.#deleteNote.forEach((fn) => fn(id));
+	}
+
+	signalNoteDeleted(id: string): void {
+		this.#noteDeleted.forEach((fn) => fn(id));
 	}
 
 	signalNotesSynced(): void {
