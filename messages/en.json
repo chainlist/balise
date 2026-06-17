@@ -33,6 +33,8 @@
 	"command_palette_group_notes": "Notes",
 	"command_palette_group_tags": "Tags",
 	"command_palette_group_commands": "Commands",
+	"command_palette_group_desks": "Desks",
+	"command_palette_switch_desk": "Switch desk",
 
 	"desk_create_title": "Create a new desk",
 	"desk_create_description": "Enter a name for your desk.",
@@ -55,7 +57,14 @@
 	"desk_delete_error_min": "You must keep at least one desk.",
 	"desk_delete_error_failed": "Failed to delete desk.",
 	"desk_delete_deleting": "Deleting...",
+	"desk_share_label": "Share this desk",
+	"desk_share_helper": "Sync this desk to your paired devices.",
+	"desk_share_sync_off": "Enable sync to share this desk.",
 	"sidebar_add_desk": "Add a new desk",
+	"settings_desks_heading": "Desks",
+	"settings_desks_description": "Manage your desks.",
+	"settings_desks_active": "Active",
+	"settings_desks_shared": "Shared",
 
 	"all_notes": "All Notes",
 	"search_tags_placeholder": "Search tags…",
@@ -278,6 +287,7 @@
 	"close_behavior_quit": "Quit application",
 
 	"settings_sync_heading": "Sync",
+	"settings_sync_soon": "Soon",
 	"settings_sync_description": "Sync your notes across your devices.",
 	"settings_sync_enable_label": "Enable sync",
 	"settings_sync_enable_helper": "Allow this device to be paired with another.",
