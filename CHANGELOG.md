@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/chainlist/balise/compare/v0.28.0...v0.29.0) (2026-06-17)
+
+
+### Features
+
+* **editor:** remember folded section ([#64](https://github.com/chainlist/balise/issues/64)) ([5458d7b](https://github.com/chainlist/balise/commit/5458d7beaea2f99e6e3c8ae3a8379cbef13024fa))
+
 ## [0.28.0](https://github.com/chainlist/balise/compare/v0.27.1...v0.28.0) (2026-06-17)
 
 
