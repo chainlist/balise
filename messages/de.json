@@ -247,6 +247,8 @@
 	"editor_reading_time": "{minutes} Min. Lesezeit",
 	"editor_tag_prev_occurrence": "Vorheriges Vorkommen",
 	"editor_tag_next_occurrence": "Nächstes Vorkommen",
+	"editor_summary": "Zusammenfassung",
+	"editor_summary_empty": "Keine Überschriften in dieser Notiz",
 
 	"image_add_description": "Beschreibung hinzufügen",
 	"image_not_found": "Bild nicht gefunden",

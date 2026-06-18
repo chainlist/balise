@@ -3,9 +3,11 @@
 	import type { Note } from '$lib/services/content/notes.svelte';
 	import { eventBus } from '$lib/services/events/event-bus';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
-	import { EllipsisVerticalIcon, Trash2Icon, PinIcon } from '@lucide/svelte';
+	import { EllipsisVerticalIcon, Trash2Icon, PinIcon, ListTreeIcon } from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
+	import NoteSummarySheet from './NoteSummarySheet.svelte';
 	import EditorView from './EditorView.svelte';
+	import type { OutlineItem } from '$lib/utils/cm';
 	import * as m from '$paraglide/messages.js';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 
@@ -34,13 +36,24 @@
 
 	let confirmOpen = $state(false);
 
-	$effect(() => eventBus.notes.deleteRequested.on((id) => {
-		if (id === note.id) confirmOpen = true;
-	}));
+	$effect(() =>
+		eventBus.notes.deleteRequested.on((id) => {
+			if (id === note.id) confirmOpen = true;
+		})
+	);
+
+	let editorView = $state<ReturnType<typeof EditorView>>();
+	let summaryOpen = $state(false);
+	let outline = $state<OutlineItem[]>([]);
+
+	function openSummary() {
+		outline = editorView?.getOutline() ?? [];
+		summaryOpen = true;
+	}
 </script>
 
-<EditorView {note} {onSave} {persistFolds}>
-	<div class="absolute top-5 right-5 z-20 -translate-y-1/2">
+<EditorView bind:this={editorView} {note} {onSave} {persistFolds}>
+	<div class="fixed top-5 right-5 z-20 flex -translate-y-1/2 items-center gap-1">
 		{#if pinnable}
 			<button
 				onclick={toggleAlwaysOnTop}
@@ -51,6 +64,13 @@
 				<PinIcon class="size-4 {alwaysOnTop ? 'fill-current' : ''}" />
 			</button>
 		{:else}
+			<button
+				onclick={openSummary}
+				aria-label={m.editor_summary()}
+				class="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+			>
+				<ListTreeIcon class="size-4" />
+			</button>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -75,5 +95,14 @@
 		{/if}
 	</div>
 </EditorView>
+
+<NoteSummarySheet
+	bind:open={summaryOpen}
+	{outline}
+	onNavigate={(pos) => {
+		summaryOpen = false;
+		editorView?.goToPosition(pos, 'start');
+	}}
+/>
 
 <NoteDeleteDialog {note} bind:open={confirmOpen} />

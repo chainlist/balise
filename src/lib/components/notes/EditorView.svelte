@@ -28,6 +28,14 @@
 	let liveContent = $state<string | null>(null);
 	let editor = $state<ReturnType<typeof Editor>>();
 
+	export function getOutline() {
+		return editor?.getOutline() ?? [];
+	}
+
+	export function goToPosition(pos: number, align: 'nearest' | 'start' = 'nearest') {
+		editor?.goToPosition(pos, align);
+	}
+
 	async function save(content: string): Promise<void> {
 		try {
 			await (onSave ? onSave(content) : notesService.update(note.id, content));
@@ -57,7 +65,7 @@
 
 <!-- Consumers remount this component per note (keyed by note.id), so the
      debounce timer, pending flush, and loaded content all belong to one note. -->
-<div class="relative h-full overflow-y-auto scrollbar-thin">
+<div class="relative scrollbar-thin h-full overflow-y-auto">
 	{#await note.content ?? notesService.loadContent(note.id) then content}
 		<EditorHeader
 			readingTime={readingTimeMinutes(liveContent ?? content)}
