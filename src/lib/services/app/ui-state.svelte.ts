@@ -3,7 +3,7 @@ import { ModalState } from './modal-state.svelte';
 import { listDesks, openDesk, renameDeskFiles } from '../platform/desk';
 import { tagsService } from '../content/tags.svelte';
 import { notesService } from '../content/notes.svelte';
-import { fsSyncService } from '../sync/fs-sync';
+import { fileMirrorService } from '../content/file-mirror';
 import { fsService } from '../platform/fs';
 import { settingsService } from '../settings/settings.svelte';
 import { noteSignals } from '../content/note-signals';
@@ -193,7 +193,7 @@ class UIState {
 		try {
 			await openDesk(desk);
 			fsService.setDesk(desk);
-			await fsSyncService.syncDeskFiles();
+			await fileMirrorService.syncDeskFiles();
 			await Promise.all([
 				tagsService.load(),
 				notesService.load(activeTag),

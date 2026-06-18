@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { devicesService, type LinkedDevice } from '$lib/services/sync/devices.svelte';
-	import { syncService } from '$lib/services/sync/sync';
+	import { pairingService } from '$lib/services/sync/pairing';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
@@ -14,7 +14,7 @@
 		device = null;
 		// Best-effort unpair on the server; the device is always removed locally.
 		try {
-			if (target.publicKey) await syncService.unpair(target.publicKey);
+			if (target.publicKey) await pairingService.unpair(target.publicKey);
 		} catch (e) {
 			toasterService.warning(m.settings_sync_unpair_warning(), errorMessage(e));
 		}

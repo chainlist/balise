@@ -4,7 +4,7 @@ import { settingsService } from '../settings/settings.svelte';
 import { toasterService } from '../app/toaster';
 import * as m from '$paraglide/messages.js';
 
-class FsSyncService {
+class FileMirrorService {
 	// Reconciles the desk's `.md` files with its SQLite DB. The whole diff +
 	// import + tag derivation + orphan write-back runs natively (see the Rust
 	// `sync_desk_files` command) so a desk switch doesn't pay a per-note round
@@ -21,4 +21,4 @@ class FsSyncService {
 	}
 }
 
-export const fsSyncService = new FsSyncService();
+export const fileMirrorService = new FileMirrorService();

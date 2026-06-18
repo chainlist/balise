@@ -1,5 +1,5 @@
-import { invoke } from '@tauri-apps/api/core';
 import { syncServerUrl } from '$lib/config/sync';
+import { getPublicKey, signChallenge } from '$lib/utils/identity';
 
 /** A paired peer as returned by the server, identified by its public key. */
 export interface Peer {
@@ -32,22 +32,14 @@ export class ClaimError extends Error {
  * Talks to the balise-sync control-plane server for device pairing. This device
  * is identified solely by its Ed25519 public key: every authenticated endpoint
  * requires a fresh signed challenge, so all calls go through
- * {@link SyncService.authedFetch}, which fetches a nonce, signs it with this
+ * {@link PairingService.authedFetch}, which fetches a nonce, signs it with this
  * device's key, and presents the key for verification. There is no server-minted
  * id to cache, so a server reset or redeploy self-heals on the next request.
  */
-class SyncService {
-	/** This device's public key, hex-encoded. Loaded once from the backend. */
-	#publicKey: string | null = null;
-
+class PairingService {
+	/** Warms this device's identity cache so the first authed request doesn't pay for it. */
 	async init(): Promise<void> {
-		this.#publicKey = await invoke<string>('public_key_hex');
-	}
-
-	/** This device's hex public key — its identity to the sync server. */
-	async publicKey(): Promise<string> {
-		if (!this.#publicKey) this.#publicKey = await invoke<string>('public_key_hex');
-		return this.#publicKey;
+		await getPublicKey();
 	}
 
 	/** Mints a short-lived, single-use pairing code for another device to claim. */
@@ -96,12 +88,12 @@ class SyncService {
 	 */
 	async #authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
 		const nonce = await this.#challenge();
-		const signature = await invoke<string>('sign_challenge', { nonce });
+		const signature = await signChallenge(nonce);
 
 		const headers = new Headers(init.headers);
 		headers.set('X-Nonce', nonce);
 		headers.set('X-Signature', signature);
-		headers.set('X-Public-Key', await this.publicKey());
+		headers.set('X-Public-Key', await getPublicKey());
 
 		return fetch(`${syncServerUrl()}${path}`, { ...init, headers });
 	}
@@ -115,4 +107,4 @@ class SyncService {
 	}
 }
 
-export const syncService = new SyncService();
+export const pairingService = new PairingService();

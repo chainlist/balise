@@ -3,8 +3,8 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import DeviceFields from './DeviceFields.svelte';
 	import { devicesService, type DeviceType } from '$lib/services/sync/devices.svelte';
-	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
-	import { syncService, ClaimError } from '$lib/services/sync/sync';
+	import { syncOrchestrator } from '$lib/services/sync/sync-orchestrator.svelte';
+	import { pairingService, ClaimError } from '$lib/services/sync/pairing';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import * as m from '$paraglide/messages.js';
@@ -43,7 +43,7 @@
 
 		isPairing = true;
 		try {
-			const peer = await syncService.claim(trimmed);
+			const peer = await pairingService.claim(trimmed);
 			const id = await deviceIdFromPublicKey(peer.publicKey);
 			devicesService.upsert({
 				id,
@@ -53,7 +53,7 @@
 				lastSeen: Date.now()
 			});
 			// Sync right away with the device we just paired.
-			void deviceSyncService.syncAll();
+			void syncOrchestrator.syncAll();
 			toasterService.success(m.settings_sync_add_accepted());
 			onpaired();
 		} catch (e) {

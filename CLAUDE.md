@@ -127,10 +127,10 @@ src/lib/
 
 ### Key Conventions
 
-- **Services are classes, utilities are plain functions.** Any module that acts as a service (has side effects, wraps other services, or is an abstraction layer) must be a class exported as a singleton (e.g. `export const fsSyncService = new FsSyncService()`). Pure utilities with no service dependencies (e.g. `desk.ts`, `notes.repo.ts`) export functions directly.
+- **Services are classes, utilities are plain functions.** Any module that acts as a service (has side effects, wraps other services, or is an abstraction layer) must be a class exported as a singleton (e.g. `export const fileMirrorService = new FileMirrorService()`). Pure utilities with no service dependencies (e.g. `desk.ts`, `notes.repo.ts`) export functions directly.
 - **Repositories** are thin SQL wrappers — no business logic, no state, no Svelte reactivity.
 - **Services** own business logic and reactive state (`$state` runes). They may import repositories and other services, but never create circular dependencies.
-- **`ui-state`** is the top-level orchestrator: it imports `notesService`, `tagsService`, and `fsSyncService`. Nothing imports `uiState` to avoid circular deps.
+- **`ui-state`** is the top-level orchestrator: it imports `notesService`, `tagsService`, and `fileMirrorService`. Nothing imports `uiState` to avoid circular deps.
 - Files are stored at `~/Documents/Balise/{deskName}/{noteId}.md` with YAML frontmatter containing note metadata.
 - **Singleton services don't need `destroy()`**. Services exported as module-level singletons live for the entire app lifetime. A `destroy()` method is dead code unless something in the app actually calls it. Don't add one speculatively.
 - **`void` on intentional fire-and-forget promises.** When a `Promise` is deliberately not awaited (e.g. `store.set()` backed by `autoSave`), prefix with `void`. A bare floating call looks like a mistake; `void` makes the intent explicit. Example: `void this.#store?.set('theme', theme)`.

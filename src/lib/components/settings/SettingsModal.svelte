@@ -15,6 +15,7 @@
 	import SyncSharingSettings from './SyncSharingSettings.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { syncFeature } from '$lib/services/sync';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -92,7 +93,7 @@
 			icon: InfoIcon,
 			component: AboutSettings
 		}
-	];
+	].filter((item) => item.id !== 'sync' || syncFeature.available);
 
 	let activeView = $state<NavView>(navItems[0] as NavView);
 	const ActiveSection = $derived(activeView.component);

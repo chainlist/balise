@@ -1,8 +1,7 @@
-import { invoke } from '@tauri-apps/api/core';
 import { syncServerUrl } from '$lib/config/sync';
 import { settingsService } from '$lib/services/settings/settings.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
-import { syncService } from '$lib/services/sync/sync';
+import { getPublicKey, signChallenge } from '$lib/utils/identity';
 import { startSync } from '$lib/utils/sync';
 import type { SignalMessage } from '$lib/models/sync';
 
@@ -18,7 +17,7 @@ const RECONNECT_MAX_MS = 30_000;
  * and signals `ready` when a peer wakes us, and forwards each `peer-ready` reply
  * to subscribers so the dialer reaches a peer the moment its endpoint is up.
  */
-class SyncConnectionService {
+class SignalingService {
 	#socket: WebSocket | null = null;
 	#reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	#reconnectDelay = RECONNECT_MIN_MS;
@@ -125,7 +124,7 @@ class SyncConnectionService {
 				break;
 			case 'wake':
 				// A paired peer wants to sync. The orchestrator brings up our endpoint
-				// and decides who dials (see DeviceSyncService). The server only wakes
+				// and decides who dials (see SyncOrchestrator). The server only wakes
 				// paired peers and the accept loop gates the exchange, so this is safe.
 				for (const handler of this.#wakeHandlers) handler(message.from);
 				break;
@@ -141,8 +140,8 @@ class SyncConnectionService {
 	/** Sign the server's nonce with this device's key and send the auth message. */
 	async #authenticate(socket: WebSocket, nonce: string): Promise<void> {
 		try {
-			const publicKey = await syncService.publicKey();
-			const signature = await invoke<string>('sign_challenge', { nonce });
+			const publicKey = await getPublicKey();
+			const signature = await signChallenge(nonce);
 			if (socket.readyState === WebSocket.OPEN) {
 				socket.send(JSON.stringify({ type: 'auth', publicKey, signature }));
 			}
@@ -177,4 +176,4 @@ class SyncConnectionService {
 	}
 }
 
-export const syncConnectionService = new SyncConnectionService();
+export const signalingService = new SignalingService();

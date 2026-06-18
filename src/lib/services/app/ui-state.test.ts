@@ -22,8 +22,8 @@ vi.mock('$lib/services/content/tags.svelte', () => ({
 		loadRelated: vi.fn().mockResolvedValue(undefined)
 	}
 }));
-vi.mock('$lib/services/sync/fs-sync', () => ({
-	fsSyncService: {
+vi.mock('$lib/services/content/file-mirror', () => ({
+	fileMirrorService: {
 		syncDeskFiles: vi.fn().mockResolvedValue(undefined)
 	}
 }));
@@ -47,7 +47,7 @@ import { noteSignals } from '$lib/services/content/note-signals';
 import { openDesk } from '$lib/services/platform/desk';
 import { notesService } from '$lib/services/content/notes.svelte';
 import { tagsService } from '$lib/services/content/tags.svelte';
-import { fsSyncService } from '$lib/services/sync/fs-sync';
+import { fileMirrorService } from '$lib/services/content/file-mirror';
 import { fsService } from '$lib/services/platform/fs';
 
 // Initialise the store once so the #store field is non-null,
@@ -253,7 +253,7 @@ describe('switchDesk', () => {
 	});
 
 	it('keeps activeDesk, activeTag and composedTags when the switch fails', async () => {
-		vi.mocked(fsSyncService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
+		vi.mocked(fileMirrorService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
 		await expect(uiState.switchDesk('Work')).rejects.toThrow('disk');
 		expect(uiState.activeDesk).toBe('Personal');
 		expect(uiState.activeTag).toBe('work');
@@ -261,13 +261,13 @@ describe('switchDesk', () => {
 	});
 
 	it('does not persist the new desk when the switch fails', async () => {
-		vi.mocked(fsSyncService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
+		vi.mocked(fileMirrorService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
 		await expect(uiState.switchDesk('Work')).rejects.toThrow();
 		expect(mockStore.set).not.toHaveBeenCalledWith('activeDesk', 'Work');
 	});
 
 	it('reopens the previous desk when the switch fails', async () => {
-		vi.mocked(fsSyncService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
+		vi.mocked(fileMirrorService.syncDeskFiles).mockRejectedValueOnce(new Error('disk'));
 		await expect(uiState.switchDesk('Work')).rejects.toThrow();
 		expect(openDesk).toHaveBeenLastCalledWith('Personal');
 		expect(fsService.setDesk).toHaveBeenLastCalledWith('Personal');

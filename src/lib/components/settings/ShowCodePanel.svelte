@@ -8,8 +8,8 @@
 		type LinkedDevice,
 		type DeviceType
 	} from '$lib/services/sync/devices.svelte';
-	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
-	import { syncService } from '$lib/services/sync/sync';
+	import { syncOrchestrator } from '$lib/services/sync/sync-orchestrator.svelte';
+	import { pairingService } from '$lib/services/sync/pairing';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import * as m from '$paraglide/messages.js';
@@ -50,7 +50,7 @@
 			return;
 		}
 		try {
-			const peers = await syncService.getPeers();
+			const peers = await pairingService.getPeers();
 			const fresh = peers.filter((p) => !baseline.has(p.publicKey));
 			if (fresh.length === 0) return;
 
@@ -71,7 +71,7 @@
 				firstPaired ??= device;
 			}
 			// Sync right away with the device we just paired.
-			void deviceSyncService.syncAll();
+			void syncOrchestrator.syncAll();
 			// Hold on a naming step so the new device can be named here.
 			paired = firstPaired;
 		} catch {
@@ -93,9 +93,9 @@
 		expired = false;
 		generating = true;
 		try {
-			const peers = await syncService.getPeers();
+			const peers = await pairingService.getPeers();
 			baseline = new Set(peers.map((p) => p.publicKey));
-			const pairing = await syncService.createPairingCode();
+			const pairing = await pairingService.createPairingCode();
 			code = pairing.code;
 			expiresAt = pairing.expiresAt;
 			stopPolling();

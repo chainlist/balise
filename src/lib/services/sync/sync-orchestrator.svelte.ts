@@ -4,7 +4,7 @@ import { deviceIdFromPublicKey, getDeviceId } from '$lib/utils/device-id';
 import { tagsService } from '$lib/services/content/tags.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { settingsService } from '$lib/services/settings/settings.svelte';
-import { syncConnectionService } from '$lib/services/sync/sync-connection.svelte';
+import { signalingService } from '$lib/services/sync/signaling.svelte';
 import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { fsService } from '$lib/services/platform/fs';
 import { noteSignals } from '$lib/services/content/note-signals';
@@ -36,7 +36,7 @@ const MAX_RETRIES = 5;
  * trust/share config the backend needs, kicks off dial cycles on a timer, and
  * reacts to `sync-result` events to refresh the active desk and desk list.
  */
-class DeviceSyncService {
+class SyncOrchestrator {
 	syncing = $state(false);
 
 	#unlisten: UnlistenFn | null = null;
@@ -63,8 +63,8 @@ class DeviceSyncService {
 			this.#onResult(event.payload)
 		);
 		this.#mirrorConfig();
-		syncConnectionService.onPeerReady((peerKey) => void this.#onPeerReady(peerKey));
-		syncConnectionService.onWake((initiatorKey) => void this.#onWake(initiatorKey));
+		signalingService.onPeerReady((peerKey) => void this.#onPeerReady(peerKey));
+		signalingService.onWake((initiatorKey) => void this.#onWake(initiatorKey));
 		noteSignals.onLocalChange(() => this.#onLocalChange());
 	}
 
@@ -163,7 +163,7 @@ class DeviceSyncService {
 	 */
 	async syncAll(notify = false): Promise<boolean> {
 		try {
-			const sent = await syncConnectionService.requestSync();
+			const sent = await signalingService.requestSync();
 			if (!sent && notify) toasterService.warning(m.settings_sync_start_error());
 			return sent;
 		} catch (e) {
@@ -196,7 +196,7 @@ class DeviceSyncService {
 				deviceIdFromPublicKey(initiatorKey)
 			]);
 			if (localId < initiatorId) await this.#dial(initiatorId);
-			else syncConnectionService.sendReady(initiatorKey);
+			else signalingService.sendReady(initiatorKey);
 		} catch (e) {
 			console.warn('sync wake failed:', e);
 		}
@@ -227,4 +227,4 @@ class DeviceSyncService {
 	}
 }
 
-export const deviceSyncService = new DeviceSyncService();
+export const syncOrchestrator = new SyncOrchestrator();

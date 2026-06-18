@@ -11,7 +11,7 @@
 	} from '@lucide/svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { devicesService, type LinkedDevice } from '$lib/services/sync/devices.svelte';
-	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
+	import { syncOrchestrator } from '$lib/services/sync/sync-orchestrator.svelte';
 	import { formatDeviceId } from '$lib/utils/device-id';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import AddDeviceDialog from './AddDeviceDialog.svelte';
@@ -47,10 +47,10 @@
 			<Button
 				size="sm"
 				variant="outline"
-				disabled={devicesService.linked.length === 0 || deviceSyncService.syncing}
-				onclick={() => void deviceSyncService.syncAll(true)}
+				disabled={devicesService.linked.length === 0 || syncOrchestrator.syncing}
+				onclick={() => void syncOrchestrator.syncAll(true)}
 			>
-				<RefreshCwIcon size="15" class={deviceSyncService.syncing ? 'animate-spin' : ''} />
+				<RefreshCwIcon size="15" class={syncOrchestrator.syncing ? 'animate-spin' : ''} />
 				{m.settings_sync_now()}
 			</Button>
 			<Button size="sm" onclick={() => (addOpen = true)}>
