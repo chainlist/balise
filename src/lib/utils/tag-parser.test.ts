@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseAllHashtags } from './tag-parser';
+import { parseAllHashtags, groupHashtagOccurrences } from './tag-parser';
 
 describe('parseAllHashtags', () => {
 	it('returns empty array for empty string', () => {
@@ -60,5 +60,31 @@ describe('parseAllHashtags', () => {
 		const result = parseAllHashtags('note #end');
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe('end');
+	});
+});
+
+describe('groupHashtagOccurrences', () => {
+	it('returns empty array when no hashtags are present', () => {
+		expect(groupHashtagOccurrences('plain text')).toEqual([]);
+	});
+
+	it('groups every occurrence of a tag with its offsets', () => {
+		const result = groupHashtagOccurrences('#foo bar #foo baz #foo');
+		expect(result).toEqual([{ name: 'foo', positions: [0, 9, 18] }]);
+	});
+
+	it('keeps groups in order of first appearance', () => {
+		const result = groupHashtagOccurrences('#beta #alpha #beta');
+		expect(result.map((g) => g.name)).toEqual(['beta', 'alpha']);
+	});
+
+	it('merges occurrences that differ only in case, keeping first-seen casing', () => {
+		const result = groupHashtagOccurrences('#Foo and #foo');
+		expect(result).toEqual([{ name: 'Foo', positions: [0, 9] }]);
+	});
+
+	it('groups tags with the same name regardless of parameter', () => {
+		const result = groupHashtagOccurrences('#tag(a) #tag(b)');
+		expect(result).toEqual([{ name: 'tag', positions: [0, 8] }]);
 	});
 });

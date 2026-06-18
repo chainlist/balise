@@ -95,6 +95,16 @@
 		}
 	});
 
+	export function goToPosition(pos: number) {
+		const view = editorView;
+		if (!view) return;
+		view.focus();
+		view.dispatch({
+			selection: { anchor: pos },
+			effects: EditorView.scrollIntoView(pos, { y: 'nearest', yMargin: 48 })
+		});
+	}
+
 	function mount(container: HTMLDivElement) {
 		return untrack(() => {
 			const view = new EditorView({

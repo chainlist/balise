@@ -244,6 +244,8 @@
 
 	"editor_placeholder": "Écrivez quelque chose, ou tapez « / » pour les commandes",
 	"editor_reading_time": "{minutes} min de lecture",
+	"editor_tag_prev_occurrence": "Occurrence précédente",
+	"editor_tag_next_occurrence": "Occurrence suivante",
 
 	"image_add_description": "Ajouter une description",
 	"image_not_found": "Image introuvable",
