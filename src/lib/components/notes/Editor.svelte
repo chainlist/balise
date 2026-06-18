@@ -36,12 +36,14 @@
 		mdImagePlugin,
 		mdTagCompletion,
 		spaceRequiredHeadings,
+		getHeadingOutline,
 		noteEditorTheme,
 		readFolds,
 		restoreFolds,
 		foldMarkerDOM,
 		type MarkMode,
-		type FoldRange
+		type FoldRange,
+		type OutlineItem
 	} from '$lib/utils/cm';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 
@@ -95,13 +97,17 @@
 		}
 	});
 
-	export function goToPosition(pos: number) {
+	export function getOutline(): OutlineItem[] {
+		return editorView ? getHeadingOutline(editorView.state) : [];
+	}
+
+	export function goToPosition(pos: number, align: 'nearest' | 'start' = 'nearest') {
 		const view = editorView;
 		if (!view) return;
 		view.focus();
 		view.dispatch({
 			selection: { anchor: pos },
-			effects: EditorView.scrollIntoView(pos, { y: 'nearest', yMargin: 48 })
+			effects: EditorView.scrollIntoView(pos, { y: align, yMargin: 48 })
 		});
 	}
 
@@ -119,6 +125,10 @@
 						extensions: [
 							GFM,
 							spaceRequiredHeadings,
+							// Drop Setext headings so `---` directly under a line of text is
+							// parsed as a HorizontalRule (separator) instead of a hidden
+							// heading underline. This editor only uses ATX (`#`) headings.
+							{ remove: ['SetextHeading'] },
 							{ props: [foldNodeProp.add({ Paragraph: () => null })] }
 						],
 						codeLanguages: languages

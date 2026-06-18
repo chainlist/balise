@@ -15,6 +15,7 @@
 	"action_save": "Guardar",
 	"action_saving": "Guardando…",
 	"action_merge": "Fusionar",
+	"action_close": "Cerrar",
 
 	"error_heading": "Error",
 	"loading": "Cargando...",
@@ -246,6 +247,8 @@
 	"editor_reading_time": "{minutes} min de lectura",
 	"editor_tag_prev_occurrence": "Aparición anterior",
 	"editor_tag_next_occurrence": "Aparición siguiente",
+	"editor_summary": "Resumen",
+	"editor_summary_empty": "No hay títulos en esta nota",
 
 	"image_add_description": "Añadir descripción",
 	"image_not_found": "Imagen no encontrada",

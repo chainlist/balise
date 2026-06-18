@@ -15,6 +15,7 @@
 	"action_save": "Enregistrer",
 	"action_saving": "Enregistrement…",
 	"action_merge": "Fusionner",
+	"action_close": "Fermer",
 
 	"error_heading": "Erreur",
 	"loading": "Chargement...",
@@ -246,6 +247,8 @@
 	"editor_reading_time": "{minutes} min de lecture",
 	"editor_tag_prev_occurrence": "Occurrence précédente",
 	"editor_tag_next_occurrence": "Occurrence suivante",
+	"editor_summary": "Sommaire",
+	"editor_summary_empty": "Aucun titre dans cette note",
 
 	"image_add_description": "Ajouter une description",
 	"image_not_found": "Image introuvable",

@@ -15,6 +15,7 @@
 	"action_save": "Save",
 	"action_saving": "Saving…",
 	"action_merge": "Merge",
+	"action_close": "Close",
 
 	"error_heading": "Error",
 	"loading": "Loading...",
@@ -246,6 +247,8 @@
 	"editor_reading_time": "{minutes} min read",
 	"editor_tag_prev_occurrence": "Previous occurrence",
 	"editor_tag_next_occurrence": "Next occurrence",
+	"editor_summary": "Summary",
+	"editor_summary_empty": "No headings in this note",
 
 	"image_add_description": "Add description",
 	"image_not_found": "Image not found",
