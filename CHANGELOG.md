@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.1](https://github.com/chainlist/balise/compare/v0.29.0...v0.29.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* **editor:** Bad h1 formatting ([eb78021](https://github.com/chainlist/balise/commit/eb78021ef5029356e08328d372101bf1b5500423))
+
 ## [0.29.0](https://github.com/chainlist/balise/compare/v0.28.0...v0.29.0) (2026-06-17)
 
 
