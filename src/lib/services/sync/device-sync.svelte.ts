@@ -7,7 +7,7 @@ import { settingsService } from '$lib/services/settings/settings.svelte';
 import { syncConnectionService } from '$lib/services/sync/sync-connection.svelte';
 import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { fsService } from '$lib/services/platform/fs';
-import { noteSignals } from '$lib/services/content/note-signals';
+import { eventBus } from '$lib/services/events/event-bus';
 import * as m from '$paraglide/messages.js';
 
 /** `sync-result` event payload: what one peer's protocol run changed locally. */
@@ -65,7 +65,7 @@ class DeviceSyncService {
 		this.#mirrorConfig();
 		syncConnectionService.onPeerReady((peerKey) => void this.#onPeerReady(peerKey));
 		syncConnectionService.onWake((initiatorKey) => void this.#onWake(initiatorKey));
-		noteSignals.onLocalChange(() => this.#onLocalChange());
+		eventBus.sync.localChange.on(() => this.#onLocalChange());
 	}
 
 	/**
@@ -95,7 +95,7 @@ class DeviceSyncService {
 		const device = devicesService.linked.find((d) => d.id === result.deviceId);
 		if (device) devicesService.upsert({ ...device, lastSeen: Date.now() });
 
-		if (result.createdDesk) noteSignals.signalDesksChanged();
+		if (result.createdDesk) eventBus.desks.changed.emit();
 		if (result.changedDesks.includes(fsService.currentDesk)) {
 			void this.#refreshActiveDesk();
 		}
@@ -103,7 +103,7 @@ class DeviceSyncService {
 
 	async #refreshActiveDesk(): Promise<void> {
 		await tagsService.load();
-		noteSignals.signalNotesSynced();
+		eventBus.sync.synced.emit();
 	}
 
 	/**

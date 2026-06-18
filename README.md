@@ -1,42 +1,49 @@
-# sv
+# Balise
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A Tauri desktop app for managing markdown notes across multiple workspaces ("desks"). Notes live in a per-desk SQLite database and are mirrored to disk as `.md` files with YAML frontmatter, so they stay plain files you own. Tags are extracted from note content via `#hashtag` syntax. Includes keyboard shortcuts, theming, multiple desks, and optional peer-to-peer sync between your own devices.
 
-## Creating a project
+## Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Frontend:** SvelteKit (client-only, SSR disabled) with Svelte 5 runes
+- **Desktop shell:** Tauri (Rust), using the `fs`, `sql`, and `store` plugins
+- **Database:** SQLite via `@tauri-apps/plugin-sql`, one database per desk
+- **Editor:** CodeMirror 6
+- **Styling:** Tailwind CSS + shadcn-svelte
 
-```sh
-# create a new project
-npx sv create my-app
-```
+## Getting started
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-pnpm dlx sv@0.15.3 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:static" mcp="ide:claude-code+setup:remote" --install pnpm fil
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Install dependencies:
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
 ```
 
-## Building
-
-To create a production version of your app:
+Run the desktop app in development:
 
 ```sh
-npm run build
+pnpm tauri dev
 ```
 
-You can preview the production build with `npm run preview`.
+To run just the frontend in a browser (no Tauri shell):
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+pnpm dev
+```
+
+## Scripts
+
+- `pnpm test` runs the unit suite once (`pnpm test:unit` to watch)
+- `pnpm check` type-checks with `svelte-check`
+- `pnpm lint` / `pnpm format` run Prettier + ESLint
+- `pnpm tauri build` produces a packaged desktop build
+
+## Architecture
+
+Code is layered to keep persistence, business logic, and UI separate:
+
+- **`repositories/`** are thin SQL and file-IO wrappers with no state or business logic.
+- **`services/`** own business logic and reactive state (`$state` runes), exported as singletons and grouped by domain (`content/`, `sync/`, `app/`, `settings/`, `platform/`).
+- **`services/events/`** is a small typed pub/sub bus (`eventBus`) built on a `Signal<T>` primitive. Low-level producers announce events (a note deleted, a local change, a sync) and higher-level consumers subscribe. This inverts dependencies so, for example, `notesService` never has to import `uiState`.
+- **`components/`** are kept small and single-responsibility.
+
+Notes are stored at `~/Documents/Balise/{deskName}/{noteId}.md`.

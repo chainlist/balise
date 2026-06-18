@@ -1,7 +1,7 @@
 import type { ShortcutDefinition } from '$lib/services/platform/shortcuts.svelte';
 import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
 import { uiState } from '$lib/services/app/ui-state.svelte';
-import { noteSignals } from '$lib/services/content/note-signals';
+import { eventBus } from '$lib/services/events/event-bus';
 import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -52,7 +52,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		run: async () => {
 			try {
 				const id = await notesService.create(newNoteContent(uiState.activeTag));
-				noteSignals.signalSelectNote(id);
+				eventBus.notes.select.emit(id);
 			} catch (e) {
 				toasterService.error(m.note_create_error_failed(), errorMessage(e));
 			}
@@ -64,7 +64,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		description: m.shortcut_delete_note_desc,
 		defaultBinding: '$mod+Delete',
 		run: () => {
-			if (uiState.activeNoteId) noteSignals.signalDeleteNote(uiState.activeNoteId);
+			if (uiState.activeNoteId) eventBus.notes.deleteRequested.emit(uiState.activeNoteId);
 		}
 	},
 	{
@@ -75,7 +75,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		run: () => {
 			const notes = notesService.notes;
 			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
-			if (idx > 0) noteSignals.signalSelectNote(notes[idx - 1].id);
+			if (idx > 0) eventBus.notes.select.emit(notes[idx - 1].id);
 		}
 	},
 	{
@@ -86,7 +86,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		run: () => {
 			const notes = notesService.notes;
 			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
-			if (idx !== -1 && idx < notes.length - 1) noteSignals.signalSelectNote(notes[idx + 1].id);
+			if (idx !== -1 && idx < notes.length - 1) eventBus.notes.select.emit(notes[idx + 1].id);
 		}
 	},
 	{

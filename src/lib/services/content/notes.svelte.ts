@@ -1,6 +1,6 @@
 ﻿import { getDB } from '$lib/utils/db';
 import { tagsService, extractTags, UNTAGGED_FILTER } from '$lib/services/content/tags.svelte';
-import { noteSignals } from '$lib/services/content/note-signals';
+import { eventBus } from '$lib/services/events/event-bus';
 import { extractTitle, notePreview } from '$lib/utils/note-utils';
 import { toSqliteUtc } from '$lib/utils/time';
 import { writeNoteFile, deleteNoteFile } from '$lib/repositories/notes.fs.repo';
@@ -97,7 +97,7 @@ class NotesService {
 			this.notes = [note, ...this.notes];
 			await writeNoteFile({ ...note, content });
 		}
-		noteSignals.signalLocalChange();
+		eventBus.sync.localChange.emit();
 		return id;
 	}
 
@@ -116,7 +116,7 @@ class NotesService {
 			const note = await queryNoteById(db, id);
 			if (note) await writeNoteFile({ ...note, content });
 		}
-		noteSignals.signalLocalChange();
+		eventBus.sync.localChange.emit();
 	}
 
 	async queryForDate(localDate: Date): Promise<Note[]> {
@@ -139,7 +139,7 @@ class NotesService {
 		await tagsService.load();
 		const note = await queryNoteById(db, id);
 		if (note) await writeNoteFile({ ...note, content });
-		noteSignals.signalLocalChange();
+		eventBus.sync.localChange.emit();
 	}
 
 	async loadContent(id: string): Promise<string> {
@@ -154,8 +154,8 @@ class NotesService {
 		await deleteNoteById(db, id);
 		this.notes = this.notes.filter((n) => n.id !== id);
 		await Promise.all([tagsService.load(), deleteNoteFile(id)]);
-		noteSignals.signalNoteDeleted(id);
-		noteSignals.signalLocalChange();
+		eventBus.notes.deleted.emit(id);
+		eventBus.sync.localChange.emit();
 	}
 }
 

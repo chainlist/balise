@@ -5,7 +5,7 @@
 	import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { tagsService } from '$lib/services/content/tags.svelte';
-	import { noteSignals } from '$lib/services/content/note-signals';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import TagName from '$lib/components/TagName.svelte';
 	import NoteCard from '$lib/components/sidebar/NoteCard.svelte';
@@ -40,7 +40,7 @@
 	}
 
 	$effect(() =>
-		noteSignals.onSelectNote(async (id) => {
+		eventBus.notes.select.on(async (id) => {
 			uiState.setActiveNote(id);
 			if (page.url.pathname !== '/') await goto(resolve('/'));
 		})

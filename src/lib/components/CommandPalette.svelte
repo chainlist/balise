@@ -6,7 +6,7 @@
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import { searchNotes } from '$lib/repositories/notes.repo';
 	import type { NoteSearchResult } from '$lib/models/note';
-	import { noteSignals } from '$lib/services/content/note-signals';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import { getDB } from '$lib/utils/db';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -62,7 +62,7 @@
 		uiState.modal.isCommandPaletteOpen = false;
 		await uiState.setActiveTag(null);
 		await goto(resolve('/'));
-		noteSignals.signalSelectNote(id);
+		eventBus.notes.select.emit(id);
 	}
 
 	function selectTag(tag: string) {
