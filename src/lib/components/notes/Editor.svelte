@@ -125,6 +125,10 @@
 						extensions: [
 							GFM,
 							spaceRequiredHeadings,
+							// Drop Setext headings so `---` directly under a line of text is
+							// parsed as a HorizontalRule (separator) instead of a hidden
+							// heading underline. This editor only uses ATX (`#`) headings.
+							{ remove: ['SetextHeading'] },
 							{ props: [foldNodeProp.add({ Paragraph: () => null })] }
 						],
 						codeLanguages: languages

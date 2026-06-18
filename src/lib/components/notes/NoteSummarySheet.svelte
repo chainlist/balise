@@ -19,7 +19,7 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="right">
+	<Sheet.Content side="right" class="frost-surface bg-transparent">
 		<Sheet.Header class="border-b border-border">
 			<Sheet.Title>{m.editor_summary()}</Sheet.Title>
 		</Sheet.Header>

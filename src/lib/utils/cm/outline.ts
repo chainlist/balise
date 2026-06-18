@@ -10,14 +10,13 @@ export interface OutlineItem {
 	from: number;
 }
 
-// ATXHeading1..6 and SetextHeading1..2 are the heading nodes Lezer produces.
-const HEADING_NODE = /^(?:ATXHeading|SetextHeading)([1-6])$/;
+// The editor uses ATX (`#`) headings only (Setext is disabled in Editor.svelte).
+const HEADING_NODE = /^ATXHeading([1-6])$/;
 
-// Strip the `#` marks from the first line. The AST already guarantees this is a
-// heading, so the regexes only need to remove the markers, not validate.
+// Strip the `#` marks. The AST already guarantees this is a heading, so the
+// regexes only need to remove the markers, not validate.
 function headingText(raw: string): string {
-	const firstLine = raw.split('\n', 1)[0];
-	return firstLine
+	return raw
 		.replace(/^#{1,6}\s+/, '')
 		.replace(/\s+#+\s*$/, '')
 		.trim();

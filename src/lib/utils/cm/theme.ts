@@ -181,7 +181,7 @@ export const noteEditorTheme = EditorView.theme({
 		display: 'inline-block',
 		width: '100%',
 		height: '1px',
-		background: 'var(--border)',
+		background: 'var(--outline-variant)',
 		verticalAlign: 'middle'
 	},
 	'.cm-widgetBuffer': { lineHeight: '0' },
