@@ -4,6 +4,7 @@
 	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import { readingTimeMinutes } from '$lib/utils/note-utils';
+	import { groupHashtagOccurrences } from '$lib/utils/tag-parser';
 	import { parseDbTimestamp } from '$lib/utils/time';
 	import Editor from './Editor.svelte';
 	import EditorHeader from './EditorHeader.svelte';
@@ -25,6 +26,7 @@
 	let saveTimer: ReturnType<typeof setTimeout>;
 	let pending: string | null = null;
 	let liveContent = $state<string | null>(null);
+	let editor = $state<ReturnType<typeof Editor>>();
 
 	async function save(content: string): Promise<void> {
 		try {
@@ -60,8 +62,11 @@
 		<EditorHeader
 			readingTime={readingTimeMinutes(liveContent ?? content)}
 			date={new Date(parseDbTimestamp(note.created_at))}
+			tags={groupHashtagOccurrences(liveContent ?? content)}
+			onNavigate={(pos) => editor?.goToPosition(pos)}
 		/>
 		<Editor
+			bind:this={editor}
 			{content}
 			autofocus
 			initialFolds={persistFolds ? uiState.getNoteFolds(note.id) : []}

@@ -23,3 +23,25 @@ export function parseAllHashtags(text: string): HashtagMatch[] {
 	}
 	return results;
 }
+
+export interface TagOccurrences {
+	name: string;
+	/** Document offsets of every occurrence, in document order. */
+	positions: number[];
+}
+
+/**
+ * Group every hashtag in `text` by name (case-insensitive, first-seen casing
+ * kept for display), in order of first appearance. Each group lists the offsets
+ * of all its occurrences so the editor header can cycle through them.
+ */
+export function groupHashtagOccurrences(text: string): TagOccurrences[] {
+	const groups = new Map<string, TagOccurrences>();
+	for (const { name, index } of parseAllHashtags(text)) {
+		const key = name.toLowerCase();
+		const existing = groups.get(key);
+		if (existing) existing.positions.push(index);
+		else groups.set(key, { name, positions: [index] });
+	}
+	return [...groups.values()];
+}

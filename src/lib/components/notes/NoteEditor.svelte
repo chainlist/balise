@@ -40,7 +40,7 @@
 </script>
 
 <EditorView {note} {onSave} {persistFolds}>
-	<div class="absolute top-5 right-5 -translate-y-1/2">
+	<div class="absolute top-5 right-5 z-20 -translate-y-1/2">
 		{#if pinnable}
 			<button
 				onclick={toggleAlwaysOnTop}

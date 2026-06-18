@@ -244,6 +244,8 @@
 
 	"editor_placeholder": "Schreibe etwas oder tippe „/“ für Befehle",
 	"editor_reading_time": "{minutes} Min. Lesezeit",
+	"editor_tag_prev_occurrence": "Vorheriges Vorkommen",
+	"editor_tag_next_occurrence": "Nächstes Vorkommen",
 
 	"image_add_description": "Beschreibung hinzufügen",
 	"image_not_found": "Bild nicht gefunden",
