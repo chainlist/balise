@@ -4,17 +4,23 @@ import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { makePlugin, hideMark, isMarkRevealed, type MarkMode } from './shared';
 
+// H1 gets a full-width underline on the line itself, not on the heading-text
+// span: a 100%-wide span would wrap below the `#` mark when the mark is revealed.
+const h1Line = Decoration.line({ class: 'cm-md-h1-line' });
+
 function buildHeaderDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {
-		if (mode === 'always') return Decoration.none;
-
 		const { state } = view;
 		const cursorPos = state.selection.main.head;
 		const ranges: Range<Decoration>[] = [];
 
 		syntaxTree(state).iterate({
 			enter(node) {
-				if (node.name !== 'HeaderMark') return;
+				if (node.name === 'ATXHeading1') {
+					ranges.push(h1Line.range(state.doc.lineAt(node.from).from));
+					return;
+				}
+				if (node.name !== 'HeaderMark' || mode === 'always') return;
 				const parent = node.node.parent;
 				if (parent && isMarkRevealed(mode, parent.from, parent.to, cursorPos)) return;
 
@@ -24,7 +30,7 @@ function buildHeaderDecos(mode: MarkMode) {
 			}
 		});
 
-		return Decoration.set(ranges);
+		return Decoration.set(ranges, true);
 	};
 }
 

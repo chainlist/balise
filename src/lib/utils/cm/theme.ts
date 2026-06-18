@@ -12,11 +12,24 @@ const mdHighlightStyle = HighlightStyle.define([
 	{ tag: t.heading3, class: 'cm-md-h3' },
 
 	// Code tokens (scoped to fenced blocks via the `.cm-md-codeblock` line class in CSS).
-	{ tag: [t.keyword, t.modifier, t.controlKeyword, t.operatorKeyword, t.definitionKeyword, t.moduleKeyword], class: 'cm-tok-keyword' },
+	{
+		tag: [
+			t.keyword,
+			t.modifier,
+			t.controlKeyword,
+			t.operatorKeyword,
+			t.definitionKeyword,
+			t.moduleKeyword
+		],
+		class: 'cm-tok-keyword'
+	},
 	{ tag: [t.string, t.special(t.string), t.regexp, t.character], class: 'cm-tok-string' },
 	{ tag: [t.comment, t.lineComment, t.blockComment, t.docComment], class: 'cm-tok-comment' },
 	{ tag: [t.number, t.bool, t.null, t.atom, t.literal], class: 'cm-tok-number' },
-	{ tag: [t.function(t.variableName), t.function(t.propertyName), t.macroName, t.labelName], class: 'cm-tok-function' },
+	{
+		tag: [t.function(t.variableName), t.function(t.propertyName), t.macroName, t.labelName],
+		class: 'cm-tok-function'
+	},
 	{ tag: [t.typeName, t.className, t.namespace, t.tagName], class: 'cm-tok-type' },
 	{ tag: [t.propertyName, t.attributeName], class: 'cm-tok-property' },
 	{ tag: [t.escape, t.meta, t.documentMeta, t.processingInstruction], class: 'cm-tok-meta' }
@@ -129,11 +142,12 @@ export const noteEditorTheme = EditorView.theme({
 		fontSize: '1.65em',
 		fontWeight: '700',
 		lineHeight: '1.2',
-		color: 'var(--primary)',
-		border: '1px solid transparent',
-		borderBottomColor: 'var(--primary)',
-		width: '100%',
-		display: 'inline-block'
+		color: 'var(--primary)'
+	},
+	// Full-width title underline lives on the line (see headerPlugin), so the `#`
+	// mark and the heading text stay on one line.
+	'.cm-md-h1-line': {
+		borderBottom: '1px solid var(--primary)'
 	},
 	'.cm-md-h2': {
 		fontSize: '1.5em',
