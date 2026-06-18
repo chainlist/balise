@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Note } from '$lib/services/content/notes.svelte';
-	import { noteSignals } from '$lib/services/content/note-signals';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon, PinIcon } from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
@@ -34,7 +34,7 @@
 
 	let confirmOpen = $state(false);
 
-	$effect(() => noteSignals.onDeleteNote((id) => {
+	$effect(() => eventBus.notes.deleteRequested.on((id) => {
 		if (id === note.id) confirmOpen = true;
 	}));
 </script>

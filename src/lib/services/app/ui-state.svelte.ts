@@ -6,7 +6,7 @@ import { notesService } from '../content/notes.svelte';
 import { fsSyncService } from '../sync/fs-sync';
 import { fsService } from '../platform/fs';
 import { settingsService } from '../settings/settings.svelte';
-import { noteSignals } from '../content/note-signals';
+import { eventBus } from '../events/event-bus';
 import { resolveStorePath } from '../platform/store-path';
 import type { FoldRange } from '$lib/utils/cm';
 
@@ -70,11 +70,11 @@ class UIState {
 		}
 
 		// Reload the visible list when a background device sync applies changes.
-		noteSignals.onNotesSynced(() => void this.#reloadView());
+		eventBus.sync.synced.on(() => void this.#reloadView());
 		// Surface desks a background sync materialised from a peer.
-		noteSignals.onDesksChanged(() => void this.#mergeDesksFromDisk());
+		eventBus.desks.changed.on(() => void this.#mergeDesksFromDisk());
 		// Drop a deleted note's remembered folds so the store can't grow forever.
-		noteSignals.onNoteDeleted((id) => this.setNoteFolds(id, []));
+		eventBus.notes.deleted.on((id) => this.setNoteFolds(id, []));
 	}
 
 	getNoteFolds(id: string): FoldRange[] {

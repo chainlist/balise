@@ -43,7 +43,7 @@ vi.mock('$lib/services/settings/settings.svelte', () => ({
 }));
 
 import { uiState } from './ui-state.svelte';
-import { noteSignals } from '$lib/services/content/note-signals';
+import { eventBus } from '$lib/services/events/event-bus';
 import { openDesk } from '$lib/services/platform/desk';
 import { notesService } from '$lib/services/content/notes.svelte';
 import { tagsService } from '$lib/services/content/tags.svelte';
@@ -302,7 +302,7 @@ describe('noteFolds', () => {
 
 	it('prunes remembered folds when a note is deleted', () => {
 		uiState.setNoteFolds('note-a', [{ from: 0, to: 5 }]);
-		noteSignals.signalNoteDeleted('note-a');
+		eventBus.notes.deleted.emit('note-a');
 		expect(uiState.getNoteFolds('note-a')).toEqual([]);
 	});
 });

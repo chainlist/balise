@@ -111,6 +111,9 @@ src/lib/
 │   ├── settings.svelte.ts  # User settings
 │   ├── shortcuts.svelte.ts # Keyboard shortcut registry
 │   ├── fs-sync.ts          # Filesystem ↔ DB sync for note files
+│   ├── events/             # App-wide typed pub/sub (cross-layer events)
+│   │   ├── signal.ts          # Generic Signal<T> channel primitive
+│   │   └── event-bus.ts       # eventBus singleton (notes / sync / desks domains)
 │   └── desk.ts             # Desk folder and DB lifecycle (no state)
 └── utils/
     ├── db.ts           # DB connection singleton
@@ -135,7 +138,7 @@ src/lib/
 - **Singleton services don't need `destroy()`**. Services exported as module-level singletons live for the entire app lifetime. A `destroy()` method is dead code unless something in the app actually calls it. Don't add one speculatively.
 - **`void` on intentional fire-and-forget promises.** When a `Promise` is deliberately not awaited (e.g. `store.set()` backed by `autoSave`), prefix with `void`. A bare floating call looks like a mistake; `void` makes the intent explicit. Example: `void this.#store?.set('theme', theme)`.
 - **`as const` over `enum` for named string constants.** When values are strings used in comparisons, SQL, or serialized formats, prefer `as const` objects. They emit no JS, values are the literal strings (no runtime indirection), and they work with `Object.values()` / `keyof typeof`.
-- **Observer/pub-sub: `Set<Handler>`, return the unsubscriber.** Use a `Set` instead of an array for event handlers. Return the unsubscribe function directly from the subscribe call. Avoids O(n) splice, eliminates storing the handler reference at the call site, and deduplicates identical registrations automatically.
+- **Cross-layer events go through `eventBus` (`services/events`).** When a low-level module must notify something across the import graph, don't import the consumer and call it directly (that risks a cycle, e.g. nothing may import `uiState`). Emit on the domain-namespaced bus (`eventBus.notes.deleted.emit(id)`) and let consumers subscribe (`eventBus.sync.synced.on(...)`). Each channel is a `Signal<T>`: a `Set`-backed pub/sub that returns its own unsubscriber from `.on()`, fires in registration order, and deduplicates identical handlers. Reach for a signal only to invert a dependency; if the reaction is something the module already legitimately depends on (a lower-level service it imports), just call it inline.
 - **Extract complex `$derived.by()` blocks to pure functions.** If a `$derived.by()` block does non-trivial computation (geometry, ranking, color mapping), extract it to a named pure function in a `.ts` file. The component keeps a one-liner derived call; the logic becomes independently unit-testable.
 - **Every failure must display an error or a warning message.** When an operation can fail (DB write, file IO, desk switch, update install), the user must see feedback: either a toast via `toasterService.error(title, message?)` / `toasterService.warning(title, message?)` (message is optional, pass `errorMessage(e)` when the underlying cause helps) or an inline form error for validation in dialogs. Toast titles come from paraglide messages (`m.*`), never hardcoded strings. A silent `catch` is only acceptable for intentional fallbacks (e.g. an optional resource that may not exist, or best-effort cleanup like tray removal).
 
