@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.30.0](https://github.com/chainlist/balise/compare/v0.29.2...v0.30.0) (2026-06-18)
+
+
+### Features
+
+* **editor:** note summary sheet with heading outline ([#70](https://github.com/chainlist/balise/issues/70)) ([1bc8d46](https://github.com/chainlist/balise/commit/1bc8d46fb259cebe3b414780900946fdba7c924d))
+* **editor:** tag navigator to step through a tag's occurrences ([#69](https://github.com/chainlist/balise/issues/69)) ([1bc8d46](https://github.com/chainlist/balise/commit/1bc8d46fb259cebe3b414780900946fdba7c924d))
+
+
+### Bug Fixes
+
+* **editor:** separator + frost-surface sheet ([#70](https://github.com/chainlist/balise/issues/70)) ([1bc8d46](https://github.com/chainlist/balise/commit/1bc8d46fb259cebe3b414780900946fdba7c924d))
+
 ## [0.29.2](https://github.com/chainlist/balise/compare/v0.29.1...v0.29.2) (2026-06-18)
 
 
