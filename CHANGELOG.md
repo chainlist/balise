@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.2](https://github.com/chainlist/balise/compare/v0.29.1...v0.29.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* **editor:** Better fold gutter behavior ([a334f8c](https://github.com/chainlist/balise/commit/a334f8cd1160305fecac3c3571e51e081508fb6c))
+
 ## [0.29.1](https://github.com/chainlist/balise/compare/v0.29.0...v0.29.1) (2026-06-18)
 
 
