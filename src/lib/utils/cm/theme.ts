@@ -62,13 +62,22 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-foldGutter .cm-gutterElement': {
 		padding: '0 4px',
 		cursor: 'pointer',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	'.cm-fold-marker': {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		color: 'var(--muted-foreground)',
 		opacity: '0',
 		transition: 'opacity 120ms ease'
 	},
-	'.cm-foldGutter:hover .cm-gutterElement, .cm-foldGutter .cm-gutterElement[title^="unfold"]': {
-		opacity: '1'
-	},
-	'.cm-foldGutter .cm-gutterElement:hover': { color: 'var(--primary)' },
+	'.cm-fold-marker svg': { width: '16px', height: '16px' },
+	// Reveal fold handles on gutter hover; a folded section keeps its handle visible.
+	'.cm-foldGutter:hover .cm-fold-marker, .cm-fold-marker-closed': { opacity: '1' },
+	'.cm-foldGutter .cm-gutterElement:hover .cm-fold-marker': { color: 'var(--primary)' },
 	'.cm-foldPlaceholder': {
 		background: 'color-mix(in oklch, var(--primary) 12%, transparent)',
 		color: 'var(--primary)',

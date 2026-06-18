@@ -39,6 +39,7 @@
 		noteEditorTheme,
 		readFolds,
 		restoreFolds,
+		foldMarkerDOM,
 		type MarkMode,
 		type FoldRange
 	} from '$lib/utils/cm';
@@ -114,7 +115,7 @@
 					}),
 					mdSyntaxHighlighting,
 					codeFolding(),
-					foldGutter(),
+					foldGutter({ markerDOM: foldMarkerDOM }),
 					// Keybindings
 					mdFormatPlugin,
 					quoteExitKeymap,
