@@ -15,6 +15,7 @@
 	"action_save": "Guardar",
 	"action_saving": "Guardando…",
 	"action_merge": "Fusionar",
+	"action_close": "Cerrar",
 
 	"error_heading": "Error",
 	"loading": "Cargando...",

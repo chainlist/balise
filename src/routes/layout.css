@@ -28,7 +28,7 @@
 
 	/* Primary (the *-custom vars are set inline by settings when the user picks a custom primary) */
 	--primary: var(--primary-custom, oklch(31.114% 0.1735 264.03)); /* #011d86 */
-	--on-primary: oklch(100% 0 0); /* #ffffff */
+	--on-primary: var(--on-primary-custom, oklch(100% 0 0)); /* #ffffff */
 
 	/* Primary scale (user-overridable in settings) */
 	--primary-50: oklch(0.966 0.008 319.7);
@@ -414,11 +414,36 @@
 	}
 }
 
+/* The blur lives on a ::before layer (not the element itself) so the element
+   never becomes a "backdrop root" — that lets a nested frost surface blur too. */
 @utility frost {
-	@apply bg-white/40 backdrop-blur-[30px] backdrop-saturate-[1.6] dark:bg-[#0e0d15]/40;
+	position: relative;
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		border-radius: inherit;
+		pointer-events: none;
+		@apply bg-white/40 backdrop-blur-[30px] backdrop-saturate-[1.6] dark:bg-[#0e0d15]/40;
+	}
 }
+/* No `position` here: every frost-surface consumer already positions itself
+   (the floating ones use `frost-surface!`). Add `relative` at the call site if
+   a static element needs the ::before to anchor to it. */
 @utility frost-surface {
-	@apply rounded border border-white/60 bg-white/75 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-2xl backdrop-blur-lg dark:border-white/[0.13] dark:bg-surface-container/90 dark:shadow-[0_2px_6px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)];
+	@apply rounded border border-white/60 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/[0.13] dark:shadow-[0_2px_6px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)];
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		border-radius: inherit;
+		pointer-events: none;
+		@apply bg-white/75 backdrop-blur-2xl dark:bg-surface-container/90;
+	}
 }
 @utility frost-selected {
 	@apply rounded border border-white/60 bg-white/75 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/[0.13] dark:bg-white/10;

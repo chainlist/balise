@@ -95,7 +95,7 @@
 			<img {src} {alt} class="block max-h-96 max-w-full rounded" ondblclick={startEdit} />
 			{#if editing}
 				<div
-					class="absolute inset-0 flex flex-col items-center justify-center gap-3 frost-surface rounded"
+					class="frost absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded"
 					transition:fade={{ duration: 100 }}
 					{@attach cancelOnOutsidePointer}
 				>

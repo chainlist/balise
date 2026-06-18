@@ -15,6 +15,7 @@
 	"action_save": "Save",
 	"action_saving": "Saving…",
 	"action_merge": "Merge",
+	"action_close": "Close",
 
 	"error_heading": "Error",
 	"loading": "Loading...",
