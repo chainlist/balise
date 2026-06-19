@@ -61,7 +61,7 @@ function buildLinkDecos(mode: MarkMode) {
 
 		forEachBareUrl(view, mode, cursorLine, (start, end, text) => {
 			// Bare video URLs alone on their line are block embeds; skip them here.
-			if (isBareUrlEmbed(state, start, end, text)) return;
+			if (isBareUrlEmbed(state, start, end)) return;
 			ranges.push(Decoration.replace({ widget: new LinkWidget(text, text) }).range(start, end));
 		});
 

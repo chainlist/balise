@@ -94,6 +94,10 @@
 			]
 		},
 		"opener:default",
-		"fs:allow-resource-read-recursive"
+		"fs:allow-resource-read-recursive",
+		{
+			"identifier": "http:default",
+			"allow": [{ "url": "https://**" }]
+		}
 	]
 }

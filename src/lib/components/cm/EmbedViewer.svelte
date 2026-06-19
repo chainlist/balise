@@ -3,12 +3,19 @@
 	import { matchEmbed, type EmbedKind } from '$lib/utils/cm/embeds.config';
 	import EmbedImageViewer from './EmbedImageViewer.svelte';
 	import EmbedVideoViewer from './EmbedVideoViewer.svelte';
+	import EmbedLinkViewer from './EmbedLinkViewer.svelte';
 
 	let {
 		url,
 		alt,
+		source,
 		onAltChange
-	}: { url: string; alt: string; onAltChange: (alt: string) => void } = $props();
+	}: {
+		url: string;
+		alt: string;
+		source: 'image' | 'link';
+		onAltChange: (alt: string) => void;
+	} = $props();
 
 	// Props every embed-kind component receives: the raw URL, the transformed
 	// iframe src, and the regex match (used only by kinds that need its groups).
@@ -25,6 +32,8 @@
 {#if embed}
 	{@const Viewer = VIEWERS[embed.def.kind]}
 	<Viewer raw={url} transformed={embed.src} match={embed.match} />
-{:else}
+{:else if source === 'image'}
 	<EmbedImageViewer path={url} {alt} {onAltChange} />
+{:else}
+	<EmbedLinkViewer raw={url} {alt} />
 {/if}

@@ -6,10 +6,11 @@ import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
 import EmbedViewer from '$lib/components/cm/EmbedViewer.svelte';
 import { fsService } from '$lib/services/platform/fs';
-import { matchEmbed } from './embeds.config';
 import { BARE_URL_RE, SvelteWidget } from './shared';
 
-// --- URL + alt extraction ---
+type EmbedSource = 'image' | 'link';
+
+// --- URL + text extraction ---
 
 // The URL child is shared by Image (`![alt](url)`) and Link (`[label](url)`) nodes.
 function urlChild(node: SyntaxNode, state: EditorState): string {
@@ -19,8 +20,9 @@ function urlChild(node: SyntaxNode, state: EditorState): string {
 	return '';
 }
 
-// The alt text sits between the first two LinkMark children: `![` and `]`.
-function imageAltRange(node: SyntaxNode): { from: number; to: number } | null {
+// The bracket text sits between the first two LinkMark children: an Image's alt
+// (`![` … `]`) or a Link's label (`[` … `]`).
+function bracketTextRange(node: SyntaxNode): { from: number; to: number } | null {
 	let open: number | null = null;
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.name !== 'LinkMark') continue;
@@ -42,7 +44,7 @@ function findAltRange(
 		to,
 		enter(node) {
 			if (node.name !== 'Image' || range) return;
-			range = imageAltRange(node.node);
+			range = bracketTextRange(node.node);
 			return false;
 		}
 	});
@@ -68,26 +70,17 @@ function ownsLine(state: EditorState, from: number, to: number): boolean {
 	return before.trim() === '' && after.trim() === '';
 }
 
-// A Link is rendered as a block embed only when its URL is a known embed host
-// AND it is alone on its line. Inline links (and non-embed links) keep their
-// linkPlugin chip. linkPlugin imports this to skip the links this plugin
-// claims, so the two never decorate the same range.
+// A Link or bare URL alone on its own line is rendered as a block embed (the
+// viewer decides video iframe vs link card). Inline links keep linkPlugin's
+// chip. linkPlugin imports these to skip what this plugin claims, so the two
+// never decorate the same range.
 export function isLinkEmbed(state: EditorState, link: SyntaxNode): boolean {
-	const href = urlChild(link, state);
-	if (!href || !matchEmbed(href)) return false;
+	if (!urlChild(link, state)) return false;
 	return ownsLine(state, link.from, link.to);
 }
 
-// Bare URLs (no brackets) aren't syntax-tree nodes; they're regex-matched. A
-// bare video URL alone on its line embeds too. linkPlugin imports this to skip
-// the bare URLs this plugin claims.
-export function isBareUrlEmbed(
-	state: EditorState,
-	from: number,
-	to: number,
-	text: string
-): boolean {
-	return !!matchEmbed(text) && ownsLine(state, from, to);
+export function isBareUrlEmbed(state: EditorState, from: number, to: number): boolean {
+	return ownsLine(state, from, to);
 }
 
 // Mirror forEachBareUrl's exclusion: a bare URL inside a link or code construct
@@ -102,7 +95,12 @@ function inLinkOrCode(state: EditorState, pos: number): boolean {
 
 // --- Widget ---
 
-type EmbedProps = { url: string; alt: string; onAltChange: (alt: string) => void };
+type EmbedProps = {
+	url: string;
+	alt: string;
+	source: EmbedSource;
+	onAltChange: (alt: string) => void;
+};
 
 class EmbedWidget extends SvelteWidget<EmbedProps> {
 	protected component = EmbedViewer;
@@ -111,7 +109,8 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 
 	constructor(
 		readonly url: string,
-		readonly alt: string
+		readonly alt: string,
+		readonly source: EmbedSource
 	) {
 		super();
 	}
@@ -124,6 +123,7 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 		return {
 			url: this.url,
 			alt: this.alt,
+			source: this.source,
 			onAltChange: (alt: string) => {
 				if (this.#el) updateAlt(view, this.#el, alt);
 			}
@@ -131,7 +131,7 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 	}
 
 	eq(other: EmbedWidget): boolean {
-		return other.url === this.url && other.alt === this.alt;
+		return other.url === this.url && other.alt === this.alt && other.source === this.source;
 	}
 
 	// Let the editor ignore events from the description button/input so
@@ -216,14 +216,19 @@ function pushBlockEmbed(
 	from: number,
 	to: number,
 	url: string,
-	alt: string
+	alt: string,
+	source: EmbedSource
 ): void {
 	const line = state.doc.lineAt(to);
 	const lineFrom = state.doc.lineAt(from).from;
 	ranges.push(
 		Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
 		Decoration.replace({}).range(lineFrom, line.to),
-		Decoration.widget({ widget: new EmbedWidget(url, alt), block: true, side: -1 }).range(lineFrom)
+		Decoration.widget({
+			widget: new EmbedWidget(url, alt, source),
+			block: true,
+			side: -1
+		}).range(lineFrom)
 	);
 }
 
@@ -240,22 +245,25 @@ function buildDecos(state: EditorState): DecorationSet {
 			if (node.name === 'Image') {
 				const url = urlChild(node.node, state);
 				if (!url) return false;
-				const altRange = imageAltRange(node.node);
-				const alt = altRange ? state.doc.sliceString(altRange.from, altRange.to) : '';
-				pushBlockEmbed(ranges, state, node.from, node.to, url, alt);
+				const textRange = bracketTextRange(node.node);
+				const alt = textRange ? state.doc.sliceString(textRange.from, textRange.to) : '';
+				pushBlockEmbed(ranges, state, node.from, node.to, url, alt, 'image');
 				return false;
 			}
 			if (node.name === 'Link') {
 				if (!isLinkEmbed(state, node.node)) return false;
-				pushBlockEmbed(ranges, state, node.from, node.to, urlChild(node.node, state), '');
+				const url = urlChild(node.node, state);
+				const textRange = bracketTextRange(node.node);
+				const label = textRange ? state.doc.sliceString(textRange.from, textRange.to) : '';
+				pushBlockEmbed(ranges, state, node.from, node.to, url, label, 'link');
 				return false;
 			}
 		}
 	});
 
-	// Bare video URLs alone on their own line (paste-to-embed). Inline bare URLs
-	// and non-video URLs stay linkPlugin's chip. Uses the same BARE_URL_RE span as
-	// linkPlugin so the two agree on which URLs are embeds.
+	// Bare URLs alone on their own line (paste-to-embed). Inline bare URLs stay
+	// linkPlugin's chip. Uses the same BARE_URL_RE span as linkPlugin so the two
+	// agree on which URLs are embeds.
 	for (let i = 1; i <= state.doc.lines; i++) {
 		const line = state.doc.line(i);
 		BARE_URL_RE.lastIndex = 0;
@@ -263,8 +271,8 @@ function buildDecos(state: EditorState): DecorationSet {
 		if (!m) continue;
 		const from = line.from + m.index;
 		const to = from + m[0].length;
-		if (!isBareUrlEmbed(state, from, to, m[0]) || inLinkOrCode(state, from)) continue;
-		pushBlockEmbed(ranges, state, from, to, m[0], '');
+		if (!isBareUrlEmbed(state, from, to) || inLinkOrCode(state, from)) continue;
+		pushBlockEmbed(ranges, state, from, to, m[0], '', 'link');
 	}
 
 	ranges.sort((a, b) => a.from - b.from);
