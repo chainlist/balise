@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.31.0](https://github.com/chainlist/balise/compare/v0.30.0...v0.31.0) (2026-06-19)
+
+
+### Features
+
+* **editor:** add `insert current date` shortcut with `$mod+;` ([1e63159](https://github.com/chainlist/balise/commit/1e631596880c40ca01c83319c68b4178277c0dbb))
+* **editor:** add date format settings in Settings &gt; General ([1e63159](https://github.com/chainlist/balise/commit/1e631596880c40ca01c83319c68b4178277c0dbb))
+* **editor:** add date picker with `@` trigger in editor ([1e63159](https://github.com/chainlist/balise/commit/1e631596880c40ca01c83319c68b4178277c0dbb))
+* **editor:** Add dates commands to slash actions ([e4b2e8f](https://github.com/chainlist/balise/commit/e4b2e8fdd6b2f12c1c8d4b99476fe9b3b531962f))
+
+
+### Bug Fixes
+
+* **editor:** Auto-close codeFence is now working ([7a9e3fd](https://github.com/chainlist/balise/commit/7a9e3fde7ae56012d183793024e9660fd397b504))
+* **editor:** Date picker getting automatic focus ([f02c5bf](https://github.com/chainlist/balise/commit/f02c5bfaa406c4a3586e07d078a9660a03083e4f))
+
+
+### Code Refactoring
+
+* **editor:** Changed rounded value for editor popover ([f0cbbf3](https://github.com/chainlist/balise/commit/f0cbbf377387a06c58ff307b28516deebe5b13b1))
+* **settings:** Add groups for settings section ([efb3160](https://github.com/chainlist/balise/commit/efb3160b276e5ccef0f97e46c8a435acd42b2453))
+* **sidebar:** Change sidebar element order (Tasks, All Notes) ([4dd8480](https://github.com/chainlist/balise/commit/4dd848036e82f3921115be8a2a40295c635e753b))
+* **tags:** Refactor tags settings + tag modal ([d3e9844](https://github.com/chainlist/balise/commit/d3e9844860cc48acca520e6658c4172922daada3))
+
 ## [0.30.0](https://github.com/chainlist/balise/compare/v0.29.2...v0.30.0) (2026-06-18)
 
 
