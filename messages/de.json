@@ -78,6 +78,9 @@
 	"tag_color_label": "Farbe",
 	"tag_pin_label": "An Seitenleiste anheften",
 	"tag_pin_toggle": "Diesen Tag anheften",
+	"settings_tags_heading": "Tags",
+	"settings_tags_description": "Verwalte und passe deine Tags an.",
+	"settings_tags_empty": "Noch keine Tags. Füge #hashtags zu deinen Notizen hinzu, um Tags zu erstellen.",
 
 	"nav_browse": "Durchsuchen",
 	"nav_knowledge_graph": "Graph",

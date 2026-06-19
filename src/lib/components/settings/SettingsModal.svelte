@@ -1,6 +1,18 @@
 <script lang="ts">
 	import { Dialog } from 'bits-ui';
-	import { XIcon, KeyboardIcon, PaletteIcon, TypeIcon, InfoIcon, WandSparklesIcon, SparklesIcon, SlidersHorizontalIcon, RefreshCwIcon, LayoutListIcon } from '@lucide/svelte';
+	import {
+		XIcon,
+		KeyboardIcon,
+		PaletteIcon,
+		TypeIcon,
+		InfoIcon,
+		WandSparklesIcon,
+		SparklesIcon,
+		SlidersHorizontalIcon,
+		RefreshCwIcon,
+		LayoutListIcon,
+		TagsIcon
+	} from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
@@ -8,6 +20,7 @@
 	import EditorSettings from './EditorSettings.svelte';
 	import AboutSettings from './AboutSettings.svelte';
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
+	import TagsSettings from './TagsSettings.svelte';
 	import GeneralSettings from './GeneralSettings.svelte';
 	import DesksSettings from './DesksSettings.svelte';
 	import SyncSettings from './SyncSettings.svelte';
@@ -42,12 +55,6 @@
 			label: m.settings_general_heading(),
 			icon: SlidersHorizontalIcon,
 			component: GeneralSettings
-		},
-		{
-			id: 'desks',
-			label: m.settings_desks_heading(),
-			icon: LayoutListIcon,
-			component: DesksSettings
 		},
 		{
 			id: 'appearance',
@@ -85,6 +92,18 @@
 				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices },
 				{ id: 'sync-sharing', label: m.settings_sync_nav_sharing(), component: SyncSharingSettings }
 			]
+		},
+		{
+			id: 'desks',
+			label: m.settings_desks_heading(),
+			icon: LayoutListIcon,
+			component: DesksSettings
+		},
+		{
+			id: 'tags',
+			label: m.settings_tags_heading(),
+			icon: TagsIcon,
+			component: TagsSettings
 		},
 		{
 			id: 'about',
@@ -145,11 +164,7 @@
 						disabled={item.comingSoon}
 						class={cn(
 							'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
-							item.comingSoon
-								? DISABLED_CLASS
-								: isItemActive(item)
-									? ACTIVE_CLASS
-									: INACTIVE_CLASS
+							item.comingSoon ? DISABLED_CLASS : isItemActive(item) ? ACTIVE_CLASS : INACTIVE_CLASS
 						)}
 					>
 						<item.icon size="15" class="shrink-0" />
