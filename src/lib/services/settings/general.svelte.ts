@@ -6,6 +6,8 @@ export interface GeneralSettings {
 	closeToTray: boolean | null;
 	autoUpdate: boolean;
 	dateFormat: DateFormat;
+	/** Whether the local MCP server is enabled (AI assistants can read notes). */
+	aiCompatibility: boolean;
 }
 
 export class GeneralSettingsService extends SettingsGroup<GeneralSettings> {
@@ -14,7 +16,8 @@ export class GeneralSettingsService extends SettingsGroup<GeneralSettings> {
 		language: 'en',
 		closeToTray: null,
 		autoUpdate: true,
-		dateFormat: 'medium'
+		dateFormat: 'medium',
+		aiCompatibility: false
 	});
 
 	setCloseToTray(value: boolean): void {
@@ -29,6 +32,11 @@ export class GeneralSettingsService extends SettingsGroup<GeneralSettings> {
 
 	setAutoUpdate(value: boolean): void {
 		this.state.autoUpdate = value;
+		this.persist();
+	}
+
+	setAiCompatibility(value: boolean): void {
+		this.state.aiCompatibility = value;
 		this.persist();
 	}
 

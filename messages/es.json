@@ -106,6 +106,10 @@
 	"settings_close_behavior_helper": "Qué ocurre al cerrar la ventana de la aplicación.",
 	"settings_auto_update_label": "Actualizaciones automáticas",
 	"settings_auto_update_helper": "Buscar actualizaciones automáticamente al iniciar la aplicación.",
+	"settings_ai_compat_label": "Compatibilidad con IA",
+	"settings_ai_compat_helper": "Ejecutar un servidor MCP local para que los asistentes de IA puedan leer tus notas.",
+	"settings_ai_compat_error": "No se pudo iniciar el servidor de IA",
+	"settings_ai_compat_url_label": "Conecta los clientes de IA a esta dirección:",
 	"settings_date_format_label": "Formato de fecha",
 	"settings_date_format_helper": "Formato usado al insertar una fecha en una nota.",
 

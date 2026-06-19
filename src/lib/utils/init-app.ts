@@ -6,6 +6,7 @@ import { syncService } from '$lib/services/sync/sync';
 import { globalShortcutService } from '$lib/services/platform/global-shortcut.svelte';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { migrateLegacyStores } from '$lib/services/platform/store-path';
+import { startMcp } from '$lib/utils/mcp';
 import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 import { syncConnectionService } from '$lib/services/sync/sync-connection.svelte';
 import { trayService } from '$lib/services/platform/tray';
@@ -18,6 +19,7 @@ export async function initApp() {
 	try {
 		await migrateLegacyStores();
 		await settingsService.init();
+		if (settingsService.general.state.aiCompatibility) void startMcp();
 		await deviceSyncService.init();
 		await devicesService.init();
 		await syncService.init();

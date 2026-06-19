@@ -1,4 +1,5 @@
 mod commands;
+mod mcp;
 mod sync;
 
 use tauri::Manager;
@@ -39,12 +40,15 @@ pub fn run() {
             sync::start_sync,
             sync::stop_sync,
             sync::set_sync_config,
-            sync::sync_peers
+            sync::sync_peers,
+            mcp::start_mcp,
+            mcp::stop_mcp
         ])
         .manage(sync::SyncState::default())
         .manage(sync::SyncConfig::default())
         .manage(sync::InFlightPeers::default())
         .manage(sync::SyncActivity::default())
+        .manage(mcp::McpState::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

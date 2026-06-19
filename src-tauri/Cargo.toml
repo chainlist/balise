@@ -29,7 +29,10 @@ chrono = "0.4"
 ed25519-dalek = "2"
 getrandom = "0.2"
 iroh = "0.98"
-tokio = { version = "1", features = ["sync", "time", "macros"] }
+tokio = { version = "1", features = ["sync", "time", "macros", "net"] }
+rmcp = { version = "0.16", features = ["server", "macros", "transport-streamable-http-server", "schemars"] }
+schemars = "1"
+axum = "0.8"
 tauri = { version = "2.11.1", features = [ "tray-icon" ] }
 tauri-plugin-log = "2"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }

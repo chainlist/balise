@@ -106,6 +106,10 @@
 	"settings_close_behavior_helper": "Was passiert, wenn Sie das App-Fenster schließen.",
 	"settings_auto_update_label": "Automatische Updates",
 	"settings_auto_update_helper": "Beim Start der App automatisch nach Updates suchen.",
+	"settings_ai_compat_label": "KI-Kompatibilität",
+	"settings_ai_compat_helper": "Einen lokalen MCP-Server starten, damit KI-Assistenten deine Notizen lesen können.",
+	"settings_ai_compat_error": "KI-Server konnte nicht gestartet werden",
+	"settings_ai_compat_url_label": "Verbinde KI-Clients mit dieser Adresse:",
 	"settings_date_format_label": "Datumsformat",
 	"settings_date_format_helper": "Format, das beim Einfügen eines Datums in eine Notiz verwendet wird.",
 

@@ -2,6 +2,8 @@
 	import { settingsService, SUPPORTED_LOCALES } from '$lib/services/settings/settings.svelte';
 	import { applyLanguageChange } from '$lib/utils/init-app';
 	import { buildDateFormatOptions, formatDate, type DateFormat } from '$lib/utils/date-format';
+	import { startMcp, stopMcp, MCP_URL } from '$lib/utils/mcp';
+	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 	import { Switch } from 'bits-ui';
@@ -46,6 +48,20 @@
 				? m.close_behavior_quit()
 				: '—'
 	);
+
+	async function toggleAiCompatibility(checked: boolean): Promise<void> {
+		settingsService.general.setAiCompatibility(checked);
+		if (!checked) {
+			void stopMcp();
+			return;
+		}
+		try {
+			await startMcp();
+		} catch (e) {
+			settingsService.general.setAiCompatibility(false);
+			toasterService.error(m.settings_ai_compat_error(), errorMessage(e));
+		}
+	}
 </script>
 
 <SettingsSection title={m.settings_general_heading()} description={m.settings_general_description()}>
@@ -108,4 +124,26 @@
 			/>
 		</Switch.Root>
 	</SettingRow>
+
+	<div>
+		<SettingRow title={m.settings_ai_compat_label()} description={m.settings_ai_compat_helper()}>
+			<Switch.Root
+				checked={settingsService.general.state.aiCompatibility}
+				onCheckedChange={(checked) => void toggleAiCompatibility(checked)}
+				aria-label={m.settings_ai_compat_label()}
+				class="inline-flex h-5 w-9 cursor-pointer items-center rounded-full transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-container-highest"
+			>
+				<Switch.Thumb
+					class="pointer-events-none block size-4 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0.5"
+				/>
+			</Switch.Root>
+		</SettingRow>
+
+		{#if settingsService.general.state.aiCompatibility}
+			<div class="mt-3 space-y-1 rounded-md border bg-muted px-3 py-2">
+				<p class="text-xs text-muted-foreground">{m.settings_ai_compat_url_label()}</p>
+				<code class="block select-all break-all font-mono text-sm">{MCP_URL}</code>
+			</div>
+		{/if}
+	</div>
 </SettingsSection>
