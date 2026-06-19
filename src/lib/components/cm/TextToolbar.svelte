@@ -74,16 +74,17 @@
 		onmousedown={(e) => e.preventDefault()}
 	>
 		{#each buttons as b (b.mark)}
+			{@const on = active[b.mark]}
 			<button
 				type="button"
 				aria-label={b.label()}
-				aria-pressed={active[b.mark]}
-				class="flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-				class:bg-accent={active[b.mark]}
-				class:text-foreground={active[b.mark]}
+				aria-pressed={on}
+				class="flex size-7 items-center justify-center rounded transition-colors {on
+					? 'bg-primary text-primary-foreground shadow-sm'
+					: 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
 				onclick={() => oncommand(b.mark)}
 			>
-				<b.icon class="size-4" strokeWidth={active[b.mark] ? 2.75 : 2} />
+				<b.icon class="size-4" strokeWidth={on ? 3 : 2} />
 			</button>
 		{/each}
 	</div>

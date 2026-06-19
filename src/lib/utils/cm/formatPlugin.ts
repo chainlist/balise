@@ -37,6 +37,36 @@ function removeSurroundingMark(
 	return null;
 }
 
+// Selection sits inside a parsed mark node (e.g. [hello] in **[hello]**) — strip
+// that node's delimiters. Tree-based, like removeSurroundingMark, so toggling
+// italic on bold **text** finds no Emphasis node and won't mistake the bold
+// `*`s for its own (which string-adjacency would). A node's opening/closing
+// marks always sit exactly at node.from..+len and node.to-len..to.
+function removeWrappingMark(
+	view: EditorView,
+	range: SelectionRange,
+	mark: string,
+	targetNode: string
+): RangeResult | null {
+	const len = mark.length;
+	let node = syntaxTree(view.state).resolveInner(range.from, 1);
+	while (node.parent) {
+		// Require the selection to fall within the node's content (between the
+		// marks); selections that include the marks fall through to the string paths.
+		if (node.name === targetNode && node.from + len <= range.from && range.to <= node.to - len) {
+			return {
+				changes: [
+					{ from: node.from, to: node.from + len },
+					{ from: node.to - len, to: node.to }
+				],
+				range: EditorSelection.range(range.anchor - len, range.head - len)
+			};
+		}
+		node = node.parent;
+	}
+	return null;
+}
+
 // Marks sit outside the selection: *[hello]* → [hello]
 function removeOuterMarks(
 	view: EditorView,
@@ -48,6 +78,14 @@ function removeOuterMarks(
 	const before = state.doc.sliceString(range.from - len, range.from);
 	const after = state.doc.sliceString(range.to, range.to + len);
 	if (before !== mark || after !== mark) return null;
+	// A `*` adjacent to another `*` belongs to `**`/`***`, not an italic delimiter;
+	// stripping it would corrupt the bold marks. Let it fall through to wrapping.
+	const repeat = mark[0];
+	if (
+		state.doc.sliceString(range.from - len - 1, range.from - len) === repeat ||
+		state.doc.sliceString(range.to + len, range.to + len + 1) === repeat
+	)
+		return null;
 	return {
 		changes: [
 			{ from: range.from - len, to: range.from },
@@ -117,6 +155,7 @@ function toggleMark(view: EditorView, mark: string): boolean {
 					);
 				}
 				return (
+					removeWrappingMark(view, range, mark, targetNode) ??
 					removeOuterMarks(view, range, mark) ??
 					removeInnerMarks(view, range, mark) ??
 					wrapWithMark(range, mark)
