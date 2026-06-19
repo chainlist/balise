@@ -182,7 +182,14 @@ function buildDecos(state: EditorState): DecorationSet {
 			ranges.push(
 				Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
 				Decoration.replace({}).range(lineFrom, line.to),
-				Decoration.widget({ widget: new ImageWidget(path, alt), block: true, side: 1 }).range(line.to)
+				// Anchor the block widget at the start of the image line, not its end. A
+				// heading's fold range ends exactly at the last block's line end, and a
+				// block widget sitting on that boundary is never covered by the fold, so
+				// an image that's the last block in a section would stay visible when the
+				// heading is folded. lineFrom is strictly inside the fold range, so it folds.
+				Decoration.widget({ widget: new ImageWidget(path, alt), block: true, side: -1 }).range(
+					lineFrom
+				)
 			);
 			return false;
 		}
