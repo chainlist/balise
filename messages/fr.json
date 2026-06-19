@@ -262,6 +262,10 @@
 	"editor_tag_next_occurrence": "Occurrence suivante",
 	"editor_summary": "Sommaire",
 	"editor_summary_empty": "Aucun titre dans cette note",
+	"editor_format_bold": "Gras",
+	"editor_format_italic": "Italique",
+	"editor_format_underline": "Souligné",
+	"editor_format_strikethrough": "Barré",
 
 	"image_add_description": "Ajouter une description",
 	"image_not_found": "Image introuvable",

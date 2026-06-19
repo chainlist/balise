@@ -5,6 +5,7 @@ import { syntaxTree } from '@codemirror/language';
 import {
 	emphasisMarks,
 	highlightMarks,
+	underlineMarks,
 	isMarkRevealed,
 	isRevealed,
 	dedupeOverlapping,
@@ -28,6 +29,10 @@ function hiddenMarks(state: EditorState, mode: MarkMode): EmphasisMark[] {
 		out.push(m);
 	}
 	for (const m of highlightMarks(state)) {
+		if (isRevealed(mode, state.doc.lineAt(m.parentFrom).number, cursorLine)) continue;
+		out.push(m);
+	}
+	for (const m of underlineMarks(state)) {
 		if (isRevealed(mode, state.doc.lineAt(m.parentFrom).number, cursorLine)) continue;
 		out.push(m);
 	}

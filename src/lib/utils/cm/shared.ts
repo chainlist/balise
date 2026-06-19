@@ -3,7 +3,7 @@ import type { DecorationSet, ViewUpdate } from '@codemirror/view';
 import type { EditorState, Range, Line } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { mount, unmount, type Component } from 'svelte';
-import { HIGHLIGHT_SOURCE, BARE_URL_SOURCE } from '../markdown-patterns';
+import { HIGHLIGHT_SOURCE, BARE_URL_SOURCE, UNDERLINE_SOURCE } from '../markdown-patterns';
 
 export type MarkMode = 'always' | 'cursor' | 'never';
 
@@ -35,12 +35,7 @@ export function isMarkRevealed(
 
 // Parser nodes that wrap inline emphasis marks. The marks themselves (EmphasisMark,
 // CodeMark, etc.) live as children of these nodes.
-const PARSED_EMPHASIS = new Set([
-	'Emphasis',
-	'StrongEmphasis',
-	'Strikethrough',
-	'InlineCode'
-]);
+const PARSED_EMPHASIS = new Set(['Emphasis', 'StrongEmphasis', 'Strikethrough', 'InlineCode']);
 
 export type EmphasisMark = {
 	from: number;
@@ -85,6 +80,26 @@ export function highlightMarks(state: EditorState): EmphasisMark[] {
 		const parentTo = parentFrom + m[0].length;
 		out.push({ from: parentFrom, to: parentFrom + 1, parentFrom, parentTo });
 		out.push({ from: parentTo - 1, to: parentTo, parentFrom, parentTo });
+	}
+	return out;
+}
+
+// Underline <u>…</u> / <ins>…</ins> tags aren't in the syntax tree either —
+// collect the open/close tags the same way as highlightMarks so cursor nav
+// treats them identically to other hidden marks. Tag lengths are derived from
+// the matched tag name (group 1).
+const UNDERLINE_MARK_RE = new RegExp(UNDERLINE_SOURCE, 'g');
+
+export function underlineMarks(state: EditorState): EmphasisMark[] {
+	const out: EmphasisMark[] = [];
+	const text = state.doc.toString();
+	UNDERLINE_MARK_RE.lastIndex = 0;
+	let m: RegExpExecArray | null;
+	while ((m = UNDERLINE_MARK_RE.exec(text)) !== null) {
+		const parentFrom = m.index;
+		const parentTo = parentFrom + m[0].length;
+		out.push({ from: parentFrom, to: parentFrom + m[1].length + 2, parentFrom, parentTo });
+		out.push({ from: parentTo - (m[1].length + 3), to: parentTo, parentFrom, parentTo });
 	}
 	return out;
 }
@@ -175,7 +190,12 @@ export function forEachBareUrl(
 			if (isRevealed(mode, state.doc.lineAt(start).number, cursorLine)) continue;
 			let skip = false;
 			for (let cur = tree.resolveInner(start, 1); cur.parent; cur = cur.parent) {
-				if (cur.name === 'Link' || cur.name === 'InlineCode' || cur.name === 'FencedCode' || cur.name === 'CodeBlock') {
+				if (
+					cur.name === 'Link' ||
+					cur.name === 'InlineCode' ||
+					cur.name === 'FencedCode' ||
+					cur.name === 'CodeBlock'
+				) {
 					skip = true;
 					break;
 				}
@@ -194,7 +214,7 @@ export abstract class SvelteWidget<P extends Record<string, unknown>> extends Wi
 	protected tagName: 'span' | 'div' = 'span';
 	protected ignoreEvents = true;
 
-	protected setup(_el: HTMLElement, _view: EditorView): void { }
+	protected setup(_el: HTMLElement, _view: EditorView): void {}
 
 	toDOM(view: EditorView): HTMLElement {
 		const el = document.createElement(this.tagName);

@@ -1,8 +1,9 @@
 import { keymap } from '@codemirror/view';
 import type { EditorView } from '@codemirror/view';
 import { EditorSelection } from '@codemirror/state';
-import type { SelectionRange, ChangeSpec } from '@codemirror/state';
+import type { SelectionRange, ChangeSpec, EditorState } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
+import { UNDERLINE_SOURCE } from '../markdown-patterns';
 
 const NODE_FOR_MARK: Record<string, string> = {
 	'*': 'Emphasis',
@@ -71,7 +72,8 @@ function removeInnerMarks(
 		text.length <= len * 2 ||
 		text[len] === mark[len - 1] ||
 		text[text.length - len - 1] === mark[0]
-	) return null;
+	)
+		return null;
 	const newFrom = range.from;
 	const newTo = range.to - len * 2;
 	return {
@@ -126,9 +128,102 @@ function toggleMark(view: EditorView, mark: string): boolean {
 	return true;
 }
 
+// Underline has no markdown syntax, so it's represented as an HTML tag. The
+// toolbar/keymap insert <u>…</u>, but existing <ins>…</ins> markup is recognised
+// too (UNDERLINE_SOURCE matches both). The open/close marks differ, so this needs
+// its own toggle (toggleMark only handles symmetric delimiters like ** or ~~).
+const U_OPEN = '<u>';
+const U_CLOSE = '</u>';
+const UNDERLINE_RE = new RegExp(UNDERLINE_SOURCE, 'g');
+
+// The <u>…</u> / <ins>…</ins> tag that fully encloses [from, to], or null. Tag
+// lengths vary, so they're returned alongside the bounds.
+function enclosingUnderline(
+	state: EditorState,
+	from: number,
+	to: number
+): { from: number; to: number; openLen: number; closeLen: number } | null {
+	const text = state.doc.toString();
+	UNDERLINE_RE.lastIndex = 0;
+	let m: RegExpExecArray | null;
+	while ((m = UNDERLINE_RE.exec(text)) !== null) {
+		const s = m.index;
+		const e = s + m[0].length;
+		if (from >= s && to <= e) {
+			return { from: s, to: e, openLen: m[1].length + 2, closeLen: m[1].length + 3 };
+		}
+	}
+	return null;
+}
+
+function toggleUnderline(view: EditorView): boolean {
+	const { state } = view;
+	const { from, to } = state.selection.main;
+	if (from === to) return false; // underline wraps a selection, nothing to do on a bare cursor
+
+	const found = enclosingUnderline(state, from, to);
+	if (found) {
+		const innerLen = found.to - found.closeLen - (found.from + found.openLen);
+		view.dispatch(
+			state.update({
+				changes: [
+					{ from: found.from, to: found.from + found.openLen },
+					{ from: found.to - found.closeLen, to: found.to }
+				],
+				selection: EditorSelection.range(found.from, found.from + innerLen),
+				userEvent: 'input'
+			})
+		);
+	} else {
+		view.dispatch(
+			state.update({
+				changes: [
+					{ from, insert: U_OPEN },
+					{ from: to, insert: U_CLOSE }
+				],
+				selection: EditorSelection.range(from + U_OPEN.length, to + U_OPEN.length),
+				userEvent: 'input'
+			})
+		);
+	}
+	return true;
+}
+
+export type FormatMark = 'bold' | 'italic' | 'underline' | 'strike';
+
+// Toggle commands shared by the keymap below and the text selection toolbar.
+export const FORMAT_COMMANDS: Record<FormatMark, (view: EditorView) => boolean> = {
+	bold: (view) => toggleMark(view, '**'),
+	italic: (view) => toggleMark(view, '*'),
+	strike: (view) => toggleMark(view, '~~'),
+	underline: toggleUnderline
+};
+
+// Which marks already wrap the current selection (for toolbar active state).
+// Emphasis marks live in the syntax tree; <ins> is matched by regex.
+export function activeMarks(state: EditorState): Record<FormatMark, boolean> {
+	const { from, to } = state.selection.main;
+	const tree = syntaxTree(state);
+	const wrappedBy = (nodeName: string): boolean => {
+		let node = tree.resolveInner(from, 1);
+		while (node.parent) {
+			if (node.name === nodeName && node.from <= from && node.to >= to) return true;
+			node = node.parent;
+		}
+		return false;
+	};
+	return {
+		bold: wrappedBy('StrongEmphasis'),
+		italic: wrappedBy('Emphasis'),
+		strike: wrappedBy('Strikethrough'),
+		underline: enclosingUnderline(state, from, to) !== null
+	};
+}
+
 export const mdFormatPlugin = keymap.of([
 	{ key: 'Mod-b', run: (view) => toggleMark(view, '**') },
 	{ key: 'Mod-i', run: (view) => toggleMark(view, '*') },
+	{ key: 'Mod-u', run: toggleUnderline },
 	{ key: 'Mod-Shift-s', run: (view) => toggleMark(view, '~~') },
 	{ key: 'Mod-Shift-h', run: (view) => toggleMark(view, '=') }
 ]);

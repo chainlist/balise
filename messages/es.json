@@ -262,6 +262,10 @@
 	"editor_tag_next_occurrence": "Aparición siguiente",
 	"editor_summary": "Resumen",
 	"editor_summary_empty": "No hay títulos en esta nota",
+	"editor_format_bold": "Negrita",
+	"editor_format_italic": "Cursiva",
+	"editor_format_underline": "Subrayado",
+	"editor_format_strikethrough": "Tachado",
 
 	"image_add_description": "Añadir descripción",
 	"image_not_found": "Imagen no encontrada",

@@ -235,6 +235,7 @@ export const noteEditorTheme = EditorView.theme({
 		background: 'var(--md-highlight-bg)',
 		borderRadius: '2px'
 	},
+	'.cm-md-underline': { textDecoration: 'underline' },
 	'[data-placeholder]': { position: 'relative' },
 	'[data-placeholder]::before': {
 		content: 'attr(data-placeholder)',

@@ -262,6 +262,10 @@
 	"editor_tag_next_occurrence": "Nächstes Vorkommen",
 	"editor_summary": "Zusammenfassung",
 	"editor_summary_empty": "Keine Überschriften in dieser Notiz",
+	"editor_format_bold": "Fett",
+	"editor_format_italic": "Kursiv",
+	"editor_format_underline": "Unterstrichen",
+	"editor_format_strikethrough": "Durchgestrichen",
 
 	"image_add_description": "Beschreibung hinzufügen",
 	"image_not_found": "Bild nicht gefunden",

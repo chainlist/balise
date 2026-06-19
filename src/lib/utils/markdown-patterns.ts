@@ -10,6 +10,13 @@
 /** `=text=` highlight mark. Capture group 1 is the inner text. */
 export const HIGHLIGHT_SOURCE = '=([^=\\n]+)=';
 
+/**
+ * Underline tag (markdown has no native underline). Matches both `<u>text</u>`
+ * and `<ins>text</ins>`. Group 1 is the tag name (`u` or `ins`), group 2 the
+ * inner text. The backreference keeps the closing tag in sync with the opener.
+ */
+export const UNDERLINE_SOURCE = '<(u|ins)>([^<]+)</\\1>';
+
 /** Bare `http(s)://` URL (autolink). */
 export const BARE_URL_SOURCE = 'https?:\\/\\/[^\\s<>[\\]()\'"]+';
 
