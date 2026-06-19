@@ -26,6 +26,10 @@
 		<BookOpenText class="size-4" />
 		{m.nav_journaling()}
 	</a>
+	<a href={resolve('/tasks')} class="row" class:active={isTasks}>
+		<CheckSquareIcon class="size-4" />
+		{m.nav_tasks()}
+	</a>
 	<button
 		type="button"
 		class="row"
@@ -35,10 +39,6 @@
 		<NotebookIcon class="size-4" />
 		{m.nav_all_notes()}
 	</button>
-	<a href={resolve('/tasks')} class="row" class:active={isTasks}>
-		<CheckSquareIcon class="size-4" />
-		{m.nav_tasks()}
-	</a>
 </div>
 
 <style lang="postcss">
