@@ -3,6 +3,7 @@ import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import LinkChip from '$lib/components/cm/LinkChip.svelte';
+import { isLinkEmbed, isBareUrlEmbed } from './embedPlugin';
 import { makePlugin, SvelteWidget, isRevealed, forEachBareUrl, type MarkMode } from './shared';
 
 class LinkWidget extends SvelteWidget<{ href: string; label: string }> {
@@ -35,6 +36,9 @@ function buildLinkDecos(mode: MarkMode) {
 				enter(node) {
 					const { from, to, name } = node;
 					if (name !== 'Link') return;
+					// Links the embed plugin renders as block embeds are skipped here so
+					// the two never decorate the same range.
+					if (isLinkEmbed(state, node.node)) return false;
 					if (isRevealed(mode, state.doc.lineAt(from).number, cursorLine)) return false;
 					let href = '';
 					let urlFrom = -1;
@@ -56,6 +60,8 @@ function buildLinkDecos(mode: MarkMode) {
 		}
 
 		forEachBareUrl(view, mode, cursorLine, (start, end, text) => {
+			// Bare video URLs alone on their line are block embeds; skip them here.
+			if (isBareUrlEmbed(state, start, end)) return;
 			ranges.push(Decoration.replace({ widget: new LinkWidget(text, text) }).range(start, end));
 		});
 

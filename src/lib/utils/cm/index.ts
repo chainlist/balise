@@ -14,7 +14,7 @@ export { mdHighlightPlugin } from './highlightPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { mdSlashPlugin } from './slashPlugin';
 export { mdDatePicker } from './datePicker';
-export { mdImagePlugin } from './imagePlugin';
+export { mdEmbedPlugin } from './embedPlugin';
 export { mdPlaceholderPlugin } from './placeholderPlugin';
 export { mdTagCompletion } from './tagCompletion';
 export { spaceRequiredHeadings } from './headingParser';
