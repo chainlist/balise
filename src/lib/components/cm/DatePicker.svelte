@@ -50,6 +50,7 @@
 		align="start"
 		sideOffset={6}
 		collisionPadding={8}
+		onOpenAutoFocus={(e) => e.preventDefault()}
 		onCloseAutoFocus={(e) => e.preventDefault()}
 		class="w-auto overflow-hidden frost-surface! p-0"
 	>

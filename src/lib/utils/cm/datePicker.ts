@@ -1,5 +1,6 @@
-import { ViewPlugin } from '@codemirror/view';
+import { ViewPlugin, keymap } from '@codemirror/view';
 import type { EditorView, ViewUpdate, PluginValue } from '@codemirror/view';
+import { Prec } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
 import { mount, unmount } from 'svelte';
 import DatePicker from '$lib/components/cm/DatePicker.svelte';
@@ -14,7 +15,7 @@ class DatePickerPluginClass implements PluginValue {
 	private pickerInstance: ReturnType<typeof mount> | null = null;
 	private pickerContainer: HTMLElement | null = null;
 	private atFrom = -1;
-	private active = false;
+	active = false;
 
 	constructor(private view: EditorView) {}
 
@@ -105,4 +106,18 @@ class DatePickerPluginClass implements PluginValue {
 	}
 }
 
-export const mdDatePicker: Extension = ViewPlugin.fromClass(DatePickerPluginClass);
+const datePickerViewPlugin = ViewPlugin.fromClass(DatePickerPluginClass);
+
+const datePickerKeymap = keymap.of([
+	{
+		key: 'Escape',
+		run: (view) => {
+			const plugin = view.plugin(datePickerViewPlugin);
+			if (!plugin?.active) return false;
+			plugin.close();
+			return true;
+		}
+	}
+]);
+
+export const mdDatePicker: Extension = [datePickerViewPlugin, Prec.highest(datePickerKeymap)];
