@@ -9,7 +9,7 @@
 <div class="my-2 flex w-full justify-center">
 	<button
 		type="button"
-		class="w-full max-w-2xl rounded-lg border bg-muted/30 p-3 text-left transition-colors hover:bg-muted"
+		class="w-full max-w-2xl rounded-lg border bg-muted/30 p-3 text-left leading-4 transition-colors hover:bg-muted"
 		onclick={() => openUrl(raw)}
 	>
 		<OgCard url={raw} label={alt} />
