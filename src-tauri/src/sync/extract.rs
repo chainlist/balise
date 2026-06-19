@@ -72,6 +72,9 @@ impl Extractor {
         };
 
         for cap in self.hashtag_re.captures_iter(content) {
+            if is_inside_html_tag(content, cap.get(0).unwrap().start()) {
+                continue;
+            }
             push(&mut seen, &mut out, cap[1].to_string());
         }
         for cap in self.fence_re.captures_iter(content) {
@@ -117,6 +120,24 @@ fn contains_word(content: &str, pattern: &str) -> bool {
             return true;
         }
         start = at + 1;
+    }
+    false
+}
+
+/// A `#…` inside an inline-HTML tag (the hex in `<span style="color: #fff">`,
+/// an `<a href="#x">` anchor, …) is markup, not a tag: it sits between a `<`
+/// and the tag's closing `>` on the same line. Mirrors `isInsideHtmlTag` in
+/// `tag-parser.ts`.
+fn is_inside_html_tag(content: &str, hash_idx: usize) -> bool {
+    let bytes = content.as_bytes();
+    let mut i = hash_idx;
+    while i > 0 {
+        i -= 1;
+        match bytes[i] {
+            b'<' => return true,
+            b'>' | b'\n' => return false,
+            _ => {}
+        }
     }
     false
 }
