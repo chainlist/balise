@@ -35,7 +35,7 @@
 		mdDatePicker,
 		mdPlaceholderPlugin,
 		mdMarkNavPlugin,
-		mdImagePlugin,
+		mdEmbedPlugin,
 		mdTagCompletion,
 		spaceRequiredHeadings,
 		getHeadingOutline,
@@ -156,8 +156,8 @@
 					mdSlashPlugin,
 					mdDatePicker,
 					mdPlaceholderPlugin,
-					// Images always render as widgets, independent of mark mode
-					mdImagePlugin(),
+					// Images and video embeds always render as widgets, independent of mark mode
+					mdEmbedPlugin(),
 					// Mark visibility (dynamically reconfigured)
 					markCompartment.of(makeMarkPlugins(settingsService.editor.state.markdownMarks)),
 					// Theme

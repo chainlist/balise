@@ -4,11 +4,20 @@ import type { Range, EditorState } from '@codemirror/state';
 import { StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
-import ImageViewer from '$lib/components/cm/ImageViewer.svelte';
+import EmbedViewer from '$lib/components/cm/EmbedViewer.svelte';
 import { fsService } from '$lib/services/platform/fs';
-import { SvelteWidget } from './shared';
+import { matchEmbed } from './embeds.config';
+import { BARE_URL_RE, SvelteWidget } from './shared';
 
-// --- Alt text ---
+// --- URL + alt extraction ---
+
+// The URL child is shared by Image (`![alt](url)`) and Link (`[label](url)`) nodes.
+function urlChild(node: SyntaxNode, state: EditorState): string {
+	for (let child = node.firstChild; child; child = child.nextSibling) {
+		if (child.name === 'URL') return state.doc.sliceString(child.from, child.to).trim();
+	}
+	return '';
+}
 
 // The alt text sits between the first two LinkMark children: `![` and `]`.
 function imageAltRange(node: SyntaxNode): { from: number; to: number } | null {
@@ -48,17 +57,60 @@ function updateAlt(view: EditorView, el: HTMLElement, alt: string): void {
 	if (range) view.dispatch({ changes: { from: range.from, to: range.to, insert: alt } });
 }
 
+// --- Embed detection (shared with linkPlugin) ---
+
+// Is the element the sole (non-whitespace) content of its line?
+function ownsLine(state: EditorState, from: number, to: number): boolean {
+	const line = state.doc.lineAt(from);
+	if (to > line.to) return false;
+	const before = state.doc.sliceString(line.from, from);
+	const after = state.doc.sliceString(to, line.to);
+	return before.trim() === '' && after.trim() === '';
+}
+
+// A Link is rendered as a block embed only when its URL is a known embed host
+// AND it is alone on its line. Inline links (and non-embed links) keep their
+// linkPlugin chip. linkPlugin imports this to skip the links this plugin
+// claims, so the two never decorate the same range.
+export function isLinkEmbed(state: EditorState, link: SyntaxNode): boolean {
+	const href = urlChild(link, state);
+	if (!href || !matchEmbed(href)) return false;
+	return ownsLine(state, link.from, link.to);
+}
+
+// Bare URLs (no brackets) aren't syntax-tree nodes; they're regex-matched. A
+// bare video URL alone on its line embeds too. linkPlugin imports this to skip
+// the bare URLs this plugin claims.
+export function isBareUrlEmbed(
+	state: EditorState,
+	from: number,
+	to: number,
+	text: string
+): boolean {
+	return !!matchEmbed(text) && ownsLine(state, from, to);
+}
+
+// Mirror forEachBareUrl's exclusion: a bare URL inside a link or code construct
+// is never an embed.
+function inLinkOrCode(state: EditorState, pos: number): boolean {
+	for (let cur = syntaxTree(state).resolveInner(pos, 1); cur.parent; cur = cur.parent) {
+		const n = cur.name;
+		if (n === 'Link' || n === 'InlineCode' || n === 'FencedCode' || n === 'CodeBlock') return true;
+	}
+	return false;
+}
+
 // --- Widget ---
 
-type ImageProps = { path: string; alt: string; onAltChange: (alt: string) => void };
+type EmbedProps = { url: string; alt: string; onAltChange: (alt: string) => void };
 
-class ImageWidget extends SvelteWidget<ImageProps> {
-	protected component = ImageViewer;
+class EmbedWidget extends SvelteWidget<EmbedProps> {
+	protected component = EmbedViewer;
 	protected tagName = 'div' as const;
 	#el: HTMLElement | null = null;
 
 	constructor(
-		readonly path: string,
+		readonly url: string,
 		readonly alt: string
 	) {
 		super();
@@ -68,9 +120,9 @@ class ImageWidget extends SvelteWidget<ImageProps> {
 		this.#el = el;
 	}
 
-	protected getProps(view: EditorView): ImageProps {
+	protected getProps(view: EditorView): EmbedProps {
 		return {
-			path: this.path,
+			url: this.url,
 			alt: this.alt,
 			onAltChange: (alt: string) => {
 				if (this.#el) updateAlt(view, this.#el, alt);
@@ -78,8 +130,8 @@ class ImageWidget extends SvelteWidget<ImageProps> {
 		};
 	}
 
-	eq(other: ImageWidget): boolean {
-		return other.path === this.path && other.alt === this.alt;
+	eq(other: EmbedWidget): boolean {
+		return other.url === this.url && other.alt === this.alt;
 	}
 
 	// Let the editor ignore events from the description button/input so
@@ -153,9 +205,31 @@ function handleDrop(event: DragEvent, view: EditorView): boolean {
 
 // --- Decoration builder ---
 
+// Replace an element's whole line with a block widget. Anchored at the start of
+// the line, not its end: a heading's fold range ends exactly at the last block's
+// line end, and a block widget sitting on that boundary is never covered by the
+// fold, so an element that's the last block in a section would stay visible when
+// the heading is folded. lineFrom is strictly inside the fold range, so it folds.
+function pushBlockEmbed(
+	ranges: Range<Decoration>[],
+	state: EditorState,
+	from: number,
+	to: number,
+	url: string,
+	alt: string
+): void {
+	const line = state.doc.lineAt(to);
+	const lineFrom = state.doc.lineAt(from).from;
+	ranges.push(
+		Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
+		Decoration.replace({}).range(lineFrom, line.to),
+		Decoration.widget({ widget: new EmbedWidget(url, alt), block: true, side: -1 }).range(lineFrom)
+	);
+}
+
 // Block widgets must come from a StateField. We iterate the full doc (no
-// viewport culling needed — block widgets are cheap and images are sparse).
-// Images always render as widgets, regardless of mark mode: the raw markdown
+// viewport culling needed — block widgets are cheap and embeds are sparse).
+// Embeds always render as widgets, regardless of mark mode: the raw markdown
 // is never useful to look at, and revealing it on cursor entry makes the
 // document jump.
 function buildDecos(state: EditorState): DecorationSet {
@@ -163,37 +237,35 @@ function buildDecos(state: EditorState): DecorationSet {
 
 	syntaxTree(state).iterate({
 		enter(node) {
-			if (node.name !== 'Image') return;
-
-			let path = '';
-			for (let child = node.node.firstChild; child; child = child.nextSibling) {
-				if (child.name === 'URL') {
-					path = state.doc.sliceString(child.from, child.to).trim();
-					break;
-				}
+			if (node.name === 'Image') {
+				const url = urlChild(node.node, state);
+				if (!url) return false;
+				const altRange = imageAltRange(node.node);
+				const alt = altRange ? state.doc.sliceString(altRange.from, altRange.to) : '';
+				pushBlockEmbed(ranges, state, node.from, node.to, url, alt);
+				return false;
 			}
-			if (!path) return false;
-
-			const altRange = imageAltRange(node.node);
-			const alt = altRange ? state.doc.sliceString(altRange.from, altRange.to) : '';
-
-			const line = state.doc.lineAt(node.to);
-			const lineFrom = state.doc.lineAt(node.from).from;
-			ranges.push(
-				Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
-				Decoration.replace({}).range(lineFrom, line.to),
-				// Anchor the block widget at the start of the image line, not its end. A
-				// heading's fold range ends exactly at the last block's line end, and a
-				// block widget sitting on that boundary is never covered by the fold, so
-				// an image that's the last block in a section would stay visible when the
-				// heading is folded. lineFrom is strictly inside the fold range, so it folds.
-				Decoration.widget({ widget: new ImageWidget(path, alt), block: true, side: -1 }).range(
-					lineFrom
-				)
-			);
-			return false;
+			if (node.name === 'Link') {
+				if (!isLinkEmbed(state, node.node)) return false;
+				pushBlockEmbed(ranges, state, node.from, node.to, urlChild(node.node, state), '');
+				return false;
+			}
 		}
 	});
+
+	// Bare video URLs alone on their own line (paste-to-embed). Inline bare URLs
+	// and non-video URLs stay linkPlugin's chip. Uses the same BARE_URL_RE span as
+	// linkPlugin so the two agree on which URLs are embeds.
+	for (let i = 1; i <= state.doc.lines; i++) {
+		const line = state.doc.line(i);
+		BARE_URL_RE.lastIndex = 0;
+		const m = BARE_URL_RE.exec(line.text);
+		if (!m) continue;
+		const from = line.from + m.index;
+		const to = from + m[0].length;
+		if (!isBareUrlEmbed(state, from, to, m[0]) || inLinkOrCode(state, from)) continue;
+		pushBlockEmbed(ranges, state, from, to, m[0], '');
+	}
 
 	ranges.sort((a, b) => a.from - b.from);
 	return Decoration.set(ranges, true);
@@ -201,7 +273,7 @@ function buildDecos(state: EditorState): DecorationSet {
 
 // --- Plugin ---
 
-export function mdImagePlugin() {
+export function mdEmbedPlugin() {
 	const blockField = StateField.define<DecorationSet>({
 		create: (state) => buildDecos(state),
 		update(deco, tr) {
