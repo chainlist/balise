@@ -14,12 +14,16 @@ jobs:
         include:
           - platform: macos-latest
             args: --target aarch64-apple-darwin
+            cacheKey: macos-aarch64
           - platform: macos-latest
             args: --target x86_64-apple-darwin
+            cacheKey: macos-x86_64
           - platform: ubuntu-22.04
             args: ''
+            cacheKey: linux
           - platform: windows-latest
             args: ''
+            cacheKey: windows
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -41,6 +45,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
+          shared-key: ${{ matrix.cacheKey }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'

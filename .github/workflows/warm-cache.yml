@@ -1,0 +1,54 @@
+name: Warm Rust cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src-tauri/Cargo.lock'
+      - 'src-tauri/Cargo.toml'
+
+jobs:
+  warm:
+    # Skip release-please version-bump commits: they change Cargo.toml's version
+    # only, which rust-cache normalizes out of its key, so the run would be a
+    # redundant cache hit with no new dependencies to compile.
+    if: "${{ !startsWith(github.event.head_commit.message, 'chore(main): release') }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            cacheKey: macos-aarch64
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            cacheKey: macos-x86_64
+          - platform: ubuntu-22.04
+            target: ''
+            cacheKey: linux
+          - platform: windows-latest
+            target: ''
+            cacheKey: windows
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+          shared-key: ${{ matrix.cacheKey }}
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Compile dependencies
+        working-directory: src-tauri
+        run: cargo build --release ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
