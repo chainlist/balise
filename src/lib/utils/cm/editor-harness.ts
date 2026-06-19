@@ -62,11 +62,7 @@ export function mountEditor(doc: string, opts: MountOptions = {}): EditorView {
 	const state = EditorState.create({
 		doc,
 		selection: opts.cursor != null ? { anchor: opts.cursor } : undefined,
-		extensions: [
-			EditorView.lineWrapping,
-			mdLanguage,
-			...(opts.extensions ?? markPlugins(mode))
-		]
+		extensions: [EditorView.lineWrapping, mdLanguage, ...(opts.extensions ?? markPlugins(mode))]
 	});
 	ensureSyntaxTree(state, doc.length, 5000);
 	return new EditorView({ parent, state });

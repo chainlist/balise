@@ -37,6 +37,35 @@ function removeSurroundingMark(
 	return null;
 }
 
+// String fallback for the empty-cursor case when a mark has no syntax-tree node
+// (the `=` highlight isn't in the parser). Finds a delimiter pair on the cursor's
+// line whose inner text contains the cursor and strips both delimiters.
+function removeSurroundingMarkString(
+	state: EditorState,
+	range: SelectionRange,
+	mark: string
+): RangeResult | null {
+	const len = mark.length;
+	const line = state.doc.lineAt(range.from);
+	const esc = mark.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const re = new RegExp(`${esc}([^${esc}\\n]+)${esc}`, 'g');
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(line.text)) !== null) {
+		const from = line.from + m.index;
+		const to = from + m[0].length;
+		if (range.from >= from + len && range.from <= to - len) {
+			return {
+				changes: [
+					{ from, to: from + len },
+					{ from: to - len, to }
+				],
+				range: EditorSelection.cursor(range.from - len)
+			};
+		}
+	}
+	return null;
+}
+
 // Selection sits inside a parsed mark node (e.g. [hello] in **[hello]**) — strip
 // that node's delimiters. Tree-based, like removeSurroundingMark, so toggling
 // italic on bold **text** finds no Emphasis node and won't mistake the bold
@@ -147,8 +176,13 @@ function toggleMark(view: EditorView, mark: string): boolean {
 		state.update(
 			state.changeByRange((range) => {
 				if (range.empty) {
+					// Marks with a tree node use the tree path; marks without one
+					// (`=` highlight) fall back to the string scan.
+					const removed =
+						removeSurroundingMark(view, range, mark, targetNode) ??
+						(targetNode ? null : removeSurroundingMarkString(state, range, mark));
 					return (
-						removeSurroundingMark(view, range, mark, targetNode) ?? {
+						removed ?? {
 							changes: { from: range.from, insert: mark + mark },
 							range: EditorSelection.cursor(range.from + len)
 						}
