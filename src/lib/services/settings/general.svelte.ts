@@ -1,17 +1,29 @@
 import { SettingsGroup } from './base.svelte';
+import type { DateFormat } from '$lib/utils/date-format';
 
 export interface GeneralSettings {
 	language: 'fr' | 'es' | 'en' | 'de';
 	closeToTray: boolean | null;
 	autoUpdate: boolean;
+	dateFormat: DateFormat;
 }
 
 export class GeneralSettingsService extends SettingsGroup<GeneralSettings> {
 	readonly key = 'general';
-	state = $state<GeneralSettings>({ language: 'en', closeToTray: null, autoUpdate: true });
+	state = $state<GeneralSettings>({
+		language: 'en',
+		closeToTray: null,
+		autoUpdate: true,
+		dateFormat: 'medium'
+	});
 
 	setCloseToTray(value: boolean): void {
 		this.state.closeToTray = value;
+		this.persist();
+	}
+
+	setDateFormat(value: DateFormat): void {
+		this.state.dateFormat = value;
 		this.persist();
 	}
 

@@ -32,6 +32,7 @@
 		mdFormatPlugin,
 		mdLinkPlugin,
 		mdSlashPlugin,
+		mdDatePicker,
 		mdPlaceholderPlugin,
 		mdMarkNavPlugin,
 		mdImagePlugin,
@@ -47,6 +48,7 @@
 		type OutlineItem
 	} from '$lib/utils/cm';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { activeEditorService } from '$lib/services/app/active-editor';
 
 	let {
 		content,
@@ -152,6 +154,7 @@
 					codeFenceAutoClose,
 					mdTagCompletion,
 					mdSlashPlugin,
+					mdDatePicker,
 					mdPlaceholderPlugin,
 					// Images always render as widgets, independent of mark mode
 					mdImagePlugin(),
@@ -164,9 +167,11 @@
 						if (u.focusChanged) {
 							if (u.view.hasFocus) {
 								focused = true;
+								activeEditorService.setActive(u.view);
 								onfocus?.();
 							} else {
 								focused = false;
+								activeEditorService.clear(u.view);
 								onblur?.();
 							}
 						}
@@ -197,6 +202,7 @@
 			if (autofocus) view.focus();
 
 			return () => {
+				activeEditorService.clear(view);
 				editorView = null;
 				view.destroy();
 			};

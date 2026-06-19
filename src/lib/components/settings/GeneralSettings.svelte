@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { settingsService, SUPPORTED_LOCALES } from '$lib/services/settings/settings.svelte';
 	import { applyLanguageChange } from '$lib/utils/init-app';
+	import { buildDateFormatOptions, formatDate, type DateFormat } from '$lib/utils/date-format';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 	import { Switch } from 'bits-ui';
@@ -16,6 +17,18 @@
 
 	const languageLabel = $derived(
 		localeLabels[settingsService.general.state.language] ?? settingsService.general.state.language
+	);
+
+	const now = new Date();
+	const dateFormatOptions = $derived(
+		buildDateFormatOptions(
+			now,
+			settingsService.general.state.language,
+			settingsService.general.state.dateFormat
+		)
+	);
+	const dateFormatLabel = $derived(
+		formatDate(now, settingsService.general.state.dateFormat, settingsService.general.state.language)
 	);
 
 	const closeBehaviorValue = $derived(
@@ -46,6 +59,21 @@
 			<Select.Content>
 				{#each SUPPORTED_LOCALES as locale (locale)}
 					<Select.Item value={locale} label={localeLabels[locale] ?? locale} />
+				{/each}
+			</Select.Content>
+		</Select.Root>
+	</SettingRow>
+
+	<SettingRow title={m.settings_date_format_label()} description={m.settings_date_format_helper()}>
+		<Select.Root
+			type="single"
+			value={settingsService.general.state.dateFormat}
+			onValueChange={(v) => v && settingsService.general.setDateFormat(v as DateFormat)}
+		>
+			<Select.Trigger class="w-auto whitespace-nowrap">{dateFormatLabel}</Select.Trigger>
+			<Select.Content>
+				{#each dateFormatOptions as opt (opt.value)}
+					<Select.Item value={opt.value} label={opt.label} />
 				{/each}
 			</Select.Content>
 		</Select.Root>

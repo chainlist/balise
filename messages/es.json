@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Error al cambiar de escritorio.",
 	"task_update_error_failed": "Error al actualizar la tarea.",
 	"updater_install_error_failed": "Error al instalar la actualización.",
+	"insert_date_no_editor": "Abre una nota para insertar la fecha.",
 
 	"sync_external_changes": "{count} notas actualizadas por cambios realizados fuera de la aplicación",
 
@@ -105,6 +106,8 @@
 	"settings_close_behavior_helper": "Qué ocurre al cerrar la ventana de la aplicación.",
 	"settings_auto_update_label": "Actualizaciones automáticas",
 	"settings_auto_update_helper": "Buscar actualizaciones automáticamente al iniciar la aplicación.",
+	"settings_date_format_label": "Formato de fecha",
+	"settings_date_format_helper": "Formato usado al insertar una fecha en una nota.",
 
 	"settings_appearance_heading": "Apariencia",
 	"settings_appearance_description": "Elige cómo se ve la aplicación.",
@@ -202,6 +205,8 @@
 	"shortcut_next_note_desc": "Seleccionar la nota de abajo en la lista",
 	"shortcut_toggle_zen_mode_name": "Activar/desactivar modo zen",
 	"shortcut_toggle_zen_mode_desc": "Ocultar la barra lateral y la lista de notas para una vista sin distracciones",
+	"shortcut_insert_today_date_name": "Insertar la fecha de hoy",
+	"shortcut_insert_today_date_desc": "Insertar la fecha de hoy en la posición del cursor en la nota activa",
 
 	"settings_about_heading": "Acerca de",
 	"settings_about_description": "Información de la aplicación y actualizaciones.",

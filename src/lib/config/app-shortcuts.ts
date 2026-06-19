@@ -1,6 +1,9 @@
 import type { ShortcutDefinition } from '$lib/services/platform/shortcuts.svelte';
 import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
 import { uiState } from '$lib/services/app/ui-state.svelte';
+import { activeEditorService } from '$lib/services/app/active-editor';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { formatDate } from '$lib/utils/date-format';
 import { eventBus } from '$lib/services/events/event-bus';
 import { toasterService, errorMessage } from '$lib/services/app/toaster';
 import { goto } from '$app/navigation';
@@ -87,6 +90,22 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 			const notes = notesService.notes;
 			const idx = notes.findIndex((n) => n.id === uiState.activeNoteId);
 			if (idx !== -1 && idx < notes.length - 1) eventBus.notes.select.emit(notes[idx + 1].id);
+		}
+	},
+	{
+		id: 'insert-today-date',
+		name: m.shortcut_insert_today_date_name,
+		description: m.shortcut_insert_today_date_desc,
+		defaultBinding: '$mod+;',
+		run: () => {
+			const text = formatDate(
+				new Date(),
+				settingsService.general.state.dateFormat,
+				settingsService.general.state.language
+			);
+			if (!activeEditorService.insertAtCursor(text)) {
+				toasterService.warning(m.insert_date_no_editor());
+			}
 		}
 	},
 	{

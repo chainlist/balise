@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Impossible de changer de bureau.",
 	"task_update_error_failed": "Impossible de mettre à jour la tâche.",
 	"updater_install_error_failed": "Impossible d'installer la mise à jour.",
+	"insert_date_no_editor": "Ouvrez une note pour insérer la date.",
 
 	"sync_external_changes": "{count} notes mises à jour suite à des modifications faites hors de l'application",
 
@@ -105,6 +106,8 @@
 	"settings_close_behavior_helper": "Ce qui se passe quand vous fermez la fenêtre.",
 	"settings_auto_update_label": "Mises à jour automatiques",
 	"settings_auto_update_helper": "Vérifier les mises à jour automatiquement au démarrage de l'application.",
+	"settings_date_format_label": "Format de date",
+	"settings_date_format_helper": "Format utilisé lors de l'insertion d'une date dans une note.",
 
 	"settings_appearance_heading": "Apparence",
 	"settings_appearance_description": "Choisissez l'aspect de l'application.",
@@ -202,6 +205,8 @@
 	"shortcut_next_note_desc": "Sélectionner la note en-dessous dans la liste",
 	"shortcut_toggle_zen_mode_name": "Activer/désactiver le mode zen",
 	"shortcut_toggle_zen_mode_desc": "Masquer la barre latérale et la liste des notes pour une vue sans distraction",
+	"shortcut_insert_today_date_name": "Insérer la date du jour",
+	"shortcut_insert_today_date_desc": "Insérer la date du jour à la position du curseur dans la note active",
 
 	"settings_about_heading": "À propos",
 	"settings_about_description": "Informations sur l'application et mises à jour.",

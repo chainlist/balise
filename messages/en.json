@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Failed to switch desk.",
 	"task_update_error_failed": "Failed to update task.",
 	"updater_install_error_failed": "Failed to install update.",
+	"insert_date_no_editor": "Open a note to insert the date.",
 
 	"sync_external_changes": "{count} notes updated from changes made outside the app",
 
@@ -105,6 +106,8 @@
 	"settings_close_behavior_helper": "What happens when you close the app window.",
 	"settings_auto_update_label": "Automatic updates",
 	"settings_auto_update_helper": "Check for updates automatically when the app starts.",
+	"settings_date_format_label": "Date format",
+	"settings_date_format_helper": "Format used when a date is inserted into a note.",
 
 	"settings_appearance_heading": "Appearance",
 	"settings_appearance_description": "Choose how the app looks.",
@@ -202,6 +205,8 @@
 	"shortcut_next_note_desc": "Select the note below in the list",
 	"shortcut_toggle_zen_mode_name": "Toggle Zen Mode",
 	"shortcut_toggle_zen_mode_desc": "Hide the sidebar and note list for a distraction-free view",
+	"shortcut_insert_today_date_name": "Insert Today's Date",
+	"shortcut_insert_today_date_desc": "Insert today's date at the cursor in the active note",
 
 	"settings_about_heading": "About",
 	"settings_about_description": "App information and updates.",

@@ -13,6 +13,7 @@ export { mdTaskTagPlugin } from './taskTagPlugin';
 export { mdHighlightPlugin } from './highlightPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { mdSlashPlugin } from './slashPlugin';
+export { mdDatePicker } from './datePicker';
 export { mdImagePlugin } from './imagePlugin';
 export { mdPlaceholderPlugin } from './placeholderPlugin';
 export { mdTagCompletion } from './tagCompletion';

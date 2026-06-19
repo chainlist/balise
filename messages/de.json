@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Schreibtisch konnte nicht gewechselt werden.",
 	"task_update_error_failed": "Aufgabe konnte nicht aktualisiert werden.",
 	"updater_install_error_failed": "Update konnte nicht installiert werden.",
+	"insert_date_no_editor": "Öffne eine Notiz, um das Datum einzufügen.",
 
 	"sync_external_changes": "{count} Notizen durch Änderungen außerhalb der App aktualisiert",
 
@@ -105,6 +106,8 @@
 	"settings_close_behavior_helper": "Was passiert, wenn Sie das App-Fenster schließen.",
 	"settings_auto_update_label": "Automatische Updates",
 	"settings_auto_update_helper": "Beim Start der App automatisch nach Updates suchen.",
+	"settings_date_format_label": "Datumsformat",
+	"settings_date_format_helper": "Format, das beim Einfügen eines Datums in eine Notiz verwendet wird.",
 
 	"settings_appearance_heading": "Erscheinungsbild",
 	"settings_appearance_description": "Wähle, wie die App aussieht.",
@@ -202,6 +205,8 @@
 	"shortcut_next_note_desc": "Die Notiz unterhalb in der Liste auswählen",
 	"shortcut_toggle_zen_mode_name": "Zen-Modus umschalten",
 	"shortcut_toggle_zen_mode_desc": "Seitenleiste und Notizliste für eine ablenkungsfreie Ansicht ausblenden",
+	"shortcut_insert_today_date_name": "Heutiges Datum einfügen",
+	"shortcut_insert_today_date_desc": "Heutiges Datum an der Cursorposition in der aktiven Notiz einfügen",
 
 	"settings_about_heading": "Info",
 	"settings_about_description": "App-Informationen und Updates.",
