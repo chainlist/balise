@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.31.1](https://github.com/chainlist/balise/compare/v0.31.0...v0.31.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **editor:** text folding now works properly with images without any text after them ([#74](https://github.com/chainlist/balise/issues/74)) ([473e6b0](https://github.com/chainlist/balise/commit/473e6b03ffaaed0b222ae2bfa6d34ddc6cbba1f5))
+* **note-preview:** Disable inner elements click ([771df64](https://github.com/chainlist/balise/commit/771df64229fb81e221b901a310365b1b1e0cab96))
+
 ## [0.31.0](https://github.com/chainlist/balise/compare/v0.30.0...v0.31.0) (2026-06-19)
 
 
