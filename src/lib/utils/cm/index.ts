@@ -5,6 +5,7 @@ export { mdHrPlugin } from './hrPlugin';
 export { mdHeaderPlugin } from './headerPlugin';
 export { mdQuotePlugin, quoteExitKeymap } from './quotePlugin';
 export { mdCodePlugin } from './codePlugin';
+export { codeFenceAutoClose } from './codeFencePlugin';
 export { mdLinkPlugin } from './linkPlugin';
 export { mdTagPlugin } from './tagPlugin';
 export { mdCheckboxPlugin } from './checkboxPlugin';

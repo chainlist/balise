@@ -24,6 +24,7 @@
 		mdQuotePlugin,
 		quoteExitKeymap,
 		mdCodePlugin,
+		codeFenceAutoClose,
 		mdTagPlugin,
 		mdCheckboxPlugin,
 		mdTaskTagPlugin,
@@ -148,6 +149,7 @@
 					]),
 					// Editing helpers
 					closeBrackets(),
+					codeFenceAutoClose,
 					mdTagCompletion,
 					mdSlashPlugin,
 					mdPlaceholderPlugin,
