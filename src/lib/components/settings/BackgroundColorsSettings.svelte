@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Popover, Switch } from 'bits-ui';
+	import { Switch } from 'bits-ui';
 	import { Button } from '$lib/components/shadcn/button/index.js';
+	import ColorPicker from '$lib/components/ColorPicker.svelte';
 	import {
 		settingsService,
 		DEFAULT_MESH_COLORS,
@@ -9,7 +10,6 @@
 		MESH_MODES,
 		type MeshMode
 	} from '$lib/services/settings/settings.svelte';
-	import { COLOR_PALETTE } from '$lib/utils/color-palette';
 	import SegmentedToggle from '$lib/components/SegmentedToggle.svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
@@ -35,22 +35,6 @@
 			settingsService.appearance.state.meshSizes.some((size, i) => size !== DEFAULT_MESH_SIZES[i])
 	);
 </script>
-
-{#snippet palette(selected: string, onPick: (color: string) => void)}
-	<div class="grid grid-cols-6 gap-2">
-		{#each COLOR_PALETTE as color (color)}
-			<Popover.Close
-				class={cn(
-					'size-6 rounded-full transition-transform hover:scale-110',
-					selected === color && 'ring-2 ring-primary ring-offset-2 ring-offset-popover'
-				)}
-				style="background-color: {color}"
-				aria-label={color}
-				onclick={() => onPick(color)}
-			/>
-		{/each}
-	</div>
-{/snippet}
 
 <div>
 	<div class="mb-4 flex items-center justify-between gap-4">
@@ -99,63 +83,46 @@
 		<div class="relative mx-auto h-44 max-w-md rounded-xl border bg-mesh dark:bg-mesh-dark">
 			{#if settingsService.appearance.state.meshMode === MESH_MODES.CORNERS}
 				{#each corners as corner (corner.index)}
-					<Popover.Root>
-						<Popover.Trigger
-							class={cn(
-								'absolute size-6 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110 dark:border-white/70',
-								corner.position
-							)}
-							style="background-color: {settingsService.appearance.state.meshColors[corner.index]}"
-							aria-label={m.settings_background_corner_aria()}
-						/>
-						<Popover.Portal>
-							<Popover.Content
-								sideOffset={6}
-								class="z-50 space-y-3 rounded-xl bg-popover p-3 shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
-							>
-								{@render palette(settingsService.appearance.state.meshColors[corner.index], (color) =>
-									settingsService.appearance.setMeshColor(corner.index, color)
-								)}
-								<label class="block space-y-1">
-									<span class="text-xs font-medium text-muted-foreground">
-										{m.settings_background_size_label()}
-									</span>
-									<input
-										type="range"
-										min="50"
-										max="200"
-										step="10"
-										value={settingsService.appearance.state.meshSizes[corner.index] * 100}
-										oninput={(e) =>
-											settingsService.appearance.setMeshSize(
-												corner.index,
-												Number(e.currentTarget.value) / 100
-											)}
-										class="w-full accent-primary"
-									/>
-								</label>
-							</Popover.Content>
-						</Popover.Portal>
-					</Popover.Root>
+					<ColorPicker
+						value={settingsService.appearance.state.meshColors[corner.index]}
+						onpick={(color) => settingsService.appearance.setMeshColor(corner.index, color)}
+						triggerAriaLabel={m.settings_background_corner_aria()}
+						triggerClass={cn(
+							'absolute size-6 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110 dark:border-white/70',
+							corner.position
+						)}
+						triggerStyle="background-color: {settingsService.appearance.state.meshColors[corner.index]}"
+					>
+						{#snippet extra()}
+							<label class="block space-y-1">
+								<span class="text-xs font-medium text-muted-foreground">
+									{m.settings_background_size_label()}
+								</span>
+								<input
+									type="range"
+									min="50"
+									max="200"
+									step="10"
+									value={settingsService.appearance.state.meshSizes[corner.index] * 100}
+									oninput={(e) =>
+										settingsService.appearance.setMeshSize(
+											corner.index,
+											Number(e.currentTarget.value) / 100
+										)}
+									class="w-full accent-primary"
+								/>
+							</label>
+						{/snippet}
+					</ColorPicker>
 				{/each}
 			{:else}
-				<Popover.Root>
-					<Popover.Trigger
-						class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110 dark:border-white/70"
-						style="background-color: {settingsService.appearance.state.meshUnifiedColor}"
-						aria-label={m.settings_background_unified_aria()}
-					/>
-					<Popover.Portal>
-						<Popover.Content
-							sideOffset={6}
-							class="z-50 rounded-xl bg-popover p-3 shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
-						>
-							{@render palette(settingsService.appearance.state.meshUnifiedColor, (color) =>
-								settingsService.appearance.setMeshUnifiedColor(color)
-							)}
-						</Popover.Content>
-					</Popover.Portal>
-				</Popover.Root>
+				<ColorPicker
+					value={settingsService.appearance.state.meshUnifiedColor}
+					onpick={(color) => settingsService.appearance.setMeshUnifiedColor(color)}
+					triggerAriaLabel={m.settings_background_unified_aria()}
+					triggerClass="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110 dark:border-white/70"
+					triggerStyle="background-color: {settingsService.appearance.state.meshUnifiedColor}"
+				/>
 			{/if}
 		</div>
 	</div>
