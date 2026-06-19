@@ -2,6 +2,7 @@ mod commands;
 mod sync;
 
 use tauri::Manager;
+use tauri_plugin_opener::OpenerExt;
 #[cfg(desktop)]
 use tauri_plugin_window_state::StateFlags;
 
@@ -60,6 +61,27 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            // The main window is declared with `"create": false` in
+            // tauri.conf.json so we can build it here and attach a new-window
+            // handler. Embedded players (YouTube/Vimeo/Dailymotion) open their
+            // "watch on…" / title / channel links via target="_blank"; intercept
+            // those, hand them to the system browser, and deny the in-app popup.
+            let main_config = app
+                .config()
+                .app
+                .windows
+                .iter()
+                .find(|w| w.label == "main")
+                .expect("main window config not found")
+                .clone();
+            let opener_handle = app.handle().clone();
+            tauri::webview::WebviewWindowBuilder::from_config(app.handle(), &main_config)?
+                .on_new_window(move |url, _features| {
+                    let _ = opener_handle.opener().open_url(url.to_string(), None::<&str>);
+                    tauri::webview::NewWindowResponse::Deny
+                })
+                .build()?;
 
             let app_handle = app.handle().clone();
             let main_window = app
