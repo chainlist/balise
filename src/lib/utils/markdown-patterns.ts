@@ -7,8 +7,27 @@
  * Non-global patterns are exported as ready RegExp instances.
  */
 
-/** `=text=` highlight mark. Capture group 1 is the inner text. */
-export const HIGHLIGHT_SOURCE = '=([^=\\n]+)=';
+/**
+ * `=text=` highlight mark. Capture group 1 is the inner text. The `(?!")` guards
+ * keep a delimiter from matching an HTML attribute `=` (e.g. `style="…"` in a
+ * color span): without them, two `style=` attributes on a line would bracket a
+ * false highlight across the spans between them.
+ */
+export const HIGHLIGHT_SOURCE = '=(?!")([^=\\n]+)=(?!")';
+
+/**
+ * Underline tag (markdown has no native underline). Matches both `<u>text</u>`
+ * and `<ins>text</ins>`. Group 1 is the tag name (`u` or `ins`), group 2 the
+ * inner text. The backreference keeps the closing tag in sync with the opener.
+ */
+export const UNDERLINE_SOURCE = '<(u|ins)>([^<]+)</\\1>';
+
+/**
+ * Text color (markdown has no native colored text). Stored as an inline HTML
+ * span: `<span style="color: #hex">text</span>`. Group 1 is the color value,
+ * group 2 the inner text. The closing tag is always `</span>` (7 chars).
+ */
+export const COLOR_SOURCE = '<span style="color:\\s*([^"]+)">([^<]+)</span>';
 
 /** Bare `http(s)://` URL (autolink). */
 export const BARE_URL_SOURCE = 'https?:\\/\\/[^\\s<>[\\]()\'"]+';

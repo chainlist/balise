@@ -418,6 +418,11 @@
    never becomes a "backdrop root" — that lets a nested frost surface blur too. */
 @utility frost {
 	position: relative;
+	/* The blur layer's color is driven by a custom property set here on the main
+	   element. A `dark:bg-…` written inside the ::before @apply compiles the dark
+	   variant onto the main element, never the pseudo-element, so it never reaches
+	   the blur layer; swapping the property in the dark scope does. */
+	--frost-bg: color-mix(in oklab, #fff 40%, transparent);
 
 	&::before {
 		content: '';
@@ -426,7 +431,11 @@
 		z-index: -1;
 		border-radius: inherit;
 		pointer-events: none;
-		@apply bg-white/40 backdrop-blur-[30px] backdrop-saturate-[1.6] dark:bg-[#0e0d15]/40;
+		background-color: var(--frost-bg);
+		@apply backdrop-blur-[30px] backdrop-saturate-[1.6];
+	}
+	&:is(.dark *) {
+		--frost-bg: color-mix(in oklab, #0e0d15 40%, transparent);
 	}
 }
 /* No `position` here: every frost-surface consumer already positions itself
@@ -434,6 +443,12 @@
    a static element needs the ::before to anchor to it. */
 @utility frost-surface {
 	@apply rounded border border-white/60 shadow-[0_1px_2px_rgba(40,30,70,0.05),0_10px_26px_rgba(40,30,70,0.11),inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-white/[0.13] dark:shadow-[0_2px_6px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)];
+	/* The blur layer's color is driven by a custom property set here on the main
+	   element. A `dark:bg-…` written inside the ::before @apply compiles the dark
+	   variant onto the main element, never the pseudo-element, so in dark mode the
+	   blur layer stayed white and the surface was unreadable; swapping the property
+	   in the dark scope reaches the pseudo-element. */
+	--frost-surface-bg: color-mix(in oklab, #fff 75%, transparent);
 
 	&::before {
 		content: '';
@@ -442,7 +457,11 @@
 		z-index: -1;
 		border-radius: inherit;
 		pointer-events: none;
-		@apply bg-white/75 backdrop-blur-2xl dark:bg-surface-container/90;
+		background-color: var(--frost-surface-bg);
+		@apply backdrop-blur-2xl;
+	}
+	&:is(.dark *) {
+		--frost-surface-bg: color-mix(in oklab, var(--surface-container) 90%, transparent);
 	}
 }
 @utility frost-selected {

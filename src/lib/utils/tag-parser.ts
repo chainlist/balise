@@ -10,10 +10,25 @@ export interface HashtagMatch extends ParsedHashtag {
 	length: number;
 }
 
+/**
+ * A `#…` sequence inside an inline-HTML tag (the hex in
+ * `<span style="color: #fff">`, an `<a href="#x">` anchor, …) is markup, not a
+ * tag: it sits between a `<` and the tag's closing `>` on the same line.
+ */
+function isInsideHtmlTag(text: string, hashIndex: number): boolean {
+	for (let i = hashIndex - 1; i >= 0; i--) {
+		const ch = text[i];
+		if (ch === '<') return true;
+		if (ch === '>' || ch === '\n') return false;
+	}
+	return false;
+}
+
 export function parseAllHashtags(text: string): HashtagMatch[] {
 	const re = new RegExp(TAG_PATTERN_SOURCE, 'g');
 	const results: HashtagMatch[] = [];
 	for (const match of text.matchAll(re)) {
+		if (isInsideHtmlTag(text, match.index)) continue;
 		results.push({
 			name: match[1],
 			param: match[2],

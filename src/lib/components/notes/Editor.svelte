@@ -29,7 +29,11 @@
 		mdCheckboxPlugin,
 		mdTaskTagPlugin,
 		mdHighlightPlugin,
+		mdUnderlinePlugin,
+		mdTextColorPlugin,
+		cleanEmptyColorSpans,
 		mdFormatPlugin,
+		mdTextToolbarPlugin,
 		mdLinkPlugin,
 		mdSlashPlugin,
 		mdDatePicker,
@@ -85,6 +89,7 @@
 			mdHeaderPlugin(mode),
 			mdQuotePlugin(mode),
 			mdHighlightPlugin(mode),
+			mdUnderlinePlugin(mode),
 			mdLinkPlugin(mode),
 			mdTagPlugin(mode),
 			mdCheckboxPlugin(mode),
@@ -154,10 +159,15 @@
 					codeFenceAutoClose,
 					mdTagCompletion,
 					mdSlashPlugin,
+					mdTextToolbarPlugin,
 					mdDatePicker,
 					mdPlaceholderPlugin,
 					// Images and video embeds always render as widgets, independent of mark mode
 					mdEmbedPlugin(),
+					// Text color span tags are never shown, independent of mark mode
+					mdTextColorPlugin(),
+					// Remove the leftover empty span when colored text is fully deleted
+					cleanEmptyColorSpans,
 					// Mark visibility (dynamically reconfigured)
 					markCompartment.of(makeMarkPlugins(settingsService.editor.state.markdownMarks)),
 					// Theme

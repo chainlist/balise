@@ -1,5 +1,5 @@
 import { getDB } from '$lib/utils/db';
-import { TAG_PATTERN_SOURCE } from '$lib/utils/tag-parser';
+import { parseAllHashtags } from '$lib/utils/tag-parser';
 import { FENCE_LANG_SOURCE } from '$lib/utils/markdown-patterns';
 import { settingsService, MAGIC_TAG_MATCH_TYPES } from '../settings/settings.svelte';
 
@@ -19,7 +19,7 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 }
 
 function extractHashtags(content: string): string[] {
-	return [...content.matchAll(new RegExp(TAG_PATTERN_SOURCE, 'gm'))].map((m) => m[1]);
+	return parseAllHashtags(content).map((m) => m.name);
 }
 
 function extractCodeTags(content: string): string[] {

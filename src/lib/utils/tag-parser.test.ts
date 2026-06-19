@@ -61,6 +61,29 @@ describe('parseAllHashtags', () => {
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe('end');
 	});
+
+	it('ignores hex color values inside a color span', () => {
+		expect(parseAllHashtags('<span style="color: #FF5733">hi</span>')).toEqual([]);
+	});
+
+	it('ignores hex colors with or without a space after the colon', () => {
+		expect(parseAllHashtags('<span style="color:#fff">a</span>')).toEqual([]);
+	});
+
+	it('keeps a real tag inside a colored span, dropping only the color value', () => {
+		const result = parseAllHashtags('<span style="color: #f00">#important</span>');
+		expect(result.map((m) => m.name)).toEqual(['important']);
+	});
+
+	it('keeps a hashtag whose name happens to be all hex digits', () => {
+		const result = parseAllHashtags('#beef and #decade');
+		expect(result.map((m) => m.name)).toEqual(['beef', 'decade']);
+	});
+
+	it('keeps a hashtag written after the word "color:" in prose', () => {
+		const result = parseAllHashtags('favorite color: #red');
+		expect(result.map((m) => m.name)).toEqual(['red']);
+	});
 });
 
 describe('groupHashtagOccurrences', () => {

@@ -37,8 +37,13 @@ function collectLenientHideRanges(
 	parsedIntervals: [number, number][]
 ): Range<Decoration>[] {
 	const ranges: Range<Decoration>[] = [];
-	const isCoveredByTree = (from: number, to: number) =>
-		parsedIntervals.some(([f, t]) => from >= f && to <= t);
+	// Defer to the parser for any region it already claimed. Overlap, not
+	// containment: a match that straddles two adjacent emphasis nodes (e.g. the
+	// `* and *` the regex sees between `**a**` and `**b**`) isn't contained by
+	// either node but still overlaps both, and hiding its ends would clobber a
+	// real delimiter of whichever node the cursor is revealing.
+	const overlapsParsed = (from: number, to: number) =>
+		parsedIntervals.some(([f, t]) => from < t && to > f);
 	const lenientCovered: [number, number][] = [];
 
 	for (const { from: vFrom, to: vTo } of view.visibleRanges) {
@@ -49,7 +54,7 @@ function collectLenientHideRanges(
 			while ((m = re.exec(text)) !== null) {
 				const from = vFrom + m.index;
 				const to = from + m[0].length;
-				if (isCoveredByTree(from, to)) continue;
+				if (overlapsParsed(from, to)) continue;
 				if (lenientCovered.some(([f, t]) => from >= f && to <= t)) continue;
 				lenientCovered.push([from, to]);
 				if (isMarkRevealed(mode, from, to, cursorPos)) continue;

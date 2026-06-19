@@ -5,6 +5,8 @@ import { syntaxTree } from '@codemirror/language';
 import {
 	emphasisMarks,
 	highlightMarks,
+	underlineMarks,
+	colorMarks,
 	isMarkRevealed,
 	isRevealed,
 	dedupeOverlapping,
@@ -18,16 +20,25 @@ type Atom = { from: number; to: number };
 // Combine emphasis marks (parent-bounds reveal) and highlight marks
 // (line-based reveal) into a single list of marks that are currently hidden.
 function hiddenMarks(state: EditorState, mode: MarkMode): EmphasisMark[] {
-	if (mode === 'always') return [];
+	const out: EmphasisMark[] = [];
+
+	// Color span tags are never shown (independent of mark mode), so they are
+	// always hidden — the cursor must always skip them.
+	for (const m of colorMarks(state)) out.push(m);
+
+	if (mode === 'always') return out;
 	const cursorPos = state.selection.main.head;
 	const cursorLine = state.doc.lineAt(cursorPos).number;
-	const out: EmphasisMark[] = [];
 
 	for (const m of emphasisMarks(state)) {
 		if (isMarkRevealed(mode, m.parentFrom, m.parentTo, cursorPos)) continue;
 		out.push(m);
 	}
 	for (const m of highlightMarks(state)) {
+		if (isRevealed(mode, state.doc.lineAt(m.parentFrom).number, cursorLine)) continue;
+		out.push(m);
+	}
+	for (const m of underlineMarks(state)) {
 		if (isRevealed(mode, state.doc.lineAt(m.parentFrom).number, cursorLine)) continue;
 		out.push(m);
 	}
@@ -67,7 +78,8 @@ function linkAtoms(view: EditorView, mode: MarkMode): Atom[] {
 }
 
 function hiddenMarkRanges(view: EditorView, mode: MarkMode): DecorationSet {
-	if (mode === 'always') return Decoration.none;
+	// No early-out on 'always': color spans are hidden in every mode, so they
+	// must stay atomic even when all other marks are shown.
 	const markRanges = hiddenMarks(view.state, mode).map((m) =>
 		Decoration.mark({}).range(m.from, m.to)
 	);
