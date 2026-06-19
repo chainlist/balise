@@ -78,6 +78,7 @@
 	"tag_color_label": "Couleur",
 	"tag_pin_label": "Épingler à la barre latérale",
 	"tag_pin_toggle": "Épingler ce tag",
+	"settings_group_organization": "Organisation",
 	"settings_tags_heading": "Tags",
 	"settings_tags_description": "Gérez et personnalisez vos tags.",
 	"settings_tags_empty": "Aucun tag pour le moment. Ajoutez des #hashtags à vos notes pour créer des tags.",

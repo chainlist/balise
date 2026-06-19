@@ -48,72 +48,93 @@
 		children?: NavView[];
 		comingSoon?: boolean;
 	};
+	type NavGroup = { id: string; title: string; items: NavItem[] };
 
-	const navItems: NavItem[] = [
+	const navGroups: NavGroup[] = [
 		{
-			id: 'general',
-			label: m.settings_general_heading(),
-			icon: SlidersHorizontalIcon,
-			component: GeneralSettings
-		},
-		{
-			id: 'appearance',
-			label: m.settings_appearance_heading(),
-			icon: PaletteIcon,
-			component: AppearanceSettings
-		},
-		{
-			id: 'editor',
-			label: m.settings_editor_heading(),
-			icon: TypeIcon,
-			component: EditorSettings
-		},
-		{
-			id: 'magic-tags',
-			label: m.settings_magic_tags_heading(),
-			icon: SparklesIcon,
-			component: MagicTagsSettings
-		},
-		{
-			id: 'shortcuts',
-			label: m.settings_shortcuts_heading(),
-			icon: KeyboardIcon,
-			component: ShortcutsSettings
-		},
-		{
-			id: 'sync',
-			label: m.settings_sync_heading(),
-			icon: RefreshCwIcon,
-			component: SyncSettings,
-			// Sync isn't ready to ship: greyed out in production builds, but kept
-			// reachable in local dev (`pnpm dev`) for continued work.
-			comingSoon: import.meta.env.PROD,
-			children: [
-				{ id: 'sync-paired', label: m.settings_sync_nav_paired(), component: SyncPairedDevices },
-				{ id: 'sync-sharing', label: m.settings_sync_nav_sharing(), component: SyncSharingSettings }
+			id: 'settings',
+			title: m.nav_settings(),
+			items: [
+				{
+					id: 'general',
+					label: m.settings_general_heading(),
+					icon: SlidersHorizontalIcon,
+					component: GeneralSettings
+				},
+				{
+					id: 'appearance',
+					label: m.settings_appearance_heading(),
+					icon: PaletteIcon,
+					component: AppearanceSettings
+				},
+				{
+					id: 'editor',
+					label: m.settings_editor_heading(),
+					icon: TypeIcon,
+					component: EditorSettings
+				},
+				{
+					id: 'magic-tags',
+					label: m.settings_magic_tags_heading(),
+					icon: SparklesIcon,
+					component: MagicTagsSettings
+				},
+				{
+					id: 'shortcuts',
+					label: m.settings_shortcuts_heading(),
+					icon: KeyboardIcon,
+					component: ShortcutsSettings
+				},
+				{
+					id: 'sync',
+					label: m.settings_sync_heading(),
+					icon: RefreshCwIcon,
+					component: SyncSettings,
+					// Sync isn't ready to ship: greyed out in production builds, but kept
+					// reachable in local dev (`pnpm dev`) for continued work.
+					comingSoon: import.meta.env.PROD,
+					children: [
+						{
+							id: 'sync-paired',
+							label: m.settings_sync_nav_paired(),
+							component: SyncPairedDevices
+						},
+						{
+							id: 'sync-sharing',
+							label: m.settings_sync_nav_sharing(),
+							component: SyncSharingSettings
+						}
+					]
+				},
+				{
+					id: 'about',
+					label: m.settings_about_heading(),
+					icon: InfoIcon,
+					component: AboutSettings
+				}
 			]
 		},
 		{
-			id: 'desks',
-			label: m.settings_desks_heading(),
-			icon: LayoutListIcon,
-			component: DesksSettings
-		},
-		{
-			id: 'tags',
-			label: m.settings_tags_heading(),
-			icon: TagsIcon,
-			component: TagsSettings
-		},
-		{
-			id: 'about',
-			label: m.settings_about_heading(),
-			icon: InfoIcon,
-			component: AboutSettings
+			id: 'organization',
+			title: m.settings_group_organization(),
+			items: [
+				{
+					id: 'desks',
+					label: m.settings_desks_heading(),
+					icon: LayoutListIcon,
+					component: DesksSettings
+				},
+				{
+					id: 'tags',
+					label: m.settings_tags_heading(),
+					icon: TagsIcon,
+					component: TagsSettings
+				}
+			]
 		}
 	];
 
-	let activeView = $state<NavView>(navItems[0] as NavView);
+	let activeView = $state<NavView>(navGroups[0].items[0] as NavView);
 	const ActiveSection = $derived(activeView.component);
 
 	function selectItem(item: NavItem): void {
@@ -134,6 +155,8 @@
 	const ACTIVE_CLASS = 'bg-sidebar-accent font-medium text-on-surface';
 	const INACTIVE_CLASS = 'text-muted-foreground hover:bg-muted hover:text-foreground';
 	const DISABLED_CLASS = 'cursor-not-allowed text-muted-foreground/50';
+	const GROUP_TITLE_CLASS =
+		'px-2 py-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground/60 uppercase';
 </script>
 
 <Dialog.Root {open} onOpenChange={(v) => (uiState.modal.isSettingsOpen = v)}>
@@ -153,41 +176,47 @@
 		>
 			<!-- Left sidebar -->
 			<div class="flex w-48 shrink-0 flex-col gap-1 rounded border-r bg-muted/30 p-3">
-				<Dialog.Title
-					class="mb-1 px-2 py-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
-				>
-					{m.nav_settings()}
-				</Dialog.Title>
-				{#each navItems as item (item.id)}
-					<button
-						onclick={() => selectItem(item)}
-						disabled={item.comingSoon}
-						class={cn(
-							'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
-							item.comingSoon ? DISABLED_CLASS : isItemActive(item) ? ACTIVE_CLASS : INACTIVE_CLASS
-						)}
-					>
-						<item.icon size="15" class="shrink-0" />
-						<span class="truncate">{item.label}</span>
-						{#if item.comingSoon}
-							<Badge class="ml-auto">{m.settings_sync_soon()}</Badge>
-						{/if}
-					</button>
-					{#if item.children && !item.comingSoon}
-						<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
-							{#each item.children as child (child.id)}
-								<button
-									onclick={() => (activeView = child)}
-									class={cn(
-										'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
-										activeView.id === child.id ? ACTIVE_CLASS : INACTIVE_CLASS
-									)}
-								>
-									<span class="truncate">{child.label}</span>
-								</button>
-							{/each}
-						</div>
+				{#each navGroups as group, groupIndex (group.id)}
+					{#if groupIndex === 0}
+						<Dialog.Title class={cn(GROUP_TITLE_CLASS, 'mb-1')}>{group.title}</Dialog.Title>
+					{:else}
+						<h3 class={cn(GROUP_TITLE_CLASS, 'mt-4 mb-1')}>{group.title}</h3>
 					{/if}
+					{#each group.items as item (item.id)}
+						<button
+							onclick={() => selectItem(item)}
+							disabled={item.comingSoon}
+							class={cn(
+								'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
+								item.comingSoon
+									? DISABLED_CLASS
+									: isItemActive(item)
+										? ACTIVE_CLASS
+										: INACTIVE_CLASS
+							)}
+						>
+							<item.icon size="15" class="shrink-0" />
+							<span class="truncate">{item.label}</span>
+							{#if item.comingSoon}
+								<Badge class="ml-auto">{m.settings_sync_soon()}</Badge>
+							{/if}
+						</button>
+						{#if item.children && !item.comingSoon}
+							<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
+								{#each item.children as child (child.id)}
+									<button
+										onclick={() => (activeView = child)}
+										class={cn(
+											'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
+											activeView.id === child.id ? ACTIVE_CLASS : INACTIVE_CLASS
+										)}
+									>
+										<span class="truncate">{child.label}</span>
+									</button>
+								{/each}
+							</div>
+						{/if}
+					{/each}
 				{/each}
 				<div class="flex-1"></div>
 				<button

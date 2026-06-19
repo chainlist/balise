@@ -78,6 +78,7 @@
 	"tag_color_label": "Color",
 	"tag_pin_label": "Fijar en la barra lateral",
 	"tag_pin_toggle": "Fijar esta etiqueta",
+	"settings_group_organization": "Organización",
 	"settings_tags_heading": "Etiquetas",
 	"settings_tags_description": "Gestiona y personaliza tus etiquetas.",
 	"settings_tags_empty": "Aún no hay etiquetas. Añade #hashtags a tus notas para crear etiquetas.",

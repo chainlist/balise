@@ -78,6 +78,7 @@
 	"tag_color_label": "Color",
 	"tag_pin_label": "Pin to sidebar",
 	"tag_pin_toggle": "Pin this tag",
+	"settings_group_organization": "Organization",
 	"settings_tags_heading": "Tags",
 	"settings_tags_description": "Manage and customise your tags.",
 	"settings_tags_empty": "No tags yet. Add #hashtags to your notes to create tags.",
