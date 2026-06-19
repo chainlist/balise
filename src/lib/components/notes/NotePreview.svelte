@@ -5,7 +5,6 @@
 		type TokenizerAndRendererExtension,
 		type Tokens
 	} from 'marked';
-	import { openUrl } from '@tauri-apps/plugin-opener';
 	import { fsService } from '$lib/services/platform/fs';
 	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
@@ -78,20 +77,9 @@
 			urlCache.clear();
 		};
 	});
-
-	// Links come from {@html}, so intercept clicks here and open them
-	// in the default browser instead of navigating the webview.
-	function onLinkClick(e: MouseEvent) {
-		const anchor = (e.target as HTMLElement).closest('a');
-		if (!anchor) return;
-		e.preventDefault();
-		e.stopPropagation();
-		openUrl(anchor.href);
-	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
-<div bind:this={container} class="note-preview line-clamp-3" onclick={onLinkClick}>
+<div bind:this={container} class="note-preview line-clamp-3">
 	{@html html}
 </div>
 
@@ -101,6 +89,9 @@
 		font-size: 0.75rem;
 		line-height: 1.6;
 		color: var(--muted-foreground);
+		/* Protective layer: clicks pass through to the note-card button
+		   instead of hitting rendered elements like links. */
+		pointer-events: none;
 	}
 
 	/* Flatten block elements to flow inline across clamped lines */
