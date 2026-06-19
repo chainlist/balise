@@ -82,9 +82,9 @@
 						</button>
 					{/snippet}
 				</DropdownMenu.Trigger>
-				<DropdownMenu.Content align="end">
+				<DropdownMenu.Content align="end" class="rounded">
 					<DropdownMenu.Item
-						class="text-destructive focus:text-destructive"
+						class="rounded text-destructive focus:text-destructive"
 						onclick={() => (confirmOpen = true)}
 					>
 						<Trash2Icon class="size-4" />
