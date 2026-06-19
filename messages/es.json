@@ -251,6 +251,10 @@
 	"slash_code_desc": "Bloque de código delimitado",
 	"slash_divider_label": "Divisor",
 	"slash_divider_desc": "Separador horizontal",
+	"slash_date_now_label": "Fecha de hoy",
+	"slash_date_now_desc": "Insertar la fecha de hoy",
+	"slash_insert_date_label": "Insertar una fecha",
+	"slash_insert_date_desc": "Elegir una fecha en un calendario",
 
 	"editor_placeholder": "Escribe algo o escribe «/» para ver comandos",
 	"editor_reading_time": "{minutes} min de lectura",

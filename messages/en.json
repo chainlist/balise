@@ -251,6 +251,10 @@
 	"slash_code_desc": "Fenced code block",
 	"slash_divider_label": "Divider",
 	"slash_divider_desc": "Horizontal separator",
+	"slash_date_now_label": "Date now",
+	"slash_date_now_desc": "Insert today's date",
+	"slash_insert_date_label": "Insert a date",
+	"slash_insert_date_desc": "Pick a date from a calendar",
 
 	"editor_placeholder": "Write something, or type '/' for commands",
 	"editor_reading_time": "{minutes} min read",

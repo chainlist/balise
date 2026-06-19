@@ -1,10 +1,14 @@
 import * as m from '$paraglide/messages.js';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { formatDate } from '$lib/utils/date-format';
 
 export interface SlashAction {
 	id: string;
 	label: string;
 	description: string;
-	insert: string;
+	/** Text to insert in place of the slash command. A function is evaluated at
+	 *  selection time (e.g. for a date that depends on the current settings). */
+	insert: string | (() => string);
 	keywords: string[];
 	icon: string;
 }
@@ -105,5 +109,27 @@ export const SLASH_ACTIONS: SlashAction[] = [
 		insert: '---\n',
 		keywords: ['divider', 'separator', 'hr'],
 		icon: '—'
+	},
+	{
+		id: 'date-now',
+		label: m.slash_date_now_label(),
+		description: m.slash_date_now_desc(),
+		insert: () =>
+			formatDate(
+				new Date(),
+				settingsService.general.state.dateFormat,
+				settingsService.general.state.language
+			),
+		keywords: ['date', 'today', 'now'],
+		icon: '📅'
+	},
+	{
+		// Inserts `@`, which the date-picker plugin reacts to by opening the calendar.
+		id: 'insert-date',
+		label: m.slash_insert_date_label(),
+		description: m.slash_insert_date_desc(),
+		insert: '@',
+		keywords: ['date', 'calendar', 'pick', 'insert'],
+		icon: '📆'
 	}
 ];

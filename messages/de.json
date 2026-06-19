@@ -251,6 +251,10 @@
 	"slash_code_desc": "Eingezäunter Codeblock",
 	"slash_divider_label": "Trennlinie",
 	"slash_divider_desc": "Horizontaler Trenner",
+	"slash_date_now_label": "Heutiges Datum",
+	"slash_date_now_desc": "Heutiges Datum einfügen",
+	"slash_insert_date_label": "Datum einfügen",
+	"slash_insert_date_desc": "Ein Datum aus einem Kalender wählen",
 
 	"editor_placeholder": "Schreibe etwas oder tippe „/“ für Befehle",
 	"editor_reading_time": "{minutes} Min. Lesezeit",
