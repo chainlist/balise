@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import type { EditorView } from '@codemirror/view';
-import { mountEditor, destroy, rendered } from './editor-harness';
+import { mountEditor, destroy, rendered, countEls } from './editor-harness';
 import type { MarkMode } from './shared';
 
 // Concealment: what the user sees as the cursor moves, across mark modes. Covers the
@@ -85,6 +85,23 @@ describe('underline concealment (line-based)', () => {
 		expect(at('a <u>x</u> b\ny', 13)).toBe('a x b\ny');
 		expect(at('a <ins>z</ins> b\ny', 5)).toBe('a <ins>z</ins> b\ny');
 		expect(at('a <ins>z</ins> b\ny', 17)).toBe('a z b\ny');
+	});
+});
+
+describe('text color concealment (always hidden)', () => {
+	it('never shows the color span tags, regardless of cursor position or mode', () => {
+		const doc = 'a <span style="color: #7c6cde">x</span> b\ny';
+		expect(at(doc, 5)).toBe('a x b\ny'); // cursor on the colored line → still hidden
+		expect(at(doc, 42)).toBe('a x b\ny'); // cursor on the next line → hidden
+		expect(at(doc, 5, 'always')).toBe('a x b\ny'); // even in 'always' mode → hidden
+		expect(at(doc, 5, 'never')).toBe('a x b\ny');
+	});
+
+	it('does not highlight the text between two color spans (their style= attributes)', () => {
+		const doc =
+			'<span style="color: #7c6cde">heading</span> mid <span style="color: #e87a6a">tail</span>';
+		view = mountEditor(doc, { mode: 'cursor', cursor: 0 });
+		expect(countEls(view, '.cm-md-highlight')).toBe(0);
 	});
 });
 

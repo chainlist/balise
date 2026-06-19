@@ -266,6 +266,8 @@
 	"editor_format_italic": "Cursiva",
 	"editor_format_underline": "Subrayado",
 	"editor_format_strikethrough": "Tachado",
+	"editor_format_color": "Color del texto",
+	"color_picker_custom": "Color personalizado",
 
 	"image_add_description": "Añadir descripción",
 	"image_not_found": "Imagen no encontrada",

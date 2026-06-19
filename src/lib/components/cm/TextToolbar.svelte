@@ -13,36 +13,44 @@
 	export type ActiveMarks = Record<FormatMark, boolean>;
 
 	export interface TextToolbarControls {
-		show(anchor: ToolbarAnchor, active: ActiveMarks): void;
+		show(anchor: ToolbarAnchor, active: ActiveMarks, color: string | null): void;
 		hide(): void;
 	}
 </script>
 
 <script lang="ts">
-	import { Bold, Italic, Underline, Strikethrough } from '@lucide/svelte';
+	import { Bold, Italic, Underline, Strikethrough, Baseline } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 	import * as m from '$paraglide/messages.js';
+	import ColorPicker from '$lib/components/ColorPicker.svelte';
 	import type { FormatMark } from '$lib/utils/cm/formatPlugin';
 
 	let {
 		controls,
-		oncommand
+		oncommand,
+		oncolor,
+		onpickertoggle
 	}: {
 		controls: TextToolbarControls;
 		oncommand: (mark: FormatMark) => void;
+		oncolor: (color: string) => void;
+		/** Notified when the color popover opens/closes, so the plugin can keep the toolbar put. */
+		onpickertoggle: (open: boolean) => void;
 	} = $props();
 
 	let visible = $state(false);
 	let anchor = $state<ToolbarAnchor>({ left: 0, top: 0, bottom: 0 });
 	let active = $state<ActiveMarks>({ bold: false, italic: false, underline: false, strike: false });
+	let activeColor = $state<string | null>(null);
 
 	// The editor's toolbar plugin drives this component imperatively through
 	// `controls` (same bridge pattern as SlashMenu); the plugin flushes effects
 	// after mount so these are populated before the first call.
 	$effect(() => {
-		controls.show = (a, marks) => {
+		controls.show = (a, marks, color) => {
 			anchor = a;
 			active = marks;
+			activeColor = color;
 			visible = true;
 		};
 		controls.hide = () => {
@@ -87,5 +95,17 @@
 				<b.icon class="size-4" strokeWidth={on ? 3 : 2} />
 			</button>
 		{/each}
+
+		<ColorPicker
+			value={activeColor}
+			onpick={oncolor}
+			onOpenChange={onpickertoggle}
+			triggerAriaLabel={m.editor_format_color()}
+			triggerClass="flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+		>
+			{#snippet trigger()}
+				<Baseline class="size-4" style={activeColor ? `color: ${activeColor}` : undefined} />
+			{/snippet}
+		</ColorPicker>
 	</div>
 {/if}

@@ -266,6 +266,8 @@
 	"editor_format_italic": "Italic",
 	"editor_format_underline": "Underline",
 	"editor_format_strikethrough": "Strikethrough",
+	"editor_format_color": "Text color",
+	"color_picker_custom": "Custom color",
 
 	"image_add_description": "Add description",
 	"image_not_found": "Image not found",

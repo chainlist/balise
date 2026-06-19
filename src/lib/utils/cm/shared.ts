@@ -3,7 +3,12 @@ import type { DecorationSet, ViewUpdate } from '@codemirror/view';
 import type { EditorState, Range, Line } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { mount, unmount, type Component } from 'svelte';
-import { HIGHLIGHT_SOURCE, BARE_URL_SOURCE, UNDERLINE_SOURCE } from '../markdown-patterns';
+import {
+	HIGHLIGHT_SOURCE,
+	BARE_URL_SOURCE,
+	UNDERLINE_SOURCE,
+	COLOR_SOURCE
+} from '../markdown-patterns';
 
 export type MarkMode = 'always' | 'cursor' | 'never';
 
@@ -100,6 +105,27 @@ export function underlineMarks(state: EditorState): EmphasisMark[] {
 		const parentTo = parentFrom + m[0].length;
 		out.push({ from: parentFrom, to: parentFrom + m[1].length + 2, parentFrom, parentTo });
 		out.push({ from: parentTo - (m[1].length + 3), to: parentTo, parentFrom, parentTo });
+	}
+	return out;
+}
+
+// Text color <span style="color: …">…</span> tags aren't in the syntax tree
+// either — collect the open/close tags like underlineMarks so cursor nav treats
+// them as hidden marks. The closing tag is always </span> (7 chars); the opening
+// tag length is whatever's left after the inner text and the close.
+const COLOR_MARK_RE = new RegExp(COLOR_SOURCE, 'g');
+
+export function colorMarks(state: EditorState): EmphasisMark[] {
+	const out: EmphasisMark[] = [];
+	const text = state.doc.toString();
+	COLOR_MARK_RE.lastIndex = 0;
+	let m: RegExpExecArray | null;
+	while ((m = COLOR_MARK_RE.exec(text)) !== null) {
+		const parentFrom = m.index;
+		const parentTo = parentFrom + m[0].length;
+		const openLen = m[0].length - m[2].length - 7;
+		out.push({ from: parentFrom, to: parentFrom + openLen, parentFrom, parentTo });
+		out.push({ from: parentTo - 7, to: parentTo, parentFrom, parentTo });
 	}
 	return out;
 }

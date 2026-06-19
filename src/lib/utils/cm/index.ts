@@ -12,6 +12,7 @@ export { mdCheckboxPlugin } from './checkboxPlugin';
 export { mdTaskTagPlugin } from './taskTagPlugin';
 export { mdHighlightPlugin } from './highlightPlugin';
 export { mdUnderlinePlugin } from './underlinePlugin';
+export { mdTextColorPlugin, cleanEmptyColorSpans } from './textColorPlugin';
 export { mdFormatPlugin } from './formatPlugin';
 export { mdTextToolbarPlugin } from './textToolbarPlugin';
 export { mdSlashPlugin } from './slashPlugin';

@@ -3,7 +3,7 @@ import type { EditorView } from '@codemirror/view';
 import { EditorSelection } from '@codemirror/state';
 import type { SelectionRange, ChangeSpec, EditorState } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { UNDERLINE_SOURCE } from '../markdown-patterns';
+import { UNDERLINE_SOURCE, COLOR_SOURCE } from '../markdown-patterns';
 
 const NODE_FOR_MARK: Record<string, string> = {
 	'*': 'Emphasis',
@@ -260,6 +260,87 @@ function toggleUnderline(view: EditorView): boolean {
 		);
 	}
 	return true;
+}
+
+// Text color, like underline, has no markdown syntax, so it's stored as an inline
+// HTML span: <span style="color: #hex">…</span>. The span that fully encloses
+// [from, to], or null. The closing tag is always </span> (7 chars); the opening
+// tag length varies with the color string, so it's derived from the match.
+const COLOR_SPAN_RE = new RegExp(COLOR_SOURCE, 'g');
+
+function enclosingColorSpan(
+	state: EditorState,
+	from: number,
+	to: number
+): { from: number; to: number; innerFrom: number; innerTo: number; color: string } | null {
+	const text = state.doc.toString();
+	COLOR_SPAN_RE.lastIndex = 0;
+	let m: RegExpExecArray | null;
+	while ((m = COLOR_SPAN_RE.exec(text)) !== null) {
+		const s = m.index;
+		const e = s + m[0].length;
+		if (from >= s && to <= e) {
+			const openLen = m[0].length - m[2].length - 7;
+			return { from: s, to: e, innerFrom: s + openLen, innerTo: e - 7, color: m[1] };
+		}
+	}
+	return null;
+}
+
+// Apply a text color to the selection. If the selection already sits in a color
+// span: picking the same color removes it (toggle off), a different color
+// replaces it. Otherwise the selection is wrapped in a new span. A bare cursor
+// outside any span is a no-op (there's nothing to color), like underline.
+export function applyTextColor(view: EditorView, color: string): boolean {
+	const { state } = view;
+	const { from, to } = state.selection.main;
+	const open = `<span style="color: ${color}">`;
+	const found = enclosingColorSpan(state, from, to);
+
+	if (found) {
+		const inner = state.doc.sliceString(found.innerFrom, found.innerTo);
+		if (found.color.toLowerCase() === color.toLowerCase()) {
+			view.dispatch(
+				state.update({
+					changes: { from: found.from, to: found.to, insert: inner },
+					selection: EditorSelection.range(found.from, found.from + inner.length),
+					userEvent: 'input'
+				})
+			);
+		} else {
+			const next = open + inner + '</span>';
+			view.dispatch(
+				state.update({
+					changes: { from: found.from, to: found.to, insert: next },
+					selection: EditorSelection.range(
+						found.from + open.length,
+						found.from + open.length + inner.length
+					),
+					userEvent: 'input'
+				})
+			);
+		}
+		return true;
+	}
+
+	if (from === to) return false;
+	view.dispatch(
+		state.update({
+			changes: [
+				{ from, insert: open },
+				{ from: to, insert: '</span>' }
+			],
+			selection: EditorSelection.range(from + open.length, to + open.length),
+			userEvent: 'input'
+		})
+	);
+	return true;
+}
+
+// The color wrapping the current selection (for the toolbar swatch), or null.
+export function activeTextColor(state: EditorState): string | null {
+	const { from, to } = state.selection.main;
+	return enclosingColorSpan(state, from, to)?.color ?? null;
 }
 
 export type FormatMark = 'bold' | 'italic' | 'underline' | 'strike';

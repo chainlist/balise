@@ -27,6 +27,15 @@ describe('HIGHLIGHT_SOURCE (=text=)', () => {
 	it('does not match an empty pair', () => {
 		expect(re().test('==')).toBe(false);
 	});
+	it('ignores the = in HTML attributes so color spans do not bracket a false highlight', () => {
+		const doc = '<span style="color: #abc">a</span> b <span style="color: #def">c</span>';
+		expect(re().test(doc)).toBe(false);
+	});
+	it('still matches a real highlight next to a color span', () => {
+		const m = re().exec('<span style="color: #abc">x</span> =hi= y');
+		expect(m?.[0]).toBe('=hi=');
+		expect(m?.[1]).toBe('hi');
+	});
 });
 
 describe('UNDERLINE_SOURCE (<u>/<ins>)', () => {

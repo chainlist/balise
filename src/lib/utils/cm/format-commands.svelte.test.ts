@@ -1,7 +1,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import type { EditorView } from '@codemirror/view';
 import { mountEditor, destroy, setSelection, setCursor, pressKey, docText } from './editor-harness';
-import { FORMAT_COMMANDS, activeMarks, mdFormatPlugin } from './formatPlugin';
+import {
+	FORMAT_COMMANDS,
+	activeMarks,
+	applyTextColor,
+	activeTextColor,
+	mdFormatPlugin
+} from './formatPlugin';
+import { cleanEmptyColorSpans } from './textColorPlugin';
 
 // Toggle commands shared by the toolbar and the keymap: wrap a selection, unwrap
 // existing marks (cursor-inside, marks-outside, marks-inside, content-of-node), and
@@ -167,6 +174,70 @@ describe('keymap', () => {
 		setCursor(v, 3); // inside "word"
 		pressKey(v, 'Mod-Shift-h');
 		expect(docText(v)).toBe('word');
+	});
+});
+
+describe('text color', () => {
+	it('wraps the selection in a color span', () => {
+		const v = open('word');
+		setSelection(v, 0, 4);
+		applyTextColor(v, '#7c6cde');
+		expect(docText(v)).toBe('<span style="color: #7c6cde">word</span>');
+		// selection stays around the inner text
+		expect(sel(v)).toEqual([29, 33]);
+	});
+
+	it('replaces the color when the selection is already in a span', () => {
+		const v = open('<span style="color: #7c6cde">word</span>');
+		setSelection(v, 29, 33); // inner "word"
+		applyTextColor(v, '#e87a6a');
+		expect(docText(v)).toBe('<span style="color: #e87a6a">word</span>');
+	});
+
+	it('removes the span when the same color is applied again (toggle off)', () => {
+		const v = open('<span style="color: #7c6cde">word</span>');
+		setSelection(v, 29, 33);
+		applyTextColor(v, '#7C6CDE'); // case-insensitive match
+		expect(docText(v)).toBe('word');
+		expect(sel(v)).toEqual([0, 4]);
+	});
+
+	it('is a no-op on a bare cursor with no enclosing span', () => {
+		const v = open('word');
+		setCursor(v, 2);
+		const handled = applyTextColor(v, '#7c6cde');
+		expect(handled).toBe(false);
+		expect(docText(v)).toBe('word');
+	});
+
+	it('activeTextColor reports the enclosing color, or null', () => {
+		const v = open('<span style="color: #7c6cde">word</span>');
+		setSelection(v, 29, 33);
+		expect(activeTextColor(v.state)).toBe('#7c6cde');
+
+		const v2 = mountEditor('plain', { extensions: [mdFormatPlugin] });
+		setSelection(v2, 0, 5);
+		expect(activeTextColor(v2.state)).toBeNull();
+		destroy(v2);
+	});
+});
+
+describe('empty color span cleanup', () => {
+	it('removes the leftover span when the colored text is fully deleted', () => {
+		view = mountEditor('a <span style="color: #e87a6a">x</span> b', {
+			extensions: [cleanEmptyColorSpans]
+		});
+		const i = docText(view).indexOf('>x</span>') + 1; // position of the inner "x"
+		view.dispatch({ changes: { from: i, to: i + 1 } }); // delete the inner text
+		expect(docText(view)).toBe('a  b');
+	});
+
+	it('leaves a span with remaining text untouched', () => {
+		view = mountEditor('<span style="color: #e87a6a">word</span>', {
+			extensions: [cleanEmptyColorSpans]
+		});
+		view.dispatch({ changes: { from: 29, to: 30 } }); // delete the inner "w"
+		expect(docText(view)).toBe('<span style="color: #e87a6a">ord</span>');
 	});
 });
 

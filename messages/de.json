@@ -266,6 +266,8 @@
 	"editor_format_italic": "Kursiv",
 	"editor_format_underline": "Unterstrichen",
 	"editor_format_strikethrough": "Durchgestrichen",
+	"editor_format_color": "Textfarbe",
+	"color_picker_custom": "Eigene Farbe",
 
 	"image_add_description": "Beschreibung hinzufügen",
 	"image_not_found": "Bild nicht gefunden",

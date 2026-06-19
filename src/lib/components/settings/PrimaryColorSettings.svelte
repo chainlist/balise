@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { Popover } from 'bits-ui';
 	import { Button } from '$lib/components/shadcn/button/index.js';
+	import ColorPicker from '$lib/components/ColorPicker.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import { COLOR_PALETTE } from '$lib/utils/color-palette';
-	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
 	import { RotateCcwIcon } from '@lucide/svelte';
 </script>
@@ -26,30 +24,11 @@
 			</Button>
 		{/if}
 
-		<Popover.Root>
-			<Popover.Trigger
-				class="size-6 rounded-full border-2 border-white bg-primary shadow-md transition-transform hover:scale-110 dark:border-white/70"
-				aria-label={m.settings_primary_aria()}
-			/>
-			<Popover.Portal>
-				<Popover.Content
-					sideOffset={6}
-					class="z-50 grid grid-cols-6 gap-2 rounded-xl bg-popover p-3 shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
-				>
-					{#each COLOR_PALETTE as color (color)}
-						<Popover.Close
-							class={cn(
-								'size-6 rounded-full transition-transform hover:scale-110',
-								settingsService.appearance.state.primaryColor === color &&
-									'ring-2 ring-primary ring-offset-2 ring-offset-popover'
-							)}
-							style="background-color: {color}"
-							aria-label={color}
-							onclick={() => settingsService.appearance.setPrimaryColor(color)}
-						/>
-					{/each}
-				</Popover.Content>
-			</Popover.Portal>
-		</Popover.Root>
+		<ColorPicker
+			value={settingsService.appearance.state.primaryColor}
+			onpick={(color) => settingsService.appearance.setPrimaryColor(color)}
+			triggerAriaLabel={m.settings_primary_aria()}
+			triggerClass="size-6 rounded-full border-2 border-white bg-primary shadow-md transition-transform hover:scale-110 dark:border-white/70"
+		/>
 	</div>
 </div>

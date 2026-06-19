@@ -18,6 +18,7 @@ import { mdHeaderPlugin } from './headerPlugin';
 import { mdQuotePlugin } from './quotePlugin';
 import { mdHighlightPlugin } from './highlightPlugin';
 import { mdUnderlinePlugin } from './underlinePlugin';
+import { mdTextColorPlugin } from './textColorPlugin';
 import { spaceRequiredHeadings } from './headingParser';
 import type { MarkMode } from './shared';
 
@@ -41,7 +42,8 @@ export function markPlugins(mode: MarkMode): Extension[] {
 		mdHeaderPlugin(mode),
 		mdQuotePlugin(mode),
 		mdHighlightPlugin(mode),
-		mdUnderlinePlugin(mode)
+		mdUnderlinePlugin(mode),
+		mdTextColorPlugin()
 	];
 }
 
