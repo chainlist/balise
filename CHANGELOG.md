@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.32.1](https://github.com/chainlist/balise/compare/v0.32.0...v0.32.1) (2026-06-20)
+
+
+### Bug Fixes
+
+* **editor:** Fix embeds clicks not opening URL ([4686f19](https://github.com/chainlist/balise/commit/4686f190a0dc25a8746ea64e8fec4eacba612726))
+
 ## [0.32.0](https://github.com/chainlist/balise/compare/v0.31.1...v0.32.0) (2026-06-19)
 
 
