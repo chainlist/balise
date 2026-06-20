@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.1](https://github.com/chainlist/balise/compare/v0.33.0...v0.33.1) (2026-06-20)
+
+
+### Bug Fixes
+
+* **editor:** fix mixing marks with colors ([#82](https://github.com/chainlist/balise/issues/82)) ([bbdf92d](https://github.com/chainlist/balise/commit/bbdf92dd73a020bdbfcd601e0e46f7ca7183830d))
+
 ## [0.33.0](https://github.com/chainlist/balise/compare/v0.32.1...v0.33.0) (2026-06-20)
 
 
