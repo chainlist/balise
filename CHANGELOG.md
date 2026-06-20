@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.2](https://github.com/chainlist/balise/compare/v0.33.1...v0.33.2) (2026-06-20)
+
+
+### Bug Fixes
+
+* **editor:** embeded colors ([#84](https://github.com/chainlist/balise/issues/84)) ([aa88cfe](https://github.com/chainlist/balise/commit/aa88cfef4f72e04f7eafc31e457c4fe6af59c94d))
+
 ## [0.33.1](https://github.com/chainlist/balise/compare/v0.33.0...v0.33.1) (2026-06-20)
 
 
