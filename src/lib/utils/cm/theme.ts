@@ -94,6 +94,9 @@ export const noteEditorTheme = EditorView.theme({
 	// Markdown decorations
 	'.cm-md-bold': { fontWeight: '600' },
 	'.cm-md-italic': { fontStyle: 'italic', color: 'var(--primary)' },
+	// An explicit text color wins over the italic accent: italic nested inside a
+	// color span inherits the span's color instead of --primary.
+	'.cm-md-colored .cm-md-italic': { color: 'inherit' },
 	'.cm-md-strike': { textDecoration: 'line-through', opacity: '0.7' },
 	'.cm-md-code': {
 		fontFamily: 'var(--md-font-mono)',

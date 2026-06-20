@@ -103,6 +103,13 @@ describe('unwrap existing marks', () => {
 		FORMAT_COMMANDS.italic(v);
 		expect(docText(v)).toBe('a foo  b');
 	});
+
+	it('snaps to the whole mark when the selection straddles its boundary', () => {
+		const v = open('*mary* another word');
+		setSelection(v, 3, 13); // from inside "mary", across the closing *, into "another"
+		FORMAT_COMMANDS.italic(v);
+		expect(docText(v)).toBe('mary another word');
+	});
 });
 
 describe('bold / italic delimiter guards', () => {
@@ -240,6 +247,78 @@ describe('text color', () => {
 		const handled = applyTextColor(v, '#7c6cde');
 		expect(handled).toBe(false);
 		expect(docText(v)).toBe('word');
+	});
+
+	// A selection that crosses a span boundary must produce flat sibling spans,
+	// never a span nested inside another (the concealment regex can't parse
+	// nesting, so nested spans leak raw <span> tags into the document).
+	describe('recoloring across a span boundary stays flat', () => {
+		it('recolors from inside a span out into plain text', () => {
+			const v = open('<span style="color: #ff00ff">colored</span> text');
+			setSelection(v, 33, 48); // from inside "colored" ("red") through " text"
+			applyTextColor(v, '#32ff32');
+			expect(docText(v)).toBe(
+				'<span style="color: #ff00ff">colo</span>' + '<span style="color: #32ff32">red text</span>'
+			);
+			const [from, to] = sel(v);
+			expect(docText(v).slice(from, to)).toBe('red text');
+		});
+
+		it('recolors from plain text into a span', () => {
+			const v = open('plain <span style="color: #ff00ff">colored</span>');
+			setSelection(v, 3, 39); // from "in" through part of "colored" ("colo")
+			applyTextColor(v, '#32ff32');
+			expect(docText(v)).toBe(
+				'pla<span style="color: #32ff32">in colo</span>' + '<span style="color: #ff00ff">red</span>'
+			);
+		});
+
+		it('recolors across two adjacent spans, absorbing the one between', () => {
+			const v = open(
+				'<span style="color: #ff00ff">aaa</span><span style="color: #00ff00">bbb</span>'
+			);
+			setSelection(v, 31, 70); // last "a" of the first span through "bb" of the second
+			applyTextColor(v, '#0000ff');
+			expect(docText(v)).toBe(
+				'<span style="color: #ff00ff">aa</span>' +
+					'<span style="color: #0000ff">abb</span>' +
+					'<span style="color: #00ff00">b</span>'
+			);
+		});
+
+		it('merges into an adjacent run when recolored to its color', () => {
+			const v = open('<span style="color: #ff00ff">colored</span> text');
+			setSelection(v, 33, 48); // "red" + " text"
+			applyTextColor(v, '#ff00ff'); // same color as the run -> merge into one span
+			expect(docText(v)).toBe('<span style="color: #ff00ff">colored text</span>');
+		});
+	});
+
+	// Double-clicking a word inside a span selects the letters but not the mark's
+	// concealed delimiters (e.g. "summary" inside <span>*summary*</span>). Those
+	// delimiters belong to the word, so recoloring must treat the selection as
+	// covering the whole span and keep the mark, not split the span and orphan the *.
+	describe('recoloring a marked word inside a span keeps the mark', () => {
+		it('recolors the whole span for italic delimiters', () => {
+			const v = open('<span style="color: #6ecdb9">*summary*</span>');
+			setSelection(v, 30, 37); // just "summary", not the asterisks
+			applyTextColor(v, '#ff0000');
+			expect(docText(v)).toBe('<span style="color: #ff0000">*summary*</span>');
+		});
+
+		it('recolors the whole span for bold delimiters', () => {
+			const v = open('<span style="color: #6ecdb9">**summary**</span>');
+			setSelection(v, 31, 38); // just "summary", not the **
+			applyTextColor(v, '#ff0000');
+			expect(docText(v)).toBe('<span style="color: #ff0000">**summary**</span>');
+		});
+
+		it('toggles the color off and leaves the bare mark', () => {
+			const v = open('<span style="color: #6ecdb9">*summary*</span>');
+			setSelection(v, 30, 37);
+			applyTextColor(v, '#6ecdb9'); // same color -> remove the span
+			expect(docText(v)).toBe('*summary*');
+		});
 	});
 
 	it('activeTextColor reports the enclosing color, or null', () => {

@@ -3,7 +3,7 @@ import type { EditorView } from '@codemirror/view';
 import { EditorSelection } from '@codemirror/state';
 import type { SelectionRange, ChangeSpec, EditorState } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
-import { UNDERLINE_SOURCE, COLOR_SOURCE } from '../markdown-patterns';
+import { HIGHLIGHT_SOURCE, UNDERLINE_SOURCE, COLOR_SOURCE } from '../markdown-patterns';
 
 const NODE_FOR_MARK: Record<string, string> = {
 	'*': 'Emphasis',
@@ -13,146 +13,77 @@ const NODE_FOR_MARK: Record<string, string> = {
 
 type RangeResult = { changes: ChangeSpec | readonly ChangeSpec[]; range: SelectionRange };
 
-// Cursor is inside a marked node — remove the wrapping marks.
-function removeSurroundingMark(
-	view: EditorView,
-	range: SelectionRange,
-	mark: string,
-	targetNode: string
-): RangeResult | null {
+type MarkSpan = { from: number; to: number };
+
+// Does `range` reach into the mark's content (the text between its delimiters)?
+// An empty cursor counts when it sits anywhere within the content (inclusive); a
+// selection counts when it overlaps the content at all, so a selection straddling
+// a delimiter still resolves to the whole mark (the toggle's touch-it-remove-it
+// policy).
+function overlapsContent(range: SelectionRange, from: number, to: number, len: number): boolean {
+	const cFrom = from + len;
+	const cTo = to - len;
+	if (range.empty) return range.from >= cFrom && range.from <= cTo;
+	return range.from < cTo && range.to > cFrom;
+}
+
+// Source regex for a delimiter pair. The `=` highlight reuses the shared pattern
+// (its `(?!")` guard stops a `style="…"` run in a color span from reading as a
+// pair); the emphasis-family marks get a lenient delimiter/content/delimiter whose
+// inner run excludes the delimiter char.
+function pairSource(mark: string): string {
+	if (mark === '=') return HIGHLIGHT_SOURCE;
+	const esc = mark.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const inner = mark[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return `${esc}([^${inner}\\n]+)${esc}`;
+}
+
+// A single `*` next to another `*` belongs to a `**`/`***` run, not an italic
+// pair; reject those so the scan never mistakes bold delimiters for its own.
+function notAdjacentRun(state: EditorState, span: MarkSpan, mark: string): boolean {
+	if (mark[0] !== '*') return true;
+	return (
+		state.doc.sliceString(span.from - 1, span.from) !== '*' &&
+		state.doc.sliceString(span.to, span.to + 1) !== '*'
+	);
+}
+
+// String scan for marks the tree can't give us: the `=` highlight (never parsed)
+// and emphasis the parser rejected (e.g. trailing-space `*foo *`). Returns the
+// first pair on the cursor's line whose content the selection reaches into.
+function findMarkByScan(state: EditorState, range: SelectionRange, mark: string): MarkSpan | null {
 	const len = mark.length;
-	let node = syntaxTree(view.state).resolveInner(range.from, -1);
-	while (node.parent) {
-		if (node.name === targetNode) {
-			return {
-				changes: [
-					{ from: node.from, to: node.from + len },
-					{ from: node.to - len, to: node.to }
-				],
-				range: EditorSelection.cursor(range.from - len)
-			};
-		}
-		node = node.parent;
+	const line = state.doc.lineAt(range.from);
+	const re = new RegExp(pairSource(mark), 'g');
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(line.text)) !== null) {
+		const span = { from: line.from + m.index, to: line.from + m.index + m[0].length };
+		if (overlapsContent(range, span.from, span.to, len) && notAdjacentRun(state, span, mark))
+			return span;
 	}
 	return null;
 }
 
-// String fallback for the empty-cursor case when a mark has no syntax-tree node
-// (the `=` highlight isn't in the parser). Finds a delimiter pair on the cursor's
-// line whose inner text contains the cursor and strips both delimiters.
-function removeSurroundingMarkString(
+// The mark of this type the selection should toggle off, with its delimiters
+// included in the returned bounds, or null. Emphasis-family marks resolve from the
+// syntax tree (which disambiguates `*`/`**`/`***` for free); anything else falls
+// back to the string scan.
+function findEnclosingMark(
 	state: EditorState,
 	range: SelectionRange,
 	mark: string
-): RangeResult | null {
+): MarkSpan | null {
+	const targetNode = NODE_FOR_MARK[mark];
 	const len = mark.length;
-	const line = state.doc.lineAt(range.from);
-	const esc = mark.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	const re = new RegExp(`${esc}([^${esc}\\n]+)${esc}`, 'g');
-	let m: RegExpExecArray | null;
-	while ((m = re.exec(line.text)) !== null) {
-		const from = line.from + m.index;
-		const to = from + m[0].length;
-		if (range.from >= from + len && range.from <= to - len) {
-			return {
-				changes: [
-					{ from, to: from + len },
-					{ from: to - len, to }
-				],
-				range: EditorSelection.cursor(range.from - len)
-			};
+	if (targetNode) {
+		let node = syntaxTree(state).resolveInner(range.from, range.empty ? -1 : 1);
+		while (node.parent) {
+			if (node.name === targetNode && overlapsContent(range, node.from, node.to, len))
+				return { from: node.from, to: node.to };
+			node = node.parent;
 		}
 	}
-	return null;
-}
-
-// Selection sits inside a parsed mark node (e.g. [hello] in **[hello]**) — strip
-// that node's delimiters. Tree-based, like removeSurroundingMark, so toggling
-// italic on bold **text** finds no Emphasis node and won't mistake the bold
-// `*`s for its own (which string-adjacency would). A node's opening/closing
-// marks always sit exactly at node.from..+len and node.to-len..to.
-function removeWrappingMark(
-	view: EditorView,
-	range: SelectionRange,
-	mark: string,
-	targetNode: string
-): RangeResult | null {
-	const len = mark.length;
-	let node = syntaxTree(view.state).resolveInner(range.from, 1);
-	while (node.parent) {
-		// Require the selection to fall within the node's content (between the
-		// marks); selections that include the marks fall through to the string paths.
-		if (node.name === targetNode && node.from + len <= range.from && range.to <= node.to - len) {
-			return {
-				changes: [
-					{ from: node.from, to: node.from + len },
-					{ from: node.to - len, to: node.to }
-				],
-				range: EditorSelection.range(range.anchor - len, range.head - len)
-			};
-		}
-		node = node.parent;
-	}
-	return null;
-}
-
-// Marks sit outside the selection: *[hello]* → [hello]
-function removeOuterMarks(
-	view: EditorView,
-	range: SelectionRange,
-	mark: string
-): RangeResult | null {
-	const len = mark.length;
-	const { state } = view;
-	const before = state.doc.sliceString(range.from - len, range.from);
-	const after = state.doc.sliceString(range.to, range.to + len);
-	if (before !== mark || after !== mark) return null;
-	// A `*` adjacent to another `*` belongs to `**`/`***`, not an italic delimiter;
-	// stripping it would corrupt the bold marks. Let it fall through to wrapping.
-	const repeat = mark[0];
-	if (
-		state.doc.sliceString(range.from - len - 1, range.from - len) === repeat ||
-		state.doc.sliceString(range.to + len, range.to + len + 1) === repeat
-	)
-		return null;
-	return {
-		changes: [
-			{ from: range.from - len, to: range.from },
-			{ from: range.to, to: range.to + len }
-		],
-		range: EditorSelection.range(range.anchor - len, range.head - len)
-	};
-}
-
-// Marks sit inside the selection: [*hello*] → [hello]
-// Guard against matching a longer mark (e.g. ** when mark is *).
-function removeInnerMarks(
-	view: EditorView,
-	range: SelectionRange,
-	mark: string
-): RangeResult | null {
-	const len = mark.length;
-	const text = view.state.doc.sliceString(range.from, range.to);
-	if (
-		!text.startsWith(mark) ||
-		!text.endsWith(mark) ||
-		text.length <= len * 2 ||
-		text[len] === mark[len - 1] ||
-		text[text.length - len - 1] === mark[0]
-	)
-		return null;
-	const newFrom = range.from;
-	const newTo = range.to - len * 2;
-	return {
-		changes: [
-			{ from: range.from, to: range.from + len },
-			{ from: range.to - len, to: range.to }
-		],
-		range: EditorSelection.range(
-			range.anchor === range.from ? newFrom : newTo,
-			range.head === range.from ? newFrom : newTo
-		)
-	};
+	return findMarkByScan(state, range, mark);
 }
 
 // No existing marks — wrap selection.
@@ -169,31 +100,39 @@ function wrapWithMark(range: SelectionRange, mark: string): RangeResult {
 
 function toggleMark(view: EditorView, mark: string): boolean {
 	const { state } = view;
-	const targetNode = NODE_FOR_MARK[mark];
 	const len = mark.length;
 
 	view.dispatch(
 		state.update(
 			state.changeByRange((range) => {
-				if (range.empty) {
-					// Marks with a tree node use the tree path; marks without one
-					// (`=` highlight) fall back to the string scan.
-					const removed =
-						removeSurroundingMark(view, range, mark, targetNode) ??
-						(targetNode ? null : removeSurroundingMarkString(state, range, mark));
-					return (
-						removed ?? {
-							changes: { from: range.from, insert: mark + mark },
-							range: EditorSelection.cursor(range.from + len)
-						}
-					);
+				const span = findEnclosingMark(state, range, mark);
+				if (span) {
+					const { from, to } = span;
+					// Map a position to where it lands after the two delimiters are deleted.
+					const mapPos = (p: number): number => {
+						let d = 0;
+						if (p >= from + len) d += len;
+						else if (p > from) d += p - from;
+						if (p >= to) d += len;
+						else if (p > to - len) d += p - (to - len);
+						return p - d;
+					};
+					return {
+						changes: [
+							{ from, to: from + len },
+							{ from: to - len, to }
+						],
+						range: range.empty
+							? EditorSelection.cursor(mapPos(range.from))
+							: EditorSelection.range(mapPos(range.anchor), mapPos(range.head))
+					};
 				}
-				return (
-					removeWrappingMark(view, range, mark, targetNode) ??
-					removeOuterMarks(view, range, mark) ??
-					removeInnerMarks(view, range, mark) ??
-					wrapWithMark(range, mark)
-				);
+				if (range.empty)
+					return {
+						changes: { from: range.from, insert: mark + mark },
+						range: EditorSelection.cursor(range.from + len)
+					};
+				return wrapWithMark(range, mark);
 			}),
 			{ userEvent: 'input' }
 		)
@@ -268,23 +207,57 @@ function toggleUnderline(view: EditorView): boolean {
 // tag length varies with the color string, so it's derived from the match.
 const COLOR_SPAN_RE = new RegExp(COLOR_SOURCE, 'g');
 
-function enclosingColorSpan(
-	state: EditorState,
-	from: number,
-	to: number
-): { from: number; to: number; innerFrom: number; innerTo: number; color: string } | null {
+type ColorSpan = { from: number; to: number; innerFrom: number; innerTo: number; color: string };
+
+function allColorSpans(state: EditorState): ColorSpan[] {
 	const text = state.doc.toString();
 	COLOR_SPAN_RE.lastIndex = 0;
+	const out: ColorSpan[] = [];
 	let m: RegExpExecArray | null;
 	while ((m = COLOR_SPAN_RE.exec(text)) !== null) {
-		const s = m.index;
-		const e = s + m[0].length;
-		if (from >= s && to <= e) {
-			const openLen = m[0].length - m[2].length - 7;
-			return { from: s, to: e, innerFrom: s + openLen, innerTo: e - 7, color: m[1] };
-		}
+		const from = m.index;
+		const to = from + m[0].length;
+		const openLen = m[0].length - m[2].length - 7;
+		out.push({ from, to, innerFrom: from + openLen, innerTo: to - 7, color: m[1] });
 	}
-	return null;
+	return out;
+}
+
+function enclosingColorSpan(state: EditorState, from: number, to: number): ColorSpan | null {
+	return allColorSpans(state).find((s) => from >= s.from && to <= s.to) ?? null;
+}
+
+// Inline marks whose delimiters can hug a color span's edges, mapping an opening
+// delimiter to its closing one (symmetric for emphasis/strike/highlight, distinct
+// for the underline tags). Used to tell when a selection that excludes these
+// concealed delimiters still covers the span's whole content.
+const MARK_DELIMITERS: Record<string, string> = {
+	'*': '*',
+	'**': '**',
+	'***': '***',
+	'~~': '~~',
+	'=': '=',
+	'<u>': '</u>',
+	'<ins>': '</ins>'
+};
+
+// True when the selection covers the span's content: either an exact match, or the
+// only thing between the selection and the span edges is a matching pair of mark
+// delimiters (e.g. selecting "summary" inside <span>*summary*</span>, where the `*`
+// are concealed). In that case the marks belong to the word, so the whole span is
+// recolored as a unit instead of being split apart and orphaning the delimiters.
+function coversSpanContent(state: EditorState, span: ColorSpan, from: number, to: number): boolean {
+	if (from === span.innerFrom && to === span.innerTo) return true;
+	const before = state.doc.sliceString(span.innerFrom, from);
+	const after = state.doc.sliceString(to, span.innerTo);
+	return before.length > 0 && MARK_DELIMITERS[before] === after;
+}
+
+// Strip color-span open/close tags from a slice so its colored runs collapse to
+// their plain text (other marks like <u> are left in place). Used when absorbing
+// existing spans into a new color.
+function stripColorTags(s: string): string {
+	return s.replace(/<span style="color:\s*[^"]+">/g, '').replace(/<\/span>/g, '');
 }
 
 // Apply a text color to the selection. When the selection sits in an existing
@@ -302,7 +275,7 @@ export function applyTextColor(view: EditorView, color: string): boolean {
 
 	if (found) {
 		const sameColor = found.color.toLowerCase() === color.toLowerCase();
-		const coversWholeSpan = from === found.innerFrom && to === found.innerTo;
+		const coversWholeSpan = coversSpanContent(state, found, from, to);
 
 		if (coversWholeSpan) {
 			const inner = state.doc.sliceString(found.innerFrom, found.innerTo);
@@ -347,6 +320,53 @@ export function applyTextColor(view: EditorView, color: string): boolean {
 		view.dispatch(
 			state.update({
 				changes: { from: found.from, to: found.to, insert },
+				selection: EditorSelection.range(selFrom, selFrom + selected.length),
+				userEvent: 'input'
+			})
+		);
+		return true;
+	}
+
+	// Selection crosses one or more color span boundaries (no single span
+	// encloses it). Rebuild the affected region as FLAT sibling spans so we never
+	// nest one color span inside another: the concealment regex can't parse
+	// nesting and would leak raw <span> tags. Span content outside the selection
+	// keeps its color; everything inside takes the new color. A side that already
+	// has the new color is merged in rather than left as a redundant sibling.
+	const overlapping = allColorSpans(state).filter((s) => s.innerFrom < to && s.innerTo > from);
+	if (overlapping.length > 0) {
+		const lower = color.toLowerCase();
+		const leftSpan = overlapping.find((s) => s.innerFrom < from) ?? null;
+		const rightSpan = overlapping.find((s) => s.innerTo > to) ?? null;
+		const regionFrom = leftSpan ? leftSpan.from : from;
+		const regionTo = rightSpan ? rightSpan.to : to;
+
+		const selected = stripColorTags(state.doc.sliceString(from, to));
+		let inner = selected;
+		let lead = 0; // chars merged in before the user's selection
+		let leftKeep = '';
+		if (leftSpan) {
+			const text = state.doc.sliceString(leftSpan.innerFrom, from);
+			if (leftSpan.color.toLowerCase() === lower) {
+				inner = text + inner;
+				lead = text.length;
+			} else {
+				leftKeep = `<span style="color: ${leftSpan.color}">${text}</span>`;
+			}
+		}
+		let rightKeep = '';
+		if (rightSpan) {
+			const text = state.doc.sliceString(to, rightSpan.innerTo);
+			if (rightSpan.color.toLowerCase() === lower) inner += text;
+			else rightKeep = `<span style="color: ${rightSpan.color}">${text}</span>`;
+		}
+
+		const middle = inner ? open + inner + '</span>' : '';
+		const insert = leftKeep + middle + rightKeep;
+		const selFrom = regionFrom + leftKeep.length + (middle ? open.length : 0) + lead;
+		view.dispatch(
+			state.update({
+				changes: { from: regionFrom, to: regionTo, insert },
 				selection: EditorSelection.range(selFrom, selFrom + selected.length),
 				userEvent: 'input'
 			})
