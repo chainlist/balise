@@ -20,14 +20,17 @@
 <svelte:element
 	this={navigate ? 'button' : 'span'}
 	{...navigate ? { type: 'button' } : {}}
-	class="rounded border border-transparent px-1.5 leading-snug select-none"
+	class="inline-block rounded border px-1.5 align-baseline leading-tight text-foreground select-none"
 	class:cursor-pointer={navigate}
 	class:cursor-default={!navigate}
-	style="color: {color ?? 'var(--primary)'}; background: color-mix(in oklch, {color ??
-		'var(--primary)'} 12%, transparent); border-color: {isActive
-		? (color ?? 'var(--primary)')
-		: 'transparent'};"
+	style={isActive ? `border-color: var(--primary);` : undefined}
 	onclick={navigate ? nav : undefined}
 >
-	#{label}
+	<span
+		class={[
+			'mr-1 inline-block size-2 rounded-full align-middle',
+			!color && 'bg-sidebar-foreground/30'
+		]}
+		style={color ? `background-color: ${color};` : undefined}
+	></span>{label}
 </svelte:element>
