@@ -202,6 +202,38 @@ describe('text color', () => {
 		expect(sel(v)).toEqual([0, 4]);
 	});
 
+	it('splits the span when only part of a colored run is recolored', () => {
+		const v = open('<span style="color: #ff00ff">A small colored text</span>');
+		setSelection(v, 37, 44); // inner "colored" (innerFrom 29 + "A small " 8)
+		applyTextColor(v, '#32ff32');
+		expect(docText(v)).toBe(
+			'<span style="color: #ff00ff">A small </span>' +
+				'<span style="color: #32ff32">colored</span>' +
+				'<span style="color: #ff00ff"> text</span>'
+		);
+		// selection stays around the recolored word
+		expect(activeTextColor(v.state)).toBe('#32ff32');
+		const [from, to] = sel(v);
+		expect(docText(v).slice(from, to)).toBe('colored');
+	});
+
+	it('omits the empty side span when the partial selection sits at an edge', () => {
+		const v = open('<span style="color: #ff00ff">colored text</span>');
+		setSelection(v, 29, 36); // inner "colored" at the start of the run
+		applyTextColor(v, '#32ff32');
+		expect(docText(v)).toBe(
+			'<span style="color: #32ff32">colored</span><span style="color: #ff00ff"> text</span>'
+		);
+	});
+
+	it('leaves a partial selection unchanged when recolored to the parent color', () => {
+		const v = open('<span style="color: #ff00ff">A small colored text</span>');
+		setSelection(v, 37, 44);
+		const handled = applyTextColor(v, '#FF00FF'); // same color, case-insensitive
+		expect(handled).toBe(true);
+		expect(docText(v)).toBe('<span style="color: #ff00ff">A small colored text</span>');
+	});
+
 	it('is a no-op on a bare cursor with no enclosing span', () => {
 		const v = open('word');
 		setCursor(v, 2);

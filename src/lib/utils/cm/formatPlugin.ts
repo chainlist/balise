@@ -287,10 +287,13 @@ function enclosingColorSpan(
 	return null;
 }
 
-// Apply a text color to the selection. If the selection already sits in a color
-// span: picking the same color removes it (toggle off), a different color
-// replaces it. Otherwise the selection is wrapped in a new span. A bare cursor
-// outside any span is a no-op (there's nothing to color), like underline.
+// Apply a text color to the selection. When the selection sits in an existing
+// color span: selecting the span's whole text replaces its color (or removes the
+// span when the same color is picked again — toggle off); selecting only part of
+// it splits the span into flat before/selected/after spans so just that part
+// takes the new color (picking the span's own color is then a no-op). A selection
+// outside any span is wrapped in a new span; a bare cursor outside any span is a
+// no-op (there's nothing to color), like underline.
 export function applyTextColor(view: EditorView, color: string): boolean {
 	const { state } = view;
 	const { from, to } = state.selection.main;
@@ -298,28 +301,56 @@ export function applyTextColor(view: EditorView, color: string): boolean {
 	const found = enclosingColorSpan(state, from, to);
 
 	if (found) {
-		const inner = state.doc.sliceString(found.innerFrom, found.innerTo);
-		if (found.color.toLowerCase() === color.toLowerCase()) {
-			view.dispatch(
-				state.update({
-					changes: { from: found.from, to: found.to, insert: inner },
-					selection: EditorSelection.range(found.from, found.from + inner.length),
-					userEvent: 'input'
-				})
-			);
-		} else {
-			const next = open + inner + '</span>';
-			view.dispatch(
-				state.update({
-					changes: { from: found.from, to: found.to, insert: next },
-					selection: EditorSelection.range(
-						found.from + open.length,
-						found.from + open.length + inner.length
-					),
-					userEvent: 'input'
-				})
-			);
+		const sameColor = found.color.toLowerCase() === color.toLowerCase();
+		const coversWholeSpan = from === found.innerFrom && to === found.innerTo;
+
+		if (coversWholeSpan) {
+			const inner = state.doc.sliceString(found.innerFrom, found.innerTo);
+			if (sameColor) {
+				view.dispatch(
+					state.update({
+						changes: { from: found.from, to: found.to, insert: inner },
+						selection: EditorSelection.range(found.from, found.from + inner.length),
+						userEvent: 'input'
+					})
+				);
+			} else {
+				const next = open + inner + '</span>';
+				view.dispatch(
+					state.update({
+						changes: { from: found.from, to: found.to, insert: next },
+						selection: EditorSelection.range(
+							found.from + open.length,
+							found.from + open.length + inner.length
+						),
+						userEvent: 'input'
+					})
+				);
+			}
+			return true;
 		}
+
+		// Partial selection: that sub-range is already the parent's color, so the
+		// same color leaves it as is; a new color splits the span around it.
+		if (sameColor) return true;
+
+		const before = state.doc.sliceString(found.innerFrom, from);
+		const selected = state.doc.sliceString(from, to);
+		const after = state.doc.sliceString(to, found.innerTo);
+		const parentOpen = `<span style="color: ${found.color}">`;
+
+		let insert = before ? `${parentOpen}${before}</span>` : '';
+		const selFrom = found.from + insert.length + open.length;
+		insert += `${open}${selected}</span>`;
+		if (after) insert += `${parentOpen}${after}</span>`;
+
+		view.dispatch(
+			state.update({
+				changes: { from: found.from, to: found.to, insert },
+				selection: EditorSelection.range(selFrom, selFrom + selected.length),
+				userEvent: 'input'
+			})
+		);
 		return true;
 	}
 
