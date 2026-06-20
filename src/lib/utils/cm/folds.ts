@@ -1,6 +1,6 @@
 import type { EditorView } from '@codemirror/view';
 import type { EditorState } from '@codemirror/state';
-import { foldedRanges, foldEffect } from '@codemirror/language';
+import { foldedRanges, foldEffect, foldable, forceParsing } from '@codemirror/language';
 
 export type FoldRange = { from: number; to: number };
 
@@ -13,11 +13,29 @@ export function readFolds(state: EditorState): FoldRange[] {
 	return folds;
 }
 
-/** Re-apply saved folds, skipping any whose offsets no longer fit the document
- *  (e.g. the note was edited on another device since the folds were saved). */
+/** Re-apply saved folds, recomputing each range against the current document so a
+ *  fold still lands on a real section boundary even when the note changed while it
+ *  was closed (a synced edit, or trailing whitespace trimmed on save). A fold whose
+ *  start no longer sits at a foldable line is dropped rather than folded mid-text. */
 export function restoreFolds(view: EditorView, folds: FoldRange[]): void {
-	const max = view.state.doc.length;
-	const valid = folds.filter((f) => f.from >= 0 && f.to <= max && f.from < f.to);
+	if (!folds.length) return;
+	// Folding reads the syntax tree, which parses lazily; force it across the whole
+	// note so sections below the initial viewport are foldable too.
+	forceParsing(view, view.state.doc.length, 150);
+	const { state } = view;
+	const max = state.doc.length;
+	const valid: FoldRange[] = [];
+	for (const f of folds) {
+		if (f.from < 0 || f.to > max || f.from >= f.to) continue;
+		// A fold starts at the end of its heading (or block) line. If the saved
+		// offset no longer lands there, the content shifted — skip it.
+		const line = state.doc.lineAt(f.from);
+		if (f.from !== line.to) continue;
+		// Re-fold the freshly computed range so the end tracks a section whose
+		// length changed since the fold was saved.
+		const range = foldable(state, line.from, line.to);
+		if (range && range.from === f.from) valid.push(range);
+	}
 	if (valid.length) view.dispatch({ effects: valid.map((f) => foldEffect.of(f)) });
 }
 
