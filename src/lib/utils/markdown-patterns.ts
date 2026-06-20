@@ -11,23 +11,28 @@
  * `=text=` highlight mark. Capture group 1 is the inner text. The `(?!")` guards
  * keep a delimiter from matching an HTML attribute `=` (e.g. `style="…"` in a
  * color span): without them, two `style=` attributes on a line would bracket a
- * false highlight across the spans between them.
+ * false highlight across the spans between them. The inner text allows whole
+ * `attr="…"` runs so a highlight can wrap a nested color span (`=<span …>x</span>=`).
  */
-export const HIGHLIGHT_SOURCE = '=(?!")([^=\\n]+)=(?!")';
+export const HIGHLIGHT_SOURCE = '=(?!")((?:[^=\\n]|="[^"\\n]*")+)=(?!")';
 
 /**
  * Underline tag (markdown has no native underline). Matches both `<u>text</u>`
  * and `<ins>text</ins>`. Group 1 is the tag name (`u` or `ins`), group 2 the
  * inner text. The backreference keeps the closing tag in sync with the opener.
+ * The inner text allows nested tags (any `<` that isn't the matching close) so
+ * underline can wrap a color span (`<u><span …>x</span></u>`).
  */
-export const UNDERLINE_SOURCE = '<(u|ins)>([^<]+)</\\1>';
+export const UNDERLINE_SOURCE = '<(u|ins)>((?:[^<]|<(?!/\\1>))+)</\\1>';
 
 /**
  * Text color (markdown has no native colored text). Stored as an inline HTML
  * span: `<span style="color: #hex">text</span>`. Group 1 is the color value,
- * group 2 the inner text. The closing tag is always `</span>` (7 chars).
+ * group 2 the inner text. The closing tag is always `</span>` (7 chars). The
+ * inner text allows nested tags (any `<` that isn't `</span>`) so a color span
+ * can wrap another mark (`<span …><u>x</u></span>`).
  */
-export const COLOR_SOURCE = '<span style="color:\\s*([^"]+)">([^<]+)</span>';
+export const COLOR_SOURCE = '<span style="color:\\s*([^"]+)">((?:[^<]|<(?!/span>))+)</span>';
 
 /** Bare `http(s)://` URL (autolink). */
 export const BARE_URL_SOURCE = 'https?:\\/\\/[^\\s<>[\\]()\'"]+';

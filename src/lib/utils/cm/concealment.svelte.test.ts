@@ -105,6 +105,24 @@ describe('text color concealment (always hidden)', () => {
 	});
 });
 
+describe('mixing color with other marks (nesting)', () => {
+	// Color combined with another HTML/regex mark used to leak raw tags: each
+	// mark's inner pattern forbade the other's delimiter, so the outer never
+	// matched. Cursor parked on line 2 so line-based reveals don't interfere.
+	it('conceals an underline wrapping a color span', () => {
+		const doc = '<u><span style="color: #7c6cde">x</span></u>\ny';
+		expect(at(doc, doc.length)).toBe('x\ny');
+	});
+	it('conceals a color span wrapping an underline', () => {
+		const doc = '<span style="color: #7c6cde"><u>x</u></span>\ny';
+		expect(at(doc, doc.length)).toBe('x\ny');
+	});
+	it('conceals a highlight wrapping a color span (its style= attribute)', () => {
+		const doc = '=<span style="color: #7c6cde">x</span>=\ny';
+		expect(at(doc, doc.length)).toBe('x\ny');
+	});
+});
+
 describe('heading mark concealment', () => {
 	it('hides the ATX marker off the line and shows it on the line', () => {
 		expect(at('## Title\n\ntext', 0)).toBe('## Title\n\ntext');
