@@ -232,12 +232,6 @@ export const noteEditorTheme = EditorView.theme({
 		textDecoration: 'underline',
 		textDecorationColor: 'var(--md-link-decoration)'
 	},
-	'.cm-md-tag': {
-		color: 'var(--primary)',
-		background: 'color-mix(in oklch, var(--primary) 12%, transparent)',
-		borderRadius: '0.5rem',
-		padding: '0 calc(var(--spacing) * 1.5)'
-	},
 	'.cm-md-highlight': {
 		background: 'var(--md-highlight-bg)',
 		borderRadius: '2px'
