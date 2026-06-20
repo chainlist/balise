@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.3](https://github.com/chainlist/balise/compare/v0.33.2...v0.33.3) (2026-06-20)
+
+
+### Code Refactoring
+
+* **TagChip:** change the way tags are shown in the editor ([#87](https://github.com/chainlist/balise/issues/87)) ([b95f92d](https://github.com/chainlist/balise/commit/b95f92dd8b3cb2f5bd43db2fbf310a0aa9f68514))
+
 ## [0.33.2](https://github.com/chainlist/balise/compare/v0.33.1...v0.33.2) (2026-06-20)
 
 
