@@ -30,7 +30,10 @@ function buildColorDecos(view: EditorView): DecorationSet {
 			ranges.push(hideMark.range(from, innerFrom));
 			ranges.push(hideMark.range(innerTo, to));
 			ranges.push(
-				Decoration.mark({ attributes: { style: `color: ${m[1]}` } }).range(innerFrom, innerTo)
+				Decoration.mark({
+					class: 'cm-md-colored',
+					attributes: { style: `color: ${m[1]}` }
+				}).range(innerFrom, innerTo)
 			);
 		}
 	}

@@ -33,14 +33,13 @@ function buildTagDecos(mode: MarkMode) {
 				const start = from + m.index;
 				const end = start + m.length;
 				if (isMarkRevealed(mode, start, end, cursorPos)) {
-					const tagColor = tagColorMap.get(m.name.toLowerCase()) ?? 'var(--primary)';
+					const tagColor =
+						tagColorMap.get(m.name.toLowerCase()) ??
+						'color-mix(in oklab, var(--color-sidebar-foreground) 30%, transparent)';
 					ranges.push(
 						Decoration.mark({
-							class: 'cm-md-tag',
-							attributes: {
-								style: `color: ${tagColor}; background: color-mix(in oklch, ${tagColor} 12%, transparent);`
-							}
-						}).range(start, end)
+							attributes: { style: `color: ${tagColor};` }
+						}).range(start, start + 1)
 					);
 				} else {
 					ranges.push(Decoration.replace({ widget: new TagWidget(m.name) }).range(start, end));
