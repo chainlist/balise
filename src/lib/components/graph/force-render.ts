@@ -16,6 +16,10 @@ export function linkAlpha(a: string, b: string, focus: string | null): number {
 	return a === focus || b === focus ? 0.8 : 0.08;
 }
 
+// Blur applied to de-emphasised (non-linked) nodes when something is focused.
+// In world units, so it scales naturally with the zoom transform.
+const DIM_BLUR_PX = 3;
+
 export interface DrawOptions {
 	nodes: ForceNode[];
 	links: ForceLink[];
@@ -60,6 +64,8 @@ export function drawGraph(ctx: CanvasRenderingContext2D, o: DrawOptions): void {
 		if (n.x == null || n.y == null) continue;
 		const alpha = nodeAlpha(n.id, focus, adjacency);
 		ctx.globalAlpha = alpha;
+		// Non-linked nodes (dimmed) also go out of focus with a gaussian blur.
+		ctx.filter = alpha < 1 ? `blur(${DIM_BLUR_PX}px)` : 'none';
 		ctx.beginPath();
 		ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
 		ctx.fillStyle = n.color;
@@ -76,4 +82,5 @@ export function drawGraph(ctx: CanvasRenderingContext2D, o: DrawOptions): void {
 		}
 	}
 	ctx.globalAlpha = 1;
+	ctx.filter = 'none';
 }
