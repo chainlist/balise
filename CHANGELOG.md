@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/chainlist/balise/compare/v0.32.1...v0.33.0) (2026-06-20)
+
+
+### Features
+
+* **editor:** added text toolbar ([#80](https://github.com/chainlist/balise/issues/80)) ([9a7c2a5](https://github.com/chainlist/balise/commit/9a7c2a5d86e82a9d2c9dbca8b358c1ea8f0ff271))
+
 ## [0.32.1](https://github.com/chainlist/balise/compare/v0.32.0...v0.32.1) (2026-06-20)
 
 
