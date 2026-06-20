@@ -241,6 +241,36 @@ describe('empty color span cleanup', () => {
 	});
 });
 
+describe('mixing color with other marks (nesting)', () => {
+	it('underlines a colored selection, nesting <u> inside the span', () => {
+		const v = open('word');
+		setSelection(v, 0, 4);
+		applyTextColor(v, '#7c6cde');
+		FORMAT_COMMANDS.underline(v);
+		expect(docText(v)).toBe('<span style="color: #7c6cde"><u>word</u></span>');
+		expect(activeMarks(v.state).underline).toBe(true);
+		expect(activeTextColor(v.state)).toBe('#7c6cde');
+	});
+
+	it('toggles the underline back off, leaving the color span intact', () => {
+		const v = open('word');
+		setSelection(v, 0, 4);
+		applyTextColor(v, '#7c6cde');
+		FORMAT_COMMANDS.underline(v);
+		FORMAT_COMMANDS.underline(v);
+		expect(docText(v)).toBe('<span style="color: #7c6cde">word</span>');
+	});
+
+	it('colors an underlined selection, nesting the span inside <u>', () => {
+		const v = open('<u>word</u>');
+		setSelection(v, 3, 7); // inner "word"
+		applyTextColor(v, '#7c6cde');
+		expect(docText(v)).toBe('<u><span style="color: #7c6cde">word</span></u>');
+		expect(activeMarks(v.state).underline).toBe(true);
+		expect(activeTextColor(v.state)).toBe('#7c6cde');
+	});
+});
+
 describe('activeMarks reports the marks wrapping the selection', () => {
 	it('detects bold and italic, and reports none on plain text', () => {
 		const v = open('**word**');
