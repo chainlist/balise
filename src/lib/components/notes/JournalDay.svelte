@@ -13,9 +13,8 @@
 
 	let { date, hasNotes }: { date: Date; hasNotes: boolean } = $props();
 
-	// User-facing collapse, distinct from the virtualization `visible` below. Today
-	// always starts open; the setting only folds past/other days by default. `date`
-	// is fixed per instance, so reading it once at init is intentional.
+	// User-facing collapse. Today always starts open; the setting only folds past/other
+	// days by default. `date` is fixed per instance, so reading it once at init is intentional.
 	let collapsed = $state(
 		settingsService.journal.state.collapseByDefault && untrack(() => !isSameDay(date, new Date()))
 	);
@@ -24,47 +23,6 @@
 	let draft = $state<Note | null>(null);
 	// Cleared once the draft is persisted, so later edits flow through the normal update path.
 	let draftSave = $state<((content: string) => Promise<void>) | undefined>(undefined);
-
-	// Days far from the viewport drop their editor(s) so the timeline can span months
-	// without keeping a CodeMirror instance alive per day. A placeholder of the last
-	// rendered height keeps the scroll position and the page's sentinels steady.
-	let visible = $state(true);
-	let placeholderHeight = $state(0);
-	// Read imperatively when the day scrolls away, so a plain ref (not $state) is enough.
-	let bodyEl: HTMLElement | undefined;
-
-	function measureBody(node: HTMLElement) {
-		bodyEl = node;
-		return () => (bodyEl = undefined);
-	}
-
-	// rootMargin only buys a preload buffer when it is measured against the actual
-	// scroll container; with the default (viewport) root the scroller clips it away.
-	function scrollParent(node: HTMLElement): HTMLElement | null {
-		for (let el = node.parentElement; el; el = el.parentElement) {
-			const overflowY = getComputedStyle(el).overflowY;
-			if (overflowY === 'auto' || overflowY === 'scroll') return el;
-		}
-		return null;
-	}
-
-	function trackVisibility(node: HTMLElement) {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) {
-						visible = true;
-					} else if (bodyEl) {
-						placeholderHeight = bodyEl.offsetHeight;
-						visible = false;
-					}
-				}
-			},
-			{ root: scrollParent(node), rootMargin: '600px' }
-		);
-		observer.observe(node);
-		return () => observer.disconnect();
-	}
 
 	const label = $derived(
 		formatDate(
@@ -134,7 +92,6 @@
 </script>
 
 <section
-	{@attach trackVisibility}
 	class="border-b border-primary/10 pb-4"
 	class:border-l-2={isToday}
 	class:border-l-primary={isToday}
@@ -165,10 +122,8 @@
 		</button>
 	</div>
 
-	{#if collapsed}
-		<!-- Folded: render only the header. -->
-	{:else if visible}
-		<div {@attach measureBody}>
+	{#if !collapsed}
+		<div>
 			{#if notes.length}
 				{#each notes as note (note.id)}
 					<div class="relative min-h-min">
@@ -198,7 +153,5 @@
 				</div>
 			{/if}
 		</div>
-	{:else}
-		<div style="height: {placeholderHeight}px"></div>
 	{/if}
 </section>
