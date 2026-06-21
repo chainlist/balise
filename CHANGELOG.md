@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.34.0](https://github.com/chainlist/balise/compare/v0.33.4...v0.34.0) (2026-06-21)
+
+
+### Features
+
+* **editor:** added overlays to embeds. Giving you the possibility to toggle the preview mode ([#95](https://github.com/chainlist/balise/issues/95)) ([ef8dd08](https://github.com/chainlist/balise/commit/ef8dd084dfb3f27bd1816a199cb9542285bc8c97))
+* **graph:** Added dimable blur whenever we hover or select a node ([#92](https://github.com/chainlist/balise/issues/92)) ([f625e4d](https://github.com/chainlist/balise/commit/f625e4d5ab439ab521e3514d9ee360017f96eeb0))
+* **journal:** rework how journal is working ([#97](https://github.com/chainlist/balise/issues/97)) ([2957175](https://github.com/chainlist/balise/commit/29571753dece0747d9572983f5843faca85a24d3))
+
+
+### Bug Fixes
+
+* **editor:** fix fold restore which could endup not wrappng the whole foldable area ([#94](https://github.com/chainlist/balise/issues/94)) ([694e1f0](https://github.com/chainlist/balise/commit/694e1f0ff17f447100af04b84c26bc4e17a6e5ed))
+
 ## [0.33.4](https://github.com/chainlist/balise/compare/v0.33.3...v0.33.4) (2026-06-20)
 
 
