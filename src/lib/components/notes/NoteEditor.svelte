@@ -15,12 +15,23 @@
 		note,
 		onSave,
 		pinnable = false,
-		persistFolds = true
+		persistFolds = true,
+		autofocus = true,
+		floating = true,
+		showHeader = true
 	}: {
 		note: Note;
 		onSave?: (content: string) => Promise<void>;
 		pinnable?: boolean;
 		persistFolds?: boolean;
+		autofocus?: boolean;
+		/** When true (default) the controls float over the viewport (single full-screen
+		 *  editor). When false they anchor to this editor, for stacked editors like the
+		 *  journal timeline where one fixed cluster per day would overlap. */
+		floating?: boolean;
+		/** Set false to hide the per-note header (date, reading time, tags), e.g. in the
+		 *  journal where each day already shows its own date heading. */
+		showHeader?: boolean;
 	} = $props();
 
 	let alwaysOnTop = $state(false);
@@ -52,8 +63,12 @@
 	}
 </script>
 
-<EditorView bind:this={editorView} {note} {onSave} {persistFolds}>
-	<div class="fixed top-5 right-5 z-20 flex -translate-y-1/2 items-center gap-1">
+<EditorView bind:this={editorView} {note} {onSave} {persistFolds} {autofocus} {showHeader}>
+	<div
+		class="z-20 flex items-center gap-1 {floating
+			? 'fixed top-5 right-5 -translate-y-1/2'
+			: 'absolute top-3 right-3'}"
+	>
 		{#if pinnable}
 			<button
 				onclick={toggleAlwaysOnTop}

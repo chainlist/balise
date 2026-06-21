@@ -88,6 +88,8 @@
 	"nav_knowledge_graph": "Graph",
 	"nav_all_notes": "Alle Notizen",
 	"nav_journaling": "Journaling",
+	"journal_jump_to_date": "Zu Datum springen",
+	"journal_empty_day": "Schreibe etwas für diesen Tag",
 	"nav_tasks": "Aufgaben",
 	"nav_tags": "Tags",
 	"nav_notes": "Notizen",

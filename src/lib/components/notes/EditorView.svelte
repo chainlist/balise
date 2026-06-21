@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy, untrack, type Snippet } from 'svelte';
 	import { notesService, type Note } from '$lib/services/content/notes.svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
@@ -15,11 +15,15 @@
 		note,
 		onSave,
 		persistFolds = true,
+		autofocus = true,
+		showHeader = true,
 		children
 	}: {
 		note: Note;
 		onSave?: (content: string) => Promise<void>;
 		persistFolds?: boolean;
+		autofocus?: boolean;
+		showHeader?: boolean;
 		children?: Snippet;
 	} = $props();
 
@@ -27,6 +31,10 @@
 	let pending: string | null = null;
 	let liveContent = $state<string | null>(null);
 	let editor = $state<ReturnType<typeof Editor>>();
+
+	// Resolve the content source once: the editor owns its document after mount, so a
+	// later note.content change (e.g. a recycled journal draft) must not reload it.
+	const initialContent = untrack(() => note.content ?? notesService.loadContent(note.id));
 
 	export function getOutline() {
 		return editor?.getOutline() ?? [];
@@ -66,17 +74,19 @@
 <!-- Consumers remount this component per note (keyed by note.id), so the
      debounce timer, pending flush, and loaded content all belong to one note. -->
 <div class="relative scrollbar-thin h-full overflow-y-auto">
-	{#await note.content ?? notesService.loadContent(note.id) then content}
-		<EditorHeader
-			readingTime={readingTimeMinutes(liveContent ?? content)}
-			date={new Date(parseDbTimestamp(note.created_at))}
-			tags={groupHashtagOccurrences(liveContent ?? content)}
-			onNavigate={(pos) => editor?.goToPosition(pos)}
-		/>
+	{#await initialContent then content}
+		{#if showHeader}
+			<EditorHeader
+				readingTime={readingTimeMinutes(liveContent ?? content)}
+				date={new Date(parseDbTimestamp(note.created_at))}
+				tags={groupHashtagOccurrences(liveContent ?? content)}
+				onNavigate={(pos) => editor?.goToPosition(pos)}
+			/>
+		{/if}
 		<Editor
 			bind:this={editor}
 			{content}
-			autofocus
+			{autofocus}
 			initialFolds={persistFolds ? uiState.getNoteFolds(note.id) : []}
 			onchange={handleChange}
 			onfoldchange={persistFolds ? (folds) => uiState.setNoteFolds(note.id, folds) : undefined}
