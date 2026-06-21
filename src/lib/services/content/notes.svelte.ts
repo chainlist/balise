@@ -15,6 +15,7 @@ import {
 	insertDeletion,
 	queryJournalNotesByDate,
 	queryNoteCreatedDates,
+	queryJournalNoteCreatedDates,
 	insertNote,
 	updateNote
 } from '$lib/repositories/notes.repo';
@@ -36,6 +37,18 @@ interface WriteOptions {
 	archived?: boolean;
 	createdAt?: string;
 	updatedAt?: string;
+}
+
+/** Reduce note creation timestamps to the set of local 'YYYY-MM-DD' days they fall on. */
+function toLocalDayKeys(stamps: string[]): Set<string> {
+	const days = new Set<string>();
+	for (const ts of stamps) {
+		const d = new Date(parseDbTimestamp(ts));
+		const mo = String(d.getMonth() + 1).padStart(2, '0');
+		const da = String(d.getDate()).padStart(2, '0');
+		days.add(`${d.getFullYear()}-${mo}-${da}`);
+	}
+	return days;
 }
 
 class NotesService {
@@ -122,15 +135,12 @@ class NotesService {
 
 	/** Set of local 'YYYY-MM-DD' days that have at least one note (by creation date). */
 	async noteDates(): Promise<Set<string>> {
-		const stamps = await queryNoteCreatedDates(getDB());
-		const days = new Set<string>();
-		for (const ts of stamps) {
-			const d = new Date(parseDbTimestamp(ts));
-			const mo = String(d.getMonth() + 1).padStart(2, '0');
-			const da = String(d.getDate()).padStart(2, '0');
-			days.add(`${d.getFullYear()}-${mo}-${da}`);
-		}
-		return days;
+		return toLocalDayKeys(await queryNoteCreatedDates(getDB()));
+	}
+
+	/** Set of local 'YYYY-MM-DD' days that have at least one journal note. */
+	async journalNoteDates(): Promise<Set<string>> {
+		return toLocalDayKeys(await queryJournalNoteCreatedDates(getDB()));
 	}
 
 	async queryForDate(localDate: Date): Promise<Note[]> {

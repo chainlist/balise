@@ -11,7 +11,7 @@
 
 	const JOURNAL_TAG = 'journal';
 
-	let { date }: { date: Date } = $props();
+	let { date, hasNotes }: { date: Date; hasNotes: boolean } = $props();
 
 	// User-facing collapse, distinct from the virtualization `visible` below. Today
 	// always starts open; the setting only folds past/other days by default. `date`
@@ -115,17 +115,30 @@
 	onMount(() => {
 		void notesService.queryForDate(date).then((res) => (notes = res));
 		// Drop a note that gets deleted elsewhere, reverting the day to its empty state.
-		return eventBus.notes.deleted.on((id) => {
+		const offDeleted = eventBus.notes.deleted.on((id) => {
 			notes = notes.filter((n) => n.id !== id);
 			if (draft?.id === id) {
 				draft = null;
 				draftSave = undefined;
 			}
 		});
+		// A "go to date" jump expands the matching day even if it was collapsed.
+		const offJumped = eventBus.journal.jumpedTo.on((key) => {
+			if (key === dateStr(date)) collapsed = false;
+		});
+		return () => {
+			offDeleted();
+			offJumped();
+		};
 	});
 </script>
 
-<section {@attach trackVisibility} class="border-b border-primary/10 pb-8">
+<section
+	{@attach trackVisibility}
+	class="border-b border-primary/10 pb-4"
+	class:border-l-2={isToday}
+	class:border-l-primary={isToday}
+>
 	<div class="mx-auto w-full max-w-175 px-2">
 		<button
 			type="button"
@@ -138,13 +151,17 @@
 					? ''
 					: 'rotate-90'}"
 			/>
-			<h2
-				class="py-3 text-xl font-semibold tracking-wide capitalize"
-				class:text-primary={isToday}
-				class:text-muted-foreground={!isToday}
-			>
+			<!-- Editor h3 size/weight (.cm-md-h3 in cm/theme.ts): 1.25em, weight 600, in var(--primary). -->
+			<h2 class="py-3 text-[1.25em] leading-[1.4] font-semibold text-[var(--primary)] capitalize">
 				{label}
 			</h2>
+			{#if hasNotes && collapsed}
+				<!-- Mirrors the CodeMirror fold placeholder (.cm-foldPlaceholder in cm/theme.ts). -->
+				<span
+					class="shrink-0 rounded bg-[var(--primary)]/10 px-1.5 text-[0.85em] text-[var(--primary)]"
+					aria-hidden="true">...</span
+				>
+			{/if}
 		</button>
 	</div>
 

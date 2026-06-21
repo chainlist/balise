@@ -8,20 +8,30 @@
 	import { onMount, tick } from 'svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { notesService } from '$lib/services/content/notes.svelte';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import { cn } from '$lib/utils.js';
 	import JournalDay from '$lib/components/notes/JournalDay.svelte';
 	import * as m from '$paraglide/messages.js';
 
-	// Past days extend downward, future days upward. The window grows as the user
-	// scrolls; today starts at the top.
+	// Past days extend downward, future days upward. Today starts at the top.
 	const PAST_INIT = 30;
 	const CHUNK = 14;
+	// Keep this much off-screen content rendered each side before folding it away.
+	const BUFFER = 800;
 
+	// Data window: how far the timeline has grown. Render window: the contiguous slice
+	// actually in the DOM. Days between the two are folded into the spacers, which hold
+	// their exact measured height so folding/unfolding never moves the scrollbar.
 	let minOffset = $state(-PAST_INIT);
 	let maxOffset = $state(0);
+	let renderMin = $state(-PAST_INIT);
+	let renderMax = $state(0);
+	let topSpacer = $state(0);
+	let bottomSpacer = $state(0);
+	const heights = new Map<number, number>();
 
 	let scrollerEl: HTMLElement | undefined;
-	let extending = false;
+	let reconciling = false;
 
 	let calendarOpen = $state(false);
 	let calendarValue = $state<DateValue>(today(getLocalTimeZone()));
@@ -30,18 +40,30 @@
 	// dot markers stay current without polling on every edit.
 	let noteDates = $state<Set<string>>(new Set());
 
+	// Local days that have a journal note, kept for the whole timeline so each day's
+	// header can show its collapsed "..." marker without loading that day's notes.
+	let journalDays = $state<Set<string>>(new Set());
+
 	async function loadNoteDates(): Promise<void> {
 		noteDates = await notesService.noteDates();
+	}
+
+	async function loadJournalDays(): Promise<void> {
+		journalDays = await notesService.journalNoteDates();
 	}
 
 	function dateKey(d: DateValue): string {
 		return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
 	}
 
+	function dayKey(d: Date): string {
+		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+	}
+
 	// Top -> bottom renders future -> past, so offsets descend.
-	const offsets = $derived.by(() => {
+	const rendered = $derived.by(() => {
 		const list: number[] = [];
-		for (let o = maxOffset; o >= minOffset; o--) list.push(o);
+		for (let o = renderMax; o >= renderMin; o--) list.push(o);
 		return list;
 	});
 
@@ -82,6 +104,8 @@
 		if (el && scrollerEl) {
 			scrollerEl.scrollTop += el.getBoundingClientRect().top - scrollerEl.getBoundingClientRect().top;
 		}
+		// The target day is mounted now; tell it to expand if it was collapsed.
+		eventBus.journal.jumpedTo.emit(dateKey(value));
 	}
 
 	// Watches the top/bottom sentinels and grows the window as they come into view.
@@ -110,7 +134,18 @@
 		};
 	}
 
-	onMount(() => uiState.setActiveTag(null));
+	onMount(() => {
+		uiState.setActiveTag(null);
+		void loadJournalDays();
+		// Membership only changes on a write or an applied sync, so refresh then
+		// rather than polling; the query is a single cheap column scan.
+		const offLocal = eventBus.sync.localChange.on(() => void loadJournalDays());
+		const offSynced = eventBus.sync.synced.on(() => void loadJournalDays());
+		return () => {
+			offLocal();
+			offSynced();
+		};
+	});
 </script>
 
 <div class="flex h-full flex-col">
@@ -159,8 +194,9 @@
 		<div {@attach infiniteScroll} class="scrollbar-thin min-h-0 flex-1 overflow-y-auto pb-16">
 			<div data-sentinel="top" class="h-px w-full"></div>
 			{#each offsets as offset (offset)}
+				{@const day = dayFromOffset(offset)}
 				<div data-offset={offset}>
-					<JournalDay date={dayFromOffset(offset)} />
+					<JournalDay date={day} hasNotes={journalDays.has(dayKey(day))} />
 				</div>
 			{/each}
 			<div data-sentinel="bottom" class="h-px w-full"></div>

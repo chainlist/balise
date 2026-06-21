@@ -32,10 +32,17 @@ class DeskEvents {
 	readonly changed = new Signal();
 }
 
+class JournalEvents {
+	/** A "go to date" jump occurred (payload is the `YYYY-MM-DD` key), so the
+	 *  matching day can expand itself if it was collapsed. */
+	readonly jumpedTo = new Signal<[key: string]>();
+}
+
 class EventBus {
 	readonly notes = new NoteEvents();
 	readonly sync = new SyncEvents();
 	readonly desks = new DeskEvents();
+	readonly journal = new JournalEvents();
 }
 
 export const eventBus = new EventBus();

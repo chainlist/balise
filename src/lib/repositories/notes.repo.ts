@@ -202,6 +202,16 @@ export async function queryNoteCreatedDates(db: Database): Promise<string[]> {
 	return rows.map((r) => r.created_at);
 }
 
+/** Creation timestamps of journal-tagged notes, used to mark journal days that have notes. */
+export async function queryJournalNoteCreatedDates(db: Database): Promise<string[]> {
+	const rows = await db.select<{ created_at: string }[]>(
+		`SELECT n.created_at FROM notes n
+	     WHERE EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = $1)`,
+		[SYSTEM_TAGS.JOURNAL]
+	);
+	return rows.map((r) => r.created_at);
+}
+
 export async function queryActiveTaskNotes(
 	db: Database
 ): Promise<{ id: string; content: string; updated_at: string }[]> {
