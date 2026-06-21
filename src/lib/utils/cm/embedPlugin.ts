@@ -8,11 +8,9 @@ import EmbedViewer from '$lib/components/cm/EmbedViewer.svelte';
 import { fsService } from '$lib/services/platform/fs';
 import { BARE_URL_RE, SvelteWidget } from './shared';
 
-type EmbedSource = 'image' | 'link';
-
 // --- URL + text extraction ---
 
-// The URL child is shared by Image (`![alt](url)`) and Link (`[label](url)`) nodes.
+// The URL child of an Image (`![alt](url)`) node.
 function urlChild(node: SyntaxNode, state: EditorState): string {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.name === 'URL') return state.doc.sliceString(child.from, child.to).trim();
@@ -20,8 +18,7 @@ function urlChild(node: SyntaxNode, state: EditorState): string {
 	return '';
 }
 
-// The bracket text sits between the first two LinkMark children: an Image's alt
-// (`![` … `]`) or a Link's label (`[` … `]`).
+// The alt text sits between the first two LinkMark children (`![` … `]`).
 function bracketTextRange(node: SyntaxNode): { from: number; to: number } | null {
 	let open: number | null = null;
 	for (let child = node.firstChild; child; child = child.nextSibling) {
@@ -32,65 +29,36 @@ function bracketTextRange(node: SyntaxNode): { from: number; to: number } | null
 	return null;
 }
 
-// Find the alt range of the first Image node overlapping [from, to].
-function findAltRange(
-	state: EditorState,
-	from: number,
-	to: number
-): { from: number; to: number } | null {
-	let range: { from: number; to: number } | null = null;
+// Find the first Image node overlapping [from, to]. Positions captured at widget
+// build time go stale as the doc changes, so the alt/toggle actions re-resolve
+// the node from the widget's live line.
+function findImage(state: EditorState, from: number, to: number): SyntaxNode | null {
+	let found: SyntaxNode | null = null;
 	syntaxTree(state).iterate({
 		from,
 		to,
 		enter(node) {
-			if (node.name !== 'Image' || range) return;
-			range = bracketTextRange(node.node);
+			if (node.name !== 'Image' || found) return;
+			found = node.node;
 			return false;
 		}
 	});
-	return range;
+	return found;
 }
 
-// Resolve the Image node from the widget's live DOM position (positions
-// captured at build time go stale as the doc changes) and rewrite its alt.
+// Resolve the Image node from the widget's live DOM position and rewrite its alt.
 function updateAlt(view: EditorView, el: HTMLElement, alt: string): void {
 	const line = view.state.doc.lineAt(view.posAtDOM(el));
-	const range = findAltRange(view.state, line.from, line.to);
+	const image = findImage(view.state, line.from, line.to);
+	const range = image && bracketTextRange(image);
 	if (range) view.dispatch({ changes: { from: range.from, to: range.to, insert: alt } });
 }
 
-// --- Embed detection (shared with linkPlugin) ---
-
-// Is the element the sole (non-whitespace) content of its line?
-function ownsLine(state: EditorState, from: number, to: number): boolean {
-	const line = state.doc.lineAt(from);
-	if (to > line.to) return false;
-	const before = state.doc.sliceString(line.from, from);
-	const after = state.doc.sliceString(to, line.to);
-	return before.trim() === '' && after.trim() === '';
-}
-
-// A Link or bare URL alone on its own line is rendered as a block embed (the
-// viewer decides video iframe vs link card). Inline links keep linkPlugin's
-// chip. linkPlugin imports these to skip what this plugin claims, so the two
-// never decorate the same range.
-export function isLinkEmbed(state: EditorState, link: SyntaxNode): boolean {
-	if (!urlChild(link, state)) return false;
-	return ownsLine(state, link.from, link.to);
-}
-
-export function isBareUrlEmbed(state: EditorState, from: number, to: number): boolean {
-	return ownsLine(state, from, to);
-}
-
-// Mirror forEachBareUrl's exclusion: a bare URL inside a link or code construct
-// is never an embed.
-function inLinkOrCode(state: EditorState, pos: number): boolean {
-	for (let cur = syntaxTree(state).resolveInner(pos, 1); cur.parent; cur = cur.parent) {
-		const n = cur.name;
-		if (n === 'Link' || n === 'InlineCode' || n === 'FencedCode' || n === 'CodeBlock') return true;
-	}
-	return false;
+// Drop the leading `!` so the embed becomes a plain `[label](url)` link.
+function demoteToLink(view: EditorView, el: HTMLElement): void {
+	const line = view.state.doc.lineAt(view.posAtDOM(el));
+	const image = findImage(view.state, line.from, line.to);
+	if (image) view.dispatch({ changes: { from: image.from, to: image.from + 1 } });
 }
 
 // --- Widget ---
@@ -98,8 +66,8 @@ function inLinkOrCode(state: EditorState, pos: number): boolean {
 type EmbedProps = {
 	url: string;
 	alt: string;
-	source: EmbedSource;
 	onAltChange: (alt: string) => void;
+	onToggleEmbed: () => void;
 };
 
 class EmbedWidget extends SvelteWidget<EmbedProps> {
@@ -109,8 +77,7 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 
 	constructor(
 		readonly url: string,
-		readonly alt: string,
-		readonly source: EmbedSource
+		readonly alt: string
 	) {
 		super();
 	}
@@ -123,19 +90,21 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 		return {
 			url: this.url,
 			alt: this.alt,
-			source: this.source,
 			onAltChange: (alt: string) => {
 				if (this.#el) updateAlt(view, this.#el, alt);
+			},
+			onToggleEmbed: () => {
+				if (this.#el) demoteToLink(view, this.#el);
 			}
 		};
 	}
 
 	eq(other: EmbedWidget): boolean {
-		return other.url === this.url && other.alt === this.alt && other.source === this.source;
+		return other.url === this.url && other.alt === this.alt;
 	}
 
-	// Let the editor ignore events from the description button/input so
-	// clicks and typing there aren't handled as editor interactions.
+	// Let the editor ignore events from the overlay buttons/input so clicks
+	// and typing there aren't handled as editor interactions.
 	override ignoreEvent(event: Event): boolean {
 		return event.target instanceof Element && event.target.closest('button, input') !== null;
 	}
@@ -166,22 +135,49 @@ function insertMarkdown(view: EditorView, pos: number, filename: string): void {
 
 // --- Event handlers ---
 
+// A single-line URL / markdown link / image, normalized to image-embed syntax.
+// Returns null for anything that isn't a link, so ordinary text pastes through.
+function toEmbedMarkdown(text: string): string | null {
+	if (/^!\[[^\]]*\]\([^)]+\)$/.test(text)) return text;
+	if (/^\[[^\]]*\]\([^)]+\)$/.test(text)) return `!${text}`;
+	BARE_URL_RE.lastIndex = 0;
+	const m = BARE_URL_RE.exec(text);
+	if (m && m[0] === text) return `![](${text})`;
+	return null;
+}
+
 function handlePaste(event: ClipboardEvent, view: EditorView): boolean {
 	const items = event.clipboardData?.items;
-	if (!items) return false;
+	if (items) {
+		for (const item of items) {
+			if (!item.type.startsWith('image/')) continue;
+			const blob = item.getAsFile();
+			if (!blob) continue;
 
-	for (const item of items) {
-		if (!item.type.startsWith('image/')) continue;
-		const blob = item.getAsFile();
-		if (!blob) continue;
-
-		event.preventDefault();
-		const pos = view.state.selection.main.from;
-		saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
-		return true;
+			event.preventDefault();
+			const pos = view.state.selection.main.from;
+			saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
+			return true;
+		}
 	}
 
-	return false;
+	// A URL or link pasted onto an otherwise-empty line becomes an embed.
+	const text = event.clipboardData?.getData('text/plain')?.trim() ?? '';
+	if (!text || text.includes('\n')) return false;
+	const markdown = toEmbedMarkdown(text);
+	if (!markdown) return false;
+	const { from, to } = view.state.selection.main;
+	const line = view.state.doc.lineAt(from);
+	const before = view.state.doc.sliceString(line.from, from);
+	const after = view.state.doc.sliceString(to, line.to);
+	if (before.trim() !== '' || after.trim() !== '') return false;
+
+	event.preventDefault();
+	view.dispatch({
+		changes: { from: line.from, to: line.to, insert: markdown },
+		selection: { anchor: line.from + markdown.length }
+	});
+	return true;
 }
 
 function handleDrop(event: DragEvent, view: EditorView): boolean {
@@ -216,8 +212,7 @@ function pushBlockEmbed(
 	from: number,
 	to: number,
 	url: string,
-	alt: string,
-	source: EmbedSource
+	alt: string
 ): void {
 	const line = state.doc.lineAt(to);
 	const lineFrom = state.doc.lineAt(from).from;
@@ -225,7 +220,7 @@ function pushBlockEmbed(
 		Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
 		Decoration.replace({}).range(lineFrom, line.to),
 		Decoration.widget({
-			widget: new EmbedWidget(url, alt, source),
+			widget: new EmbedWidget(url, alt),
 			block: true,
 			side: -1
 		}).range(lineFrom)
@@ -234,46 +229,25 @@ function pushBlockEmbed(
 
 // Block widgets must come from a StateField. We iterate the full doc (no
 // viewport culling needed — block widgets are cheap and embeds are sparse).
-// Embeds always render as widgets, regardless of mark mode: the raw markdown
-// is never useful to look at, and revealing it on cursor entry makes the
-// document jump.
+// Only image syntax `![…](url)` is an embed; the embed kind (image/video/link)
+// is decided from the URL by EmbedViewer. Plain `[label](url)` links and bare
+// URLs stay linkPlugin's chip. Embeds always render as widgets, regardless of
+// mark mode: the raw markdown is never useful to look at, and revealing it on
+// cursor entry makes the document jump.
 function buildDecos(state: EditorState): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
 
 	syntaxTree(state).iterate({
 		enter(node) {
-			if (node.name === 'Image') {
-				const url = urlChild(node.node, state);
-				if (!url) return false;
-				const textRange = bracketTextRange(node.node);
-				const alt = textRange ? state.doc.sliceString(textRange.from, textRange.to) : '';
-				pushBlockEmbed(ranges, state, node.from, node.to, url, alt, 'image');
-				return false;
-			}
-			if (node.name === 'Link') {
-				if (!isLinkEmbed(state, node.node)) return false;
-				const url = urlChild(node.node, state);
-				const textRange = bracketTextRange(node.node);
-				const label = textRange ? state.doc.sliceString(textRange.from, textRange.to) : '';
-				pushBlockEmbed(ranges, state, node.from, node.to, url, label, 'link');
-				return false;
-			}
+			if (node.name !== 'Image') return;
+			const url = urlChild(node.node, state);
+			if (!url) return false;
+			const textRange = bracketTextRange(node.node);
+			const alt = textRange ? state.doc.sliceString(textRange.from, textRange.to) : '';
+			pushBlockEmbed(ranges, state, node.from, node.to, url, alt);
+			return false;
 		}
 	});
-
-	// Bare URLs alone on their own line (paste-to-embed). Inline bare URLs stay
-	// linkPlugin's chip. Uses the same BARE_URL_RE span as linkPlugin so the two
-	// agree on which URLs are embeds.
-	for (let i = 1; i <= state.doc.lines; i++) {
-		const line = state.doc.line(i);
-		BARE_URL_RE.lastIndex = 0;
-		const m = BARE_URL_RE.exec(line.text);
-		if (!m) continue;
-		const from = line.from + m.index;
-		const to = from + m[0].length;
-		if (!isBareUrlEmbed(state, from, to) || inLinkOrCode(state, from)) continue;
-		pushBlockEmbed(ranges, state, from, to, m[0], '', 'link');
-	}
 
 	ranges.sort((a, b) => a.from - b.from);
 	return Decoration.set(ranges, true);
@@ -285,7 +259,13 @@ export function mdEmbedPlugin() {
 	const blockField = StateField.define<DecorationSet>({
 		create: (state) => buildDecos(state),
 		update(deco, tr) {
-			if (tr.docChanged) return buildDecos(tr.state);
+			// Rebuild on doc edits, but also when the syntax tree advances: a long
+			// document parses lazily (the tail is only parsed as it scrolls into
+			// view), and that parsing arrives via transactions that don't change the
+			// doc. Without this, an embed past the initial parse never gets decorated
+			// and shows its raw `![](…)` markdown.
+			if (tr.docChanged || syntaxTree(tr.startState) != syntaxTree(tr.state))
+				return buildDecos(tr.state);
 			return deco;
 		},
 		provide: (f) => EditorView.decorations.from(f)

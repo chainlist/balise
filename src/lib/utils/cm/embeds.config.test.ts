@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { matchEmbed } from './embeds.config';
+import { matchEmbed, isImageUrl } from './embeds.config';
 
 describe('matchEmbed', () => {
 	it('returns null for a non-video URL', () => {
@@ -65,5 +65,35 @@ describe('matchEmbed', () => {
 			const m = matchEmbed('https://dai.ly/x8abc12');
 			expect(m?.src).toBe('https://www.dailymotion.com/embed/video/x8abc12');
 		});
+	});
+});
+
+describe('isImageUrl', () => {
+	it('treats a local attachment path as an image', () => {
+		expect(isImageUrl('attachments/123.png')).toBe(true);
+	});
+
+	it('treats a bare relative path as an image', () => {
+		expect(isImageUrl('photo.jpg')).toBe(true);
+	});
+
+	it('treats an http URL with an image extension as an image', () => {
+		expect(isImageUrl('https://example.com/a.png')).toBe(true);
+	});
+
+	it('ignores a query string when checking the extension', () => {
+		expect(isImageUrl('https://example.com/a.jpg?w=200')).toBe(true);
+	});
+
+	it('treats a data image URL as an image', () => {
+		expect(isImageUrl('data:image/png;base64,iVBORw0KGgo=')).toBe(true);
+	});
+
+	it('treats a non-image http URL as a link', () => {
+		expect(isImageUrl('https://example.com/article')).toBe(false);
+	});
+
+	it('treats a non-image data URL as a link', () => {
+		expect(isImageUrl('data:text/plain;base64,aGk=')).toBe(false);
 	});
 });
