@@ -50,3 +50,15 @@ export function matchEmbed(url: string): EmbedMatch | null {
 	}
 	return null;
 }
+
+const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|avif|svg|bmp|ico)(\?.*)?$/i;
+
+// Since every embed is now `![…](url)`, the embed kind is inferred from the URL,
+// not the markdown syntax. A URL is an image when it's a local/relative path (we
+// only ever save image attachments) or an http(s)/data URL with an image type.
+// Anything else (a non-image http URL) renders as a link card.
+export function isImageUrl(url: string): boolean {
+	if (url.startsWith('data:')) return url.startsWith('data:image/');
+	if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) return true;
+	return IMAGE_EXT_RE.test(url);
+}

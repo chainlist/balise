@@ -271,6 +271,8 @@
 
 	"image_add_description": "Add description",
 	"image_not_found": "Image not found",
+	"embed_show_as_link": "Show as link",
+	"embed_show_as_embed": "Embed",
 
 	"wizard_lang_title": "Choose your language",
 	"wizard_lang_subtitle": "You can change this later in Settings.",
