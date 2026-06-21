@@ -196,6 +196,12 @@ export async function queryAllNotesMeta(
 	return db.select('SELECT id, updated_at FROM notes');
 }
 
+/** Creation timestamps of every note, used to mark calendar days that have notes. */
+export async function queryNoteCreatedDates(db: Database): Promise<string[]> {
+	const rows = await db.select<{ created_at: string }[]>('SELECT created_at FROM notes');
+	return rows.map((r) => r.created_at);
+}
+
 export async function queryActiveTaskNotes(
 	db: Database
 ): Promise<{ id: string; content: string; updated_at: string }[]> {

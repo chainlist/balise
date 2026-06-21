@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { Calendar } from '$lib/components/shadcn/calendar/index.js';
+	import { Calendar, Day as CalendarDay } from '$lib/components/shadcn/calendar/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as Popover from '$lib/components/shadcn/popover';
 	import { Calendar as CalendarIcon } from '@lucide/svelte';
-	import { today, getLocalTimeZone } from '@internationalized/date';
+	import { today, getLocalTimeZone, isSameDay } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
 	import { onMount, tick } from 'svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { notesService } from '$lib/services/content/notes.svelte';
+	import { cn } from '$lib/utils.js';
 	import JournalDay from '$lib/components/notes/JournalDay.svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -23,6 +25,18 @@
 
 	let calendarOpen = $state(false);
 	let calendarValue = $state<DateValue>(today(getLocalTimeZone()));
+
+	// Local days that have a note, refreshed each time the calendar opens so the
+	// dot markers stay current without polling on every edit.
+	let noteDates = $state<Set<string>>(new Set());
+
+	async function loadNoteDates(): Promise<void> {
+		noteDates = await notesService.noteDates();
+	}
+
+	function dateKey(d: DateValue): string {
+		return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
+	}
 
 	// Top -> bottom renders future -> past, so offsets descend.
 	const offsets = $derived.by(() => {
@@ -101,7 +115,13 @@
 
 <div class="flex h-full flex-col">
 	<div class="shrink-0 p-3">
-		<Popover.Root bind:open={calendarOpen}>
+		<Popover.Root
+			open={calendarOpen}
+			onOpenChange={(open) => {
+				calendarOpen = open;
+				if (open) void loadNoteDates();
+			}}
+		>
 			<Popover.Trigger>
 				{#snippet child({ props })}
 					<Button variant="outline" size="sm" {...props}>
@@ -116,7 +136,21 @@
 					bind:value={calendarValue}
 					onValueChange={(v) => v && jumpToDate(v)}
 					locale={navigator.language}
-				/>
+				>
+					{#snippet day({ day: date })}
+						<CalendarDay>
+							{date.day}
+							{#if noteDates.has(dateKey(date))}
+								<div
+									class={cn(
+										'size-1.5 rounded-full',
+										isSameDay(date, calendarValue) ? 'bg-primary-foreground' : 'bg-primary'
+									)}
+								></div>
+							{/if}
+						</CalendarDay>
+					{/snippet}
+				</Calendar>
 			</Popover.Content>
 		</Popover.Root>
 	</div>

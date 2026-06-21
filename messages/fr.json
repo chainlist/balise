@@ -146,6 +146,11 @@
 	"settings_marks_cursor": "Sur le curseur",
 	"settings_marks_never": "Jamais",
 
+	"settings_journal_heading": "Journal",
+	"settings_journal_description": "Configurez le fil du journal.",
+	"settings_journal_collapse_label": "Replier les jours par défaut",
+	"settings_journal_collapse_helper": "Affiche les jours passés repliés dans le journal. Aujourd'hui reste déplié.",
+
 	"settings_magic_tags_match_starts_with": "Commence par",
 	"settings_magic_tags_match_ends_with": "Se termine par",
 	"settings_magic_tags_match_contains": "Contient",

@@ -146,6 +146,11 @@
 	"settings_marks_cursor": "En el cursor",
 	"settings_marks_never": "Nunca",
 
+	"settings_journal_heading": "Diario",
+	"settings_journal_description": "Configura la línea de tiempo del diario.",
+	"settings_journal_collapse_label": "Contraer los días por defecto",
+	"settings_journal_collapse_helper": "Muestra los días pasados contraídos en el diario. Hoy permanece expandido.",
+
 	"settings_magic_tags_match_starts_with": "Empieza con",
 	"settings_magic_tags_match_ends_with": "Termina con",
 	"settings_magic_tags_match_contains": "Contiene",

@@ -11,13 +11,15 @@
 		SlidersHorizontalIcon,
 		RefreshCwIcon,
 		LayoutListIcon,
-		TagsIcon
+		TagsIcon,
+		NotebookIcon
 	} from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
 	import AppearanceSettings from './AppearanceSettings.svelte';
 	import EditorSettings from './EditorSettings.svelte';
+	import JournalSettings from './JournalSettings.svelte';
 	import AboutSettings from './AboutSettings.svelte';
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
 	import TagsSettings from './TagsSettings.svelte';
@@ -72,6 +74,12 @@
 					label: m.settings_editor_heading(),
 					icon: TypeIcon,
 					component: EditorSettings
+				},
+				{
+					id: 'journal',
+					label: m.settings_journal_heading(),
+					icon: NotebookIcon,
+					component: JournalSettings
 				},
 				{
 					id: 'magic-tags',

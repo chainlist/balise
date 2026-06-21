@@ -51,9 +51,16 @@
 	{#if tags.length}
 		<div class="flex flex-wrap gap-1.5">
 			{#each tags as tag (tag.name)}
-				<button type="button" class="cursor-pointer text-xs" onclick={() => toggle(tag)}>
+				{@const navigable = tag.positions.length > 0}
+				<svelte:element
+					this={navigable ? 'button' : 'span'}
+					{...navigable ? { type: 'button' } : {}}
+					class="text-xs"
+					class:cursor-pointer={navigable}
+					onclick={navigable ? () => toggle(tag) : undefined}
+				>
 					<TagChip tag={tag.name} navigate={false} />
-				</button>
+				</svelte:element>
 			{/each}
 		</div>
 	{/if}

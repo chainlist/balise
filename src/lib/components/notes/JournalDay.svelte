@@ -1,16 +1,24 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { Note } from '$lib/models/note';
 	import { notesService } from '$lib/services/content/notes.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { formatDate } from '$lib/utils/date-format';
 	import { eventBus } from '$lib/services/events/event-bus';
+	import { ChevronRightIcon } from '@lucide/svelte';
 	import NoteEditor from './NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const JOURNAL_TAG = 'journal';
 
 	let { date }: { date: Date } = $props();
+
+	// User-facing collapse, distinct from the virtualization `visible` below. Today
+	// always starts open; the setting only folds past/other days by default. `date`
+	// is fixed per instance, so reading it once at init is intentional.
+	let collapsed = $state(
+		settingsService.journal.state.collapseByDefault && untrack(() => !isSameDay(date, new Date()))
+	);
 
 	let notes = $state<Note[]>([]);
 	let draft = $state<Note | null>(null);
@@ -119,16 +127,30 @@
 
 <section {@attach trackVisibility} class="border-b border-primary/10 pb-8">
 	<div class="mx-auto w-full max-w-175 px-2">
-		<h2
-			class="py-3 pl-10 text-xl font-semibold tracking-wide capitalize"
-			class:text-primary={isToday}
-			class:text-muted-foreground={!isToday}
+		<button
+			type="button"
+			onclick={() => (collapsed = !collapsed)}
+			aria-expanded={!collapsed}
+			class="flex w-full items-center gap-1.5 pl-4 text-left"
 		>
-			{label}
-		</h2>
+			<ChevronRightIcon
+				class="size-4 shrink-0 text-muted-foreground transition-transform {collapsed
+					? ''
+					: 'rotate-90'}"
+			/>
+			<h2
+				class="py-3 text-xl font-semibold tracking-wide capitalize"
+				class:text-primary={isToday}
+				class:text-muted-foreground={!isToday}
+			>
+				{label}
+			</h2>
+		</button>
 	</div>
 
-	{#if visible}
+	{#if collapsed}
+		<!-- Folded: render only the header. -->
+	{:else if visible}
 		<div {@attach measureBody}>
 			{#if notes.length}
 				{#each notes as note (note.id)}

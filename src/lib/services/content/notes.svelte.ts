@@ -2,7 +2,7 @@
 import { tagsService, extractTags, UNTAGGED_FILTER } from '$lib/services/content/tags.svelte';
 import { eventBus } from '$lib/services/events/event-bus';
 import { extractTitle, notePreview } from '$lib/utils/note-utils';
-import { toSqliteUtc } from '$lib/utils/time';
+import { toSqliteUtc, parseDbTimestamp } from '$lib/utils/time';
 import { writeNoteFile, deleteNoteFile } from '$lib/repositories/notes.fs.repo';
 import { setNoteTags } from '$lib/repositories/tags.repo';
 import {
@@ -14,6 +14,7 @@ import {
 	deleteNoteById,
 	insertDeletion,
 	queryJournalNotesByDate,
+	queryNoteCreatedDates,
 	insertNote,
 	updateNote
 } from '$lib/repositories/notes.repo';
@@ -117,6 +118,19 @@ class NotesService {
 			if (note) await writeNoteFile({ ...note, content });
 		}
 		eventBus.sync.localChange.emit();
+	}
+
+	/** Set of local 'YYYY-MM-DD' days that have at least one note (by creation date). */
+	async noteDates(): Promise<Set<string>> {
+		const stamps = await queryNoteCreatedDates(getDB());
+		const days = new Set<string>();
+		for (const ts of stamps) {
+			const d = new Date(parseDbTimestamp(ts));
+			const mo = String(d.getMonth() + 1).padStart(2, '0');
+			const da = String(d.getDate()).padStart(2, '0');
+			days.add(`${d.getFullYear()}-${mo}-${da}`);
+		}
+		return days;
 	}
 
 	async queryForDate(localDate: Date): Promise<Note[]> {
