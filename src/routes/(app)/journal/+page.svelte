@@ -5,126 +5,131 @@
 	import { Calendar as CalendarIcon } from '@lucide/svelte';
 	import { today, getLocalTimeZone } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
-	import { notesService } from '$lib/services/content/notes.svelte';
-	import type { Note } from '$lib/models/note';
-	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
-	import { onMount } from 'svelte';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { onMount, tick } from 'svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import JournalDay from '$lib/components/notes/JournalDay.svelte';
+	import * as m from '$paraglide/messages.js';
 
-	const JOURNAL_TAG = 'journal';
+	// Past days extend downward, future days upward. The window grows as the user
+	// scrolls; today starts at the top.
+	const PAST_INIT = 30;
+	const CHUNK = 14;
 
-	let selectedDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
-	let journalNotes = $state<Note[]>([]);
-	let draftNote = $state<Note | null>(null);
-	let isCalendarOpen = $state(false);
-	const onSaveHandlers = new SvelteMap<string, (content: string) => Promise<void>>();
+	let minOffset = $state(-PAST_INIT);
+	let maxOffset = $state(0);
 
-	const allNotes = $derived([...journalNotes, ...(draftNote ? [draftNote] : [])]);
-	const hasMultipleNotes = $derived(allNotes.length > 1);
-	const selectedDateLabel = $derived(
-		selectedDate
-			? new Intl.DateTimeFormat(navigator.language, { dateStyle: 'medium' }).format(
-					toJSDate(selectedDate)
-				)
-			: ''
-	);
+	let scrollerEl: HTMLElement | undefined;
+	let extending = false;
 
-	function toJSDate(dv: DateValue): Date {
-		return new Date(dv.year, dv.month - 1, dv.day);
+	let calendarOpen = $state(false);
+	let calendarValue = $state<DateValue>(today(getLocalTimeZone()));
+
+	// Top -> bottom renders future -> past, so offsets descend.
+	const offsets = $derived.by(() => {
+		const list: number[] = [];
+		for (let o = maxOffset; o >= minOffset; o--) list.push(o);
+		return list;
+	});
+
+	function dayFromOffset(offset: number): Date {
+		const now = new Date();
+		return new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
 	}
 
-	function toDateStr(date: Date): string {
-		const y = date.getFullYear();
-		const m = String(date.getMonth() + 1).padStart(2, '0');
-		const d = String(date.getDate()).padStart(2, '0');
-		return `${y}-${m}-${d}`;
+	function offsetFromDate(date: Date): number {
+		const now = new Date();
+		const a = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+		const b = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+		return Math.round((b - a) / 86_400_000);
 	}
 
-	function journalNoteContent(date: Date): string {
-		const formatted = new Intl.DateTimeFormat(navigator.language, { dateStyle: 'full' }).format(
-			date
+	// Appending older days below needs no adjustment; prepending future days above
+	// shifts everything down, so restore the scroll offset to keep the view steady.
+	async function extendFuture(): Promise<void> {
+		if (!scrollerEl) return;
+		const prevHeight = scrollerEl.scrollHeight;
+		const prevTop = scrollerEl.scrollTop;
+		maxOffset += CHUNK;
+		await tick();
+		scrollerEl.scrollTop = prevTop + (scrollerEl.scrollHeight - prevHeight);
+	}
+
+	function extendPast(): void {
+		minOffset -= CHUNK;
+	}
+
+	async function jumpToDate(value: DateValue): Promise<void> {
+		calendarOpen = false;
+		const off = offsetFromDate(new Date(value.year, value.month - 1, value.day));
+		minOffset = off - PAST_INIT;
+		maxOffset = off + Math.ceil(CHUNK / 2);
+		await tick();
+		const el = scrollerEl?.querySelector<HTMLElement>(`[data-offset="${off}"]`);
+		if (el && scrollerEl) {
+			scrollerEl.scrollTop += el.getBoundingClientRect().top - scrollerEl.getBoundingClientRect().top;
+		}
+	}
+
+	// Watches the top/bottom sentinels and grows the window as they come into view.
+	// Re-runs whenever the scroller remounts (e.g. a desk switch via {#key}).
+	function infiniteScroll(node: HTMLElement) {
+		scrollerEl = node;
+		const top = node.querySelector('[data-sentinel="top"]')!;
+		const bottom = node.querySelector('[data-sentinel="bottom"]')!;
+		const observer = new IntersectionObserver(
+			async (entries) => {
+				for (const entry of entries) {
+					if (!entry.isIntersecting || extending) continue;
+					extending = true;
+					if (entry.target === top) await extendFuture();
+					else if (entry.target === bottom) extendPast();
+					extending = false;
+				}
+			},
+			{ root: node, rootMargin: '300px' }
 		);
-		return `### ${formatted}\n\n\n\n#${JOURNAL_TAG}`;
+		observer.observe(top);
+		observer.observe(bottom);
+		return () => {
+			observer.disconnect();
+			scrollerEl = undefined;
+		};
 	}
 
-	let loadSeq = 0;
-
-	async function loadForDate(date: Date): Promise<void> {
-		const seq = ++loadSeq;
-		const dateStr = toDateStr(date);
-		const notes = await notesService.queryForDate(date);
-		// A newer date selection superseded this load; drop the stale response.
-		if (seq !== loadSeq) return;
-		onSaveHandlers.clear();
-
-		if (notes.length > 0) {
-			journalNotes = notes;
-			draftNote = null;
-		} else {
-			const id = crypto.randomUUID();
-			onSaveHandlers.set(id, async (content) => {
-				await notesService.createForDate(id, content, date);
-				onSaveHandlers.delete(id);
-			});
-			draftNote = {
-				id,
-				content: journalNoteContent(date),
-				title: '',
-				pinned: false,
-				archived: false,
-				created_at: `${dateStr} 00:00:00`,
-				updated_at: `${dateStr} 00:00:00`
-			};
-			journalNotes = [];
-		}
-	}
-
-	onMount(() => {
-		uiState.setActiveTag(null);
-	});
-
-	$effect(() => {
-		if (selectedDate && uiState.activeDesk) {
-			loadForDate(toJSDate(selectedDate));
-		}
-	});
+	onMount(() => uiState.setActiveTag(null));
 </script>
 
-<div class="relative h-full">
-	<div class="absolute top-4 left-4 z-10">
-		<Popover.Root bind:open={isCalendarOpen}>
+<div class="flex h-full flex-col">
+	<div class="shrink-0 p-3">
+		<Popover.Root bind:open={calendarOpen}>
 			<Popover.Trigger>
 				{#snippet child({ props })}
 					<Button variant="outline" size="sm" {...props}>
 						<CalendarIcon class="size-4" />
-						{selectedDateLabel}
+						{m.journal_jump_to_date()}
 					</Button>
 				{/snippet}
 			</Popover.Trigger>
-			<Popover.Content align="start" class="w-auto overflow-hidden frost-surface! p-0">
+			<Popover.Content align="start" class="frost-surface! w-auto overflow-hidden p-0">
 				<Calendar
 					type="single"
-					bind:value={selectedDate}
-					onValueChange={() => (isCalendarOpen = false)}
+					bind:value={calendarValue}
+					onValueChange={(v) => v && jumpToDate(v)}
 					locale={navigator.language}
 				/>
 			</Popover.Content>
 		</Popover.Root>
 	</div>
 
-	<div class="h-full space-y-8 overflow-y-auto scrollbar-thin pb-16">
-		{#each allNotes as note (note.id)}
-			<div class="relative" class:h-full={!hasMultipleNotes} class:min-h-min={hasMultipleNotes}>
-				<NoteEditor {note} onSave={onSaveHandlers.get(note.id)} />
-				<div
-					class="absolute bottom-0 left-0 h-px w-full
-           bg-linear-to-r
-           from-transparent
-           via-primary/20
-           to-transparent"
-				></div>
-			</div>
-		{/each}
-	</div>
+	{#key uiState.activeDesk}
+		<div {@attach infiniteScroll} class="scrollbar-thin min-h-0 flex-1 overflow-y-auto pb-16">
+			<div data-sentinel="top" class="h-px w-full"></div>
+			{#each offsets as offset (offset)}
+				<div data-offset={offset}>
+					<JournalDay date={dayFromOffset(offset)} />
+				</div>
+			{/each}
+			<div data-sentinel="bottom" class="h-px w-full"></div>
+		</div>
+	{/key}
 </div>
