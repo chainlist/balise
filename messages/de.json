@@ -146,6 +146,11 @@
 	"settings_marks_cursor": "Am Cursor",
 	"settings_marks_never": "Nie",
 
+	"settings_journal_heading": "Journal",
+	"settings_journal_description": "Konfiguriere die Journal-Zeitleiste.",
+	"settings_journal_collapse_label": "Tage standardmäßig einklappen",
+	"settings_journal_collapse_helper": "Zeigt vergangene Tage im Journal eingeklappt an. Heute bleibt ausgeklappt.",
+
 	"settings_magic_tags_match_starts_with": "Beginnt mit",
 	"settings_magic_tags_match_ends_with": "Endet mit",
 	"settings_magic_tags_match_contains": "Enthält",

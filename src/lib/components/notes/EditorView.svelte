@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onDestroy, untrack, type Snippet } from 'svelte';
 	import { notesService, type Note } from '$lib/services/content/notes.svelte';
+	import { getTagsForNote } from '$lib/services/content/tags.svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
 	import { readingTimeMinutes } from '$lib/utils/note-utils';
-	import { groupHashtagOccurrences } from '$lib/utils/tag-parser';
 	import { parseDbTimestamp } from '$lib/utils/time';
 	import Editor from './Editor.svelte';
 	import EditorHeader from './EditorHeader.svelte';
@@ -79,7 +79,7 @@
 			<EditorHeader
 				readingTime={readingTimeMinutes(liveContent ?? content)}
 				date={new Date(parseDbTimestamp(note.created_at))}
-				tags={groupHashtagOccurrences(liveContent ?? content)}
+				tags={getTagsForNote(liveContent ?? content)}
 				onNavigate={(pos) => editor?.goToPosition(pos)}
 			/>
 		{/if}

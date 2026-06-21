@@ -20,7 +20,7 @@ vi.mock('$lib/services/settings/settings.svelte', async () => {
 	};
 });
 
-import { tagsService, extractTags, tagDisplayName } from './tags.svelte';
+import { tagsService, extractTags, getTagsForNote, tagDisplayName } from './tags.svelte';
 import * as repo from '$lib/repositories/tags.repo';
 
 const RAW_TAG = (tag = 'work', pinned = 0) => ({
@@ -199,6 +199,29 @@ describe('extractTags', () => {
 	it('combines hashtag and code-block tags without duplicates', () => {
 		const tags = extractTags('#typescript note\n```typescript\ncode\n```');
 		expect(tags.filter((t) => t === 'typescript')).toHaveLength(1);
+	});
+});
+
+// ─── getTagsForNote (pure) ──────────────────────────────────────────────────
+
+describe('getTagsForNote', () => {
+	it('returns hashtags with their document positions', () => {
+		const tags = getTagsForNote('#work then #work again');
+		const work = tags.find((t) => t.name === 'work');
+		expect(work?.positions).toEqual([0, 11]);
+	});
+
+	it('returns derived code tags with empty positions', () => {
+		const tags = getTagsForNote('```typescript\nconst x = 1\n```');
+		expect(tags.find((t) => t.name === 'code')?.positions).toEqual([]);
+		expect(tags.find((t) => t.name === 'typescript')?.positions).toEqual([]);
+	});
+
+	it('merges a hashtag and a matching code fence into one navigable entry', () => {
+		const tags = getTagsForNote('#typescript\n```typescript\ncode\n```');
+		const ts = tags.filter((t) => t.name === 'typescript');
+		expect(ts).toHaveLength(1);
+		expect(ts[0].positions).toEqual([0]);
 	});
 });
 

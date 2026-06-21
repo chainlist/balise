@@ -1,62 +1,28 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { Note } from '$lib/models/note';
 	import { notesService } from '$lib/services/content/notes.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { formatDate } from '$lib/utils/date-format';
 	import { eventBus } from '$lib/services/events/event-bus';
+	import { ChevronRightIcon } from '@lucide/svelte';
 	import NoteEditor from './NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const JOURNAL_TAG = 'journal';
 
-	let { date }: { date: Date } = $props();
+	let { date, hasNotes }: { date: Date; hasNotes: boolean } = $props();
+
+	// User-facing collapse. Today always starts open; the setting only folds past/other
+	// days by default. `date` is fixed per instance, so reading it once at init is intentional.
+	let collapsed = $state(
+		settingsService.journal.state.collapseByDefault && untrack(() => !isSameDay(date, new Date()))
+	);
 
 	let notes = $state<Note[]>([]);
 	let draft = $state<Note | null>(null);
 	// Cleared once the draft is persisted, so later edits flow through the normal update path.
 	let draftSave = $state<((content: string) => Promise<void>) | undefined>(undefined);
-
-	// Days far from the viewport drop their editor(s) so the timeline can span months
-	// without keeping a CodeMirror instance alive per day. A placeholder of the last
-	// rendered height keeps the scroll position and the page's sentinels steady.
-	let visible = $state(true);
-	let placeholderHeight = $state(0);
-	// Read imperatively when the day scrolls away, so a plain ref (not $state) is enough.
-	let bodyEl: HTMLElement | undefined;
-
-	function measureBody(node: HTMLElement) {
-		bodyEl = node;
-		return () => (bodyEl = undefined);
-	}
-
-	// rootMargin only buys a preload buffer when it is measured against the actual
-	// scroll container; with the default (viewport) root the scroller clips it away.
-	function scrollParent(node: HTMLElement): HTMLElement | null {
-		for (let el = node.parentElement; el; el = el.parentElement) {
-			const overflowY = getComputedStyle(el).overflowY;
-			if (overflowY === 'auto' || overflowY === 'scroll') return el;
-		}
-		return null;
-	}
-
-	function trackVisibility(node: HTMLElement) {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) {
-						visible = true;
-					} else if (bodyEl) {
-						placeholderHeight = bodyEl.offsetHeight;
-						visible = false;
-					}
-				}
-			},
-			{ root: scrollParent(node), rootMargin: '600px' }
-		);
-		observer.observe(node);
-		return () => observer.disconnect();
-	}
 
 	const label = $derived(
 		formatDate(
@@ -107,29 +73,57 @@
 	onMount(() => {
 		void notesService.queryForDate(date).then((res) => (notes = res));
 		// Drop a note that gets deleted elsewhere, reverting the day to its empty state.
-		return eventBus.notes.deleted.on((id) => {
+		const offDeleted = eventBus.notes.deleted.on((id) => {
 			notes = notes.filter((n) => n.id !== id);
 			if (draft?.id === id) {
 				draft = null;
 				draftSave = undefined;
 			}
 		});
+		// A "go to date" jump expands the matching day even if it was collapsed.
+		const offJumped = eventBus.journal.jumpedTo.on((key) => {
+			if (key === dateStr(date)) collapsed = false;
+		});
+		return () => {
+			offDeleted();
+			offJumped();
+		};
 	});
 </script>
 
-<section {@attach trackVisibility} class="border-b border-primary/10 pb-8">
+<section
+	class="border-b border-primary/10 pb-4"
+	class:border-l-2={isToday}
+	class:border-l-primary={isToday}
+>
 	<div class="mx-auto w-full max-w-175 px-2">
-		<h2
-			class="py-3 pl-10 text-xl font-semibold tracking-wide capitalize"
-			class:text-primary={isToday}
-			class:text-muted-foreground={!isToday}
+		<button
+			type="button"
+			onclick={() => (collapsed = !collapsed)}
+			aria-expanded={!collapsed}
+			class="flex w-full items-center gap-1.5 pl-4 text-left"
 		>
-			{label}
-		</h2>
+			<ChevronRightIcon
+				class="size-4 shrink-0 text-muted-foreground transition-transform {collapsed
+					? ''
+					: 'rotate-90'}"
+			/>
+			<!-- Editor h3 size/weight (.cm-md-h3 in cm/theme.ts): 1.25em, weight 600, in var(--primary). -->
+			<h2 class="py-3 text-[1.25em] leading-[1.4] font-semibold text-[var(--primary)] capitalize">
+				{label}
+			</h2>
+			{#if hasNotes && collapsed}
+				<!-- Mirrors the CodeMirror fold placeholder (.cm-foldPlaceholder in cm/theme.ts). -->
+				<span
+					class="shrink-0 rounded bg-[var(--primary)]/10 px-1.5 text-[0.85em] text-[var(--primary)]"
+					aria-hidden="true">...</span
+				>
+			{/if}
+		</button>
 	</div>
 
-	{#if visible}
-		<div {@attach measureBody}>
+	{#if !collapsed}
+		<div>
 			{#if notes.length}
 				{#each notes as note (note.id)}
 					<div class="relative min-h-min">
@@ -159,7 +153,5 @@
 				</div>
 			{/if}
 		</div>
-	{:else}
-		<div style="height: {placeholderHeight}px"></div>
 	{/if}
 </section>

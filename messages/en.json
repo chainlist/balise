@@ -146,6 +146,11 @@
 	"settings_marks_cursor": "On cursor",
 	"settings_marks_never": "Never",
 
+	"settings_journal_heading": "Journal",
+	"settings_journal_description": "Configure the journal timeline.",
+	"settings_journal_collapse_label": "Collapse days by default",
+	"settings_journal_collapse_helper": "Start past days collapsed in the journal. Today stays expanded.",
+
 	"settings_magic_tags_match_starts_with": "Starts with",
 	"settings_magic_tags_match_ends_with": "Ends with",
 	"settings_magic_tags_match_contains": "Contains",

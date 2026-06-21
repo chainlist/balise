@@ -7,6 +7,7 @@ import { setLocale, locales } from '$paraglide/runtime.js';
 import { GeneralSettingsService } from './general.svelte';
 import { AppearanceSettingsService } from './appearance.svelte';
 import { EditorSettingsService } from './editor.svelte';
+import { JournalSettingsService } from './journal.svelte';
 import { MagicTagsSettingsService } from './magic-tags.svelte';
 import { ShortcutsSettingsService } from './shortcuts.svelte';
 import { SyncSettingsService } from './sync.svelte';
@@ -19,6 +20,7 @@ export const SUPPORTED_LOCALES = locales;
 /* Public re-exports so consumers can import everything from the aggregator. */
 export type { GeneralSettings } from './general.svelte';
 export type { EditorSettings } from './editor.svelte';
+export type { JournalSettings } from './journal.svelte';
 export type { ShortcutsSettings } from './shortcuts.svelte';
 export {
 	MESH_MODES,
@@ -64,6 +66,7 @@ class SettingsService {
 	general!: GeneralSettingsService;
 	appearance!: AppearanceSettingsService;
 	editor!: EditorSettingsService;
+	journal!: JournalSettingsService;
 	magicTags!: MagicTagsSettingsService;
 	shortcuts!: ShortcutsSettingsService;
 	sync!: SyncSettingsService;
@@ -78,6 +81,7 @@ class SettingsService {
 		this.general = new GeneralSettingsService(this.#store);
 		this.appearance = new AppearanceSettingsService(this.#store);
 		this.editor = new EditorSettingsService(this.#store);
+		this.journal = new JournalSettingsService(this.#store);
 		this.magicTags = new MagicTagsSettingsService(this.#store);
 		this.shortcuts = new ShortcutsSettingsService(this.#store);
 		this.sync = new SyncSettingsService(this.#store);
@@ -86,6 +90,7 @@ class SettingsService {
 			this.general.load(),
 			this.appearance.load(),
 			this.editor.load(),
+			this.journal.load(),
 			this.magicTags.load(),
 			this.shortcuts.load(),
 			this.sync.load()

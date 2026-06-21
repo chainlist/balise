@@ -1,5 +1,5 @@
 import { getDB } from '$lib/utils/db';
-import { parseAllHashtags } from '$lib/utils/tag-parser';
+import { groupHashtagOccurrences, type TagOccurrences } from '$lib/utils/tag-parser';
 import { FENCE_LANG_SOURCE } from '$lib/utils/markdown-patterns';
 import { settingsService, MAGIC_TAG_MATCH_TYPES } from '../settings/settings.svelte';
 
@@ -16,10 +16,6 @@ export const UNTAGGED_FILTER = '__untagged__' as const;
 
 export function tagDisplayName(tag: { display_name: string | null; tag: string }): string {
 	return tag.display_name ?? tag.tag;
-}
-
-function extractHashtags(content: string): string[] {
-	return parseAllHashtags(content).map((m) => m.name);
 }
 
 function extractCodeTags(content: string): string[] {
@@ -68,14 +64,29 @@ function extractMagicTags(content: string): string[] {
 	return [...found];
 }
 
+/**
+ * Every tag a note carries, in display order, as the single source of truth for
+ * both persistence and the editor header. Literal `#hashtags` keep their document
+ * offsets so the header can cycle through each occurrence; derived tags (code
+ * fences, magic patterns) have no literal `#tag` to jump to, so they come back
+ * with empty `positions` and render as static chips.
+ */
+export function getTagsForNote(content: string): TagOccurrences[] {
+	const groups = groupHashtagOccurrences(content);
+	const seen = new Set(groups.map((g) => g.name.toLowerCase()));
+
+	for (const name of [...extractCodeTags(content), ...extractMagicTags(content)]) {
+		const key = name.toLowerCase();
+		if (seen.has(key)) continue;
+		seen.add(key);
+		groups.push({ name, positions: [] });
+	}
+
+	return groups;
+}
+
 export function extractTags(content: string): string[] {
-	return [
-		...new Set([
-			...extractHashtags(content),
-			...extractCodeTags(content),
-			...extractMagicTags(content)
-		])
-	];
+	return getTagsForNote(content).map((t) => t.name);
 }
 
 class TagsService {
