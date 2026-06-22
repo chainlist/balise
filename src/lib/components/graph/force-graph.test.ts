@@ -53,36 +53,36 @@ describe('buildForceGraph', () => {
 
 	it('keeps links whose endpoints are known tags', () => {
 		const tags = [makeTag('a'), makeTag('b')];
-		const cooc: TagCooccurrence[] = [{ a: 'A', b: 'b', count: 3 }];
+		const cooc: TagCooccurrence[] = [{ a: 'A', b: 'b', weight: 0.3 }];
 		const { links } = buildForceGraph(tags, cooc, opts);
 		expect(links).toHaveLength(1);
-		expect(links[0]).toMatchObject({ source: 'a', target: 'b', weight: 3 });
+		expect(links[0]).toMatchObject({ source: 'a', target: 'b', weight: 0.3 });
 	});
 
 	it('drops links whose endpoints are not known tags', () => {
 		const tags = [makeTag('a')];
-		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'ghost', count: 2 }];
+		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'ghost', weight: 0.2 }];
 		const { links } = buildForceGraph(tags, cooc, opts);
 		expect(links).toHaveLength(0);
 	});
 
 	it('drops self-links', () => {
 		const tags = [makeTag('a')];
-		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'A', count: 5 }];
+		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'A', weight: 0.5 }];
 		const { links } = buildForceGraph(tags, cooc, opts);
 		expect(links).toHaveLength(0);
 	});
 
 	it('keeps all nodes by default even when isolated', () => {
 		const tags = [makeTag('a'), makeTag('b'), makeTag('lonely')];
-		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'b', count: 1 }];
+		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'b', weight: 0.1 }];
 		const { nodes } = buildForceGraph(tags, cooc, opts);
 		expect(nodes.map((n) => n.id)).toContain('lonely');
 	});
 
 	it('drops isolated nodes when hideIsolated is set', () => {
 		const tags = [makeTag('a'), makeTag('b'), makeTag('lonely')];
-		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'b', count: 1 }];
+		const cooc: TagCooccurrence[] = [{ a: 'a', b: 'b', weight: 0.1 }];
 		const { nodes } = buildForceGraph(tags, cooc, { ...opts, hideIsolated: true });
 		expect(nodes.map((n) => n.id).sort()).toEqual(['a', 'b']);
 	});

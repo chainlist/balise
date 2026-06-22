@@ -11,9 +11,12 @@ import type { ForceNode, ForceLink } from './force-graph';
 
 type Sim = Simulation<ForceNode, ForceLink>;
 
-// Heavier pairs sit closer together; light ones drift apart.
+// Stronger pairs sit closer together; weak ones drift apart. `weight` is a
+// 0..1 Jaccard overlap, so the extra distance is bounded (0 at full overlap,
+// up to +80 as the overlap approaches nothing).
 export function linkDistanceFor(weight: number, base: number): number {
-	return base + 60 / Math.sqrt(weight);
+	const w = Math.max(0, Math.min(1, weight));
+	return base + (1 - w) * 80;
 }
 
 export function createSimulation(

@@ -32,8 +32,12 @@
 	let mouse = $state({ x: 0, y: 0 });
 	let wrapW = $state(0);
 
+	// Strongest connection in view, used to scale dots/chords relative to it.
+	// Falls back to 1 when there are no related tags (avoids a divide-by-zero);
+	// no floor of 1 on real weights, since Jaccard strengths are all <= 1.
 	const maxWeight = $derived(
-		Math.max(1, ...arcs.flatMap((a) => a.relatedTags.map((r) => r.weight)))
+		arcs.flatMap((a) => a.relatedTags.map((r) => r.weight)).reduce((mx, w) => Math.max(mx, w), 0) ||
+			1
 	);
 
 	const layout = $derived(buildLayout(arcs, maxWeight));

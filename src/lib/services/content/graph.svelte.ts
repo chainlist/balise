@@ -1,12 +1,15 @@
 import { getDB } from '$lib/utils/db';
 import { queryTagCooccurrences } from '$lib/repositories/tags.repo';
 import { tagsService } from '$lib/services/content/tags.svelte';
+import { jaccardWeight } from '$lib/utils/graph-weight';
 import type { Tag } from '$lib/models/tag';
 
 interface TagCooccurrence {
 	a: string;
 	b: string;
 	count: number;
+	countA: number;
+	countB: number;
 }
 
 interface TagNeighbor {
@@ -25,7 +28,13 @@ class GraphService {
 	async load(): Promise<void> {
 		if (tagsService.tags.length === 0) await tagsService.load();
 		const rows = await queryTagCooccurrences(getDB());
-		this.cooccurrences = rows.map((r) => ({ a: r.tag_a, b: r.tag_b, count: r.count }));
+		this.cooccurrences = rows.map((r) => ({
+			a: r.tag_a,
+			b: r.tag_b,
+			count: r.count,
+			countA: r.count_a,
+			countB: r.count_b
+		}));
 	}
 
 	private readonly byLower = $derived.by(() => {
@@ -56,8 +65,9 @@ class GraphService {
 			const tagA = this.byLower[a];
 			const tagB = this.byLower[b];
 			if (tagA && tagB) {
-				(map[a] ??= []).push({ tag: tagB, weight: c.count });
-				(map[b] ??= []).push({ tag: tagA, weight: c.count });
+				const weight = jaccardWeight(c.countA, c.countB, c.count);
+				(map[a] ??= []).push({ tag: tagB, weight });
+				(map[b] ??= []).push({ tag: tagA, weight });
 			}
 		}
 		for (const key in map) map[key].sort((x, y) => y.weight - x.weight);
@@ -72,13 +82,20 @@ class GraphService {
 		})
 	);
 
-	// Highest single co-occurrence count (drives the "min connections" slider range).
-	readonly maxWeight = $derived(this.cooccurrences.reduce((mx, c) => Math.max(mx, c.count), 1));
+	// Co-occurrence edges weighted by Jaccard overlap (0..1), for the force view.
+	readonly weightedEdges = $derived(
+		this.cooccurrences.map((c) => ({
+			a: c.a,
+			b: c.b,
+			weight: jaccardWeight(c.countA, c.countB, c.count)
+		}))
+	);
 
-	// Tags co-occurring with `name`, above `minWeight`, strongest first.
-	neighborsOf(name: string, minWeight = 1): TagNeighbor[] {
+	// Tags co-occurring with `name`, strongest first, optionally filtered by a
+	// minimum 0..1 Jaccard strength. `minStrength` 0 shows every connection.
+	neighborsOf(name: string, minStrength = 0): TagNeighbor[] {
 		const neighbors = this.neighborsByTag[name.toLowerCase()] ?? [];
-		return minWeight <= 1 ? neighbors : neighbors.filter((n) => n.weight >= minWeight);
+		return minStrength <= 0 ? neighbors : neighbors.filter((n) => n.weight >= minStrength);
 	}
 }
 

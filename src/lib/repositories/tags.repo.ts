@@ -97,15 +97,28 @@ export interface TagCooccurrenceRow {
 	tag_a: string;
 	tag_b: string;
 	count: number;
+	count_a: number;
+	count_b: number;
 }
 
 export async function queryTagCooccurrences(db: Database): Promise<TagCooccurrenceRow[]> {
+	// `count` is the shared-note count for the pair; `count_a` / `count_b` are
+	// each tag's own note count over the same (non-archived) population, so the
+	// caller can compute a Jaccard overlap without a second round trip.
 	return db.select<TagCooccurrenceRow[]>(`
-      SELECT a.tag AS tag_a, b.tag AS tag_b, COUNT(*) AS count
+      WITH marginals AS (
+        SELECT LOWER(nt.tag) AS tag, COUNT(*) AS count
+        FROM note_tags nt
+        JOIN notes n ON n.id = nt.note_id AND n.archived = 0
+        GROUP BY LOWER(nt.tag)
+      )
+      SELECT a.tag AS tag_a, b.tag AS tag_b, COUNT(*) AS count,
+             ma.count AS count_a, mb.count AS count_b
       FROM note_tags a
       JOIN note_tags b ON a.note_id = b.note_id AND LOWER(a.tag) < LOWER(b.tag)
-      JOIN notes n ON n.id = a.note_id
-      WHERE n.archived = 0
+      JOIN notes n ON n.id = a.note_id AND n.archived = 0
+      JOIN marginals ma ON ma.tag = LOWER(a.tag)
+      JOIN marginals mb ON mb.tag = LOWER(b.tag)
       GROUP BY LOWER(a.tag), LOWER(b.tag)
     `);
 }

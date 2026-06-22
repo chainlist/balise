@@ -186,7 +186,7 @@
 	"graph_settings_close": "Einstellungen schließen",
 	"graph_settings_tags": "Tags",
 	"graph_settings_tags_desc": "Anzahl der Tags im Graphen",
-	"graph_settings_min_cooccurrence": "Min. Verbindungen",
+	"graph_settings_min_cooccurrence": "Min. Stärke",
 	"graph_mode_sunburst": "Radial",
 	"graph_mode_force": "Netzwerk",
 	"graph_settings_repulsion": "Abstand",
