@@ -22,7 +22,7 @@ export interface ForceLink extends SimulationLinkDatum<ForceNode> {
 export interface TagCooccurrence {
 	a: string;
 	b: string;
-	count: number;
+	weight: number;
 }
 
 // Canvas pan/zoom: screen = world * k + (x, y).
@@ -73,7 +73,7 @@ export function buildForceGraph(
 		const a = c.a.toLowerCase();
 		const b = c.b.toLowerCase();
 		if (a !== b && known.has(a) && known.has(b)) {
-			links.push({ source: a, target: b, weight: c.count });
+			links.push({ source: a, target: b, weight: c.weight });
 		}
 	}
 

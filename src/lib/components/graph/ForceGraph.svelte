@@ -65,6 +65,18 @@
 		return { x: width / 2 || 300, y: height / 2 || 300 };
 	}
 
+	// Coalesce every redraw trigger (sim ticks, hover, pan/zoom) into at most one
+	// paint per animation frame. A burst of mousemove events in a single frame
+	// then costs one draw, not one per event.
+	let rafId = 0;
+	function scheduleDraw() {
+		if (rafId) return;
+		rafId = requestAnimationFrame(() => {
+			rafId = 0;
+			draw();
+		});
+	}
+
 	function draw() {
 		const ctx = canvas?.getContext('2d');
 		if (!ctx) return;
@@ -92,7 +104,7 @@
 		canvas.height = Math.round(height * dpr);
 		canvas.style.width = `${width}px`;
 		canvas.style.height = `${height}px`;
-		draw();
+		scheduleDraw();
 	}
 
 	// (Re)build the simulation whenever the graph data changes. Size and the
@@ -108,7 +120,7 @@
 			center: untrack(centerWorld),
 			repulsion: untrack(() => repulsion),
 			linkDistance: untrack(() => linkDistance),
-			onTick: draw
+			onTick: scheduleDraw
 		});
 
 		return () => {
@@ -148,7 +160,7 @@
 		void isDark;
 		void transform;
 		void hoveredId;
-		draw();
+		scheduleDraw();
 	});
 
 	function localPoint(e: MouseEvent): { x: number; y: number } {
@@ -258,6 +270,7 @@
 		return () => {
 			ro.disconnect();
 			canvas.removeEventListener('wheel', handleWheel);
+			if (rafId) cancelAnimationFrame(rafId);
 		};
 	});
 </script>

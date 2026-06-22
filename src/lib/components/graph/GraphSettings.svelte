@@ -4,13 +4,11 @@
 
 	let {
 		categoryCount = $bindable(),
-		minCooccurrence = $bindable(),
-		maxWeight,
+		minStrength = $bindable(),
 		onclose
 	}: {
 		categoryCount: number;
-		minCooccurrence: number;
-		maxWeight: number;
+		minStrength: number;
 		onclose: () => void;
 	} = $props();
 </script>
@@ -43,16 +41,11 @@
 		<label class="block">
 			<div class="mb-1 flex items-center justify-between">
 				<span class="text-xs text-foreground">{m.graph_settings_min_cooccurrence()}</span>
-				<span class="text-xs text-muted-foreground tabular-nums">{minCooccurrence}</span>
+				<span class="text-xs text-muted-foreground tabular-nums"
+					>{Math.round(minStrength * 100)}%</span
+				>
 			</div>
-			<input
-				type="range"
-				min="1"
-				max={Math.max(1, maxWeight)}
-				step="1"
-				bind:value={minCooccurrence}
-				class="w-full"
-			/>
+			<input type="range" min="0" max="1" step="0.05" bind:value={minStrength} class="w-full" />
 		</label>
 	</div>
 </div>

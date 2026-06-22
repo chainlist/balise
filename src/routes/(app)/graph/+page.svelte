@@ -32,12 +32,12 @@
 		}
 	});
 	let categoryCount = $state(10);
-	let minCooccurrence = $state(1);
+	let minStrength = $state(0);
 	let settingsOpen = $state(false);
 
 	// Network-mode tunables (page-local, like the sunburst sliders).
 	let repulsion = $state(380);
-	let linkDistance = $state(30);
+	let linkDistance = $state(90);
 	let hideIsolated = $state(false);
 
 	onMount(() => {
@@ -61,7 +61,7 @@
 			label: tagDisplayName(t),
 			noteCount: t.count,
 			color: colorFor(t),
-			relatedTags: graphService.neighborsOf(t.tag, minCooccurrence).map((n) => ({
+			relatedTags: graphService.neighborsOf(t.tag, minStrength).map((n) => ({
 				label: tagDisplayName(n.tag),
 				color: colorFor(n.tag),
 				weight: n.weight
@@ -78,7 +78,7 @@
 	const arcs = $derived.by<SunburstArc[]>(() => {
 		if (selectedTag) {
 			return graphService
-				.neighborsOf(selectedTag.tag, minCooccurrence)
+				.neighborsOf(selectedTag.tag, minStrength)
 				.slice(0, Math.max(1, categoryCount))
 				.map((n) => arcFor(n.tag));
 		}
@@ -90,7 +90,7 @@
 
 	// Force mode shows every tag and every co-occurrence (ignores the sliders).
 	const forceGraph = $derived(
-		buildForceGraph(rankedTags, graphService.cooccurrences, {
+		buildForceGraph(rankedTags, graphService.weightedEdges, {
 			colorFor,
 			labelFor: tagDisplayName,
 			hideIsolated
@@ -166,8 +166,7 @@
 			{#if mode === 'sunburst'}
 				<GraphSettings
 					bind:categoryCount
-					bind:minCooccurrence
-					maxWeight={graphService.maxWeight}
+					bind:minStrength
 					onclose={() => (settingsOpen = false)}
 				/>
 			{:else}
