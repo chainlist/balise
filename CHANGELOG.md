@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.34.1](https://github.com/chainlist/balise/compare/v0.34.0...v0.34.1) (2026-06-22)
+
+
+### Performance Improvements
+
+* **journal:** improved journal perfs by implementing virtual scroll ([#99](https://github.com/chainlist/balise/issues/99)) ([ed69a22](https://github.com/chainlist/balise/commit/ed69a22034208935dfebaa997efe7e137a56be78))
+
+
+### Code Refactoring
+
+* **graph:** Refactor graph algorithm to show with better accuracy the related tags ([#101](https://github.com/chainlist/balise/issues/101)) ([9a6065e](https://github.com/chainlist/balise/commit/9a6065ecadb6ddb7aa5bc4d20801ed3b103c6a9d))
+
 ## [0.34.0](https://github.com/chainlist/balise/compare/v0.33.4...v0.34.0) (2026-06-21)
 
 
