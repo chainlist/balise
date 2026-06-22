@@ -95,7 +95,7 @@ class DeviceSyncService {
 		const device = devicesService.linked.find((d) => d.id === result.deviceId);
 		if (device) devicesService.upsert({ ...device, lastSeen: Date.now() });
 
-		if (result.createdDesk) eventBus.desks.changed.emit();
+		if (result.createdDesk) eventBus.desks.created.emit();
 		if (result.changedDesks.includes(fsService.currentDesk)) {
 			void this.#refreshActiveDesk();
 		}

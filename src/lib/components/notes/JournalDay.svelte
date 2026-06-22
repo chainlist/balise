@@ -3,15 +3,16 @@
 	import type { Note } from '$lib/models/note';
 	import { notesService } from '$lib/services/content/notes.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { uiState } from '$lib/services/app/ui-state.svelte';
 	import { formatDate } from '$lib/utils/date-format';
 	import { eventBus } from '$lib/services/events/event-bus';
-	import { ChevronRightIcon } from '@lucide/svelte';
+	import { ChevronRightIcon, PanelLeftIcon } from '@lucide/svelte';
 	import NoteEditor from './NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const JOURNAL_TAG = 'journal';
 
-	let { date, hasNotes }: { date: Date; hasNotes: boolean } = $props();
+	let { date, hasNotes, count }: { date: Date; hasNotes: boolean; count: number } = $props();
 
 	// User-facing collapse. Today always starts open; the setting only folds past/other
 	// days by default. `date` is fixed per instance, so reading it once at init is intentional.
@@ -32,6 +33,7 @@
 		)
 	);
 	const isToday = $derived(isSameDay(date, new Date()));
+	const isActiveDay = $derived(!!uiState.activeDay && isSameDay(uiState.activeDay, date));
 
 	function isSameDay(a: Date, b: Date): boolean {
 		return (
@@ -92,16 +94,16 @@
 </script>
 
 <section
-	class="border-b border-primary/10 pb-4"
+	class="group border-b border-primary/10 pb-4"
 	class:border-l-2={isToday}
 	class:border-l-primary={isToday}
 >
-	<div class="mx-auto w-full max-w-175 px-2">
+	<div class="mx-auto flex w-full max-w-175 items-center justify-between px-2">
 		<button
 			type="button"
 			onclick={() => (collapsed = !collapsed)}
 			aria-expanded={!collapsed}
-			class="flex w-full items-center gap-1.5 pl-4 text-left"
+			class="flex min-w-0 flex-1 items-center gap-1.5 pl-4 text-left"
 		>
 			<ChevronRightIcon
 				class="size-4 shrink-0 text-muted-foreground transition-transform {collapsed
@@ -120,6 +122,20 @@
 				>
 			{/if}
 		</button>
+		{#if count > 0}
+			<button
+				type="button"
+				onclick={() => uiState.setActiveDay(date)}
+				aria-label={m.journal_view_day_notes()}
+				title={m.journal_view_day_notes()}
+				class="mr-2 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.8em] font-medium transition-opacity focus-visible:opacity-100 group-hover:opacity-100 {isActiveDay
+					? 'border-primary/40 bg-[var(--primary)]/10 text-[var(--primary)] opacity-100'
+					: 'border-primary/15 text-muted-foreground opacity-0 hover:bg-sidebar-accent hover:text-on-surface'}"
+			>
+				<PanelLeftIcon class="size-3.5 shrink-0" />
+				{m.journal_day_notes_count({ count })}
+			</button>
+		{/if}
 	</div>
 
 	{#if !collapsed}
