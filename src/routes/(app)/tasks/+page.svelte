@@ -7,6 +7,15 @@
 
 	let loaded = $state(false);
 
+	let prevDesk = uiState.activeDesk;
+	$effect(() => {
+		const desk = uiState.activeDesk;
+		if (desk !== prevDesk) {
+			prevDesk = desk;
+			tasksService.load();
+		}
+	});
+
 	onMount(async () => {
 		uiState.setActiveTag(null);
 		await tasksService.load();

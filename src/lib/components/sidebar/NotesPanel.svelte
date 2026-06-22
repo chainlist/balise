@@ -4,6 +4,8 @@
 	import { page } from '$app/state';
 	import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
 	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { formatDate } from '$lib/utils/date-format';
 	import { tagsService } from '$lib/services/content/tags.svelte';
 	import { eventBus } from '$lib/services/events/event-bus';
 	import { toasterService, errorMessage } from '$lib/services/app/toaster';
@@ -17,6 +19,16 @@
 	function tagColor(t: string): string | null {
 		return tagsService.tags.find((tag) => tag.tag === t)?.color ?? null;
 	}
+
+	const dayLabel = $derived(
+		uiState.activeDay
+			? formatDate(
+					uiState.activeDay,
+					settingsService.general.state.dateFormat,
+					settingsService.general.state.language
+				)
+			: null
+	);
 
 	async function handleCreate() {
 		let id: string;
@@ -49,9 +61,25 @@
 
 <div class="flex h-full min-h-0 flex-col frost">
 	<div class="flex items-center justify-between gap-1 px-3 pt-3 pb-2">
-		<span class="text-md truncate font-medium text-on-surface">
-			<TagName tag={uiState.activeTag || m.all_notes()} />
-		</span>
+		{#if uiState.activeDay}
+			<span class="text-md flex min-w-0 items-center gap-1 font-medium text-on-surface">
+				<span class="truncate capitalize">{dayLabel}</span>
+				<Button
+					variant="ghost"
+					size="icon-xs"
+					onclick={() => uiState.setActiveDay(null)}
+					aria-label={m.journal_clear_day_filter()}
+					title={m.journal_clear_day_filter()}
+					class="h-5 w-5 shrink-0 text-sidebar-foreground/60 hover:text-on-surface"
+				>
+					<XIcon class="size-3.5" />
+				</Button>
+			</span>
+		{:else}
+			<span class="text-md truncate font-medium text-on-surface">
+				<TagName tag={uiState.activeTag || m.all_notes()} />
+			</span>
+		{/if}
 		<div class="flex items-center">
 			<Button
 				variant="ghost"

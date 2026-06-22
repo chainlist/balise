@@ -190,6 +190,21 @@ export async function queryJournalNotesByDate(
 	return rows.map(mapNote);
 }
 
+/** Every note (any tag) created within the given UTC range, oldest first. */
+export async function queryNotesByCreatedDate(
+	db: Database,
+	utcFrom: string,
+	utcTo: string
+): Promise<Note[]> {
+	const rows = await db.select<RawNote[]>(
+		`SELECT ${NOTE_COLS} FROM notes
+     WHERE created_at >= $1 AND created_at < $2
+     ORDER BY created_at ASC`,
+		[utcFrom, utcTo]
+	);
+	return rows.map(mapNote);
+}
+
 export async function queryAllNotesMeta(
 	db: Database
 ): Promise<{ id: string; updated_at: string }[]> {

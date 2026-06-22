@@ -24,6 +24,7 @@ class UIState {
 	desks = $state([defaultDesk] as string[]);
 	activeTag = $state<string | null>(null);
 	composedTags = $state<string[]>([]);
+	activeDay = $state<Date | null>(null);
 	graphMode = $state<GraphMode>('sunburst');
 	ready = $state(false);
 
@@ -72,7 +73,7 @@ class UIState {
 		// Reload the visible list when a background device sync applies changes.
 		eventBus.sync.synced.on(() => void this.#reloadView());
 		// Surface desks a background sync materialised from a peer.
-		eventBus.desks.changed.on(() => void this.#mergeDesksFromDisk());
+		eventBus.desks.created.on(() => void this.#mergeDesksFromDisk());
 		// Drop a deleted note's remembered folds so the store can't grow forever.
 		eventBus.notes.deleted.on((id) => this.setNoteFolds(id, []));
 	}
@@ -103,6 +104,10 @@ class UIState {
 	}
 
 	async #reloadView(): Promise<void> {
+		if (this.activeDay) {
+			await notesService.loadForDay(this.activeDay);
+			return;
+		}
 		await Promise.all([
 			notesService.load(this.activeTag, this.composedTags),
 			tagsService.loadRelated(this.activeTag, this.composedTags)
@@ -157,8 +162,9 @@ class UIState {
 	}
 
 	async setActiveTag(tag: string | null): Promise<void> {
-		if (this.activeTag === tag) return;
+		if (this.activeTag === tag && this.activeDay === null) return;
 
+		this.activeDay = null;
 		this.activeTag = tag;
 		this.composedTags = [];
 		await Promise.all([
@@ -166,6 +172,26 @@ class UIState {
 			notesService.load(tag),
 			tagsService.loadRelated(tag)
 		]);
+	}
+
+	/** Filter the note list to every note created on a local day, clearing any tag
+	 *  filter. Pass `null` to drop the day filter and revert to the active tag. */
+	async setActiveDay(day: Date | null): Promise<void> {
+		this.activeDay = day;
+		if (day) {
+			this.activeTag = null;
+			this.composedTags = [];
+			await Promise.all([
+				this.#store?.set('activeTag', null),
+				notesService.loadForDay(day),
+				tagsService.loadRelated(null)
+			]);
+		} else {
+			await Promise.all([
+				notesService.load(this.activeTag, this.composedTags),
+				tagsService.loadRelated(this.activeTag, this.composedTags)
+			]);
+		}
 	}
 
 	async setGraphMode(mode: GraphMode): Promise<void> {
@@ -178,6 +204,7 @@ class UIState {
 	}
 
 	async toggleComposedTag(tag: string): Promise<void> {
+		this.activeDay = null;
 		const s = new Set(this.composedTags);
 		if (s.has(tag)) s.delete(tag);
 		else s.add(tag);
@@ -213,6 +240,7 @@ class UIState {
 		if (this.activeTag !== activeTag) {
 			this.activeTag = activeTag;
 		}
+		this.activeDay = null;
 		this.composedTags = [];
 		await this.setActiveDesk(desk);
 	}

@@ -29,7 +29,7 @@ class SyncEvents {
 class DeskEvents {
 	/** Device sync created a desk that wasn't here before, so the desk list can
 	 *  pick it up. */
-	readonly changed = new Signal();
+	readonly created = new Signal();
 }
 
 class JournalEvents {

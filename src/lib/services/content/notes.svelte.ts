@@ -14,6 +14,7 @@ import {
 	deleteNoteById,
 	insertDeletion,
 	queryJournalNotesByDate,
+	queryNotesByCreatedDate,
 	queryNoteCreatedDates,
 	queryJournalNoteCreatedDates,
 	insertNote,
@@ -49,6 +50,19 @@ function toLocalDayKeys(stamps: string[]): Set<string> {
 		days.add(`${d.getFullYear()}-${mo}-${da}`);
 	}
 	return days;
+}
+
+/** Count note creation timestamps per local 'YYYY-MM-DD' day. */
+function toLocalDayCounts(stamps: string[]): Map<string, number> {
+	const counts = new Map<string, number>();
+	for (const ts of stamps) {
+		const d = new Date(parseDbTimestamp(ts));
+		const mo = String(d.getMonth() + 1).padStart(2, '0');
+		const da = String(d.getDate()).padStart(2, '0');
+		const key = `${d.getFullYear()}-${mo}-${da}`;
+		counts.set(key, (counts.get(key) ?? 0) + 1);
+	}
+	return counts;
 }
 
 class NotesService {
@@ -138,6 +152,11 @@ class NotesService {
 		return toLocalDayKeys(await queryNoteCreatedDates(getDB()));
 	}
 
+	/** Count of notes (any tag) per local 'YYYY-MM-DD' day, by creation date. */
+	async noteCountsByDay(): Promise<Map<string, number>> {
+		return toLocalDayCounts(await queryNoteCreatedDates(getDB()));
+	}
+
 	/** Set of local 'YYYY-MM-DD' days that have at least one journal note. */
 	async journalNoteDates(): Promise<Set<string>> {
 		return toLocalDayKeys(await queryJournalNoteCreatedDates(getDB()));
@@ -148,6 +167,14 @@ class NotesService {
 		const utcFrom = toSqliteUtc(new Date(y, mo, d));
 		const utcTo = toSqliteUtc(new Date(y, mo, d + 1));
 		return queryJournalNotesByDate(getDB(), utcFrom, utcTo);
+	}
+
+	/** Load every note (any tag) created on the given local day into the visible list. */
+	async loadForDay(localDate: Date): Promise<void> {
+		const y = localDate.getFullYear(), mo = localDate.getMonth(), d = localDate.getDate();
+		const utcFrom = toSqliteUtc(new Date(y, mo, d));
+		const utcTo = toSqliteUtc(new Date(y, mo, d + 1));
+		this.notes = await queryNotesByCreatedDate(getDB(), utcFrom, utcTo);
 	}
 
 	async createForDate(id: string, content: string, localDate: Date): Promise<void> {

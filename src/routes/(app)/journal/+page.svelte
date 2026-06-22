@@ -44,12 +44,20 @@
 	// header can show its collapsed "..." marker without loading that day's notes.
 	let journalDays = $state<Set<string>>(new Set());
 
+	// Count of all notes (any tag) per local day, so each day's header button can
+	// show how many notes it would load without querying that day individually.
+	let noteCounts = $state<Map<string, number>>(new Map());
+
 	async function loadNoteDates(): Promise<void> {
 		noteDates = await notesService.noteDates();
 	}
 
 	async function loadJournalDays(): Promise<void> {
 		journalDays = await notesService.journalNoteDates();
+	}
+
+	async function loadNoteCounts(): Promise<void> {
+		noteCounts = await notesService.noteCountsByDay();
 	}
 
 	function dateKey(d: DateValue): string {
@@ -169,6 +177,8 @@
 		}
 		// The target day is mounted now; tell it to expand if it was collapsed.
 		eventBus.journal.jumpedTo.emit(dateKey(value));
+		// Surface that day's notes in the side panel, matching the day header button.
+		void uiState.setActiveDay(new Date(value.year, value.month - 1, value.day));
 		void reconcile();
 	}
 
@@ -202,12 +212,18 @@
 	}
 
 	onMount(() => {
-		uiState.setActiveTag(null);
+		// Opening the journal focuses today: load today's notes into the side panel.
+		void uiState.setActiveDay(new Date());
 		void loadJournalDays();
+		void loadNoteCounts();
 		// Membership only changes on a write or an applied sync, so refresh then
 		// rather than polling; the query is a single cheap column scan.
-		const offLocal = eventBus.sync.localChange.on(() => void loadJournalDays());
-		const offSynced = eventBus.sync.synced.on(() => void loadJournalDays());
+		const refresh = () => {
+			void loadJournalDays();
+			void loadNoteCounts();
+		};
+		const offLocal = eventBus.sync.localChange.on(refresh);
+		const offSynced = eventBus.sync.synced.on(refresh);
 		return () => {
 			offLocal();
 			offSynced();
@@ -263,7 +279,11 @@
 			{#each rendered as offset (offset)}
 				{@const day = dayFromOffset(offset)}
 				<div data-offset={offset}>
-					<JournalDay date={day} hasNotes={journalDays.has(dayKey(day))} />
+					<JournalDay
+						date={day}
+						hasNotes={journalDays.has(dayKey(day))}
+						count={noteCounts.get(dayKey(day)) ?? 0}
+					/>
 				</div>
 			{/each}
 			<div style="height:{bottomSpacer}px"></div>
