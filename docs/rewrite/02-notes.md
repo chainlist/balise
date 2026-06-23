@@ -88,45 +88,90 @@ export const noteRepo = {
 ## Todos
 
 ### Domain (`core/domain/note.ts`)
-- [ ] `Note` class with fields and `static create(content, magicRules)` (derive tags/title/
+- [x] `Note` class with fields and `static create(content, magicRules)` (derive tags/title/
       preview, new id + timestamps; apply Balise's real create rules).
-- [ ] `withContent(content, magicRules)`, `buildFile()`, `static fromFile(text)`,
+      Done: readonly aggregate; empty content allowed (no not-empty throw). `create` takes an
+      optional `opts` ({id, createdAt, updatedAt, pinned, archived}) so journal-day notes and
+      sync imports can pin those without a second factory; everything omitted defaults to a
+      fresh id and "now".
+- [x] `withContent(content, magicRules)`, `buildFile()`, `static fromFile(text)`,
       `static fromRow(row)`, `toRow()`, `toListItem()`.
-- [ ] `NoteListItem` and `NoteSearchResult` types.
-- [ ] `newNoteContent(titleText, activeTag)` (pure; service supplies `m.note_new_title()`).
+      Done, **except `fromRow`**: under the `NoteListItem` projection (decision 2) plus the new
+      `fromListItem` (reconstitutes the immutable shell for an edit), nothing needs a full `Note`
+      rebuilt from a raw DB row, so `fromRow` would be dead code. Omitted on the Simplicity-First
+      rule; add it if a later concept needs a full-note-from-row load. `toRow()` returns a
+      `NoteRow` (flags as 0/1, snake_case dates); the repo owns column order.
+- [x] `NoteListItem` and `NoteSearchResult` types.
+      Done (+ `NoteRow` for the upsert projection). `NoteListItem` uses camelCase
+      `createdAt`/`updatedAt`; components are repointed at cutover (Concept 09).
+- [x] `newNoteContent(titleText, activeTag)` (pure; service supplies `m.note_new_title()`).
+      Done: pure in the domain; the service re-exports a `newNoteContent(activeTag)` wrapper that
+      injects `m.note_new_title()`, keeping the existing call site stable.
 
 ### Data Access (`core/repositories/note.repo.ts`)
-- [ ] `noteRepo` singleton speaking `Note`/`NoteListItem`. Port every query from
+- [x] `noteRepo` singleton speaking `Note`/`NoteListItem`. Port every query from
       `notes.repo.ts` as use-case methods: `findByTags`, `findUntagged`, `findById`,
       `loadContent`, `save` (DB + tags + file + mtime), `delete` (tombstone + row + file),
       `findByCreatedDate`, the journal queries, `allMeta`, `createdDates`, `search`.
       `getDb()` is internal; no `Database` parameter; no `extractTitle`/`extractTags` import.
       Note: `queryActiveTaskNotes`/`queryRecentDoneNotes` move to Concept 05.
-- [ ] File IO (`writeFile`, `deleteFile`) lives inside `noteRepo`, using
+      Done: all listed methods present (journal queries are `findJournalByDate` +
+      `journalCreatedDates`). `save` is one `INSERT … ON CONFLICT(id) DO UPDATE` (preserves
+      flags + created_at on a local edit, same contract as the old UPDATE; new rows take every
+      column) — chosen over `INSERT OR REPLACE` so rowid and the FTS triggers behave exactly as
+      before. A separate `importNote(note)` upserts applying every field (sync semantics), no
+      file. `note_tags` writes (`setNoteTags`/`resolveCanonicalTags`, casing-preserving) are
+      private here, as Concept 01 reserved. `queryNoteUpdatedAt` not ported (the aggregate now
+      carries `updatedAt`); `queryNotesWithContentByIds` not ported (no caller; pre-existing dead
+      code left in the old repo).
+- [x] File IO (`writeFile`, `deleteFile`) lives inside `noteRepo`, using
       `core/repositories/backend/fs` and `core/repositories/backend/tauri` (mtime), calling
       `note.buildFile()`. Expose `writeFile`/`deleteFile` for the Sync compatibility surface.
+      Done: `writeFile` writes `note.buildFile()` then best-effort `setDeskFileMtime`; `delete`
+      uses `deleteFile` internally; both `writeFile`/`deleteFile`/`insertDeletion` are public for
+      sync. Frontmatter byte-format verified against `src-tauri/src/sync/note_file.rs` in a test.
 
 ### Application (`core/services/notes.svelte.ts`)
-- [ ] Singleton `notesService` with `$state notes: NoteListItem[]`.
-- [ ] Thin use cases: `create`, `update`, `delete` (tombstone + `eventBus` emissions),
+- [x] Singleton `notesService` with `$state notes: NoteListItem[]`.
+      Done.
+- [x] Thin use cases: `create`, `update`, `delete` (tombstone + `eventBus` emissions),
       `load`, `loadContent`, `createForDate`, `importNote` (sync path). Each builds/edits a
       `Note` via the domain, calls one `noteRepo` method, updates state, emits. No SQL.
-- [ ] Keep `noteDates`/`noteCountsByDay` here; journal-specific day methods go to Concept 04.
+      Done: `update` reconstitutes the immutable shell via `Note.fromListItem(meta)` (list item,
+      or `findById` fallback) then `.withContent(...)`, so the file mirror keeps the real
+      created_at/flags without a content round trip. `ImportOptions` drops the old `create` flag
+      — `save`/`importNote` are idempotent upserts, so create-vs-update is automatic. No
+      `uiState` import (would cycle): callers still pass `newNoteContent(activeTag)`.
+- [x] Keep `noteDates`/`noteCountsByDay` here; journal-specific day methods go to Concept 04.
+      Done: both here (over `noteRepo.createdDates()`); `journalNoteDates`/`queryForDate`/
+      `loadForDay` deferred to Concept 04 (the repo methods they need are already ported).
 
 ### Tests (`core/domain/note.test.ts`)
-- [ ] `Note.create` derives tags/title/preview from content and sets timestamps.
-- [ ] `buildFile`/`fromFile` round-trip (frontmatter to fields and back).
-- [ ] `withContent` re-derives tags/title/preview and bumps `updatedAt`.
-- [ ] `newNoteContent` with and without an active tag.
+- [x] `Note.create` derives tags/title/preview from content and sets timestamps.
+      Done (+ empty content, + opts overrides).
+- [x] `buildFile`/`fromFile` round-trip (frontmatter to fields and back).
+      Done (+ exact on-disk byte format, + body containing a `---` rule, + no-frontmatter input).
+- [x] `withContent` re-derives tags/title/preview and bumps `updatedAt`.
+      Done (preserves id/created_at/flags; bumps off a stored timestamp).
+- [x] `newNoteContent` with and without an active tag.
+      Done (+ the untagged sentinel emits no hashtag). 15 tests pass.
 
 ## Definition of Done
-- [ ] Todos ticked; `pnpm test:unit -- --run src/lib/core/domain/note.test.ts` passes.
-- [ ] `pnpm lint` passes.
-- [ ] Self-audit: `note.repo.ts` has no `extractTitle`/`notePreview`/`extractTags` import and
+- [x] Todos ticked; `pnpm test:unit -- --run src/lib/core/domain/note.test.ts` passes.
+      15 new tests; full suite 475 passed (was 460 after Concept 01).
+- [x] `pnpm lint` passes.
+      `prettier --check` + `eslint` clean on the four new files (bare `pnpm lint` still trips on
+      the pre-existing `src-tauri/target` artifact noted in Concept 00).
+- [x] Self-audit: `note.repo.ts` has no `extractTitle`/`notePreview`/`extractTags` import and
       no `Database` parameter; the `Note` aggregate does all derivation; `notes.svelte.ts`
       has no `getDb`/SQL and its methods are thin sequencers.
-- [ ] Compatibility surface preserved (below).
-- [ ] Dashboard updated.
+      Verified by grep: the only `extractTitle`/`getDb` hits in repo/service are the comments
+      documenting their absence.
+- [x] Compatibility surface preserved (below).
+      `notesService.{loadContent,update,importNote,notes}`, `noteRepo.{allMeta,insertDeletion,
+      writeFile,deleteFile}`, `Note.fromFile` all present. (Note: sync is currently native Rust,
+      so these TS surfaces have no live callers today; kept for the future TS-sync repoint.)
+- [x] Dashboard updated.
 
 ## Compatibility surface (out-of-scope Editor and Sync, repointed at cutover)
 - **Editor** calls: `notesService.loadContent(id)`, `notesService.update(id, content)`,
