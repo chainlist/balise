@@ -42,7 +42,11 @@ Cut over in this order so the app keeps running between chunks:
       repoint. NoteEditor wraps the out-of-scope editor; use the Tags compatibility method.
 - [ ] `components/settings/*`: repoint to `core/services/settings/*`.
 - [ ] `components/graph/*`, `components/tasks/*`: repoint; pull pure geometry from
-      `core/domain/graph.ts` / `core/domain/task.ts`.
+      `core/domain/graph.ts` / `core/domain/task.ts`. **Note:** the graph geometry move was
+      deferred from Concept 06 — the pure parts of `components/graph/sunburst.ts` and
+      `force-graph.ts` (arc/chord/sunburst math, node-radius/adjacency/transform helpers)
+      still need to be moved into `core/domain/graph.ts` here before the components repoint;
+      leave `force-sim.ts`/`force-render.ts` (d3 + canvas) in the components.
 - [ ] `components/*` top-level (CommandPalette, TitleBar, wizard, modals): repoint.
 
 ### Out-of-scope subsystems (repoint only)

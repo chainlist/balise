@@ -152,7 +152,7 @@ file text), never raw markdown, so the parsers are not duplicated in Rust.
 - [x] 03 Desks
 - [x] 04 Journal
 - [x] 05 Tasks
-- [ ] 06 Graph
+- [x] 06 Graph
 - [ ] 07 Settings
 - [ ] 08 App shell services
 - [ ] 09 Pages and components cutover

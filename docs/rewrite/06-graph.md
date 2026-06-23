@@ -42,31 +42,51 @@ these builders with `tagsService.tags`.
 ## Todos
 
 ### Domain (`core/domain/graph.ts`)
-- [ ] Move `jaccardWeight`. Pure.
-- [ ] Move graph color mapping.
-- [ ] Add `buildScores`, `buildNeighbors`, `rankTags`, `weightedEdges`, `neighborsOf` as
-      pure functions taking tags and cooccurrences.
-- [ ] Move any pure layout geometry (arc angles, sunburst slices) used by the graph
-      components; leave SVG rendering in the components.
+- [x] Move `jaccardWeight`. Pure. — ported verbatim from `utils/graph-weight.ts`.
+- [x] Move graph color mapping. — `assignGraphColors` + `DEFAULT_TAG_COLOR` + the two
+      palettes ported verbatim from `utils/graph-colors.ts`.
+- [x] Add `buildScores`, `buildNeighbors`, `rankTags`, `weightedEdges`, `neighborsOf` as
+      pure functions taking tags and cooccurrences. — added; `neighborsOf(neighbors, name,
+      minStrength)` takes the prebuilt adjacency from `buildNeighbors` so the service stays a
+      one-liner. Domain owns `TagCooccurrence` / `TagNeighbor` / `WeightedEdge` types.
+- [~] Move any pure layout geometry (arc angles, sunburst slices) used by the graph
+      components; leave SVG rendering in the components. — **DEFERRED to Concept 09**
+      (decision 2026-06-23). The geometry (`components/graph/sunburst.ts`,
+      `force-graph.ts`) is already pure and unit-tested in place; moving it now would only
+      duplicate it until cutover, so it is relocated into `core/domain/graph.ts` as part of
+      the graph component repoint in 09.
 
 ### Data Access
-- [ ] Confirm `queryTagCooccurrences` exists in `core/repositories/tag.repo.ts` (from
-      Concept 01) and returns the `{ tag_a, tag_b, count, count_a, count_b }` shape.
+- [x] Confirm `queryTagCooccurrences` exists in `core/repositories/tag.repo.ts` (from
+      Concept 01) and returns the `{ tag_a, tag_b, count, count_a, count_b }` shape. —
+      exists as `tagRepo.cooccurrences()`; maps the raw row to the camelCase domain shape
+      `{ tagA, tagB, count, countA, countB }`. No change needed.
 
 ### Application (`core/services/graph.svelte.ts`)
-- [ ] `$state cooccurrences`; `load()` reads via the repo and maps to the domain shape.
-- [ ] `$derived` `rankedTags`, `weightedEdges`, and a `neighborsOf(name, minStrength)`
-      method, each delegating to the domain builders.
+- [x] `$state cooccurrences`; `load()` reads via the repo and maps to the domain shape. —
+      `load()` lazy-loads tags then assigns `await tagRepo.cooccurrences()` directly (the
+      repo already returns the domain shape).
+- [x] `$derived` `rankedTags`, `weightedEdges`, and a `neighborsOf(name, minStrength)`
+      method, each delegating to the domain builders. — private `$derived` `scores` /
+      `neighbors` feed the public `rankedTags` / `weightedEdges` `$derived` and the
+      `neighborsOf` method. Compatibility surface (`load`, `rankedTags`, `weightedEdges`,
+      `neighborsOf`) matches what `graph/+page.svelte` consumes.
 
 ### Tests (`core/domain/graph.test.ts`)
-- [ ] Port `graph-weight.test.ts` and `graph-colors.test.ts`.
-- [ ] `buildScores`/`rankTags`: a small fixture yields the expected order.
-- [ ] `buildNeighbors`/`neighborsOf`: adjacency is symmetric, sorted by weight, and
-      `minStrength` filters correctly.
+- [x] Port `graph-weight.test.ts` and `graph-colors.test.ts`. — ported verbatim (imports
+      repointed to `./graph` and `./tag`).
+- [x] `buildScores`/`rankTags`: a small fixture yields the expected order. — scores sum both
+      endpoints, unconnected tags score 0, unknown rows ignored; ranking is by score then
+      alphabetical tie-break.
+- [x] `buildNeighbors`/`neighborsOf`: adjacency is symmetric, sorted by weight, and
+      `minStrength` filters correctly. — plus case-insensitive lookup, unknown-tag empty
+      list, and dropping rows whose endpoints are not known tags.
 
 ## Definition of Done
-- [ ] Todos ticked; `pnpm test:unit -- --run src/lib/core/domain/graph.test.ts` passes.
-- [ ] `pnpm lint` passes.
-- [ ] Self-audit: builders are pure (no `$state`, no Svelte) and unit-tested; the service
-      holds only state and `$derived` wiring; no note-to-note edges anywhere.
-- [ ] Dashboard updated.
+- [x] Todos ticked (geometry deferred to 09 per the decision above);
+      `pnpm test:unit -- --run src/lib/core/domain/graph.test.ts` passes. — 543 passed (25 new).
+- [x] `pnpm lint` passes. — prettier + eslint clean on the three new files.
+- [x] Self-audit: builders are pure (no `$state`, no Svelte) and unit-tested; the service
+      holds only state and `$derived` wiring; no note-to-note edges anywhere. — confirmed:
+      domain imports only `./tag`; service imports domain + repo + tagsService only.
+- [x] Dashboard updated.
