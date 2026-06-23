@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import {
-		settingsService,
 		MAGIC_TAG_MATCH_TYPES,
-		type MagicTag,
+		type MagicTagRule,
 		type MagicTagMatchType
-	} from '$lib/services/settings/settings.svelte';
+	} from '$lib/core/domain/settings';
 	import { ArrowRightIcon, PlusIcon, Trash2Icon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
@@ -47,7 +47,7 @@
 		save();
 	}
 
-	function updateRule(index: number, field: keyof MagicTag, value: string) {
+	function updateRule(index: number, field: keyof MagicTagRule, value: string) {
 		rules = rules.map((r, i) => (i === index ? { ...r, [field]: value } : r));
 		save();
 	}

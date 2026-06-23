@@ -2,14 +2,14 @@
 	import { Switch } from 'bits-ui';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import ColorPicker from '$lib/components/ColorPicker.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import {
-		settingsService,
 		DEFAULT_MESH_COLORS,
 		DEFAULT_MESH_SIZES,
 		DEFAULT_MESH_UNIFIED_COLOR,
 		MESH_MODES,
 		type MeshMode
-	} from '$lib/services/settings/settings.svelte';
+	} from '$lib/core/domain/settings';
 	import SegmentedToggle from '$lib/components/SegmentedToggle.svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';

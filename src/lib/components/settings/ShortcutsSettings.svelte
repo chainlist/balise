@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { shortcutsService } from '$lib/services/platform/shortcuts.svelte';
-	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import { globalShortcutService } from '$lib/services/platform/global-shortcut.svelte';
+	import { shortcutsService } from '$lib/core/services/shortcuts.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { uiState } from '$lib/core/services/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';
@@ -17,12 +16,12 @@
 	let searchQuery = $state('');
 
 	onMount(() => {
-		void globalShortcutService.recheck(APP_SHORTCUTS);
+		void shortcutsService.recheck(APP_SHORTCUTS);
 	});
 
 	function reapplyIfGlobal(id: string) {
 		const def = APP_SHORTCUTS.find((d) => d.id === id);
-		if (def?.global) void globalShortcutService.apply(def, true);
+		if (def?.global) void shortcutsService.apply(def, true);
 	}
 
 	const filteredShortcuts = $derived(
@@ -201,7 +200,7 @@
 									</KbdGroup>
 								{/if}
 							</button>
-							{#if def.global && globalShortcutService.status[def.id] === 'conflict'}
+							{#if def.global && shortcutsService.status[def.id] === 'conflict'}
 								<p class="mt-1 text-xs text-destructive">
 									{m.settings_shortcuts_global_conflict()}
 								</p>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { Switch } from 'bits-ui';
 	import * as m from '$paraglide/messages.js';
 	import SettingsSection from './SettingsSection.svelte';

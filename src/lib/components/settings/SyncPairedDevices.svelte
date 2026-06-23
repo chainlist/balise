@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { cn } from '$lib/utils.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import SyncLinkedDevices from './SyncLinkedDevices.svelte';

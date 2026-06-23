@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Switch } from 'bits-ui';
-	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { desksService } from '$lib/core/services/desks.svelte';
 	import { cn } from '$lib/utils.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import SettingsSection from './SettingsSection.svelte';
@@ -58,7 +58,7 @@
 					<p class="text-xs text-muted-foreground">{m.settings_sync_share_desks_helper()}</p>
 				</div>
 				<div class="mt-3 space-y-1">
-					{#each uiState.desks as desk (desk)}
+					{#each desksService.desks as desk (desk)}
 						<div
 							class="flex items-center justify-between gap-3 rounded px-3 py-2 hover:bg-muted/40"
 						>

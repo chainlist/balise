@@ -9,7 +9,7 @@
 		RefreshCwIcon,
 		Trash2Icon
 	} from '@lucide/svelte';
-	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { devicesService, type LinkedDevice } from '$lib/services/sync/devices.svelte';
 	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import { formatDeviceId } from '$lib/utils/device-id';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { LayoutListIcon, Trash2Icon } from '@lucide/svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { desksService } from '$lib/core/services/desks.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import Badge from '$lib/components/Badge.svelte';
 	import SettingsSection from './SettingsSection.svelte';
@@ -14,7 +14,7 @@
 	let isDeleteOpen = $state(false);
 	let deleteDeskName = $state<string | null>(null);
 
-	const desks = $derived(uiState.desks);
+	const desks = $derived(desksService.desks);
 
 	function openManage(desk: string) {
 		manageDeskName = desk;
@@ -44,7 +44,7 @@
 						<LayoutListIcon size="18" class="shrink-0 text-muted-foreground" />
 						<span class="truncate text-sm font-medium">{desk}</span>
 					</button>
-					{#if desk === uiState.activeDesk}
+					{#if desk === desksService.activeDesk}
 						<Badge>{m.settings_desks_active()}</Badge>
 					{/if}
 					{#if settingsService.sync.state.enabled && settingsService.sync.isDeskShared(desk)}

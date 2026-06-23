@@ -82,7 +82,26 @@ Cut over in this order so the app keeps running between chunks:
       `utils/markdown-patterns`, an un-migrated shared util.) **Deferred:** `notes/Editor.svelte`
       moves with the **Editor (cm)** slice (no `Note`-type coupling with `EditorView`; only its own
       `settingsService`/`activeEditorService` imports).
-- [ ] `components/settings/*`: repoint to `core/services/settings/*`.
+- [x] `components/settings/*`: repointed to `core`. In-scope flips: `settingsService`
+      (`core/services/settings/settings.svelte`), `themeService` (`core/services/theme.svelte`),
+      `tagsService` (`core/services/tags.svelte`), `updaterService`, `toasterService`/`errorMessage`,
+      `uiState`, plus the domain pulls (`Theme` → `core/domain/theme`; `Tag` → `core/domain/tag`;
+      `MESH_*`/`MeshMode`/`MAGIC_TAG_MATCH_TYPES`/`MagicTagMatchType`/`SYNC_INTERVAL_OPTIONS` →
+      `core/domain/settings`). `SUPPORTED_LOCALES` had no `core` home → repointed `GeneralSettings`
+      to the canonical `SUPPORTED_LANGUAGES` from `core/domain/settings` (same values). `MagicTag`
+      (old) → `MagicTagRule` (domain), an identical `{pattern,matchType,tag}` shape.
+      **Global-shortcut merge (Concept 08-forced):** the old `globalShortcutService` (apply/recheck/
+      status) was folded into the app-shell `shortcutsService` (the `core/services/system/global-shortcut`
+      wrapper is now just the OS `register`/`unregister` seam), so `ShortcutsSettings` calls
+      `shortcutsService.recheck`/`.apply`/`.status` and drops the `globalShortcutService` import.
+      **Desk reads:** `DesksSettings` + `SyncSharingSettings` moved `uiState.desks`/`activeDesk` →
+      `desksService` (matching the sidebar split; `DesksSettings`'s `uiState` import dropped as it
+      became unused). **Deferred (left in place):** the sync/device components (`EnterCodeForm`,
+      `ShowCodePanel`, `DeviceEditDialog`, `DeviceDeleteDialog`, `DeviceFields`, `SyncLinkedDevices`)
+      keep `services/sync/*` + `utils/device-id` + `utils/sync` for the **Sync** slice (only their
+      `toaster`/`settings` imports flipped); `AboutSettings`/`GeneralSettings` keep `utils/init-app`
+      (`checkForNews`/`applyLanguageChange`) for the **bootstrap/layout** slice; `EditorSettings`
+      keeps `utils/cm`'s `MarkMode`; `config/app-shortcuts` (not a migrated path) stays.
 - [x] `components/graph/*`, `components/tasks/*`: repoint; pull pure geometry from
       `core/domain/graph.ts` / `core/domain/task.ts`. **Tasks done:** `tasks/TaskBoard.svelte`
       + `tasks/TaskBoardCard.svelte` repointed (`tasksService`/`toasterService`/`uiState` →
