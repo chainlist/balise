@@ -87,7 +87,9 @@
 			dpr,
 			width,
 			height,
-			focus: hoveredId ?? selectedId,
+			// While a tag is selected it stays the focus; hovering other nodes must
+			// not steal the highlight. Hover only drives focus when nothing is selected.
+			focus: selectedId ?? hoveredId,
 			selectedId,
 			adjacency,
 			linkColor,

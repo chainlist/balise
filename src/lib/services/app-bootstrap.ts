@@ -1,4 +1,4 @@
-import { migrateLegacyStores } from '$lib/repositories/backend/store';
+import { migrateLegacyStores, migrateWorkspaceStore } from '$lib/repositories/backend/store';
 import { settingsService } from '$lib/services/settings/settings.svelte';
 import { themeService } from '$lib/services/theme.svelte';
 import { shortcutsService } from '$lib/services/shortcuts.svelte';
@@ -28,6 +28,7 @@ import { marked } from 'marked';
 export async function initApp(): Promise<{ error: string | null }> {
 	try {
 		await migrateLegacyStores();
+		await migrateWorkspaceStore();
 		await settingsService.init();
 		await deviceSyncService.init();
 		await devicesService.init();

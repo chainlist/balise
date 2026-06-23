@@ -11,8 +11,9 @@ import { fsSyncService } from '$lib/services/sync/fs-sync';
 // desk. No SQL, no `getDb`, no filesystem calls — `deskRepo` hides the folder/DB
 // lifecycle and the domain owns the name/list rules. Each method is a thin ordered
 // list of steps. Persistence lives in a dedicated `workspace.json` store this
-// service owns (Concept 09 cutover migrates `activeDesk`/`desks` here from the old
-// `ui-state.json`). The UI-selection state (activeTag, activeDay, composedTags)
+// service owns; `migrateWorkspaceStore` (run at bootstrap) carries `activeDesk`/`desks`
+// over from the old `ui-state.json` on the first launch after the cutover. The
+// UI-selection state (activeTag, activeDay, composedTags)
 // stays with `ui-state` (Concept 08); `switchDesk` only uses `activeTag` to reload.
 
 const defaults = {

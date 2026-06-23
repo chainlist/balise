@@ -1,4 +1,4 @@
-import { migrateLegacyStores } from '$lib/repositories/backend/store';
+import { migrateLegacyStores, migrateWorkspaceStore } from '$lib/repositories/backend/store';
 import { deskRepo } from '$lib/repositories/desk.repo';
 import { settingsService } from '$lib/services/settings/settings.svelte';
 import { themeService } from '$lib/services/theme.svelte';
@@ -16,6 +16,7 @@ import { tagsService } from '$lib/services/tags.svelte';
 export async function initQuickCapture(): Promise<{ error: string | null }> {
 	try {
 		await migrateLegacyStores();
+		await migrateWorkspaceStore();
 		await settingsService.init();
 		themeService.init();
 		await uiState.init();
