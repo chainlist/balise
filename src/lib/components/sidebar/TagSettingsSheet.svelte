@@ -31,8 +31,6 @@
 	let color = $derived(draftColor ?? baseColor);
 	let pinned = $derived(draftPinned ?? basePinned);
 
-	let previewName = $derived(displayName.trim() || tag?.tag || '');
-
 	let saving = $state(false);
 
 	function reset() {
@@ -71,8 +69,7 @@
 					class="size-3.5 shrink-0 rounded-full ring-1 ring-black/10"
 					style="background-color: {color};"
 				></span>
-				<Dialog.Title class="truncate">{previewName}</Dialog.Title>
-				<span class="shrink-0 font-mono text-xs text-muted-foreground">#{tag?.tag}</span>
+				<Dialog.Title class="truncate font-mono">#{tag?.tag}</Dialog.Title>
 			</div>
 			<Dialog.Description>{m.tag_settings_description()}</Dialog.Description>
 		</Dialog.Header>

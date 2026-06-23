@@ -47,10 +47,6 @@
 		if (page.url.pathname !== '/') await goto(resolve('/'));
 	}
 
-	function clearActiveTag() {
-		uiState.setActiveTag(null);
-	}
-
 	$effect(() =>
 		eventBus.notes.select.on(async (id) => {
 			uiState.setActiveNote(id);
@@ -59,10 +55,10 @@
 	);
 </script>
 
-<div class="flex h-full min-h-0 flex-col frost">
+<div class="frost flex h-full min-h-0 flex-col">
 	<div class="flex items-center justify-between gap-1 px-3 pt-3 pb-2">
 		{#if uiState.activeDay}
-			<span class="text-md flex min-w-0 items-center gap-1 font-medium text-on-surface">
+			<span class="text-md flex h-6 min-w-0 items-center gap-1 font-medium text-on-surface">
 				<span class="truncate capitalize">{dayLabel}</span>
 				<Button
 					variant="ghost"
@@ -76,7 +72,7 @@
 				</Button>
 			</span>
 		{:else}
-			<span class="text-md truncate font-medium text-on-surface">
+			<span class="text-md flex h-6 min-w-0 items-center font-medium text-on-surface">
 				<TagName tag={uiState.activeTag || m.all_notes()} />
 			</span>
 		{/if}
@@ -94,19 +90,8 @@
 		</div>
 	</div>
 
-	{#if uiState.activeTag || uiState.composedTags.length > 0}
+	{#if uiState.composedTags.length > 0}
 		<div class="flex flex-wrap items-center gap-1 px-3 pb-2">
-			<!-- {#if uiState.activeTag}
-				<button
-					type="button"
-					onclick={clearActiveTag}
-					class="group inline-flex items-center gap-1 rounded border bg-muted px-2 py-0.5 text-sm font-medium hover:bg-muted/70"
-					style={tagColor(uiState.activeTag) ? `border-color: ${tagColor(uiState.activeTag)};` : ''}
-				>
-					<TagName tag={uiState.activeTag} />
-					<XIcon class="size-3 opacity-50 group-hover:opacity-100" />
-				</button>
-			{/if} -->
 			{#each uiState.composedTags as t (t)}
 				<button
 					type="button"
@@ -121,7 +106,7 @@
 		</div>
 	{/if}
 
-	<div class="flex flex-1 scrollbar-thin flex-col gap-2 overflow-y-auto px-3 pb-3">
+	<div class="flex scrollbar-thin flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3">
 		{#if notesService.notes.length === 0}
 			<p class="px-2 py-6 text-center text-sm text-muted-foreground">{m.no_notes_yet()}</p>
 		{:else}

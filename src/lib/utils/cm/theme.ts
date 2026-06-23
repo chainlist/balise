@@ -191,7 +191,8 @@ export const noteEditorTheme = EditorView.theme({
 		width: '100%',
 		height: '1px',
 		background: 'var(--outline-variant)',
-		verticalAlign: 'middle'
+		verticalAlign: 'middle',
+		margin: '2em 0'
 	},
 	'.cm-widgetBuffer': { lineHeight: '0' },
 	'.cm-md-code-block': {
@@ -239,6 +240,15 @@ export const noteEditorTheme = EditorView.theme({
 		borderRadius: '2px'
 	},
 	'.cm-md-underline': { textDecoration: 'underline' },
+	'.cm-md-date': {
+		font: 'inherit',
+		color: 'inherit',
+		background: 'none',
+		border: 'none',
+		padding: '0',
+		textDecoration: 'underline',
+		textDecorationColor: 'var(--md-link-decoration)'
+	},
 	'[data-placeholder]': { position: 'relative' },
 	'[data-placeholder]::before': {
 		content: 'attr(data-placeholder)',

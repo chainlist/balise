@@ -30,6 +30,10 @@ class ActiveEditorService {
 		view.focus();
 		return true;
 	}
+
+	focus() {
+		this.#view?.focus();
+	}
 }
 
 export const activeEditorService = new ActiveEditorService();
