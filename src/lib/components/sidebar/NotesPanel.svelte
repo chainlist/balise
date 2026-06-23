@@ -58,7 +58,7 @@
 <div class="frost flex h-full min-h-0 flex-col">
 	<div class="flex items-center justify-between gap-1 px-3 pt-3 pb-2">
 		{#if uiState.activeDay}
-			<span class="text-md flex min-w-0 items-center gap-1 font-medium text-on-surface">
+			<span class="text-md flex h-6 min-w-0 items-center gap-1 font-medium text-on-surface">
 				<span class="truncate capitalize">{dayLabel}</span>
 				<Button
 					variant="ghost"
@@ -72,7 +72,7 @@
 				</Button>
 			</span>
 		{:else}
-			<span class="text-md truncate font-medium text-on-surface">
+			<span class="text-md flex h-6 min-w-0 items-center font-medium text-on-surface">
 				<TagName tag={uiState.activeTag || m.all_notes()} />
 			</span>
 		{/if}

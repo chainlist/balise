@@ -12,7 +12,7 @@
 <div class="frost h-full w-full">
 	{#if selectedNote}
 		{#key selectedNote.id}
-			<NoteEditor note={selectedNote} />
+			<NoteEditor note={selectedNote} showHeader={!uiState.modal.isZenModeActive} />
 		{/key}
 	{:else}
 		<div class="flex h-full items-center justify-center">
