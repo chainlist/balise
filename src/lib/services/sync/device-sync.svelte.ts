@@ -1,13 +1,13 @@
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { syncPeers, setSyncConfig, startSync } from '$lib/utils/sync';
 import { deviceIdFromPublicKey, getDeviceId } from '$lib/utils/device-id';
-import { tagsService } from '$lib/services/content/tags.svelte';
+import { tagsService } from '$lib/core/services/tags.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
-import { settingsService } from '$lib/services/settings/settings.svelte';
+import { settingsService } from '$lib/core/services/settings/settings.svelte';
 import { syncConnectionService } from '$lib/services/sync/sync-connection.svelte';
-import { toasterService, errorMessage } from '$lib/services/app/toaster';
-import { fsService } from '$lib/services/platform/fs';
-import { eventBus } from '$lib/services/events/event-bus';
+import { toasterService, errorMessage } from '$lib/core/services/toaster';
+import { fsService } from '$lib/core/repositories/backend/fs';
+import { eventBus } from '$lib/core/services/events/event-bus';
 import * as m from '$paraglide/messages.js';
 
 /** `sync-result` event payload: what one peer's protocol run changed locally. */

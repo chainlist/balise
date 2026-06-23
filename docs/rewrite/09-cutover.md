@@ -163,9 +163,19 @@ Cut over in this order so the app keeps running between chunks:
       **Flagged:** `config/app-shortcuts.ts` still imports the old `notes`/`ui-state`/`active-editor`/
       `settings`/`toaster`/`eventBus`/`shortcuts` singletons (live via `CommandPalette`); repoint it
       with the app-shell/shortcuts cutover (its `date-format` import left for that pass).
-- [ ] Sync (`services/sync/*`, fs-sync, device-sync): repoint `importNote`, meta queries,
-      tombstones, and note-file IO to the new Notes repo/service. Grep for every current
-      call site first and check them off one by one.
+- [x] Sync (`services/sync/*`, fs-sync, device-sync): repointed. **No note IO left on the TS
+      side:** `importNote`, meta queries, tombstones, and note-file diffing all run natively now
+      (`sync_desk_files`/`sync_peers` + the Rust accept loop), so the repoint reduced to the
+      service/backend imports. Flipped `tagsService`/`settingsService`/`toasterService`+`errorMessage`/
+      `eventBus` → `core/services/*`, `fsService` → `core/repositories/backend/fs` (its `currentDesk`
+      is set by `desk.repo` on switch, so it's populated under the new bootstrap), and
+      `resolveStorePath` → `core/repositories/backend/store`. `utils/sync`'s `setSyncConfig` now
+      types `magicTags` as the domain `MagicTagRule` (identical `{pattern,matchType,tag}` shape).
+      **`SignalMessage` relocated:** moved out of `models/sync` (its only consumer) into
+      `services/sync/signal.ts` so `models/` can be deleted; the sync subsystem keeps its internals
+      (`devices`/`sync-connection`/`sync`/`utils/sync`/`utils/device-id`) and the deferred settings
+      device components needed no change (they already consume only the sync subsystem + flipped
+      `core` toaster/settings). Full unit suite green (569 tests).
 
 ## Deletion and flatten
 - [ ] Grep for any remaining imports of `$lib/services/` (old), `$lib/repositories/`,

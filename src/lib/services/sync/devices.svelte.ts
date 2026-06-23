@@ -1,5 +1,5 @@
 import { load, type Store } from '@tauri-apps/plugin-store';
-import { resolveStorePath } from '../platform/store-path';
+import { resolveStorePath } from '$lib/core/repositories/backend/store';
 
 export type DeviceType = 'desktop' | 'laptop' | 'mobile' | 'tablet';
 
