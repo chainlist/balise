@@ -196,10 +196,25 @@ Cut over in this order so the app keeps running between chunks:
       `core` toaster/settings). Full unit suite green (569 tests).
 
 ## Deletion and flatten
-- [ ] Grep for any remaining imports of `$lib/services/` (old), `$lib/repositories/`,
+- [x] Grep for any remaining imports of `$lib/services/` (old), `$lib/repositories/`,
       `$lib/models/`, and the migrated `$lib/utils/*` files. Zero results before deleting.
-- [ ] Delete old `services/`, `repositories/`, `models/`, and migrated `utils/*` (leave
-      `utils/cm/*` and any genuinely-still-used helpers).
+      Verified across `src/`: every importer of a dead path was itself inside the dead
+      island. The only `core -> old` edges left are the intentional out-of-scope ones
+      (`app-bootstrap`/`desks` → `services/sync/*`, `ui-state` → `utils/cm` `FoldRange` type),
+      and the live editor/preview/device components keep their out-of-scope helpers.
+- [x] Delete old `services/`, `repositories/`, `models/`, and migrated `utils/*` (leave
+      `utils/cm/*` and any genuinely-still-used helpers). **Deleted (59 files):** `services/`'s
+      `app/`, `content/`, `events/`, `platform/`, `settings/` subtrees; all of `repositories/`
+      and `models/`; and the migrated leaf utils (`date-format`, `db`, `graph-colors`,
+      `graph-weight`, `init-app`, `init-quick`, `tag-constants`, `tag-parser`, `task-colors`,
+      `task-parser`, `time`, `primary-color`) with their `.test.ts` siblings. **Kept (out-of-scope
+      / genuinely-still-used):** `services/sync/*` (the whole sync subsystem — reached from
+      `core` `app-bootstrap`/`desks` and the settings device components); `utils/cm/*` (editor);
+      `utils/color-palette` (ColorPicker), `utils/markdown-patterns` (cm + NotePreview, with its
+      test), `utils/note-utils` (`readingTimeMinutes` in `EditorView`, no `core` home, with its
+      test), `utils/device-id` + `utils/sync` (sync subsystem + sync settings). Unit suite green
+      after deletion: **360 tests / 24 files** (the old island's ~200 duplicate tests went with
+      it; the `core/*` suite + kept cm/util tests remain).
 - [ ] Flatten `core/*` to final `lib/*` paths (or keep `core/`); update imports.
 - [ ] Update `CLAUDE.md` folder-structure section to match the new tree.
 
