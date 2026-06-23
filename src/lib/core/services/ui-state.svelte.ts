@@ -86,6 +86,17 @@ class UIState {
 		]);
 	}
 
+	/** Clear the tag / day / composed-tag selection in memory, without reloading the
+	 *  note list. Used on a desk switch, where `desksService.switchDesk` has already
+	 *  reloaded the untagged view; this just realigns the selection state with it.
+	 *  Matches the old `switchDesk`, which reset these fields without persisting
+	 *  `activeTag`. */
+	clearSelection(): void {
+		this.activeTag = null;
+		this.activeDay = null;
+		this.composedTags = [];
+	}
+
 	async setActiveTag(tag: string | null): Promise<void> {
 		if (this.activeTag === tag && this.activeDay === null) return;
 

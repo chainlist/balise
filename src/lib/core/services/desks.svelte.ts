@@ -97,6 +97,25 @@ class DesksService {
 		}
 	}
 
+	/** Full delete use case (presentation can't call the repo directly): switch away
+	 *  to a fallback desk if the deleted one is active, erase its files, then drop it
+	 *  from the list. The old orchestration lived in `DeleteDeskSheet`; the UI-selection
+	 *  reset after a switch-away stays with `uiState` (the sheet calls `clearSelection`). */
+	async deleteDesk(desk: string): Promise<void> {
+		if (!this.desks.includes(desk)) return;
+		if (!canRemoveDesk(this.desks)) {
+			throw new Error('You must keep at least one desk.');
+		}
+
+		if (this.activeDesk === desk) {
+			const fallback = this.desks.find((d) => d !== desk);
+			if (fallback) await this.switchDesk(fallback);
+		}
+
+		await deskRepo.delete(desk);
+		await this.removeDesk(desk);
+	}
+
 	async removeDesk(desk: string): Promise<void> {
 		if (!this.desks.includes(desk)) return;
 		if (!canRemoveDesk(this.desks)) {

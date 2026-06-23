@@ -1,8 +1,9 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { deleteDeskFiles } from '$lib/services/platform/desk';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { desksService } from '$lib/core/services/desks.svelte';
+	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { canRemoveDesk } from '$lib/core/domain/desk';
 	import * as m from '$paraglide/messages.js';
 
 	let {
@@ -18,22 +19,18 @@
 
 		const desk = deskName;
 		deleteDeskError = null;
+
+		if (!canRemoveDesk(desksService.desks)) {
+			deleteDeskError = m.desk_delete_error_min();
+			return;
+		}
+
+		const wasActive = desk === desksService.activeDesk;
 		isDeletingDesk = true;
 
 		try {
-			if (desk === uiState.activeDesk) {
-				const fallbackDesk = uiState.desks.find((value) => value !== desk);
-				if (!fallbackDesk) {
-					deleteDeskError = m.desk_delete_error_min();
-					isDeletingDesk = false;
-					return;
-				}
-
-				await uiState.switchDesk(fallbackDesk);
-			}
-
-			await deleteDeskFiles(desk);
-			await uiState.removeDesk(desk);
+			await desksService.deleteDesk(desk);
+			if (wasActive) uiState.clearSelection();
 			deskName = null;
 			open = false;
 		} catch {

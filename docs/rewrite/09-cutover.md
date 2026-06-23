@@ -47,8 +47,22 @@ Cut over in this order so the app keeps running between chunks:
       whole `(app)` consumer tree have been repointed together.
 
 ### Component groups (repoint imports; rewrite only if the layering forces it)
-- [ ] `components/sidebar/*` (notes panel, tags card, tag filter, desk sheets): heaviest
-      group; repoint to `notesService`/`tagsService`/`desksService`/`uiState`.
+- [x] `components/sidebar/*` (notes panel, tags card, tag filter, desk sheets): heaviest
+      group; repointed to `notesService`/`tagsService`/`desksService`/`uiState` (all `core`).
+      `Note` reads → `NoteListItem` (`updated_at` → `updatedAt`); `tagDisplayName`/`UNTAGGED_FILTER`
+      now from `core/domain/tag`; `sanitizeDeskName`/`canRemoveDesk` from `core/domain/desk`.
+      **Desk lifecycle rewritten (layering-forced):** the desk sheets no longer call
+      `deleteDeskFiles`/`uiState` mutations directly. Added `desksService.deleteDesk(desk)`
+      (the orchestration Concept 03 deferred: switch-away → `deskRepo.delete` → `removeDesk`);
+      `DeleteDeskSheet` calls it and guards the min-desk message via the domain `canRemoveDesk`.
+      `DeskSettingsSheet` rename passes `uiState.activeTag` through (new `renameDesk` defaults it
+      to `null`). **Desk-switch UI reset:** old `uiState.switchDesk` reset the selection;
+      the new split (desks vs ui-state) left no single seam, so added `uiState.clearSelection()`
+      (in-memory reset, no reload — matches old behavior) called after `desksService.switchDesk`
+      at the 3 user-switch sites (`SidebarHeader`, `AddDeskSheet`, `DeleteDeskSheet`).
+      (Dropped a pre-existing unused `tagDisplayName` import in `TagSidebarItem` while rewriting
+      its import block. `NotesPanel`'s `clearActiveTag` + `TagSidebarItem`'s `PinIcon`/`HashIcon`
+      stay: pre-existing unused, on lines this slice didn't touch.)
 - [~] `components/notes/*` (NoteEditor, EditorHeader, NotePreview, TagNavigator, dialogs):
       repoint. NoteEditor wraps the out-of-scope editor; use the Tags compatibility method.
       **Done:** `NoteEditor`, `EditorView`, `EditorHeader`, `NoteDeleteDialog`, `JournalDay`
@@ -59,11 +73,15 @@ Cut over in this order so the app keeps running between chunks:
       `core/domain/shared/time`; `JournalDay` now calls `journalService.createForDate`/
       `queryForDate`. (Removed a pre-existing unused `fade` import in `EditorView` since it sat
       in the import block being rewritten.) `NoteSummarySheet` + `TagNavigator` needed no change
-      (only `utils/cm` / `TagChip` imports, both staying). **Deferred:** `NotePreview` → moves
-      with the **sidebar** slice (its only consumer is `sidebar/NoteCard`, and its `fsService`
-      import needs the presentation→backend layering decision shared with `cm/EmbedImageViewer`).
-      `notes/Editor.svelte` → moves with the **Editor (cm)** slice (no `Note`-type coupling with
-      `EditorView`; only its own `settingsService`/`activeEditorService` imports).
+      (only `utils/cm` / `TagChip` imports, both staying). **`NotePreview` done (with the sidebar
+      slice):** its image-file read no longer imports the backend `fsService` directly (the matrix
+      forbids presentation → backend client). **Decision:** added a thin app-layer
+      `core/services/assets.ts` (`assetsService.readImage(path)`) wrapping `backend/fs`, mirroring
+      how services reach `backend/store`; `NotePreview` reads through it. The same seam covers
+      `cm/EmbedImageViewer` when the **Editor (cm)** slice lands. (`HIGHLIGHT_SOURCE` stays from
+      `utils/markdown-patterns`, an un-migrated shared util.) **Deferred:** `notes/Editor.svelte`
+      moves with the **Editor (cm)** slice (no `Note`-type coupling with `EditorView`; only its own
+      `settingsService`/`activeEditorService` imports).
 - [ ] `components/settings/*`: repoint to `core/services/settings/*`.
 - [x] `components/graph/*`, `components/tasks/*`: repoint; pull pure geometry from
       `core/domain/graph.ts` / `core/domain/task.ts`. **Tasks done:** `tasks/TaskBoard.svelte`

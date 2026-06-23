@@ -5,7 +5,7 @@
 		type TokenizerAndRendererExtension,
 		type Tokens
 	} from 'marked';
-	import { fsService } from '$lib/services/platform/fs';
+	import { assetsService } from '$lib/core/services/assets';
 	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
 	let { content }: { content: string } = $props();
@@ -61,7 +61,7 @@
 				return;
 			}
 			try {
-				const data = await fsService.readFile(path);
+				const data = await assetsService.readImage(path);
 				const url = URL.createObjectURL(new Blob([data]));
 				urlCache.set(path, url);
 				img.src = url;

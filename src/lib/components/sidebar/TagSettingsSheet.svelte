@@ -2,8 +2,8 @@
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { tagsService } from '$lib/services/content/tags.svelte';
-	import type { Tag } from '$lib/models/tag';
+	import { tagsService } from '$lib/core/services/tags.svelte';
+	import type { Tag } from '$lib/core/domain/tag';
 	import { CheckIcon, PinIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 
