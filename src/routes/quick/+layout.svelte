@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { initQuickCapture } from '$lib/core/services/quick-bootstrap';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { initQuickCapture } from '$lib/services/quick-bootstrap';
+	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let { children } = $props();
 

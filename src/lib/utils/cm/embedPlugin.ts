@@ -5,7 +5,7 @@ import { StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
 import EmbedViewer from '$lib/components/cm/EmbedViewer.svelte';
-import { assetsService } from '$lib/core/services/assets';
+import { assetsService } from '$lib/services/assets';
 import { BARE_URL_RE, SvelteWidget } from './shared';
 
 // --- URL + text extraction ---

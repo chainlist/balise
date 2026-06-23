@@ -1,9 +1,9 @@
 import { type Store } from '@tauri-apps/plugin-store';
-import { loadStore } from '$lib/core/repositories/backend/store';
+import { loadStore } from '$lib/repositories/backend/store';
 import { ModalState } from './modal-state.svelte';
-import { notesService } from '$lib/core/services/notes.svelte';
-import { tagsService } from '$lib/core/services/tags.svelte';
-import { eventBus } from '$lib/core/services/events/event-bus';
+import { notesService } from '$lib/services/notes.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
+import { eventBus } from '$lib/services/events/event-bus';
 import type { FoldRange } from '$lib/utils/cm';
 
 // Application/app-shell layer: the UI *selection* state (which tag, composed

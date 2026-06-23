@@ -1,5 +1,5 @@
 import { getDb } from './backend/db';
-import type { Tag, RelatedTag } from '$lib/core/domain/tag';
+import type { Tag, RelatedTag } from '$lib/domain/tag';
 
 // Data access for tags. Every method reaches the shared connection through
 // `getDb()` internally and maps rows to finished domain objects; SQL lives only

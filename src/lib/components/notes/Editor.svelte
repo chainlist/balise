@@ -51,8 +51,8 @@
 		type FoldRange,
 		type OutlineItem
 	} from '$lib/utils/cm';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { activeEditorService } from '$lib/core/services/active-editor';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { activeEditorService } from '$lib/services/active-editor';
 
 	let {
 		content,

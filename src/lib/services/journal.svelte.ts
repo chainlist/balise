@@ -1,8 +1,8 @@
-import { noteRepo } from '$lib/core/repositories/note.repo';
-import { notesService } from '$lib/core/services/notes.svelte';
-import { dayRange, createdAtForDate } from '$lib/core/domain/journal';
-import { toLocalDayKeys } from '$lib/core/domain/shared/time';
-import type { NoteListItem } from '$lib/core/domain/note';
+import { noteRepo } from '$lib/repositories/note.repo';
+import { notesService } from '$lib/services/notes.svelte';
+import { dayRange, createdAtForDate } from '$lib/domain/journal';
+import { toLocalDayKeys } from '$lib/domain/shared/time';
+import type { NoteListItem } from '$lib/domain/note';
 
 // Application layer: the journal is a thin view over Notes (the notes carrying the
 // system `journal` tag, browsed by date), so this service owns no table and no

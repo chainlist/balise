@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onDestroy, untrack, type Snippet } from 'svelte';
-	import { notesService } from '$lib/core/services/notes.svelte';
-	import type { NoteListItem } from '$lib/core/domain/note';
-	import { tagsService } from '$lib/core/services/tags.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
+	import { notesService } from '$lib/services/notes.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { readingTimeMinutes } from '$lib/utils/note-utils';
-	import { parseDbTimestamp } from '$lib/core/domain/shared/time';
+	import { parseDbTimestamp } from '$lib/domain/shared/time';
 	import Editor from './Editor.svelte';
 	import EditorHeader from './EditorHeader.svelte';
 	import * as m from '$paraglide/messages.js';

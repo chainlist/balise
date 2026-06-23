@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ChevronRightIcon } from '@lucide/svelte';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { SYNC_SERVER_URL } from '$lib/config/sync';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import * as m from '$paraglide/messages.js';

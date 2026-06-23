@@ -4,10 +4,10 @@
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { Switch } from 'bits-ui';
 	import { Trash2Icon } from '@lucide/svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { sanitizeDeskName } from '$lib/core/domain/desk';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { sanitizeDeskName } from '$lib/domain/desk';
 	import { cn } from '$lib/utils.js';
 	import DeleteDeskSheet from '$lib/components/sidebar/DeleteDeskSheet.svelte';
 	import * as m from '$paraglide/messages.js';

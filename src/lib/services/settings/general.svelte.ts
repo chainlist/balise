@@ -4,7 +4,7 @@ import {
 	normalizeLanguage,
 	type GeneralSettings,
 	type DateFormat
-} from '$lib/core/domain/settings';
+} from '$lib/domain/settings';
 
 export class GeneralSettingsSection extends SettingsSection<GeneralSettings> {
 	readonly key = 'general';

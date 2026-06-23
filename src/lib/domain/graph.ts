@@ -236,10 +236,15 @@ export function buildLayout(arcs: SunburstArc[], maxWeight: number): LayoutItem[
 
 export type ChordData = {
 	id: string;
-	x1: number; y1: number;
-	x2: number; y2: number;
-	c1: string; c2: string;
-	w: number; a: number; b: number;
+	x1: number;
+	y1: number;
+	x2: number;
+	y2: number;
+	c1: string;
+	c2: string;
+	w: number;
+	a: number;
+	b: number;
 };
 
 export function buildChords(
@@ -272,11 +277,15 @@ export function buildChords(
 			}
 			out.push({
 				id: `${Math.min(l.i, partner)}-${Math.max(l.i, partner)}`,
-				x1: d.x, y1: d.y,
-				x2: end.x, y2: end.y,
-				c1: l.arc.color, c2: d.rt.color,
+				x1: d.x,
+				y1: d.y,
+				x2: end.x,
+				y2: end.y,
+				c1: l.arc.color,
+				c2: d.rt.color,
 				w: 0.5 + (d.rt.weight / maxWeight) * 2,
-				a: l.i, b: partner
+				a: l.i,
+				b: partner
 			});
 		}
 	}

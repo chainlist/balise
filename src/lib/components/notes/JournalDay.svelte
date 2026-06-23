@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
-	import type { NoteListItem } from '$lib/core/domain/note';
-	import { journalService } from '$lib/core/services/journal.svelte';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { formatDate } from '$lib/core/domain/datetime';
-	import { eventBus } from '$lib/core/services/events/event-bus';
+	import type { NoteListItem } from '$lib/domain/note';
+	import { journalService } from '$lib/services/journal.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { formatDate } from '$lib/domain/datetime';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import { ChevronRightIcon, PanelLeftIcon } from '@lucide/svelte';
 	import NoteEditor from './NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';

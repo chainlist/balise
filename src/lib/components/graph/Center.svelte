@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { C, RC } from '$lib/core/domain/graph';
+	import { C, RC } from '$lib/domain/graph';
 
 	let {
 		centerLabel,

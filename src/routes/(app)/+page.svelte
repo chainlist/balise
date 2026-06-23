@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { notesService } from '$lib/core/services/notes.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { notesService } from '$lib/services/notes.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import * as m from '$paraglide/messages.js';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 

@@ -11,7 +11,7 @@
 	import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 	import { syncService } from '$lib/services/sync/sync';
 	import { deviceIdFromPublicKey } from '$lib/utils/device-id';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as m from '$paraglide/messages.js';
 
 	let { onpaired }: { onpaired: () => void } = $props();

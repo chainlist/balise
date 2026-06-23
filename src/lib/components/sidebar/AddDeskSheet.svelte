@@ -2,9 +2,9 @@
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { sanitizeDeskName } from '$lib/core/domain/desk';
-	import { desksService } from '$lib/core/services/desks.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { sanitizeDeskName } from '$lib/domain/desk';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();

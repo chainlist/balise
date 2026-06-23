@@ -1,10 +1,10 @@
-import { migrateLegacyStores } from '$lib/core/repositories/backend/store';
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
-import { themeService } from '$lib/core/services/theme.svelte';
-import { shortcutsService } from '$lib/core/services/shortcuts.svelte';
-import { uiState } from '$lib/core/services/ui-state.svelte';
-import { desksService } from '$lib/core/services/desks.svelte';
-import { trayService } from '$lib/core/services/system/tray';
+import { migrateLegacyStores } from '$lib/repositories/backend/store';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { themeService } from '$lib/services/theme.svelte';
+import { shortcutsService } from '$lib/services/shortcuts.svelte';
+import { uiState } from '$lib/services/ui-state.svelte';
+import { desksService } from '$lib/services/desks.svelte';
+import { trayService } from '$lib/services/system/tray';
 import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 import { deviceSyncService } from '$lib/services/sync/device-sync.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';

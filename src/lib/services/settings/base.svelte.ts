@@ -1,4 +1,4 @@
-import { settingsRepo } from '$lib/core/repositories/settings.repo';
+import { settingsRepo } from '$lib/repositories/settings.repo';
 
 /**
  * Application-layer base for one settings section. Owns its key in the shared

@@ -205,7 +205,10 @@ describe('weightedEdges', () => {
 
 // ─── Sunburst geometry ────────────────────────────────────────────────────────
 
-function makeArc(label: string, relatedTags: { label: string; weight: number }[] = []): SunburstArc {
+function makeArc(
+	label: string,
+	relatedTags: { label: string; weight: number }[] = []
+): SunburstArc {
 	return {
 		label,
 		noteCount: 1,
@@ -240,7 +243,7 @@ describe('buildLayout', () => {
 	it('a0 for the first arc starts just after the top (-π/2)', () => {
 		const arcs = [makeArc('a'), makeArc('b')];
 		const layout = buildLayout(arcs, 1);
-		const expected = 0 * (((Math.PI * 2 - GAP * 2) / 2) + GAP) - Math.PI / 2 + GAP / 2;
+		const expected = 0 * ((Math.PI * 2 - GAP * 2) / 2 + GAP) - Math.PI / 2 + GAP / 2;
 		expect(layout[0].a0).toBeCloseTo(expected, 10);
 	});
 
@@ -288,7 +291,12 @@ describe('buildLayout', () => {
 	});
 
 	it('dot radius grows with weight relative to maxWeight', () => {
-		const arcs = [makeArc('a', [{ label: 'light', weight: 1 }, { label: 'heavy', weight: 10 }])];
+		const arcs = [
+			makeArc('a', [
+				{ label: 'light', weight: 1 },
+				{ label: 'heavy', weight: 10 }
+			])
+		];
 		const layout = buildLayout(arcs, 10);
 		const [heavy, light] = layout[0].dots; // sorted descending by weight
 		expect(heavy.r).toBeGreaterThan(light.r);

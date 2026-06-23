@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
-import { fsService } from '$lib/core/repositories/backend/fs';
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
-import { toasterService } from '$lib/core/services/toaster';
+import { fsService } from '$lib/repositories/backend/fs';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { toasterService } from '$lib/services/toaster';
 import * as m from '$paraglide/messages.js';
 
 class FsSyncService {

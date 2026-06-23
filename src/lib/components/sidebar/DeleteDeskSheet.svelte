@@ -1,9 +1,9 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { desksService } from '$lib/core/services/desks.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { canRemoveDesk } from '$lib/core/domain/desk';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { canRemoveDesk } from '$lib/domain/desk';
 	import * as m from '$paraglide/messages.js';
 
 	let {

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { themeService } from '$lib/core/services/theme.svelte';
-	import type { Theme } from '$lib/core/domain/theme';
+	import { themeService } from '$lib/services/theme.svelte';
+	import type { Theme } from '$lib/domain/theme';
 	import { SunIcon, MoonIcon, MonitorIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import SegmentedToggle from '$lib/components/SegmentedToggle.svelte';

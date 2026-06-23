@@ -1,4 +1,4 @@
-import { tagRepo } from '$lib/core/repositories/tag.repo';
+import { tagRepo } from '$lib/repositories/tag.repo';
 import {
 	getTagsForNote,
 	UNTAGGED_FILTER,
@@ -6,11 +6,11 @@ import {
 	type RelatedTag,
 	type TagOccurrences,
 	type MagicTagRule
-} from '$lib/core/domain/tag';
+} from '$lib/domain/tag';
 
 // Re-export the pure composers so callers that import them from the tags
 // service today (Notes, Editor) keep a stable import path at cutover.
-export { getTagsForNote, extractTags } from '$lib/core/domain/tag';
+export { getTagsForNote, extractTags } from '$lib/domain/tag';
 
 // Application layer: orchestration and reactive state only. No SQL, no `getDb`,
 // no rules. Methods sequence repo calls and update state; the pinned re-sort is

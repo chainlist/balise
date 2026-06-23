@@ -215,17 +215,26 @@ Cut over in this order so the app keeps running between chunks:
       test), `utils/device-id` + `utils/sync` (sync subsystem + sync settings). Unit suite green
       after deletion: **360 tests / 24 files** (the old island's ~200 duplicate tests went with
       it; the `core/*` suite + kept cm/util tests remain).
-- [ ] Flatten `core/*` to final `lib/*` paths (or keep `core/`); update imports.
-- [ ] Update `CLAUDE.md` folder-structure section to match the new tree.
+- [x] Flatten `core/*` to final `lib/*` paths (or keep `core/`); update imports. **Decision:
+      flatten** (per section-2 target tree; `core/` was a construction scaffold). `git mv`'d
+      `core/domain`→`lib/domain`, `core/repositories`→`lib/repositories` (with `backend/`), and
+      each `core/services/*` child→`lib/services/` (merging beside the kept out-of-scope `sync/`);
+      removed the now-empty `core/`. Then one mechanical pass rewrote `$lib/core/` → `$lib/` across
+      **108 source files** (`.ts`/`.svelte` under `src/`; the doc's historical refs left intact).
+      No barrel/alias/relative-escape edge cases. Unit suite green: **360 tests / 24 files**.
+- [x] Update `CLAUDE.md` folder-structure section to match the new tree. Rewrote the folder map
+      as the five layers (presentation/domain/repositories+backend/services/utils) and refreshed the
+      stale Key Conventions (domain purity, repos speak domain objects, services sequence,
+      `ui-state` now imports `eventBus` not `fsSyncService`).
 
 ## Definition of Done
-- [ ] Every route and component group repointed and ticked.
+- [x] Every route and component group repointed and ticked.
 - [ ] Editor and Sync still work end to end (manual run: create, edit, tag, delete a note;
-      switch desk; sync if a peer is available).
-- [ ] Old code deleted; no dangling imports.
-- [ ] Full unit suite passes: `pnpm test:unit -- --run`.
+      switch desk; sync if a peer is available). **Pending user manual run.**
+- [x] Old code deleted; no dangling imports. (Flatten verified zero remaining `$lib/core/` in `src/`.)
+- [x] Full unit suite passes: `pnpm test:unit -- --run` (360 tests / 24 files).
 - [ ] `pnpm lint` passes.
-- [ ] `CLAUDE.md` updated.
+- [x] `CLAUDE.md` updated.
 - [ ] Dashboard shows all concepts done.
 
 ## Notes

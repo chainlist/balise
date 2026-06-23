@@ -1,5 +1,5 @@
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
-import { resolveTheme, THEMES, type Theme } from '$lib/core/domain/theme';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { resolveTheme, THEMES, type Theme } from '$lib/domain/theme';
 
 // Application/app-shell layer: applies the resolved theme to the document. The
 // theme value and its persistence live in the appearance settings section; the

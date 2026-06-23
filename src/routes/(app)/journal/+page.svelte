@@ -6,11 +6,11 @@
 	import { today, getLocalTimeZone, isSameDay } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
 	import { onMount, tick } from 'svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
-	import { notesService } from '$lib/core/services/notes.svelte';
-	import { journalService } from '$lib/core/services/journal.svelte';
-	import { eventBus } from '$lib/core/services/events/event-bus';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { notesService } from '$lib/services/notes.svelte';
+	import { journalService } from '$lib/services/journal.svelte';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import { cn } from '$lib/utils.js';
 	import JournalDay from '$lib/components/notes/JournalDay.svelte';
 	import * as m from '$paraglide/messages.js';

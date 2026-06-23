@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { tagsService } from '$lib/core/services/tags.svelte';
-	import { tagDisplayName, type Tag, type RelatedTag } from '$lib/core/domain/tag';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import { tagDisplayName, type Tag, type RelatedTag } from '$lib/domain/tag';
 
 	let { tag, untagged }: { tag: string | Tag | RelatedTag; untagged?: boolean } = $props();
 

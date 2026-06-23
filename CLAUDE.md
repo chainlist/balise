@@ -92,35 +92,48 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### Folder Structure
 
+The code follows a five-layer architecture with a one-way dependency flow:
+**Presentation → Application (services) → Domain → Data Access (repositories) → Backend**.
+A layer may only import from layers below it. See `docs/rewrite/README.md` for the full
+import matrix.
+
 ```
 src/lib/
-├── components/         # Svelte UI components
+├── components/         # Presentation: Svelte UI (DOM, CSS) — imports services + domain types only
 │   ├── shadcn/         # shadcn-svelte primitives — NEVER edit unless the user explicitly asks
-│   ├── notes/          # Note list and editor components
+│   ├── sidebar/        # Notes panel, tags card, tag filter, desk sheets
+│   ├── notes/          # Note editor host, preview, dialogs
 │   ├── settings/       # Settings panel components
-│   └── cm/             # CodeMirror editor extensions
-├── repositories/       # Raw persistence access (no state, no business logic)
-│   ├── notes.repo.ts      # Note SQL queries
-│   ├── notes.fs.repo.ts   # Note file IO (frontmatter + {id}.md), wraps fsService
-│   └── tags.repo.ts
-├── services/           # Business logic and app state
-│   ├── notes.svelte.ts     # Note CRUD + reactive state
-│   ├── tags.svelte.ts      # Tag state and extraction
-│   ├── ui-state.svelte.ts  # Global UI state (active desk, tag, note)
-│   ├── theme.svelte.ts     # Theme management
-│   ├── settings.svelte.ts  # User settings
-│   ├── shortcuts.svelte.ts # Keyboard shortcut registry
-│   ├── fs-sync.ts          # Filesystem ↔ DB sync for note files
-│   ├── events/             # App-wide typed pub/sub (cross-layer events)
-│   │   ├── signal.ts          # Generic Signal<T> channel primitive
-│   │   └── event-bus.ts       # eventBus singleton (notes / sync / desks domains)
-│   └── desk.ts             # Desk folder and DB lifecycle (no state)
-└── utils/
-    ├── db.ts           # DB connection singleton
-    ├── migrations.ts   # Schema versioning
-    ├── init-app.ts     # App bootstrap sequence
-    ├── note-title.ts   # Title extraction from markdown
-    └── cm/             # CodeMirror plugins (pairs, code, style, format)
+│   ├── graph/          # Subject graph (sunburst, force, chord) — d3/canvas render only
+│   ├── tasks/          # Task board
+│   └── cm/             # CodeMirror editor components (out of scope — not re-layered)
+├── domain/             # Layer 3: pure business rules — no I/O, no Svelte, no Tauri
+│   ├── note.ts            # Note aggregate (class, static create/fromRow); derives tags/title/preview
+│   ├── tag.ts             # Tag rules, hashtag parsing, display names
+│   ├── desk.ts            # Desk aggregate + name/removal rules
+│   ├── task.ts · graph.ts · journal.ts · settings.ts · theme.ts · shortcut.ts · datetime.ts
+│   └── shared/            # id · markdown · time primitives
+├── repositories/       # Layer 4: data access — speaks domain objects, owns the DB connection; SQL lives ONLY here
+│   ├── note.repo.ts       # Note persistence (SQL + file IO), singleton object
+│   ├── tag.repo.ts · desk.repo.ts · settings.repo.ts
+│   └── backend/           # Backend client — the ONLY place Tauri is touched
+│       ├── db.ts             # plugin-sql connection (singleton)
+│       ├── fs.ts             # plugin-fs adapter
+│       ├── store.ts          # plugin-store adapter
+│       └── tauri.ts          # invoke() wrappers
+├── services/           # Layer 2: use-case sequencers + reactive $state — singletons, no SQL/DOM/Tauri
+│   ├── notes · tags · desks · tasks · journal · graph · theme · shortcuts · updater (.svelte.ts)
+│   ├── ui-state.svelte.ts  # Top-level orchestrator (active desk/tag/note); NOTHING imports it
+│   ├── app-bootstrap.ts · quick-bootstrap.ts  # Composition roots (main + quick-capture window)
+│   ├── assets.ts · active-editor.ts · link-preview.ts · toaster.ts · modal-state.svelte.ts
+│   ├── settings/           # Settings sub-services split by domain (appearance, editor, sync, …)
+│   ├── events/             # App-wide typed pub/sub: signal.ts (Signal<T>) + event-bus.ts (eventBus singleton)
+│   ├── system/             # OS seams: tray, global-shortcut, updater, link-preview
+│   └── sync/               # P2P sync subsystem (out of scope — not re-layered)
+└── utils/                  # Shared helpers + out-of-scope subsystems (not part of the layering)
+    ├── cm/                 # CodeMirror plugins (out of scope — not re-layered)
+    ├── color-palette.ts · markdown-patterns.ts · note-utils.ts  # genuinely-shared pure helpers
+    └── device-id.ts · sync.ts                                   # used by the sync subsystem
 ```
 
 ### Component Design Conventions
@@ -130,10 +143,11 @@ src/lib/
 
 ### Key Conventions
 
-- **Services are classes, utilities are plain functions.** Any module that acts as a service (has side effects, wraps other services, or is an abstraction layer) must be a class exported as a singleton (e.g. `export const fsSyncService = new FsSyncService()`). Pure utilities with no service dependencies (e.g. `desk.ts`, `notes.repo.ts`) export functions directly.
-- **Repositories** are thin SQL wrappers — no business logic, no state, no Svelte reactivity.
-- **Services** own business logic and reactive state (`$state` runes). They may import repositories and other services, but never create circular dependencies.
-- **`ui-state`** is the top-level orchestrator: it imports `notesService`, `tagsService`, and `fsSyncService`. Nothing imports `uiState` to avoid circular deps.
+- **Singletons hold state; the domain holds rules; pure helpers are plain functions.** Services and repositories are exported as singletons — a singleton object (`export const noteRepo = { … }`) or a class instance (`export const fsSyncService = new FsSyncService()`). Domain aggregates with identity/lifecycle (Note, Desk) are classes with a `static create()` factory; stateless domain rules and shared utilities export functions directly (e.g. `domain/tag.ts`, `utils/note-utils.ts`).
+- **Domain is pure.** Rules and config are passed in — no I/O, no Svelte, no Tauri. A concept's aggregate validates and derives in its factory; everything above it trusts the result.
+- **Repositories speak domain objects and own the connection.** They map domain objects to rows/files and back, reaching the backend client internally. SQL lives **only** in repositories; services never see a `Database`. No business logic, no state, no Svelte reactivity.
+- **Services sequence, they do not compute.** A use case is a thin ordered list of steps (build the domain object, call the repo, update state). They own reactive `$state` (runes) and may import repositories and other services, but never create circular dependencies.
+- **`ui-state`** is the top-level orchestrator: it imports `notesService`, `tagsService`, and `eventBus`. Nothing imports `uiState` to avoid circular deps.
 - Files are stored at `~/Documents/Balise/{deskName}/{noteId}.md` with YAML frontmatter containing note metadata.
 - **Singleton services don't need `destroy()`**. Services exported as module-level singletons live for the entire app lifetime. A `destroy()` method is dead code unless something in the app actually calls it. Don't add one speculatively.
 - **`void` on intentional fire-and-forget promises.** When a `Promise` is deliberately not awaited (e.g. `store.set()` backed by `autoSave`), prefix with `void`. A bare floating call looks like a mistake; `void` makes the intent explicit. Example: `void this.#store?.set('theme', theme)`.

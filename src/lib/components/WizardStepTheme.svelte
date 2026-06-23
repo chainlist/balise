@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { themeService } from '$lib/core/services/theme.svelte';
-	import type { Theme } from '$lib/core/domain/theme';
+	import { themeService } from '$lib/services/theme.svelte';
+	import type { Theme } from '$lib/domain/theme';
 	import { cn } from '$lib/utils.js';
 	import { Sun, Moon, Monitor } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';

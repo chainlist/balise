@@ -1,4 +1,4 @@
-import { fsService } from '$lib/core/repositories/backend/fs';
+import { fsService } from '$lib/repositories/backend/fs';
 
 function extFromMime(mimeType: string): string {
 	return (mimeType.split('/')[1] ?? 'png').replace(/\+.*$/, '');

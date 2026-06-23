@@ -1,14 +1,14 @@
 <script lang="ts">
 	import * as Command from '$lib/components/shadcn/command/index.js';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
-	import { notesService } from '$lib/core/services/notes.svelte';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
-	import { tagsService } from '$lib/core/services/tags.svelte';
-	import { tagDisplayName } from '$lib/core/domain/tag';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { notesService } from '$lib/services/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import { tagDisplayName } from '$lib/domain/tag';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import type { NoteSearchResult } from '$lib/core/domain/note';
-	import { eventBus } from '$lib/core/services/events/event-bus';
+	import type { NoteSearchResult } from '$lib/domain/note';
+	import { eventBus } from '$lib/services/events/event-bus';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { FileTextIcon, TagIcon, ZapIcon, LayoutListIcon } from '@lucide/svelte';

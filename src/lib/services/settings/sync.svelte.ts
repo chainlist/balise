@@ -1,6 +1,6 @@
 import { SettingsSection } from './base.svelte';
-import { DEFAULT_SYNC_SETTINGS, type SyncSettings } from '$lib/core/domain/settings';
-import { sanitizeDeskName } from '$lib/core/domain/desk';
+import { DEFAULT_SYNC_SETTINGS, type SyncSettings } from '$lib/domain/settings';
+import { sanitizeDeskName } from '$lib/domain/desk';
 
 export class SyncSettingsSection extends SettingsSection<SyncSettings> {
 	readonly key = 'sync';

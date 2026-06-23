@@ -1,14 +1,14 @@
-import { noteRepo } from '$lib/core/repositories/note.repo';
-import { notesService } from '$lib/core/services/notes.svelte';
+import { noteRepo } from '$lib/repositories/note.repo';
+import { notesService } from '$lib/services/notes.svelte';
 import {
 	parseTasksFromNote,
 	rewriteHashtagLine,
 	rewriteChecklistLine,
 	type TaskItem,
 	type TaskStatus
-} from '$lib/core/domain/task';
+} from '$lib/domain/task';
 
-export type { TaskItem, TaskStatus } from '$lib/core/domain/task';
+export type { TaskItem, TaskStatus } from '$lib/domain/task';
 
 // Application layer: the task board is a thin view over Notes (lines tagged
 // `#todo/#inprogress/#done` or checklist items), so this service owns the board

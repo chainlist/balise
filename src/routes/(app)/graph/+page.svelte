@@ -2,12 +2,12 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { tagDisplayName } from '$lib/core/domain/tag';
-	import { graphService } from '$lib/core/services/graph.svelte';
-	import { themeService } from '$lib/core/services/theme.svelte';
-	import type { Tag } from '$lib/core/domain/tag';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
+	import { tagDisplayName } from '$lib/domain/tag';
+	import { graphService } from '$lib/services/graph.svelte';
+	import { themeService } from '$lib/services/theme.svelte';
+	import type { Tag } from '$lib/domain/tag';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
 	import Sunburst from '$lib/components/graph/Sunburst.svelte';
 	import ForceGraph from '$lib/components/graph/ForceGraph.svelte';
 	import GraphSettings from '$lib/components/graph/GraphSettings.svelte';
@@ -20,7 +20,7 @@
 		DEFAULT_TAG_COLOR,
 		buildForceGraph,
 		type SunburstArc
-	} from '$lib/core/domain/graph';
+	} from '$lib/domain/graph';
 
 	let loaded = $state(false);
 	const mode = $derived(uiState.graphMode);

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { UNTAGGED_FILTER } from '$lib/core/domain/tag';
-	import type { Tag } from '$lib/core/domain/tag';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { UNTAGGED_FILTER } from '$lib/domain/tag';
+	import type { Tag } from '$lib/domain/tag';
 	import { Settings2Icon, PinIcon, HashIcon } from '@lucide/svelte';
 	import TagName from '../TagName.svelte';
 

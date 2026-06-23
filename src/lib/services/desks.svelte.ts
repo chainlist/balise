@@ -1,10 +1,10 @@
 import { type Store } from '@tauri-apps/plugin-store';
-import { loadStore } from '$lib/core/repositories/backend/store';
-import { deskRepo } from '$lib/core/repositories/desk.repo';
-import { notesService } from '$lib/core/services/notes.svelte';
-import { tagsService } from '$lib/core/services/tags.svelte';
-import { eventBus } from '$lib/core/services/events/event-bus';
-import { DEFAULT_DESK, canRemoveDesk, isAppDataFolder } from '$lib/core/domain/desk';
+import { loadStore } from '$lib/repositories/backend/store';
+import { deskRepo } from '$lib/repositories/desk.repo';
+import { notesService } from '$lib/services/notes.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
+import { eventBus } from '$lib/services/events/event-bus';
+import { DEFAULT_DESK, canRemoveDesk, isAppDataFolder } from '$lib/domain/desk';
 import { fsSyncService } from '$lib/services/sync/fs-sync';
 
 // Application layer: the workspace use cases plus the reactive desk list and active

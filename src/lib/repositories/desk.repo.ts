@@ -2,7 +2,7 @@ import { BaseDirectory, exists, mkdir, readDir, remove, rename } from '@tauri-ap
 import { documentDir, join } from '@tauri-apps/api/path';
 import { loadDb, closeDbIfMatches } from './backend/db';
 import { fsService, DESKS_ROOT_DIR } from './backend/fs';
-import { sanitizeDeskName, isAppDataFolder } from '$lib/core/domain/desk';
+import { sanitizeDeskName, isAppDataFolder } from '$lib/domain/desk';
 
 // Data access for desks: a desk is a folder under Documents/Balise/<name> with its
 // own SQLite DB, and this layer hides both. It opens/closes the shared connection

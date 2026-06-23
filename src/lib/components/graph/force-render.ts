@@ -1,4 +1,4 @@
-import type { ForceNode, ForceLink, Transform } from '$lib/core/domain/graph';
+import type { ForceNode, ForceLink, Transform } from '$lib/domain/graph';
 
 // `focus` is what the pointer/selection emphasises; null = nothing dimmed.
 export function nodeAlpha(

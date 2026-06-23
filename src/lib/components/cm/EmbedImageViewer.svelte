@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { assetsService } from '$lib/core/services/assets';
+	import { assetsService } from '$lib/services/assets';
 	import * as m from '$paraglide/messages.js';
 	import EmbedControls from './EmbedControls.svelte';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Switch } from 'bits-ui';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
 	import { cn } from '$lib/utils.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import SettingsSection from './SettingsSection.svelte';

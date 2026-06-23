@@ -1,5 +1,5 @@
-import { tagRepo } from '$lib/core/repositories/tag.repo';
-import { tagsService } from '$lib/core/services/tags.svelte';
+import { tagRepo } from '$lib/repositories/tag.repo';
+import { tagsService } from '$lib/services/tags.svelte';
 import {
 	buildScores,
 	buildNeighbors,
@@ -8,7 +8,7 @@ import {
 	neighborsOf as selectNeighbors,
 	type TagCooccurrence,
 	type TagNeighbor
-} from '$lib/core/domain/graph';
+} from '$lib/domain/graph';
 
 // Application layer: holds the loaded co-occurrence rows in `$state` and exposes
 // `$derived` one-liners that delegate to the pure domain builders, run against

@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { MagicTagRule } from '$lib/core/domain/settings';
+import type { MagicTagRule } from '$lib/domain/settings';
 
 /** Starts the iroh networking layer. Rejects if the endpoint fails to bind. */
 export function startSync(): Promise<void> {

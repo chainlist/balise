@@ -1,5 +1,5 @@
 import { SettingsSection } from './base.svelte';
-import { DEFAULT_SHORTCUTS_SETTINGS, type ShortcutsSettings } from '$lib/core/domain/settings';
+import { DEFAULT_SHORTCUTS_SETTINGS, type ShortcutsSettings } from '$lib/domain/settings';
 
 export class ShortcutsSettingsSection extends SettingsSection<ShortcutsSettings> {
 	readonly key = 'shortcuts';

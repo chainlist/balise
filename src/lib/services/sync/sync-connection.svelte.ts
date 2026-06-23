@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { syncServerUrl } from '$lib/config/sync';
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
+import { settingsService } from '$lib/services/settings/settings.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { syncService } from '$lib/services/sync/sync';
 import { startSync } from '$lib/utils/sync';

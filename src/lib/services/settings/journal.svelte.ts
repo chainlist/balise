@@ -1,5 +1,5 @@
 import { SettingsSection } from './base.svelte';
-import { DEFAULT_JOURNAL_SETTINGS, type JournalSettings } from '$lib/core/domain/settings';
+import { DEFAULT_JOURNAL_SETTINGS, type JournalSettings } from '$lib/domain/settings';
 
 export class JournalSettingsSection extends SettingsSection<JournalSettings> {
 	readonly key = 'journal';

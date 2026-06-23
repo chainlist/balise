@@ -1,14 +1,14 @@
 import { getDb } from './backend/db';
 import { fsService } from './backend/fs';
 import { setDeskFileMtime } from './backend/tauri';
-import { parseDbTimestamp } from '$lib/core/domain/shared/time';
-import { SYSTEM_TAGS } from '$lib/core/domain/tag';
+import { parseDbTimestamp } from '$lib/domain/shared/time';
+import { SYSTEM_TAGS } from '$lib/domain/tag';
 import {
 	Note,
 	type NoteListItem,
 	type NoteSearchResult,
 	type NoteContentItem
-} from '$lib/core/domain/note';
+} from '$lib/domain/note';
 
 // Data access for notes: both the SQLite rows and the `.md` file mirror live
 // behind this one layer, speaking `Note` / `NoteListItem`. SQL lives only here,

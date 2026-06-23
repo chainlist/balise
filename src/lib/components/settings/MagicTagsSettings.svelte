@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import {
 		MAGIC_TAG_MATCH_TYPES,
 		type MagicTagRule,
 		type MagicTagMatchType
-	} from '$lib/core/domain/settings';
+	} from '$lib/domain/settings';
 	import { ArrowRightIcon, PlusIcon, Trash2Icon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
-	import { ra } from '$lib/core/domain/graph';
+	import { ra } from '$lib/domain/graph';
 
 	let {
 		path,

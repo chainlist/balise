@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { devicesService, type LinkedDevice } from '$lib/services/sync/devices.svelte';
 	import { syncService } from '$lib/services/sync/sync';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as m from '$paraglide/messages.js';

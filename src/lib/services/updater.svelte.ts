@@ -1,6 +1,6 @@
-import { updater, type Update, type DownloadEvent } from '$lib/core/services/system/updater';
-import { toasterService, errorMessage } from '$lib/core/services/toaster';
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
+import { updater, type Update, type DownloadEvent } from '$lib/services/system/updater';
+import { toasterService, errorMessage } from '$lib/services/toaster';
+import { settingsService } from '$lib/services/settings/settings.svelte';
 import * as m from '$paraglide/messages.js';
 
 type UpdateStatus =

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { notesService } from '$lib/core/services/notes.svelte';
-	import type { NoteListItem } from '$lib/core/domain/note';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
+	import { notesService } from '$lib/services/notes.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as m from '$paraglide/messages.js';

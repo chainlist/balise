@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { updaterService } from '$lib/core/services/updater.svelte';
+	import { updaterService } from '$lib/services/updater.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	let dismissed = $state(false);

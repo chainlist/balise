@@ -1,10 +1,10 @@
-import { migrateLegacyStores } from '$lib/core/repositories/backend/store';
-import { deskRepo } from '$lib/core/repositories/desk.repo';
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
-import { themeService } from '$lib/core/services/theme.svelte';
-import { uiState } from '$lib/core/services/ui-state.svelte';
-import { desksService } from '$lib/core/services/desks.svelte';
-import { tagsService } from '$lib/core/services/tags.svelte';
+import { migrateLegacyStores } from '$lib/repositories/backend/store';
+import { deskRepo } from '$lib/repositories/desk.repo';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { themeService } from '$lib/services/theme.svelte';
+import { uiState } from '$lib/services/ui-state.svelte';
+import { desksService } from '$lib/services/desks.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
 
 // Quick-capture window bootstrap: a minimal sibling of `app-bootstrap`. The quick
 // window only needs settings (for the theme and the magic-tag rules `Note.create`

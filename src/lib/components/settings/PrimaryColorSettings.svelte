@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import ColorPicker from '$lib/components/ColorPicker.svelte';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import * as m from '$paraglide/messages.js';
 	import { RotateCcwIcon } from '@lucide/svelte';
 </script>

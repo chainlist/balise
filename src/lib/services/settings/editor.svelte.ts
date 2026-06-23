@@ -5,7 +5,7 @@ import {
 	clampLineHeight,
 	type EditorSettings,
 	type MarkMode
-} from '$lib/core/domain/settings';
+} from '$lib/domain/settings';
 
 // NOTE (Concept 07): `applyVars` writes CSS variables to `document`, an app-shell
 // concern kept intact here; Concept 08 should relocate the DOM write.

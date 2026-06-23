@@ -5,7 +5,7 @@
 		type TokenizerAndRendererExtension,
 		type Tokens
 	} from 'marked';
-	import { assetsService } from '$lib/core/services/assets';
+	import { assetsService } from '$lib/services/assets';
 	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
 
 	let { content }: { content: string } = $props();

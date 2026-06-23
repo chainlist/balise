@@ -1,15 +1,15 @@
-import { noteRepo } from '$lib/core/repositories/note.repo';
-import { tagsService } from '$lib/core/services/tags.svelte';
-import { eventBus } from '$lib/core/services/events/event-bus';
+import { noteRepo } from '$lib/repositories/note.repo';
+import { tagsService } from '$lib/services/tags.svelte';
+import { eventBus } from '$lib/services/events/event-bus';
 import {
 	Note,
 	newNoteContent as buildNewNoteContent,
 	type NoteListItem,
 	type NoteSearchResult
-} from '$lib/core/domain/note';
-import { UNTAGGED_FILTER } from '$lib/core/domain/tag';
-import { dayRange } from '$lib/core/domain/journal';
-import { toLocalDayKeys, toLocalDayCounts } from '$lib/core/domain/shared/time';
+} from '$lib/domain/note';
+import { UNTAGGED_FILTER } from '$lib/domain/tag';
+import { dayRange } from '$lib/domain/journal';
+import { toLocalDayKeys, toLocalDayCounts } from '$lib/domain/shared/time';
 import * as m from '$paraglide/messages.js';
 
 // Convenience wrapper over the pure domain template, so callers (NotesPanel,

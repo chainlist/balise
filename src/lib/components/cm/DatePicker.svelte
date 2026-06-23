@@ -11,7 +11,7 @@
 	import { Calendar } from '$lib/components/shadcn/calendar/index.js';
 	import * as Popover from '$lib/components/shadcn/popover';
 	import { today, getLocalTimeZone, type DateValue } from '@internationalized/date';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 
 	let {
 		anchor,

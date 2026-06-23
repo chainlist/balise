@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { notesService } from '$lib/core/services/notes.svelte';
-	import type { NoteListItem } from '$lib/core/domain/note';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
-	import { resyncQuickCapture } from '$lib/core/services/quick-bootstrap';
+	import { notesService } from '$lib/services/notes.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { resyncQuickCapture } from '$lib/services/quick-bootstrap';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';

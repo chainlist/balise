@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
-	import { sector, buildChords, buildLayout, SIZE, C, RI, RO, type SunburstArc } from '$lib/core/domain/graph';
+	import { sector, buildChords, buildLayout, SIZE, C, RI, RO, type SunburstArc } from '$lib/domain/graph';
 	import Arc from './Arc.svelte';
 	import RelatedDot from './RelatedDot.svelte';
 	import OverflowBadge from './OverflowBadge.svelte';

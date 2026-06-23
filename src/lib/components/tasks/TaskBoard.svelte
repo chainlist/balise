@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
-	import { tasksService, type TaskItem, type TaskStatus } from '$lib/core/services/tasks.svelte';
-	import { toasterService, errorMessage } from '$lib/core/services/toaster';
+	import { tasksService, type TaskItem, type TaskStatus } from '$lib/services/tasks.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import TaskBoardCard from './TaskBoardCard.svelte';
-	import { TASK_STATUS_COLOR as ACCENT } from '$lib/core/domain/task';
+	import { TASK_STATUS_COLOR as ACCENT } from '$lib/domain/task';
 	import * as m from '$paraglide/messages.js';
 
 	const FLIP_MS = 200;

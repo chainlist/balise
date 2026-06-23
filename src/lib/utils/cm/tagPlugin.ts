@@ -2,8 +2,8 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import type { Range } from '@codemirror/state';
 import TagChip from '$lib/components/cm/TagChip.svelte';
-import { tagsService } from '$lib/core/services/tags.svelte';
-import { parseAllHashtags } from '$lib/core/domain/tag';
+import { tagsService } from '$lib/services/tags.svelte';
+import { parseAllHashtags } from '$lib/domain/tag';
 import { makePlugin, SvelteWidget, isMarkRevealed, type MarkMode } from './shared';
 
 class TagWidget extends SvelteWidget<{ tag: string; navigate: boolean }> {

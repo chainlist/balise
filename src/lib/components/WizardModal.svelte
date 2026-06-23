@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from 'bits-ui';
-	import type { MarkMode } from '$lib/core/domain/settings';
-	import type { Theme } from '$lib/core/domain/theme';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { applyLanguageChange } from '$lib/core/services/app-bootstrap';
+	import type { MarkMode } from '$lib/domain/settings';
+	import type { Theme } from '$lib/domain/theme';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { applyLanguageChange } from '$lib/services/app-bootstrap';
 	import * as m from '$paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 	import Button from '$lib/components/shadcn/button/button.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import WizardStepLanguage from './WizardStepLanguage.svelte';

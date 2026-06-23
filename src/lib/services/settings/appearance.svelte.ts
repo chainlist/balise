@@ -1,5 +1,5 @@
 import { SettingsSection } from './base.svelte';
-import { settingsRepo } from '$lib/core/repositories/settings.repo';
+import { settingsRepo } from '$lib/repositories/settings.repo';
 import {
 	MESH_MODES,
 	DEFAULT_MESH_COLORS,
@@ -9,8 +9,8 @@ import {
 	type AppearanceSettings,
 	type MeshMode,
 	type Theme
-} from '$lib/core/domain/settings';
-import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/core/domain/theme';
+} from '$lib/domain/settings';
+import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/domain/theme';
 
 // NOTE: the `apply*Vars` methods below write CSS variables to `document`, an
 // app-shell/presentation concern. The pure CSS-var computation now lives in

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	import { TASK_STATUS_COLOR } from '$lib/core/domain/task';
+	import { TASK_STATUS_COLOR } from '$lib/domain/task';
 
 	export type TaskStatus = 'todo' | 'done' | 'inprogress';
 

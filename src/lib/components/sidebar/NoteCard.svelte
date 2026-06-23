@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { NoteListItem } from '$lib/core/domain/note';
+	import type { NoteListItem } from '$lib/domain/note';
 	import NotePreview from '$lib/components/notes/NotePreview.svelte';
-	import { parseDbTimestamp } from '$lib/core/domain/shared/time';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { parseDbTimestamp } from '$lib/domain/shared/time';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const intl = $derived(

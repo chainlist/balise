@@ -1,11 +1,11 @@
 import { SettingsSection } from './base.svelte';
-import { settingsRepo } from '$lib/core/repositories/settings.repo';
+import { settingsRepo } from '$lib/repositories/settings.repo';
 import {
 	DEFAULT_MAGIC_TAGS,
 	normalizeMagicRules,
 	type MagicTagsSettings,
 	type MagicTagRule
-} from '$lib/core/domain/settings';
+} from '$lib/domain/settings';
 
 export class MagicTagsSettingsSection extends SettingsSection<MagicTagsSettings> {
 	readonly key = 'magicTags';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ra } from '$lib/core/domain/graph';
+	import { ra } from '$lib/domain/graph';
 
 	let {
 		cx,

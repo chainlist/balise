@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import type { MarkMode } from '$lib/core/domain/settings';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import type { MarkMode } from '$lib/domain/settings';
 	import { EyeIcon, EyeOffIcon, MousePointerIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';

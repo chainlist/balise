@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { tagsService } from '$lib/core/services/tags.svelte';
-	import { UNTAGGED_FILTER } from '$lib/core/domain/tag';
-	import type { Tag } from '$lib/core/domain/tag';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import { UNTAGGED_FILTER } from '$lib/domain/tag';
+	import type { Tag } from '$lib/domain/tag';
 	import TagSidebarItem from '$lib/components/sidebar/TagSidebarItem.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
 

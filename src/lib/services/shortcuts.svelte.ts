@@ -1,7 +1,7 @@
-import { settingsService } from '$lib/core/services/settings/settings.svelte';
-import { toasterService } from '$lib/core/services/toaster';
-import { globalShortcut } from '$lib/core/services/system/global-shortcut';
-import { resolveBinding, toAccelerator } from '$lib/core/domain/shortcut';
+import { settingsService } from '$lib/services/settings/settings.svelte';
+import { toasterService } from '$lib/services/toaster';
+import { globalShortcut } from '$lib/services/system/global-shortcut';
+import { resolveBinding, toAccelerator } from '$lib/domain/shortcut';
 import * as m from '$paraglide/messages.js';
 
 export interface ShortcutDefinition {

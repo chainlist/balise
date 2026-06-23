@@ -1,6 +1,6 @@
-import { settingsRepo } from '$lib/core/repositories/settings.repo';
-import { tagsService } from '$lib/core/services/tags.svelte';
-import { eventBus } from '$lib/core/services/events/event-bus';
+import { settingsRepo } from '$lib/repositories/settings.repo';
+import { tagsService } from '$lib/services/tags.svelte';
+import { eventBus } from '$lib/services/events/event-bus';
 import {
 	migrateLegacySettings,
 	DEFAULT_SETTINGS,
@@ -12,7 +12,7 @@ import {
 	type MeshColors,
 	type MeshSizes,
 	type MeshMode
-} from '$lib/core/domain/settings';
+} from '$lib/domain/settings';
 import { setLocale } from '$paraglide/runtime.js';
 
 import { GeneralSettingsSection } from './general.svelte';

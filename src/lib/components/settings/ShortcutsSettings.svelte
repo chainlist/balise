@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { shortcutsService } from '$lib/core/services/shortcuts.svelte';
-	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { shortcutsService } from '$lib/services/shortcuts.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import { RotateCcwIcon } from '@lucide/svelte';
 	import { cn } from '$lib/utils.js';
 	import * as m from '$paraglide/messages.js';

@@ -2,8 +2,8 @@
 	import { marked } from 'marked';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { TASK_STATUS_COLOR, type TaskItem } from '$lib/core/domain/task';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { TASK_STATUS_COLOR, type TaskItem } from '$lib/domain/task';
 	import * as m from '$paraglide/messages.js';
 
 	let { task }: { task: TaskItem } = $props();

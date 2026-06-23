@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { tasksService } from '$lib/core/services/tasks.svelte';
-	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { desksService } from '$lib/core/services/desks.svelte';
+	import { tasksService } from '$lib/services/tasks.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
 	import TaskBoard from '$lib/components/tasks/TaskBoard.svelte';
 	import * as m from '$paraglide/messages.js';
 
