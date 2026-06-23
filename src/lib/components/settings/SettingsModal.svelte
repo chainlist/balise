@@ -7,7 +7,6 @@
 		TypeIcon,
 		InfoIcon,
 		WandSparklesIcon,
-		SparklesIcon,
 		SlidersHorizontalIcon,
 		RefreshCwIcon,
 		LayoutListIcon,
@@ -82,12 +81,6 @@
 					component: JournalSettings
 				},
 				{
-					id: 'magic-tags',
-					label: m.settings_magic_tags_heading(),
-					icon: SparklesIcon,
-					component: MagicTagsSettings
-				},
-				{
 					id: 'shortcuts',
 					label: m.settings_shortcuts_heading(),
 					icon: KeyboardIcon,
@@ -136,7 +129,14 @@
 					id: 'tags',
 					label: m.settings_tags_heading(),
 					icon: TagsIcon,
-					component: TagsSettings
+					component: TagsSettings,
+					children: [
+						{
+							id: 'magic-tags',
+							label: m.settings_magic_tags_heading(),
+							component: MagicTagsSettings
+						}
+					]
 				}
 			]
 		}
