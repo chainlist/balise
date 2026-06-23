@@ -150,7 +150,7 @@ file text), never raw markdown, so the parsers are not duplicated in Rust.
 - [x] 01 Tags
 - [x] 02 Notes
 - [x] 03 Desks
-- [ ] 04 Journal
+- [x] 04 Journal
 - [ ] 05 Tasks
 - [ ] 06 Graph
 - [ ] 07 Settings

@@ -7,7 +7,8 @@ import {
 	type NoteListItem
 } from '$lib/core/domain/note';
 import { UNTAGGED_FILTER } from '$lib/core/domain/tag';
-import { toSqliteUtc, toLocalDayKeys, toLocalDayCounts } from '$lib/core/domain/shared/time';
+import { dayRange } from '$lib/core/domain/journal';
+import { toLocalDayKeys, toLocalDayCounts } from '$lib/core/domain/shared/time';
 import * as m from '$paraglide/messages.js';
 
 // Convenience wrapper over the pure domain template, so callers (NotesPanel,
@@ -60,11 +61,11 @@ class NotesService {
 		eventBus.sync.localChange.emit();
 	}
 
-	async createForDate(id: string, content: string, localDate: Date): Promise<void> {
-		const note = Note.create(content, tagsService.magicRules, {
-			id,
-			createdAt: createdAtForLocalDate(localDate)
-		});
+	/** Create a note off the visible list, with a caller-chosen id and creation time.
+	 *  The journal view stamps day entries through here (see `journalService`) and
+	 *  keeps its own per-day buckets, so the shared `notes` list is left untouched. */
+	async createDated(id: string, content: string, createdAt: string): Promise<void> {
+		const note = Note.create(content, tagsService.magicRules, { id, createdAt });
 		await noteRepo.save(note);
 		await tagsService.load();
 		eventBus.sync.localChange.emit();
@@ -105,22 +106,14 @@ class NotesService {
 	async noteCountsByDay(): Promise<Map<string, number>> {
 		return toLocalDayCounts(await noteRepo.createdDates());
 	}
+
+	/** Load every note (any tag) created on the given local day into the visible
+	 *  list — the main view's "active day" filter. This owns the shared list; the
+	 *  journal view's per-date, journal-only reads go through `journalService`. */
+	async loadForDay(localDate: Date): Promise<void> {
+		const { utcFrom, utcTo } = dayRange(localDate);
+		this.notes = await noteRepo.findByCreatedDate(utcFrom, utcTo);
+	}
 }
 
 export const notesService = new NotesService();
-
-// `createForDate` stamps a journal note for the chosen day: noon for a past day
-// (a stable, DST-safe midday), but "now" when the day is today so the entry keeps
-// its real creation time. A thin use-case step; Concept 04 (Journal) may re-home it.
-function createdAtForLocalDate(localDate: Date): string {
-	const now = new Date();
-	const isToday =
-		now.getFullYear() === localDate.getFullYear() &&
-		now.getMonth() === localDate.getMonth() &&
-		now.getDate() === localDate.getDate();
-	return isToday
-		? toSqliteUtc(now)
-		: toSqliteUtc(
-				new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), 12, 0, 0)
-			);
-}
