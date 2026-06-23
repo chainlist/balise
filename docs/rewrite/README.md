@@ -154,7 +154,7 @@ file text), never raw markdown, so the parsers are not duplicated in Rust.
 - [x] 05 Tasks
 - [x] 06 Graph
 - [x] 07 Settings
-- [ ] 08 App shell services
+- [x] 08 App shell services
 - [ ] 09 Pages and components cutover
 
 ## 6. Workflow (how to run this across sessions)

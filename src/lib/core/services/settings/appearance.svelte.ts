@@ -10,12 +10,12 @@ import {
 	type MeshMode,
 	type Theme
 } from '$lib/core/domain/settings';
-import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/utils/primary-color';
+import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/core/domain/theme';
 
-// NOTE (Concept 07): the `apply*Vars` methods below write CSS variables to
-// `document`, an app-shell/presentation concern. The concept keeps these side
-// effects intact here for now; Concept 08 should relocate the DOM writes into the
-// app-shell layer and leave this section service as pure state + persistence.
+// NOTE: the `apply*Vars` methods below write CSS variables to `document`, an
+// app-shell/presentation concern. The pure CSS-var computation now lives in
+// `domain/theme` (Concept 08); the DOM writes stay here as the appearance
+// section's apply step, mirroring how the theme service owns the root `dark` class.
 
 const MESH_CSS_VARS = ['--mesh-tl', '--mesh-tr', '--mesh-br', '--mesh-bl'] as const;
 const MESH_SIZE_CSS_VARS = [

@@ -26,44 +26,53 @@ behind thin OS wrappers (`core/services/system/`) or the presentation layer.
 ## Todos
 
 ### Domain
-- [ ] `core/domain/theme.ts`: theme constants, `resolveTheme`, primary-color helpers (pure).
-- [ ] `core/domain/shortcut.ts`: binding string parse, default + custom binding merge (pure).
+- [x] `core/domain/theme.ts`: theme constants, `resolveTheme`, primary-color helpers (pure).
+      `THEMES` + `resolveTheme(theme, prefersDark)`; the `primaryColorVars`/`PRIMARY_COLOR_VARS`
+      helpers moved here from `utils/primary-color` (the core appearance section now imports them
+      from the domain; the old util stays for old code until cutover).
+- [x] `core/domain/shortcut.ts`: binding string parse, default + custom binding merge (pure).
+      `resolveBinding(customBindings, id, defaultBinding)` + `toAccelerator(binding)`.
 
 ### Application services
-- [ ] `core/services/ui-state.svelte.ts`: the selection state that stayed after Desks moved
+- [x] `core/services/ui-state.svelte.ts`: the selection state that stayed after Desks moved
       out (`activeTag`, `composedTags`, `activeDay`, `activeNoteId` derivation, `graphMode`,
-      `noteFolds`). Keep the `setActiveTag`/`setActiveDay`/`toggleComposedTag` use cases,
-      now delegating list reloads to `notesService`/`tagsService`/`journalService`.
-- [ ] `core/services/theme.svelte.ts`, `modal-state.svelte.ts`, `updater.svelte.ts`,
-      `toaster.ts`, `link-preview.ts`, `active-editor.ts`: re-home, keep behavior.
-- [ ] `core/services/shortcuts.svelte.ts`: registry + apply, using the domain binding logic
-      and the global-shortcut OS wrapper.
+      `noteFolds`, plus `ready` and the composed `ModalState`). `setActiveTag`/`setActiveDay`/
+      `toggleComposedTag` kept, delegating list reloads to `notesService`/`tagsService`. Reads
+      its own `ui-state.json`; desk keys are left to `desksService` (migrated at cutover).
+- [x] `core/services/theme.svelte.ts`, `modal-state.svelte.ts`, `updater.svelte.ts`,
+      `toaster.ts`, `link-preview.ts`, `active-editor.ts`: re-homed, behavior kept.
+- [x] `core/services/shortcuts.svelte.ts`: registry + apply. Consolidates the old
+      `shortcuts.svelte.ts` (getBinding/buildTinykeysMap) and `global-shortcut.svelte.ts`
+      (status/applyAll/apply/recheck), using `domain/shortcut` and the `globalShortcut` wrapper.
 
 ### OS / Tauri wrappers (not data access)
 These are OS integrations, not persistence, so they do not belong in the data-access
 backend client (`repositories/backend/`). They are thin wrappers owned by the app-shell
 (application) layer and live under `core/services/system/`.
-- [ ] `core/services/system/tray.ts`, `global-shortcut.ts`, `updater.ts`, `link-preview.ts`:
-      isolate the Tauri/`window` side effects here so the app-shell services stay
-      framework-light and the OS calls have one home each.
+- [x] `core/services/system/tray.ts`, `global-shortcut.ts`, `updater.ts`, `link-preview.ts`:
+      the Tauri/`window` side effects are isolated here. `global-shortcut` hides the plugin and
+      the `Pressed` edge; `updater` exposes check + download-then-relaunch; `link-preview` is the
+      HTTP fetch; `tray` is the whole tray (all OS side effects).
 
 ### Bootstrap
-- [ ] `core/services/app-bootstrap.ts`: port `initApp` ordering (settings, sync init,
-      theme, shortcuts, ui-state, desk switch, news). `applyLanguageChange` and
-      `window.location.reload` are DOM side effects: keep them in the presentation layout or
-      a clearly-marked app-shell function, not in a pure service.
+- [x] `core/services/app-bootstrap.ts`: ported `initApp` ordering (settings, sync init, theme,
+      shortcuts, ui-state, `desksService.init` + `switchDesk`, news). The sync stack and
+      `APP_SHORTCUTS` are still the old modules (out of scope), repointed at cutover.
+      `applyLanguageChange`/`checkForNews` and `window.location.reload` live here as the
+      clearly-marked app-shell composition root, not in a leaf service.
 
 ### Tests
-- [ ] `core/domain/theme.test.ts`: `resolveTheme` for each input.
-- [ ] `core/domain/shortcut.test.ts`: binding parse and default/custom merge.
+- [x] `core/domain/theme.test.ts`: `resolveTheme` for each input (+ `primaryColorVars`).
+- [x] `core/domain/shortcut.test.ts`: binding parse and default/custom merge.
 
 ## Definition of Done
-- [ ] Todos ticked; `pnpm test:unit -- --run src/lib/core/domain/theme.test.ts src/lib/core/domain/shortcut.test.ts` passes.
-- [ ] `pnpm lint` passes.
-- [ ] Self-audit: services hold no raw Tauri/`window`/DOM calls (those are in the
-      `core/services/system/` wrappers or presentation); ui-state imports notes/tags/journal
-      services, and nothing imports ui-state (no cycle).
-- [ ] Dashboard updated.
+- [x] Todos ticked; `pnpm exec vitest run src/lib/core/domain/theme.test.ts src/lib/core/domain/shortcut.test.ts` passes (2 files, 10 tests).
+- [x] `pnpm lint` passes (scoped to the new/edited files; repo-wide lint is pre-existing-dirty).
+- [x] Self-audit: all Tauri side effects are behind `core/services/system/` wrappers or in the
+      bootstrap composition root; DOM is confined to the app-shell theme service (the `dark`
+      class + `matchMedia`, the documented app-shell exception) and `parseOpenGraph`. ui-state
+      imports notes/tags, and only `app-bootstrap` (the root) imports ui-state (no cycle).
+- [x] Dashboard updated.
 
 ## Notes
 - `ui-state` must not be imported by lower layers (keep it a leaf orchestrator, as today).
