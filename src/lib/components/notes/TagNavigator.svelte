@@ -29,7 +29,7 @@
 </script>
 
 <div
-	class="frost-surface fixed top-2 right-2 z-30 flex w-fit items-center gap-2 rounded px-2 py-1 font-mono text-sm select-none"
+	class="frost-surface fixed top-10 right-2 z-30 flex w-fit items-center gap-2 rounded px-2 py-1 font-mono text-sm select-none"
 	transition:fade|global={{ duration: 100 }}
 >
 	<TagChip tag={name} navigate={false} />

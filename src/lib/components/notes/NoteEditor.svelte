@@ -66,7 +66,7 @@
 <EditorView bind:this={editorView} {note} {onSave} {persistFolds} {autofocus} {showHeader}>
 	<div
 		class="z-20 flex items-center gap-1 {floating
-			? 'fixed top-5 right-5 -translate-y-1/2'
+			? 'fixed top-15 right-5 -translate-y-1/2'
 			: 'absolute top-3 right-3'}"
 	>
 		{#if pinnable}

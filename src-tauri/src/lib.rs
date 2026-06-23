@@ -87,6 +87,15 @@ pub fn run() {
             let main_window = app
                 .get_webview_window("main")
                 .expect("main window not found");
+
+            // macOS keeps its native decorations so the Overlay title bar
+            // (tauri.conf.json) can draw the traffic-light buttons; every other
+            // platform uses the in-app window controls, so strip the OS frame
+            // here. Done in Rust (not JS) so the native title bar never flashes
+            // before the webview takes over.
+            #[cfg(not(target_os = "macos"))]
+            let _ = main_window.set_decorations(false);
+
             main_window.on_window_event(move |event| {
                 if let tauri::WindowEvent::Destroyed = event {
                     app_handle.exit(0);

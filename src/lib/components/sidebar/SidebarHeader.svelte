@@ -9,6 +9,7 @@
 	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeskSettingsSheet from '$lib/components/sidebar/DeskSettingsSheet.svelte';
+	import { isMac } from '$lib/utils/platform';
 	import * as m from '$paraglide/messages.js';
 
 	const sidebar = useSidebar();
@@ -34,8 +35,12 @@
 </script>
 
 <div class="flex flex-col gap-2 p-3">
-	<div class="flex items-center justify-between">
-		<h1 class="text-xl font-bold text-primary">Balise</h1>
+	<div
+		data-tauri-drag-region
+		class="flex items-center justify-between select-none"
+		style:padding-left={isMac ? '64px' : undefined}
+	>
+		<h1 data-tauri-drag-region class="text-xl font-bold text-primary">Balise</h1>
 		<Button variant="ghost" size="icon-sm" onclick={() => (uiState.modal.isSettingsOpen = true)}>
 			<Settings class="size-3.5" />
 		</Button>

@@ -13,6 +13,7 @@
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import NotesPanel from '$lib/components/sidebar/NotesPanel.svelte';
+	import TitleBar from '$lib/components/TitleBar.svelte';
 	import SidebarProvider from '$lib/components/shadcn/sidebar/sidebar-provider.svelte';
 	import ResizablePanel from '$lib/components/ResizablePanel.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
@@ -95,8 +96,11 @@
 						<NotesPanel />
 					</ResizablePanel>
 				{/if}
-				<div class="min-w-0 flex-1">
-					{@render children()}
+				<div class="flex min-w-0 flex-1 flex-col">
+					<TitleBar />
+					<div class="min-h-0 flex-1">
+						{@render children()}
+					</div>
 				</div>
 			</div>
 			<CommandPalette />

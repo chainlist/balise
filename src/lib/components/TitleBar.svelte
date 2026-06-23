@@ -1,53 +1,45 @@
 <script lang="ts">
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { Minus, X, Square } from '@lucide/svelte';
+	import { isMac } from '$lib/utils/platform';
+	import { navbarState } from '$lib/services/navbar.svelte';
 
-	const isMac = true; //typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
 	const win = getCurrentWindow();
 </script>
 
-<div
-	data-tauri-drag-region
-	class="frost flex h-8 w-full shrink-0 items-center border-b border-border select-none"
->
-	{#if isMac}
-		<div class="ml-3 flex items-center gap-1.5">
-			<button
-				onclick={() => void win.close()}
-				aria-label="Close"
-				class="h-3 w-3 rounded-full bg-[#FF5F57] transition-opacity hover:opacity-80 focus:outline-none"
-			></button>
-			<button
-				onclick={() => void win.minimize()}
-				aria-label="Minimize"
-				class="h-3 w-3 rounded-full bg-[#FFBD2E] transition-opacity hover:opacity-80 focus:outline-none"
-			></button>
-			<button
-				onclick={() => void win.toggleMaximize()}
-				aria-label="Maximize"
-				class="h-3 w-3 rounded-full bg-[#28C840] transition-opacity hover:opacity-80 focus:outline-none"
-			></button>
-		</div>
-	{:else}
-		<div class="ml-auto flex">
+<!-- Title-bar strip for the content panel: the empty area is a drag region so
+     the window can be moved (and double-clicked to maximize). The center slot is
+     filled by the active note's header (date, reading time). On Windows/Linux it
+     also hosts the window controls; macOS draws native traffic lights via the
+     Overlay title bar, so no buttons are rendered there. -->
+<div data-tauri-drag-region class="flex h-9 w-full shrink-0 items-center select-none">
+	<div data-tauri-drag-region class="flex min-w-0 flex-1 items-center justify-center">
+		{#if navbarState.center}
+			<div class:pointer-events-none={navbarState.grabbable}>
+				{@render navbarState.center()}
+			</div>
+		{/if}
+	</div>
+	{#if !isMac}
+		<div class="flex shrink-0">
 			<button
 				onclick={() => void win.minimize()}
 				aria-label="Minimize"
-				class="flex h-8 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-foreground focus:outline-none"
+				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-white focus:outline-none"
 			>
 				<Minus class="size-3.5" />
 			</button>
 			<button
 				onclick={() => void win.toggleMaximize()}
 				aria-label="Maximize"
-				class="flex h-8 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-foreground focus:outline-none"
+				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-white focus:outline-none"
 			>
 				<Square class="size-3.5" />
 			</button>
 			<button
 				onclick={() => void win.close()}
 				aria-label="Close"
-				class="hover:text-destructive-foreground flex h-8 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-destructive focus:outline-none"
+				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-destructive hover:text-white focus:outline-none"
 			>
 				<X class="size-3.5" />
 			</button>
