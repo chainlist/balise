@@ -24,7 +24,7 @@ export interface TaskItem {
 /** Status hashtag, group 1 is the status word. Non-global so `.exec` is reusable. */
 export const HASHTAG_RE = /#(todo|inprogress|done)\b/i;
 /** Strips every status hashtag (and trailing space) from the task text. */
-const HASHTAG_STRIP_RE = /#(todo|inprogress|done)\b\s*/gi;
+export const HASHTAG_STRIP_RE = /#(todo|inprogress|done)\b\s*/gi;
 /**
  * Checklist item, lenient. Groups: [1] prefix "- [", [2] marker, [3] "] "
  * separator, [4] text. Supports Balise's `~` in-progress marker. Mirrors the

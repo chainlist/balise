@@ -1,6 +1,6 @@
 import * as m from '$paraglide/messages.js';
-import { settingsService } from '$lib/services/settings/settings.svelte';
-import { formatDate } from '$lib/utils/date-format';
+import { settingsService } from '$lib/core/services/settings/settings.svelte';
+import { formatDate } from '$lib/core/domain/datetime';
 
 export interface SlashAction {
 	id: string;

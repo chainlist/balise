@@ -3,7 +3,8 @@ import {
 	type CompletionContext,
 	type CompletionResult
 } from '@codemirror/autocomplete';
-import { tagDisplayName, tagsService } from '$lib/services/content/tags.svelte';
+import { tagsService } from '$lib/core/services/tags.svelte';
+import { tagDisplayName } from '$lib/core/domain/tag';
 
 function tagCompletions(context: CompletionContext): CompletionResult | null {
 	const word = context.matchBefore(/#[a-zA-Z0-9/]*/);

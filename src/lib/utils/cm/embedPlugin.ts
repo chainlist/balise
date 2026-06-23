@@ -5,7 +5,7 @@ import { StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
 import EmbedViewer from '$lib/components/cm/EmbedViewer.svelte';
-import { fsService } from '$lib/services/platform/fs';
+import { assetsService } from '$lib/core/services/assets';
 import { BARE_URL_RE, SvelteWidget } from './shared';
 
 // --- URL + text extraction ---
@@ -112,19 +112,6 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 
 // --- File saving ---
 
-function extFromMime(mimeType: string): string {
-	return (mimeType.split('/')[1] ?? 'png').replace(/\+.*$/, '');
-}
-
-async function saveAttachment(blob: Blob): Promise<string> {
-	const ext = extFromMime(blob.type);
-	const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
-	await fsService.mkdir('attachments');
-	const buffer = await blob.arrayBuffer();
-	await fsService.writeFile(`attachments/${filename}`, new Uint8Array(buffer));
-	return filename;
-}
-
 function insertMarkdown(view: EditorView, pos: number, filename: string): void {
 	const text = `![](attachments/${filename})`;
 	view.dispatch({
@@ -156,7 +143,7 @@ function handlePaste(event: ClipboardEvent, view: EditorView): boolean {
 
 			event.preventDefault();
 			const pos = view.state.selection.main.from;
-			saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
+			assetsService.saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
 			return true;
 		}
 	}
@@ -195,7 +182,7 @@ function handleDrop(event: DragEvent, view: EditorView): boolean {
 
 	event.preventDefault();
 	const pos = view.posAtCoords({ x: event.clientX, y: event.clientY }) ?? view.state.doc.length;
-	saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
+	assetsService.saveAttachment(blob).then((filename) => insertMarkdown(view, pos, filename));
 	return true;
 }
 

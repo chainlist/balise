@@ -4,7 +4,7 @@
 	import { journalService } from '$lib/core/services/journal.svelte';
 	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { uiState } from '$lib/core/services/ui-state.svelte';
-	import { formatDate } from '$lib/utils/date-format';
+	import { formatDate } from '$lib/core/domain/datetime';
 	import { eventBus } from '$lib/core/services/events/event-bus';
 	import { ChevronRightIcon, PanelLeftIcon } from '@lucide/svelte';
 	import NoteEditor from './NoteEditor.svelte';

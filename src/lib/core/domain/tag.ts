@@ -62,9 +62,11 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 
 const TAG_PATTERN_SOURCE = String.raw`#([a-zA-Z0-9/]{2,})(?:\(([^)]+)\))?`;
 
-interface HashtagMatch {
+export interface HashtagMatch {
 	name: string;
 	index: number;
+	/** Length of the full `#tag` match (with any `(param)`), for editor decoration ranges. */
+	length: number;
 }
 
 /**
@@ -81,12 +83,12 @@ function isInsideHtmlTag(text: string, hashIndex: number): boolean {
 	return false;
 }
 
-function parseAllHashtags(text: string): HashtagMatch[] {
+export function parseAllHashtags(text: string): HashtagMatch[] {
 	const re = new RegExp(TAG_PATTERN_SOURCE, 'g');
 	const results: HashtagMatch[] = [];
 	for (const match of text.matchAll(re)) {
 		if (isInsideHtmlTag(text, match.index)) continue;
-		results.push({ name: match[1], index: match.index });
+		results.push({ name: match[1], index: match.index, length: match[0].length });
 	}
 	return results;
 }

@@ -63,7 +63,7 @@ Cut over in this order so the app keeps running between chunks:
       (Dropped a pre-existing unused `tagDisplayName` import in `TagSidebarItem` while rewriting
       its import block. `NotesPanel`'s `clearActiveTag` + `TagSidebarItem`'s `PinIcon`/`HashIcon`
       stay: pre-existing unused, on lines this slice didn't touch.)
-- [~] `components/notes/*` (NoteEditor, EditorHeader, NotePreview, TagNavigator, dialogs):
+- [x] `components/notes/*` (NoteEditor, EditorHeader, NotePreview, TagNavigator, dialogs):
       repoint. NoteEditor wraps the out-of-scope editor; use the Tags compatibility method.
       **Done:** `NoteEditor`, `EditorView`, `EditorHeader`, `NoteDeleteDialog`, `JournalDay`
       repointed to `core`. Editor prop type is now `NoteListItem & { content?: string }` (the
@@ -79,9 +79,9 @@ Cut over in this order so the app keeps running between chunks:
       `core/services/assets.ts` (`assetsService.readImage(path)`) wrapping `backend/fs`, mirroring
       how services reach `backend/store`; `NotePreview` reads through it. The same seam covers
       `cm/EmbedImageViewer` when the **Editor (cm)** slice lands. (`HIGHLIGHT_SOURCE` stays from
-      `utils/markdown-patterns`, an un-migrated shared util.) **Deferred:** `notes/Editor.svelte`
-      moves with the **Editor (cm)** slice (no `Note`-type coupling with `EditorView`; only its own
-      `settingsService`/`activeEditorService` imports).
+      `utils/markdown-patterns`, an un-migrated shared util.) **`notes/Editor.svelte` done (with the
+      Editor (cm) slice):** `settingsService` → `core`, `activeEditorService` →
+      `core/services/active-editor`; the `$lib/utils/cm` barrel stays (kept editor subsystem).
 - [x] `components/settings/*`: repointed to `core`. In-scope flips: `settingsService`
       (`core/services/settings/settings.svelte`), `themeService` (`core/services/theme.svelte`),
       `tagsService` (`core/services/tags.svelte`), `updaterService`, `toasterService`/`errorMessage`,
@@ -141,8 +141,28 @@ Cut over in this order so the app keeps running between chunks:
       `config/app-shortcuts` (not a migrated path).
 
 ### Out-of-scope subsystems (repoint only)
-- [ ] Editor (`utils/cm/*`, `components/cm/*`): repoint note content read/write and tag
+- [x] Editor (`utils/cm/*`, `components/cm/*`): repointed note content read/write and tag
       extraction to the new services per the Concept 02/01 compatibility surfaces.
+      **Service/domain flips:** `tagsService`/`settingsService`/`uiState`/`activeEditorService`/
+      `linkPreviewService` → `core/services/*`; `SYSTEM_TAGS`/`tagDisplayName`/`parseAllHashtags`
+      → `core/domain/tag`; `HASHTAG_RE`/`HASHTAG_STRIP_RE`/`TASK_STATUS_COLOR` → `core/domain/task`.
+      **Consolidate-into-core decision (was: keep editor helper utils):** the editor's pure
+      parsing/format primitives are now single-sourced in `core/domain`, not duplicated in `utils`.
+      `core/domain/tag.parseAllHashtags` was made public and gained a `length` field (for the
+      `tagPlugin` decoration ranges; `groupHashtagOccurrences` is unaffected); `HASHTAG_STRIP_RE`
+      exported from `core/domain/task`; new `core/domain/datetime.ts` (`formatDate`/
+      `buildDateFormatOptions`, importing `DateFormat` from `core/domain/settings`) replaces
+      `utils/date-format`, with `datetime.test.ts`. The other live `date-format` consumers
+      (`JournalDay`, `NotesPanel`, `GeneralSettings`) were repointed too; `EditorSettings`'s
+      deferred `MarkMode` now comes from `core/domain/settings` (wizard precedent). **Attachment
+      write seam:** `embedPlugin`'s paste/drop image save no longer touches the backend `fsService`
+      directly; `assetsService.saveAttachment(blob)` was added to the existing app-layer seam
+      (mirrors `readImage`), and `cm/EmbedImageViewer` now reads via `assetsService.readImage`.
+      **Not deleted yet:** old `utils/{tag-parser,task-parser,tag-constants,date-format}.ts` stay
+      until the deletion step (old service island + `config/app-shortcuts` still import them).
+      **Flagged:** `config/app-shortcuts.ts` still imports the old `notes`/`ui-state`/`active-editor`/
+      `settings`/`toaster`/`eventBus`/`shortcuts` singletons (live via `CommandPalette`); repoint it
+      with the app-shell/shortcuts cutover (its `date-format` import left for that pass).
 - [ ] Sync (`services/sync/*`, fs-sync, device-sync): repoint `importNote`, meta queries,
       tombstones, and note-file IO to the new Notes repo/service. Grep for every current
       call site first and check them off one by one.

@@ -5,7 +5,7 @@
 	import { notesService, newNoteContent } from '$lib/core/services/notes.svelte';
 	import { uiState } from '$lib/core/services/ui-state.svelte';
 	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { formatDate } from '$lib/utils/date-format';
+	import { formatDate } from '$lib/core/domain/datetime';
 	import { tagsService } from '$lib/core/services/tags.svelte';
 	import { eventBus } from '$lib/core/services/events/event-bus';
 	import { toasterService, errorMessage } from '$lib/core/services/toaster';

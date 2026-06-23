@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fsService } from '$lib/services/platform/fs';
+	import { assetsService } from '$lib/core/services/assets';
 	import * as m from '$paraglide/messages.js';
 	import EmbedControls from './EmbedControls.svelte';
 
@@ -40,8 +40,8 @@
 			src = cached;
 			return;
 		}
-		fsService
-			.readFile(path)
+		assetsService
+			.readImage(path)
 			.then((data) => {
 				const url = URL.createObjectURL(new Blob([data]));
 				urlCache.set(path, url);
