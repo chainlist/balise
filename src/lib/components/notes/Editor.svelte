@@ -35,6 +35,7 @@
 		mdFormatPlugin,
 		mdTextToolbarPlugin,
 		mdLinkPlugin,
+		mdDatePlugin,
 		mdSlashPlugin,
 		mdDatePicker,
 		mdPlaceholderPlugin,
@@ -91,6 +92,7 @@
 			mdHighlightPlugin(mode),
 			mdUnderlinePlugin(mode),
 			mdLinkPlugin(mode),
+			mdDatePlugin(mode),
 			mdTagPlugin(mode),
 			mdCheckboxPlugin(mode),
 			mdTaskTagPlugin(mode)

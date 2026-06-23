@@ -8,6 +8,7 @@ export { mdCodePlugin } from './codePlugin';
 export { codeFenceAutoClose } from './codeFencePlugin';
 export { mdLinkPlugin } from './linkPlugin';
 export { mdTagPlugin } from './tagPlugin';
+export { mdDatePlugin } from './datePlugin';
 export { mdCheckboxPlugin } from './checkboxPlugin';
 export { mdTaskTagPlugin } from './taskTagPlugin';
 export { mdHighlightPlugin } from './highlightPlugin';
