@@ -1,33 +1,10 @@
-import { SettingsGroup } from './base.svelte';
-import { sanitizeDeskName } from '../platform/desk';
+import { SettingsSection } from './base.svelte';
+import { DEFAULT_SYNC_SETTINGS, type SyncSettings } from '$lib/domain/settings';
+import { sanitizeDeskName } from '$lib/domain/desk';
 
-export interface SyncSettings {
-	enabled: boolean;
-	/** Throttle: the shortest time between automatic syncs, in minutes. */
-	intervalMinutes: number;
-	/** Custom pairing server URL; empty falls back to the build-time default. */
-	syncUrl: string;
-	/** Whether this device shares its app settings (everything except sync
-	 *  settings) with paired devices. */
-	shareSettings: boolean;
-	/** Desk names this device excludes from sync. Empty shares every desk,
-	 *  including any added later. Stored sanitized so the sync gate (which only
-	 *  knows the sanitized desk name) and the settings UI agree. */
-	unsharedDesks: string[];
-}
-
-/** Selectable throttle windows, in minutes. */
-export const SYNC_INTERVAL_OPTIONS = [5, 10, 30, 60] as const;
-
-export class SyncSettingsService extends SettingsGroup<SyncSettings> {
+export class SyncSettingsSection extends SettingsSection<SyncSettings> {
 	readonly key = 'sync';
-	state = $state<SyncSettings>({
-		enabled: false,
-		intervalMinutes: 5,
-		syncUrl: '',
-		shareSettings: true,
-		unsharedDesks: []
-	});
+	state = $state<SyncSettings>({ ...DEFAULT_SYNC_SETTINGS });
 
 	setSyncEnabled(value: boolean): void {
 		this.state.enabled = value;

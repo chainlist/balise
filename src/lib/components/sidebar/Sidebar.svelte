@@ -3,7 +3,7 @@
 	import BrowseCard from '$lib/components/sidebar/BrowseCard.svelte';
 	import TagsCard from '$lib/components/sidebar/TagsCard.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import * as m from '$paraglide/messages.js';
 </script>
 

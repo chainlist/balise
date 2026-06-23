@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import type { TagOccurrences } from '$lib/utils/tag-parser';
+	import type { TagOccurrences } from '$lib/domain/tag';
 	import TagChip from '$lib/components/cm/TagChip.svelte';
 	import TagNavigator from './TagNavigator.svelte';
 

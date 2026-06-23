@@ -3,9 +3,9 @@
 	import { getVersion } from '@tauri-apps/api/app';
 	import { RefreshCwIcon, SparklesIcon, DownloadIcon, HeartIcon } from '@lucide/svelte';
 	import appIcon from '$lib/assets/app-icon.png';
-	import { updaterService } from '$lib/services/platform/updater.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { checkForNews } from '$lib/utils/init-app';
+	import { updaterService } from '$lib/services/updater.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { checkForNews } from '$lib/services/app-bootstrap';
 	import * as m from '$paraglide/messages.js';
 	import SettingsSection from './SettingsSection.svelte';
 

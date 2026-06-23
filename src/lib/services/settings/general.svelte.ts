@@ -1,21 +1,14 @@
-import { SettingsGroup } from './base.svelte';
-import type { DateFormat } from '$lib/utils/date-format';
+import { SettingsSection } from './base.svelte';
+import {
+	DEFAULT_GENERAL_SETTINGS,
+	normalizeLanguage,
+	type GeneralSettings,
+	type DateFormat
+} from '$lib/domain/settings';
 
-export interface GeneralSettings {
-	language: 'fr' | 'es' | 'en' | 'de';
-	closeToTray: boolean | null;
-	autoUpdate: boolean;
-	dateFormat: DateFormat;
-}
-
-export class GeneralSettingsService extends SettingsGroup<GeneralSettings> {
+export class GeneralSettingsSection extends SettingsSection<GeneralSettings> {
 	readonly key = 'general';
-	state = $state<GeneralSettings>({
-		language: 'en',
-		closeToTray: null,
-		autoUpdate: true,
-		dateFormat: 'medium'
-	});
+	state = $state<GeneralSettings>({ ...DEFAULT_GENERAL_SETTINGS });
 
 	setCloseToTray(value: boolean): void {
 		this.state.closeToTray = value;
@@ -33,7 +26,7 @@ export class GeneralSettingsService extends SettingsGroup<GeneralSettings> {
 	}
 
 	async setLanguage(lang: string): Promise<void> {
-		this.state.language = lang as GeneralSettings['language'];
+		this.state.language = normalizeLanguage(lang);
 		await this.save();
 	}
 }

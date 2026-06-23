@@ -1,12 +1,12 @@
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { syncPeers, setSyncConfig, startSync } from '$lib/utils/sync';
 import { deviceIdFromPublicKey, getDeviceId } from '$lib/utils/device-id';
-import { tagsService } from '$lib/services/content/tags.svelte';
+import { tagsService } from '$lib/services/tags.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { settingsService } from '$lib/services/settings/settings.svelte';
 import { syncConnectionService } from '$lib/services/sync/sync-connection.svelte';
-import { toasterService, errorMessage } from '$lib/services/app/toaster';
-import { fsService } from '$lib/services/platform/fs';
+import { toasterService, errorMessage } from '$lib/services/toaster';
+import { fsService } from '$lib/repositories/backend/fs';
 import { eventBus } from '$lib/services/events/event-bus';
 import * as m from '$paraglide/messages.js';
 

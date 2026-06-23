@@ -4,8 +4,8 @@ import { Decoration, EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import TaskCard, { type TaskStatus } from '$lib/components/cm/TaskCard.svelte';
 import { SvelteWidget, buildLineDecos, type MarkMode } from './shared';
-import { SYSTEM_TAGS } from '$lib/utils/tag-constants';
-import { HASHTAG_RE, HASHTAG_STRIP_RE } from '$lib/utils/task-parser';
+import { SYSTEM_TAGS } from '$lib/domain/tag';
+import { HASHTAG_RE, HASHTAG_STRIP_RE } from '$lib/domain/task';
 
 const NEXT_STATUS_TAG: Record<TaskStatus, string> = {
 	todo: `#${SYSTEM_TAGS.INPROGRESS}`,

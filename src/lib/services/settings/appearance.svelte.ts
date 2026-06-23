@@ -1,22 +1,21 @@
-import { SettingsGroup } from './base.svelte';
-import type { Theme } from '../app/theme.svelte';
-import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/utils/primary-color';
+import { SettingsSection } from './base.svelte';
+import { settingsRepo } from '$lib/repositories/settings.repo';
+import {
+	MESH_MODES,
+	DEFAULT_MESH_COLORS,
+	DEFAULT_MESH_SIZES,
+	DEFAULT_MESH_UNIFIED_COLOR,
+	DEFAULT_APPEARANCE_SETTINGS,
+	type AppearanceSettings,
+	type MeshMode,
+	type Theme
+} from '$lib/domain/settings';
+import { primaryColorVars, PRIMARY_COLOR_VARS } from '$lib/domain/theme';
 
-/* Order matches the mesh gradients: top-left, top-right, bottom-right, bottom-left */
-export type MeshColors = [string, string, string, string];
-/* Per-corner bubble scale factors, same order as MeshColors */
-export type MeshSizes = [number, number, number, number];
-
-export const MESH_MODES = {
-	CORNERS: 'corners',
-	UNIFIED: 'unified'
-} as const;
-
-export type MeshMode = (typeof MESH_MODES)[keyof typeof MESH_MODES];
-
-export const DEFAULT_MESH_COLORS: MeshColors = ['#7c6cde', '#7c6cde', '#7c6cde', '#7c6cde'];
-export const DEFAULT_MESH_SIZES: MeshSizes = [1, 1.9, 1.7, 1];
-export const DEFAULT_MESH_UNIFIED_COLOR = '#7c6cde';
+// NOTE: the `apply*Vars` methods below write CSS variables to `document`, an
+// app-shell/presentation concern. The pure CSS-var computation now lives in
+// `domain/theme` (Concept 08); the DOM writes stay here as the appearance
+// section's apply step, mirroring how the theme service owns the root `dark` class.
 
 const MESH_CSS_VARS = ['--mesh-tl', '--mesh-tr', '--mesh-br', '--mesh-bl'] as const;
 const MESH_SIZE_CSS_VARS = [
@@ -26,26 +25,12 @@ const MESH_SIZE_CSS_VARS = [
 	'--mesh-bl-size'
 ] as const;
 
-export interface AppearanceSettings {
-	theme: Theme;
-	primaryColor: string | null;
-	meshColors: MeshColors;
-	meshSizes: MeshSizes;
-	meshMode: MeshMode;
-	meshUnifiedColor: string;
-	meshEnabled: boolean;
-}
-
-export class AppearanceSettingsService extends SettingsGroup<AppearanceSettings> {
+export class AppearanceSettingsSection extends SettingsSection<AppearanceSettings> {
 	readonly key = 'appearance';
 	state = $state<AppearanceSettings>({
-		theme: 'system',
-		primaryColor: null,
+		...DEFAULT_APPEARANCE_SETTINGS,
 		meshColors: [...DEFAULT_MESH_COLORS],
-		meshSizes: [...DEFAULT_MESH_SIZES],
-		meshMode: MESH_MODES.CORNERS,
-		meshUnifiedColor: DEFAULT_MESH_UNIFIED_COLOR,
-		meshEnabled: true
+		meshSizes: [...DEFAULT_MESH_SIZES]
 	});
 
 	setTheme(theme: Theme): void {
@@ -139,7 +124,7 @@ export class AppearanceSettingsService extends SettingsGroup<AppearanceSettings>
 
 	/** Keep theme in sync across windows (main <-> quick add). */
 	watchCrossWindow(): void {
-		void this.store.onKeyChange<AppearanceSettings>('appearance', (appearance) => {
+		void settingsRepo.onSectionChange<AppearanceSettings>('appearance', (appearance) => {
 			this.state.theme = appearance?.theme ?? 'system';
 		});
 	}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Switch } from 'bits-ui';
-	import { settingsService, SYNC_INTERVAL_OPTIONS } from '$lib/services/settings/settings.svelte';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { SYNC_INTERVAL_OPTIONS } from '$lib/domain/settings';
 	import { stopSync } from '$lib/utils/sync';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 	import SyncAdvancedSettings from './SyncAdvancedSettings.svelte';

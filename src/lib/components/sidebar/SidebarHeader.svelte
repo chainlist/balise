@@ -4,22 +4,24 @@
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ChevronsUpDownIcon, PlusIcon, LayoutListIcon, Settings } from '@lucide/svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import AddDeskSheet from '$lib/components/sidebar/AddDeskSheet.svelte';
 	import DeskSettingsSheet from '$lib/components/sidebar/DeskSettingsSheet.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	const sidebar = useSidebar();
-	const desks = $derived(uiState.desks);
-	const selectedDesk = $derived(uiState.activeDesk);
+	const desks = $derived(desksService.desks);
+	const selectedDesk = $derived(desksService.activeDesk);
 	let isAddDeskOpen = $state(false);
 	let isDeskSettingsOpen = $state(false);
 	let deskPendingSettings = $state<string | null>(null);
 
 	async function handleSelectDesk(desk: string) {
 		try {
-			await uiState.switchDesk(desk);
+			await desksService.switchDesk(desk);
+			uiState.clearSelection();
 		} catch (e) {
 			toasterService.error(m.desk_switch_error_failed(), errorMessage(e));
 		}

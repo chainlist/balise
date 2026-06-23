@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { Toaster } from '$lib/components/shadcn/sonner';
-	import { themeService } from '$lib/services/app/theme.svelte';
+	import { themeService } from '$lib/services/theme.svelte';
 	let { children } = $props();
 </script>
 

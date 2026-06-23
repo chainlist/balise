@@ -2,13 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { notesService, newNoteContent } from '$lib/services/notes.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import { formatDate } from '$lib/utils/date-format';
-	import { tagsService } from '$lib/services/content/tags.svelte';
+	import { formatDate } from '$lib/domain/datetime';
+	import { tagsService } from '$lib/services/tags.svelte';
 	import { eventBus } from '$lib/services/events/event-bus';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import TagName from '$lib/components/TagName.svelte';
 	import NoteCard from '$lib/components/sidebar/NoteCard.svelte';
 	import TagFilterDropdown from '$lib/components/sidebar/TagFilterDropdown.svelte';

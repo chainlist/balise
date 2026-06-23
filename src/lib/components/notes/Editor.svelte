@@ -52,7 +52,7 @@
 		type OutlineItem
 	} from '$lib/utils/cm';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import { activeEditorService } from '$lib/services/app/active-editor';
+	import { activeEditorService } from '$lib/services/active-editor';
 
 	let {
 		content,

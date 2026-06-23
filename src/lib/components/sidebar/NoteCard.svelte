@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Note } from '$lib/models/note';
+	import type { NoteListItem } from '$lib/domain/note';
 	import NotePreview from '$lib/components/notes/NotePreview.svelte';
-	import { parseDbTimestamp } from '$lib/utils/time';
+	import { parseDbTimestamp } from '$lib/domain/shared/time';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -14,7 +14,7 @@
 		active,
 		onclick
 	}: {
-		note: Note;
+		note: NoteListItem;
 		active: boolean;
 		onclick: () => void;
 	} = $props();
@@ -38,6 +38,6 @@
 		{/if}
 	</div>
 	<span class="text-[11px] text-shadow-accent-foreground">
-		{intl.format(new Date(parseDbTimestamp(note.updated_at)))}
+		{intl.format(new Date(parseDbTimestamp(note.updatedAt)))}
 	</span>
 </button>

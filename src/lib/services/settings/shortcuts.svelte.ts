@@ -1,12 +1,9 @@
-import { SettingsGroup } from './base.svelte';
+import { SettingsSection } from './base.svelte';
+import { DEFAULT_SHORTCUTS_SETTINGS, type ShortcutsSettings } from '$lib/domain/settings';
 
-export interface ShortcutsSettings {
-	customBindings: Record<string, string>;
-}
-
-export class ShortcutsSettingsService extends SettingsGroup<ShortcutsSettings> {
+export class ShortcutsSettingsSection extends SettingsSection<ShortcutsSettings> {
 	readonly key = 'shortcuts';
-	state = $state<ShortcutsSettings>({ customBindings: {} });
+	state = $state<ShortcutsSettings>({ ...DEFAULT_SHORTCUTS_SETTINGS });
 
 	setBinding(id: string, binding: string): void {
 		this.state.customBindings = { ...this.state.customBindings, [id]: binding };

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { linkPreviewService, type LinkPreview } from '$lib/services/platform/link-preview';
+	import { linkPreviewService, type LinkPreview } from '$lib/services/link-preview';
 
 	// Shared Open Graph card content (favicon, title, description, thumbnail).
 	// Self-fetches via the cached linkPreviewService; the consumer supplies the

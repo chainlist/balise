@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import { BookOpenText, Share2Icon, NotebookIcon, CheckSquareIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
 

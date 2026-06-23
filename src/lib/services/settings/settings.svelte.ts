@@ -1,90 +1,63 @@
-import { load, type Store } from '@tauri-apps/plugin-store';
-import { resolveStorePath } from '../platform/store-path';
-import type { MarkMode } from '$lib/utils/cm';
-import type { Theme } from '../app/theme.svelte';
-import { setLocale, locales } from '$paraglide/runtime.js';
+import { settingsRepo } from '$lib/repositories/settings.repo';
+import { tagsService } from '$lib/services/tags.svelte';
+import { eventBus } from '$lib/services/events/event-bus';
+import {
+	migrateLegacySettings,
+	DEFAULT_SETTINGS,
+	type LegacySettings,
+	type Theme,
+	type MarkMode,
+	type Language,
+	type MagicTagRule,
+	type MeshColors,
+	type MeshSizes,
+	type MeshMode
+} from '$lib/domain/settings';
+import { setLocale } from '$paraglide/runtime.js';
 
-import { GeneralSettingsService } from './general.svelte';
-import { AppearanceSettingsService } from './appearance.svelte';
-import { EditorSettingsService } from './editor.svelte';
-import { JournalSettingsService } from './journal.svelte';
-import { MagicTagsSettingsService } from './magic-tags.svelte';
-import { ShortcutsSettingsService } from './shortcuts.svelte';
-import { SyncSettingsService } from './sync.svelte';
-import type { GeneralSettings } from './general.svelte';
-import type { MagicTag } from './magic-tags.svelte';
-import type { MeshColors, MeshSizes, MeshMode } from './appearance.svelte';
-
-export const SUPPORTED_LOCALES = locales;
-
-/* Public re-exports so consumers can import everything from the aggregator. */
-export type { GeneralSettings } from './general.svelte';
-export type { EditorSettings } from './editor.svelte';
-export type { JournalSettings } from './journal.svelte';
-export type { ShortcutsSettings } from './shortcuts.svelte';
-export {
-	MESH_MODES,
-	DEFAULT_MESH_COLORS,
-	DEFAULT_MESH_SIZES,
-	DEFAULT_MESH_UNIFIED_COLOR
-} from './appearance.svelte';
-export type {
-	AppearanceSettings,
-	MeshColors,
-	MeshSizes,
-	MeshMode
-} from './appearance.svelte';
-export { MAGIC_TAG_MATCH_TYPES, DEFAULT_MAGIC_TAGS } from './magic-tags.svelte';
-export type { MagicTag, MagicTagMatchType, MagicTagsSettings } from './magic-tags.svelte';
-export { SYNC_INTERVAL_OPTIONS } from './sync.svelte';
-export type { SyncSettings } from './sync.svelte';
-
-/* Flat keys from before settings were grouped into sections; migrated once. */
-const LEGACY_KEYS = [
-	'theme',
-	'fontSize',
-	'lineHeight',
-	'markdownMarks',
-	'customBindings',
-	'language',
-	'magicTags',
-	'closeToTray',
-	'meshColors',
-	'meshSizes',
-	'meshMode',
-	'meshUnifiedColor',
-	'meshEnabled',
-	'primaryColor'
-] as const;
+import { GeneralSettingsSection } from './general.svelte';
+import { AppearanceSettingsSection } from './appearance.svelte';
+import { EditorSettingsSection } from './editor.svelte';
+import { JournalSettingsSection } from './journal.svelte';
+import { MagicTagsSettingsSection } from './magic-tags.svelte';
+import { ShortcutsSettingsSection } from './shortcuts.svelte';
+import { SyncSettingsSection } from './sync.svelte';
 
 /**
- * Top-level orchestrator. Loads the shared store, runs the one-time legacy
- * migration, then constructs and loads each section service. Sections own their
- * own reactive state and setters; this class only wires them to the store.
+ * Application-layer aggregator. Loads the shared store, runs the one-time legacy
+ * migration (pure mapping in the domain, reads/writes via the repo), then
+ * constructs and loads each section service. Sections own their reactive state
+ * and setters; this class only sequences init and wires the cross-cutting seams:
+ * the magic-tag rules into `tagsService`, the desk rename/remove events into the
+ * sync section, and the app-shell side effects (locale, CSS vars, cross-window
+ * theme) at the boundary.
  */
 class SettingsService {
-	general!: GeneralSettingsService;
-	appearance!: AppearanceSettingsService;
-	editor!: EditorSettingsService;
-	journal!: JournalSettingsService;
-	magicTags!: MagicTagsSettingsService;
-	shortcuts!: ShortcutsSettingsService;
-	sync!: SyncSettingsService;
-
-	#store: Store | null = null;
+	general!: GeneralSettingsSection;
+	appearance!: AppearanceSettingsSection;
+	editor!: EditorSettingsSection;
+	journal!: JournalSettingsSection;
+	magicTags!: MagicTagsSettingsSection;
+	shortcuts!: ShortcutsSettingsSection;
+	sync!: SyncSettingsSection;
 
 	async init(): Promise<void> {
-		this.#store = await load(await resolveStorePath('settings.json'), { autoSave: 100 });
-
+		await settingsRepo.load(DEFAULT_SETTINGS);
 		await this.#migrate();
 
-		this.general = new GeneralSettingsService(this.#store);
-		this.appearance = new AppearanceSettingsService(this.#store);
-		this.editor = new EditorSettingsService(this.#store);
-		this.journal = new JournalSettingsService(this.#store);
-		this.magicTags = new MagicTagsSettingsService(this.#store);
-		this.shortcuts = new ShortcutsSettingsService(this.#store);
-		this.sync = new SyncSettingsService(this.#store);
+		this.general = new GeneralSettingsSection();
+		this.appearance = new AppearanceSettingsSection();
+		this.editor = new EditorSettingsSection();
+		this.journal = new JournalSettingsSection();
+		this.magicTags = new MagicTagsSettingsSection();
+		this.shortcuts = new ShortcutsSettingsSection();
+		this.sync = new SyncSettingsSection();
+
+		// Closes the Concept 01 seam: push magic-tag rules into tagsService on load
+		// and on every change. Set before load so the first push happens.
+		this.magicTags.onRulesChange = (rules: MagicTagRule[]) => {
+			tagsService.magicRules = rules;
+		};
 
 		await Promise.all([
 			this.general.load(),
@@ -96,21 +69,26 @@ class SettingsService {
 			this.sync.load()
 		]);
 
+		// App-shell side effects (revisited in Concept 08): apply locale, CSS vars,
+		// and keep the theme synced across windows.
 		setLocale(this.general.state.language);
 		this.editor.applyVars();
 		this.appearance.apply();
 		this.appearance.watchCrossWindow();
+
+		// Carry/forget a desk's sync-share choice when a desk is renamed or removed.
+		eventBus.desks.renamed.on((oldName, newName) => this.sync.renameSharedDesk(oldName, newName));
+		eventBus.desks.removed.on((name) => this.sync.forgetDesk(name));
 	}
 
 	/**
-	 * One-time migration of the legacy flat keys (theme, fontSize, ...) into the
-	 * section objects. Runs before load and is idempotent: it skips once the
-	 * section keys exist, and does nothing on a fresh install.
+	 * One-time migration of the legacy flat keys into the section objects. Triggered
+	 * purely by the presence of a legacy flat key (the pure mapping returns `null`
+	 * when none is present), so a fresh install and an already-migrated store both
+	 * no-op. The presence of a legacy key is the only reliable signal now that the
+	 * section keys read back as their defaults from the store.
 	 */
 	async #migrate(): Promise<void> {
-		const store = this.#store!;
-		if ((await store.get('appearance')) !== undefined) return;
-
 		const [
 			theme,
 			fontSize,
@@ -127,23 +105,23 @@ class SettingsService {
 			meshEnabled,
 			primaryColor
 		] = await Promise.all([
-			store.get<Theme>('theme'),
-			store.get<number>('fontSize'),
-			store.get<number>('lineHeight'),
-			store.get<MarkMode>('markdownMarks'),
-			store.get<Record<string, string>>('customBindings'),
-			store.get<GeneralSettings['language']>('language'),
-			store.get<MagicTag[]>('magicTags'),
-			store.get<boolean>('closeToTray'),
-			store.get<MeshColors>('meshColors'),
-			store.get<MeshSizes>('meshSizes'),
-			store.get<MeshMode>('meshMode'),
-			store.get<string>('meshUnifiedColor'),
-			store.get<boolean>('meshEnabled'),
-			store.get<string>('primaryColor')
+			settingsRepo.getSection<Theme>('theme'),
+			settingsRepo.getSection<number>('fontSize'),
+			settingsRepo.getSection<number>('lineHeight'),
+			settingsRepo.getSection<MarkMode>('markdownMarks'),
+			settingsRepo.getSection<Record<string, string>>('customBindings'),
+			settingsRepo.getSection<Language>('language'),
+			settingsRepo.getSection<MagicTagRule[]>('magicTags'),
+			settingsRepo.getSection<boolean | null>('closeToTray'),
+			settingsRepo.getSection<MeshColors>('meshColors'),
+			settingsRepo.getSection<MeshSizes>('meshSizes'),
+			settingsRepo.getSection<MeshMode>('meshMode'),
+			settingsRepo.getSection<string>('meshUnifiedColor'),
+			settingsRepo.getSection<boolean>('meshEnabled'),
+			settingsRepo.getSection<string>('primaryColor')
 		]);
 
-		const hasLegacy = [
+		const raw: LegacySettings = {
 			theme,
 			fontSize,
 			lineHeight,
@@ -158,25 +136,16 @@ class SettingsService {
 			meshUnifiedColor,
 			meshEnabled,
 			primaryColor
-		].some((value) => value !== undefined);
-		if (!hasLegacy) return;
+		};
 
-		await store.set('general', { language, closeToTray });
-		await store.set('appearance', {
-			theme,
-			primaryColor,
-			meshColors,
-			meshSizes,
-			meshMode,
-			meshUnifiedColor,
-			meshEnabled
-		});
-		await store.set('editor', { fontSize, lineHeight, markdownMarks });
-		await store.set('magicTags', { tags: magicTags });
-		await store.set('shortcuts', { customBindings });
+		const migration = migrateLegacySettings(raw);
+		if (!migration) return;
 
-		await Promise.all(LEGACY_KEYS.map((key) => store.delete(key)));
-		await store.save();
+		await Promise.all(
+			Object.entries(migration.sections).map(([key, value]) => settingsRepo.setSection(key, value))
+		);
+		await settingsRepo.deleteKeys(migration.deleteKeys);
+		await settingsRepo.save();
 	}
 }
 

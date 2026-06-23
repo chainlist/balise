@@ -1,47 +1,34 @@
-import { SettingsGroup } from './base.svelte';
+import { SettingsSection } from './base.svelte';
+import { settingsRepo } from '$lib/repositories/settings.repo';
+import {
+	DEFAULT_MAGIC_TAGS,
+	normalizeMagicRules,
+	type MagicTagsSettings,
+	type MagicTagRule
+} from '$lib/domain/settings';
 
-export const MAGIC_TAG_MATCH_TYPES = {
-	STARTS_WITH: 'starts_with',
-	ENDS_WITH: 'ends_with',
-	CONTAINS: 'contains',
-	CONTAINS_WORD: 'contains_word'
-} as const;
-
-export type MagicTagMatchType = (typeof MAGIC_TAG_MATCH_TYPES)[keyof typeof MAGIC_TAG_MATCH_TYPES];
-
-export interface MagicTag {
-	pattern: string;
-	matchType: MagicTagMatchType;
-	tag: string;
-}
-
-export const DEFAULT_MAGIC_TAGS: MagicTag[] = [
-	{ pattern: '- [ ]', matchType: MAGIC_TAG_MATCH_TYPES.STARTS_WITH, tag: 'todo' },
-	{ pattern: '- [x]', matchType: MAGIC_TAG_MATCH_TYPES.STARTS_WITH, tag: 'done' }
-];
-
-export interface MagicTagsSettings {
-	tags: MagicTag[];
-}
-
-export class MagicTagsSettingsService extends SettingsGroup<MagicTagsSettings> {
+export class MagicTagsSettingsSection extends SettingsSection<MagicTagsSettings> {
 	readonly key = 'magicTags';
-	state = $state<MagicTagsSettings>({ tags: DEFAULT_MAGIC_TAGS });
+	state = $state<MagicTagsSettings>({ tags: [...DEFAULT_MAGIC_TAGS] });
 
-	/** Older stored tags may lack a matchType; default those to CONTAINS. */
+	/** Set by the aggregator to push the current rules into `tagsService`
+	 *  (closes the Concept 01 magic-tag seam). Fires on load and on every change. */
+	onRulesChange?: (rules: MagicTagRule[]) => void;
+
+	/** Older stored tags may lack a `matchType`; the domain defaults those. */
 	async load(): Promise<void> {
-		const stored = await this.store.get<MagicTagsSettings>(this.key);
-		if (!stored?.tags) return;
-		this.state = {
-			tags: stored.tags.map(({ matchType, ...rest }) => ({
-				...rest,
-				matchType: (matchType as MagicTagMatchType | undefined) ?? MAGIC_TAG_MATCH_TYPES.CONTAINS
-			}))
-		};
+		const stored = await settingsRepo.getSection<MagicTagsSettings>(this.key);
+		if (stored?.tags) this.state = { tags: normalizeMagicRules(stored.tags) };
+		this.#notify();
 	}
 
-	setMagicTags(tags: MagicTag[]): void {
+	setMagicTags(tags: MagicTagRule[]): void {
 		this.state.tags = tags;
 		this.persist();
+		this.#notify();
+	}
+
+	#notify(): void {
+		this.onRulesChange?.(this.state.tags);
 	}
 }

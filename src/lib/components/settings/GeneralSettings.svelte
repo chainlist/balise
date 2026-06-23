@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { settingsService, SUPPORTED_LOCALES } from '$lib/services/settings/settings.svelte';
-	import { applyLanguageChange } from '$lib/utils/init-app';
-	import { buildDateFormatOptions, formatDate, type DateFormat } from '$lib/utils/date-format';
+	import { settingsService } from '$lib/services/settings/settings.svelte';
+	import { SUPPORTED_LANGUAGES, type DateFormat } from '$lib/domain/settings';
+	import { applyLanguageChange } from '$lib/services/app-bootstrap';
+	import { buildDateFormatOptions, formatDate } from '$lib/domain/datetime';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';
 	import { Switch } from 'bits-ui';
@@ -57,7 +58,7 @@
 		>
 			<Select.Trigger class="w-auto whitespace-nowrap">{languageLabel}</Select.Trigger>
 			<Select.Content>
-				{#each SUPPORTED_LOCALES as locale (locale)}
+				{#each SUPPORTED_LANGUAGES as locale (locale)}
 					<Select.Item value={locale} label={localeLabels[locale] ?? locale} />
 				{/each}
 			</Select.Content>

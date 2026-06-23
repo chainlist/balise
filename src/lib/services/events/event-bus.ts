@@ -30,6 +30,13 @@ class DeskEvents {
 	/** Device sync created a desk that wasn't here before, so the desk list can
 	 *  pick it up. */
 	readonly created = new Signal();
+	/** A desk was renamed (payload: old then new name), so sync settings can carry
+	 *  a desk's share choice across the rename. Subscriber wired by Concept 07
+	 *  (Settings); until then nothing listens. */
+	readonly renamed = new Signal<[oldName: string, newName: string]>();
+	/** A desk was removed from the list, so sync settings can forget its stale
+	 *  share entry. Subscriber wired by Concept 07 (Settings). */
+	readonly removed = new Signal<[name: string]>();
 }
 
 class JournalEvents {

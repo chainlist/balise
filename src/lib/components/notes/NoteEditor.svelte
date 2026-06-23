@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Note } from '$lib/services/content/notes.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
 	import { eventBus } from '$lib/services/events/event-bus';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon, PinIcon, ListTreeIcon } from '@lucide/svelte';
@@ -20,7 +20,7 @@
 		floating = true,
 		showHeader = true
 	}: {
-		note: Note;
+		note: NoteListItem & { content?: string };
 		onSave?: (content: string) => Promise<void>;
 		pinnable?: boolean;
 		persistFolds?: boolean;

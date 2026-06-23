@@ -1,24 +1,27 @@
-import { SettingsGroup } from './base.svelte';
-import type { MarkMode } from '$lib/utils/cm';
+import { SettingsSection } from './base.svelte';
+import {
+	DEFAULT_EDITOR_SETTINGS,
+	clampFontSize,
+	clampLineHeight,
+	type EditorSettings,
+	type MarkMode
+} from '$lib/domain/settings';
 
-export interface EditorSettings {
-	fontSize: number;
-	lineHeight: number;
-	markdownMarks: MarkMode;
-}
+// NOTE (Concept 07): `applyVars` writes CSS variables to `document`, an app-shell
+// concern kept intact here; Concept 08 should relocate the DOM write.
 
-export class EditorSettingsService extends SettingsGroup<EditorSettings> {
+export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 	readonly key = 'editor';
-	state = $state<EditorSettings>({ fontSize: 16, lineHeight: 1.75, markdownMarks: 'cursor' });
+	state = $state<EditorSettings>({ ...DEFAULT_EDITOR_SETTINGS });
 
 	setFontSize(size: number): void {
-		this.state.fontSize = size;
+		this.state.fontSize = clampFontSize(size);
 		this.applyVars();
 		this.persist();
 	}
 
 	setLineHeight(value: number): void {
-		this.state.lineHeight = value;
+		this.state.lineHeight = clampLineHeight(value);
 		this.applyVars();
 		this.persist();
 	}

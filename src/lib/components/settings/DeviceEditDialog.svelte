@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { devicesService, type LinkedDevice } from '$lib/services/sync/devices.svelte';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Input } from '$lib/components/shadcn/input/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';

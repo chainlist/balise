@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { C, RC } from './sunburst';
+	import { C, RC } from '$lib/domain/graph';
 
 	let {
 		centerLabel,

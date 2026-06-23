@@ -6,8 +6,10 @@
 	import { today, getLocalTimeZone, isSameDay } from '@internationalized/date';
 	import type { DateValue } from '@internationalized/date';
 	import { onMount, tick } from 'svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { notesService } from '$lib/services/content/notes.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
+	import { notesService } from '$lib/services/notes.svelte';
+	import { journalService } from '$lib/services/journal.svelte';
 	import { eventBus } from '$lib/services/events/event-bus';
 	import { cn } from '$lib/utils.js';
 	import JournalDay from '$lib/components/notes/JournalDay.svelte';
@@ -53,7 +55,7 @@
 	}
 
 	async function loadJournalDays(): Promise<void> {
-		journalDays = await notesService.journalNoteDates();
+		journalDays = await journalService.journalNoteDates();
 	}
 
 	async function loadNoteCounts(): Promise<void> {
@@ -273,7 +275,7 @@
 		</Popover.Root>
 	</div>
 
-	{#key uiState.activeDesk}
+	{#key desksService.activeDesk}
 		<div {@attach infiniteScroll} class="scrollbar-thin min-h-0 flex-1 overflow-y-auto pb-16">
 			<div style="height:{topSpacer}px"></div>
 			{#each rendered as offset (offset)}

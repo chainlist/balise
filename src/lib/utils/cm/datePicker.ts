@@ -6,7 +6,7 @@ import { mount, unmount } from 'svelte';
 import DatePicker from '$lib/components/cm/DatePicker.svelte';
 import type { DatePickerAnchor } from '$lib/components/cm/DatePicker.svelte';
 import { settingsService } from '$lib/services/settings/settings.svelte';
-import { formatDate } from '$lib/utils/date-format';
+import { formatDate } from '$lib/domain/datetime';
 
 // `@` at line start or after a space/tab, with the cursor right after it.
 const AT_RE = /(?:^|[ \t])@$/;

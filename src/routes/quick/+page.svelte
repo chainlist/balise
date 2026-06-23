@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { notesService, type Note } from '$lib/services/content/notes.svelte';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
-	import { resyncQuickCapture } from '$lib/utils/init-quick';
+	import { notesService } from '$lib/services/notes.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
+	import { resyncQuickCapture } from '$lib/services/quick-bootstrap';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import NoteEditor from '$lib/components/notes/NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';
@@ -12,14 +13,14 @@
 	let dbNoteId: string | null = null;
 	let hasSaved = false;
 
-	const draftNote = $derived<Note>({
+	const draftNote = $derived<NoteListItem>({
 		id: draftId,
 		title: '',
 		preview: '',
 		pinned: false,
 		archived: false,
-		created_at: new Date().toISOString(),
-		updated_at: new Date().toISOString()
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString()
 	});
 
 	function resetDraft() {

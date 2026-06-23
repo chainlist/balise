@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { tagsService } from '$lib/services/content/tags.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let { tag, navigate = false }: { tag: string; navigate: boolean } = $props();
 

@@ -10,7 +10,7 @@
 		type ForceNode,
 		type ForceLink,
 		type Transform
-	} from './force-graph';
+	} from '$lib/domain/graph';
 	import { drawGraph } from './force-render';
 	import { createSimulation, setSimCenter, setSimTunables } from './force-sim';
 
@@ -87,7 +87,9 @@
 			dpr,
 			width,
 			height,
-			focus: hoveredId ?? selectedId,
+			// While a tag is selected it stays the focus; hovering other nodes must
+			// not steal the highlight. Hover only drives focus when nothing is selected.
+			focus: selectedId ?? hoveredId,
 			selectedId,
 			adjacency,
 			linkColor,

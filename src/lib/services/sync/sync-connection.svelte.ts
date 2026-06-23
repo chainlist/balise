@@ -4,7 +4,7 @@ import { settingsService } from '$lib/services/settings/settings.svelte';
 import { devicesService } from '$lib/services/sync/devices.svelte';
 import { syncService } from '$lib/services/sync/sync';
 import { startSync } from '$lib/utils/sync';
-import type { SignalMessage } from '$lib/models/sync';
+import type { SignalMessage } from '$lib/services/sync/signal';
 
 /** Reconnect backoff bounds for a dropped control-plane connection. */
 const RECONNECT_MIN_MS = 1_000;

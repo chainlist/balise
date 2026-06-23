@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
-	import { initQuickCapture } from '$lib/utils/init-quick';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { LoaderCircle } from '@lucide/svelte';
-	import * as m from '$paraglide/messages.js';
+	import { initQuickCapture } from '$lib/services/quick-bootstrap';
+	import { uiState } from '$lib/services/ui-state.svelte';
 
 	let { children } = $props();
 

@@ -1,11 +1,11 @@
-import type { ShortcutDefinition } from '$lib/services/platform/shortcuts.svelte';
-import { notesService, newNoteContent } from '$lib/services/content/notes.svelte';
-import { uiState } from '$lib/services/app/ui-state.svelte';
-import { activeEditorService } from '$lib/services/app/active-editor';
+import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
+import { notesService, newNoteContent } from '$lib/services/notes.svelte';
+import { uiState } from '$lib/services/ui-state.svelte';
+import { activeEditorService } from '$lib/services/active-editor';
 import { settingsService } from '$lib/services/settings/settings.svelte';
-import { formatDate } from '$lib/utils/date-format';
+import { formatDate } from '$lib/domain/datetime';
 import { eventBus } from '$lib/services/events/event-bus';
-import { toasterService, errorMessage } from '$lib/services/app/toaster';
+import { toasterService, errorMessage } from '$lib/services/toaster';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';

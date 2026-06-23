@@ -151,7 +151,7 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-codeblock .cm-tok-property': { color: 'var(--cm-t-property)' },
 	'.cm-md-codeblock .cm-tok-meta': { color: 'var(--cm-t-meta)' },
 	'.cm-md-h1': {
-		fontSize: '1.65em',
+		fontSize: '1.602em',
 		fontWeight: '700',
 		lineHeight: '1.2',
 		color: 'var(--primary)'
@@ -159,11 +159,10 @@ export const noteEditorTheme = EditorView.theme({
 	// Full-width title underline lives on the line (see headerPlugin), so the `#`
 	// mark and the heading text stay on one line.
 	'.cm-md-h1-line': {
-		borderBottom: '1px solid var(--primary)',
 		paddingTop: '0.75em'
 	},
 	'.cm-md-h2': {
-		fontSize: '1.5em',
+		fontSize: '1.4602em',
 		fontWeight: '600',
 		lineHeight: '1.4',
 		color: 'var(--primary)'
@@ -172,7 +171,7 @@ export const noteEditorTheme = EditorView.theme({
 		paddingTop: '0.5em'
 	},
 	'.cm-md-h3': {
-		fontSize: '1.25em',
+		fontSize: '1.224em',
 		fontWeight: '600',
 		lineHeight: '1.5',
 		color: 'var(--primary)'

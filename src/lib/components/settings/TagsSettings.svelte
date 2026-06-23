@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { PinIcon } from '@lucide/svelte';
-	import { tagsService } from '$lib/services/content/tags.svelte';
-	import type { Tag } from '$lib/models/tag';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import type { Tag } from '$lib/domain/tag';
 	import TagName from '$lib/components/TagName.svelte';
 	import TagSettingsSheet from '$lib/components/sidebar/TagSettingsSheet.svelte';
 	import SettingsSection from './SettingsSection.svelte';

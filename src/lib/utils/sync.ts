@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { MagicTag } from '$lib/services/settings/magic-tags.svelte';
+import type { MagicTagRule } from '$lib/domain/settings';
 
 /** Starts the iroh networking layer. Rejects if the endpoint fails to bind. */
 export function startSync(): Promise<void> {
@@ -19,7 +19,7 @@ export function stopSync(): Promise<void> {
 export function setSyncConfig(config: {
 	peers: string[];
 	unshared: string[];
-	magicTags: MagicTag[];
+	magicTags: MagicTagRule[];
 }): Promise<void> {
 	return invoke('set_sync_config', config);
 }

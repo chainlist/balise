@@ -29,7 +29,7 @@
 	import SyncPairedDevices from './SyncPairedDevices.svelte';
 	import SyncSharingSettings from './SyncSharingSettings.svelte';
 	import Badge from '$lib/components/Badge.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
 	import type { Component } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 

@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { onDestroy, untrack, type Snippet } from 'svelte';
-	import { notesService, type Note } from '$lib/services/content/notes.svelte';
-	import { getTagsForNote } from '$lib/services/content/tags.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
+	import { notesService } from '$lib/services/notes.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
+	import { tagsService } from '$lib/services/tags.svelte';
+	import { uiState } from '$lib/services/ui-state.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { readingTimeMinutes } from '$lib/utils/note-utils';
-	import { parseDbTimestamp } from '$lib/utils/time';
+	import { parseDbTimestamp } from '$lib/domain/shared/time';
 	import Editor from './Editor.svelte';
 	import EditorHeader from './EditorHeader.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { fade } from 'svelte/transition';
 
 	let {
 		note,
@@ -19,7 +19,7 @@
 		showHeader = true,
 		children
 	}: {
-		note: Note;
+		note: NoteListItem & { content?: string };
 		onSave?: (content: string) => Promise<void>;
 		persistFolds?: boolean;
 		autofocus?: boolean;
@@ -78,8 +78,8 @@
 		{#if showHeader}
 			<EditorHeader
 				readingTime={readingTimeMinutes(liveContent ?? content)}
-				date={new Date(parseDbTimestamp(note.created_at))}
-				tags={getTagsForNote(liveContent ?? content)}
+				date={new Date(parseDbTimestamp(note.createdAt))}
+				tags={tagsService.tagsForNote(liveContent ?? content)}
 				onNavigate={(pos) => editor?.goToPosition(pos)}
 			/>
 		{/if}
