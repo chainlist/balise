@@ -4,7 +4,8 @@ import { eventBus } from '$lib/core/services/events/event-bus';
 import {
 	Note,
 	newNoteContent as buildNewNoteContent,
-	type NoteListItem
+	type NoteListItem,
+	type NoteSearchResult
 } from '$lib/core/domain/note';
 import { UNTAGGED_FILTER } from '$lib/core/domain/tag';
 import { dayRange } from '$lib/core/domain/journal';
@@ -73,6 +74,12 @@ class NotesService {
 
 	async loadContent(id: string): Promise<string> {
 		return noteRepo.loadContent(id);
+	}
+
+	/** Full-text + title search for the command palette. The length gating (FTS vs.
+	 *  title LIKE vs. empty) lives in the repo, so callers just pass the raw query. */
+	async search(query: string): Promise<NoteSearchResult[]> {
+		return noteRepo.search(query);
 	}
 
 	async delete(id: string): Promise<void> {

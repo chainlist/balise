@@ -118,7 +118,27 @@ Cut over in this order so the app keeps running between chunks:
       `ForceLink` brought a **type-only** `d3-force` import into the domain (runtime stays in the
       components); `buildForceGraph` now takes the existing domain `WeightedEdge` instead of a
       duplicate local type. Full unit suite green (564 tests).
-- [ ] `components/*` top-level (CommandPalette, TitleBar, wizard, modals): repoint.
+- [x] `components/*` top-level (CommandPalette, TitleBar, wizard, modals): repoint.
+      `NewsModal`, `UpdateNotifier`, `TagName`, `WizardModal`, `WizardStepMarks`, `WizardStepTheme`
+      repointed to `core` (`uiState`/`updaterService`/`themeService`/`settingsService`/`tagsService`,
+      plus domain pulls: `Theme` → `core/domain/theme`, `Tag`/`RelatedTag`/`tagDisplayName` →
+      `core/domain/tag`, `MarkMode` → `core/domain/settings`). `TitleBar`, `WizardStepLanguage`,
+      `WizardStepWelcome`, `WizardStepDone` needed no change. **`MarkMode` decision:** repointed the
+      wizard's type to `core/domain/settings` (the setting's canonical home; identical
+      `'always'|'cursor'|'never'` union to `utils/cm`) since the wizard only consumes it as a
+      settings value and never touches CodeMirror — `EditorSettings`'s deferred `utils/cm` `MarkMode`
+      is the Editor slice's concern. **`WizardModal`:** `getBaseDir` now `desksService.getBaseDir()`;
+      kept `applyLanguageChange` from `utils/init-app` (bootstrap/layout slice, consistent with
+      `GeneralSettings`/`AboutSettings`). **CommandPalette (layering-forced rewrite):** presentation
+      can't reach `notes.repo`/`getDB`, so added a thin `notesService.search(query)` wrapping the
+      existing `noteRepo.search`; the palette now calls it and the `searchNotes`/`getDB` imports are
+      gone. The presentation `>= 3` length guard was **dropped** — the repo owns the FTS-vs-title-LIKE
+      gating, so 1–2 char queries now match note titles (was: nothing). Desk reads moved
+      `uiState.desks`/`activeDesk` → `desksService`; `uiState.switchDesk` → `desksService.switchDesk`
+      + `uiState.clearSelection()` (the 4th user-switch site, matching the sidebar split).
+      **Left in place:** `ColorPicker` keeps `utils/color-palette` (pure config, no `core` home, not a
+      layering violation — a genuinely-still-used helper; decide at flatten); `CommandPalette` keeps
+      `config/app-shortcuts` (not a migrated path).
 
 ### Out-of-scope subsystems (repoint only)
 - [ ] Editor (`utils/cm/*`, `components/cm/*`): repoint note content read/write and tag

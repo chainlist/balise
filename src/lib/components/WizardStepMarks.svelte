@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MarkMode } from '$lib/utils/cm';
+	import type { MarkMode } from '$lib/core/domain/settings';
 	import { cn } from '$lib/utils.js';
 	import { Eye, EyeOff, Pencil } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';

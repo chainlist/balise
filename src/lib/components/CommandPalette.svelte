@@ -1,13 +1,14 @@
 <script lang="ts">
 	import * as Command from '$lib/components/shadcn/command/index.js';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
-	import { tagsService, tagDisplayName } from '$lib/services/content/tags.svelte';
+	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { desksService } from '$lib/core/services/desks.svelte';
+	import { notesService } from '$lib/core/services/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/core/services/toaster';
+	import { tagsService } from '$lib/core/services/tags.svelte';
+	import { tagDisplayName } from '$lib/core/domain/tag';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
-	import { searchNotes } from '$lib/repositories/notes.repo';
-	import type { NoteSearchResult } from '$lib/models/note';
-	import { eventBus } from '$lib/services/events/event-bus';
-	import { getDB } from '$lib/utils/db';
+	import type { NoteSearchResult } from '$lib/core/domain/note';
+	import { eventBus } from '$lib/core/services/events/event-bus';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { FileTextIcon, TagIcon, ZapIcon, LayoutListIcon } from '@lucide/svelte';
@@ -40,16 +41,16 @@
 
 	let filteredDesks = $derived(
 		(query.trim()
-			? uiState.desks.filter((d) => d.toLowerCase().includes(query.toLowerCase()))
-			: uiState.desks
+			? desksService.desks.filter((d) => d.toLowerCase().includes(query.toLowerCase()))
+			: desksService.desks
 		)
-			.filter((d) => d !== uiState.activeDesk)
+			.filter((d) => d !== desksService.activeDesk)
 			.slice(0, 3)
 	);
 
 	async function handleInput(value: string) {
 		query = value;
-		noteResults = value.trim().length >= 3 ? await searchNotes(getDB(), value) : [];
+		noteResults = await notesService.search(value);
 	}
 
 	$effect(() => {
@@ -74,7 +75,8 @@
 	async function selectDesk(desk: string) {
 		uiState.modal.isCommandPaletteOpen = false;
 		try {
-			await uiState.switchDesk(desk);
+			await desksService.switchDesk(desk);
+			uiState.clearSelection();
 			await goto(resolve('/'));
 		} catch (e) {
 			toasterService.error(m.desk_switch_error_failed(), errorMessage(e));
