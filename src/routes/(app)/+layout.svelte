@@ -30,13 +30,18 @@
 	let showCloseDialog = $state(false);
 
 	onMount(async () => {
+		const win = getCurrentWindow();
+		// Reveal the window only after the first themed frame has painted (the theme
+		// is applied synchronously by the boot script in app.html), so the webview's
+		// default white surface never flashes before the UI appears.
+		requestAnimationFrame(() => void win.show());
+
 		const [{ error: initError }] = await Promise.all([initApp(), trayService.init()]);
 		error = initError;
 		if (!error) {
 			uiState.modal.isWizardOpen = !localStorage.getItem('balise_onboarding_done');
 		}
 
-		const win = getCurrentWindow();
 		await win.onCloseRequested(async (event) => {
 			event.preventDefault();
 			const pref = settingsService.general.state.closeToTray;

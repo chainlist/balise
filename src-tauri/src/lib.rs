@@ -92,7 +92,6 @@ pub fn run() {
                     app_handle.exit(0);
                 }
             });
-            main_window.show()?;
 
             #[cfg(target_os = "macos")]
             if let Some(quick_window) = app.get_webview_window("quick") {

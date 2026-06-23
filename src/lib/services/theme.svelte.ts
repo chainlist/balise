@@ -22,6 +22,13 @@ class ThemeService {
 		const dark = resolveTheme(this.theme, prefersDark) === 'dark';
 		document.documentElement.classList.toggle('dark', dark);
 		this.#isDark = dark;
+		/* Mirror the preference so the boot script in app.html can apply the
+		   correct theme before first paint on the next launch (no FOUC). */
+		try {
+			localStorage.setItem('balise_theme', this.theme);
+		} catch {
+			/* storage disabled: theme still applies this session */
+		}
 	}
 
 	setTheme(theme: Theme): void {
