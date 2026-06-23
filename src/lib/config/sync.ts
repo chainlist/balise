@@ -1,4 +1,4 @@
-import { settingsService } from '$lib/services/settings/settings.svelte';
+import { settingsService } from '$lib/core/services/settings/settings.svelte';
 
 /**
  * Default base URL of the balise-sync control-plane server (pairing + wake

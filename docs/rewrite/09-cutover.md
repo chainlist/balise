@@ -37,14 +37,32 @@ Cut over in this order so the app keeps running between chunks:
 - [x] `routes/(app)/graph/+page.svelte`. Repointed `graphService`/`themeService`/`uiState`
       to `core`; `tagDisplayName` + `type Tag` now from `core/domain/tag`; `assignGraphColors`
       + `DEFAULT_TAG_COLOR` from `core/domain/graph`; `uiState.activeDesk` now `desksService`.
-- [ ] `routes/quick/+page.svelte` (quick capture window). Repoint. **Deferred:** the
-      quick window boots via the still-old `init-quick` (initialises the old singletons),
-      and the draft note uses the old `Note` shape, so cut it over together with its
-      bootstrap and `NoteEditor`, not in isolation.
-- [ ] `routes/(app)/+layout.svelte` and `routes/+layout.svelte`. Repoint bootstrap to
-      `core/services/app-bootstrap`. **Do this last:** old and new services are separate
-      stateful singletons, so the app only becomes runnable once the bootstrap flip and the
-      whole `(app)` consumer tree have been repointed together.
+- [x] `routes/quick/+page.svelte` + `routes/quick/+layout.svelte` (quick capture window).
+      Cut over together with their bootstrap: added `core/services/quick-bootstrap.ts` (the
+      `initQuickCapture`/`resyncQuickCapture` port of the old `utils/init-quick`), a minimal
+      sibling of `app-bootstrap` that opens the active desk's DB and loads tags without the full
+      `switchDesk` (no note-list load / file sync) or the tray/shortcuts/sync stack; as a
+      composition root it reaches `backend/store` migration + `deskRepo.open` directly (and
+      `desksService.refreshActiveDesk()` for resync). The page's draft note moved to the new
+      `NoteListItem` shape (`created_at`/`updated_at` → `createdAt`/`updatedAt`); `notesService`/
+      `toasterService`+`errorMessage`/`uiState` → `core`. (Dropped 3 pre-existing unused imports —
+      `fade`/`LoaderCircle`/`m` — from the quick layout's import block while repointing it.)
+- [x] `routes/(app)/+layout.svelte` and `routes/+layout.svelte`. **Bootstrap flip (the last
+      repoint chunk — the live app now runs on `core`):** `(app)` layout's `initApp` →
+      `core/services/app-bootstrap`, `trayService` → `core/services/system/tray`, and
+      `uiState`/`settingsService`/`shortcutsService` → `core`; root layout's `themeService` →
+      `core`. Repointed the remaining live old-bootstrap consumers in the same pass so no
+      uninitialised old singleton is left reachable: `config/app-shortcuts.ts` (`ShortcutDefinition`/
+      `notesService`+`newNoteContent`/`uiState`/`activeEditorService`/`settingsService`/`eventBus`/
+      `toasterService`+`errorMessage` → `core`, `formatDate` → `core/domain/datetime`);
+      `config/sync.ts` (`settingsService` → `core` — the live sync subsystem reads `syncServerUrl()`
+      off it, so the old uninitialised singleton would have yielded an empty server URL after the
+      flip); and the deferred `WizardModal`/`GeneralSettings` (`applyLanguageChange`) +
+      `AboutSettings` (`checkForNews`) `utils/init-app` imports → `core/services/app-bootstrap`.
+      After this, no live route / component / config imports the old services or old bootstrap;
+      the remaining old-path imports are confined to the dead old island
+      (`services/content/*`, `services/app/ui-state.*`, `repositories/notes.fs.repo`,
+      `utils/init-{app,quick}`) awaiting the deletion step.
 
 ### Component groups (repoint imports; rewrite only if the layering forces it)
 - [x] `components/sidebar/*` (notes panel, tags card, tag filter, desk sheets): heaviest

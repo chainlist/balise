@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { settingsService } from '$lib/core/services/settings/settings.svelte';
 	import { SUPPORTED_LANGUAGES, type DateFormat } from '$lib/core/domain/settings';
-	import { applyLanguageChange } from '$lib/utils/init-app';
+	import { applyLanguageChange } from '$lib/core/services/app-bootstrap';
 	import { buildDateFormatOptions, formatDate } from '$lib/core/domain/datetime';
 	import * as m from '$paraglide/messages.js';
 	import * as Select from '$lib/components/shadcn/select/index.js';

@@ -3,7 +3,7 @@
 	import type { MarkMode } from '$lib/core/domain/settings';
 	import type { Theme } from '$lib/core/domain/theme';
 	import { settingsService } from '$lib/core/services/settings/settings.svelte';
-	import { applyLanguageChange } from '$lib/utils/init-app';
+	import { applyLanguageChange } from '$lib/core/services/app-bootstrap';
 	import * as m from '$paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 	import Button from '$lib/components/shadcn/button/button.svelte';
