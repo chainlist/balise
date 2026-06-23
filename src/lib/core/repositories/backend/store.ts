@@ -1,11 +1,11 @@
 import { BaseDirectory, exists, mkdir, readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { documentDir, join } from '@tauri-apps/api/path';
 import { load, type Store } from '@tauri-apps/plugin-store';
+import { DESKS_ROOT_DIR } from './fs';
 
-// Store-file path resolution plus a thin `loadStore` wrapper. Inlined `DESKS_ROOT_DIR`
-// keeps the backend client importing only Tauri (per the layer audit); Concept 03
-// (Desks) re-homes the constant into the desk domain.
-const DESKS_ROOT_DIR = 'Balise';
+// Store-file path resolution plus a thin `loadStore` wrapper. `DESKS_ROOT_DIR` is the
+// single storage-root detail owned by the fs adapter; store files live under
+// `Balise/.balise`.
 const STORE_SUBDIR = '.balise';
 
 /** Store files that live under Documents/Balise/.balise. */

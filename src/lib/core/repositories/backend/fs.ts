@@ -12,24 +12,18 @@ import {
 } from '@tauri-apps/plugin-fs';
 
 // Desk-scoped filesystem adapter: the only module importing `@tauri-apps/plugin-fs`
-// for note files. Inlined here so the backend client imports only Tauri (per the
-// layer audit); Concept 03 (Desks) re-homes `sanitizeDeskName` into the desk
-// domain, after which this adapter will receive an already-sanitized name.
-const DESKS_ROOT_DIR = 'Balise';
-
-function sanitizeDeskName(desk: string): string {
-	const sanitized = desk.trim().replace(/[\\/:*?"<>|]/g, '-');
-	if (!sanitized) {
-		throw new Error('Desk name cannot be empty.');
-	}
-	return sanitized;
-}
+// for note files. `DESKS_ROOT_DIR` is the single storage-root detail shared by the
+// other backend modules (the store path) and the desk repository (folder ops), so
+// it's exported from here rather than duplicated — it's a data-access detail, not a
+// domain rule. Desk-name sanitization is a domain rule (`core/domain/desk`) applied
+// by the desk repository before `setDesk`, so this adapter receives an already-safe name.
+export const DESKS_ROOT_DIR = 'Balise';
 
 class FsService {
 	#desk = '';
 
 	setDesk(name: string): void {
-		this.#desk = sanitizeDeskName(name);
+		this.#desk = name;
 	}
 
 	get currentDesk(): string {

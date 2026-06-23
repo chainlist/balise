@@ -149,7 +149,7 @@ file text), never raw markdown, so the parsers are not duplicated in Rust.
 - [x] 00 Foundation and conventions
 - [x] 01 Tags
 - [x] 02 Notes
-- [ ] 03 Desks
+- [x] 03 Desks
 - [ ] 04 Journal
 - [ ] 05 Tasks
 - [ ] 06 Graph
