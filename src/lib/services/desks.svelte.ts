@@ -21,9 +21,15 @@ const defaults = {
 	desks: [DEFAULT_DESK]
 };
 
+/** Minimum time the switch loader stays on screen, so a fast switch can't flash it. */
+const MIN_LOADER_MS = 250;
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 class DesksService {
 	desks = $state<string[]>([DEFAULT_DESK]);
 	activeDesk = $state(DEFAULT_DESK);
+	/** True while a desk switch is in flight; the layout shows the loader on it. */
+	switching = $state(false);
 
 	#store: Store | null = null;
 
@@ -134,6 +140,8 @@ class DesksService {
 
 	async switchDesk(desk: string, activeTag: string | null = null): Promise<void> {
 		const prevDesk = this.activeDesk;
+		this.switching = true;
+		const minHold = delay(MIN_LOADER_MS);
 		try {
 			await deskRepo.open(desk);
 			await fsSyncService.syncDeskFiles();
@@ -148,11 +156,15 @@ class DesksService {
 			if (prevDesk !== desk) {
 				await deskRepo.open(prevDesk);
 			}
+			this.switching = false;
 			throw e;
 		}
 
 		// Commit the active desk only once every fallible step has succeeded.
 		await this.setActiveDesk(desk);
+		// Hold the loader for the rest of its minimum beat before revealing the new desk.
+		await minHold;
+		this.switching = false;
 	}
 }
 

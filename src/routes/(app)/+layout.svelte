@@ -4,6 +4,7 @@
 	import { initApp } from '$lib/services/app-bootstrap';
 	import { trayService } from '$lib/services/system/tray';
 	import { uiState } from '$lib/services/ui-state.svelte';
+	import { desksService } from '$lib/services/desks.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { exit } from '@tauri-apps/plugin-process';
@@ -80,33 +81,36 @@
 			<h1>{m.error_heading()}</h1>
 			<p>{error}</p>
 		</div>
-	{:else if !ready}
-		<div
-			class="absolute top-0 left-0 flex h-screen w-screen items-center justify-center gap-4"
-			out:fade={{ duration: 250 }}
-		>
-			<span>{m.loading()}</span>
-			<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
-		</div>
 	{:else}
-		<div class="flex h-screen w-full" in:fade={{ duration: 250 }}>
-			{#if !uiState.modal.isZenModeActive}
-				<Sidebar />
-				<ResizablePanel storageKey="balise-notes-panel-width" defaultWidth={280} minWidth={200}>
-					<NotesPanel />
-				</ResizablePanel>
-			{/if}
-			<div class="min-w-0 flex-1">
-				{@render children()}
+		{#if ready}
+			<div class="flex h-screen w-full" in:fade={{ duration: 250 }}>
+				{#if !uiState.modal.isZenModeActive}
+					<Sidebar />
+					<ResizablePanel storageKey="balise-notes-panel-width" defaultWidth={280} minWidth={200}>
+						<NotesPanel />
+					</ResizablePanel>
+				{/if}
+				<div class="min-w-0 flex-1">
+					{@render children()}
+				</div>
 			</div>
-		</div>
-		<CommandPalette />
-		<UpdateNotifier />
-		{#if uiState.modal.isWizardOpen}
-			<WizardModal />
+			<CommandPalette />
+			<UpdateNotifier />
+			{#if uiState.modal.isWizardOpen}
+				<WizardModal />
+			{/if}
+			{#if uiState.modal.isNewsOpen}
+				<NewsModal />
+			{/if}
 		{/if}
-		{#if uiState.modal.isNewsOpen}
-			<NewsModal />
+		{#if !ready || desksService.switching}
+			<div
+				class="absolute top-0 left-0 z-50 flex h-screen w-screen items-center justify-center gap-4 bg-background"
+				out:fade={{ duration: 250 }}
+			>
+				<span>{m.loading()}</span>
+				<p class="animate-spin text-sm text-muted-foreground"><LoaderCircle /></p>
+			</div>
 		{/if}
 	{/if}
 </SidebarProvider>
