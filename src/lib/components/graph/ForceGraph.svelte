@@ -10,7 +10,7 @@
 		type ForceNode,
 		type ForceLink,
 		type Transform
-	} from './force-graph';
+	} from '$lib/core/domain/graph';
 	import { drawGraph } from './force-render';
 	import { createSimulation, setSimCenter, setSimTunables } from './force-sim';
 

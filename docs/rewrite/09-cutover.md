@@ -26,27 +26,61 @@ Cut over in this order so the app keeps running between chunks:
 ## Pages and components
 
 ### Routes (per-chunk)
-- [ ] `routes/(app)/+page.svelte` (main note editor host). Thin today: imports
-      `notesService` and `uiState`. Repoint to `core` services.
-- [ ] `routes/(app)/journal/+page.svelte`. Repoint to `journalService`/`notesService`.
-- [ ] `routes/(app)/tasks/+page.svelte`. Repoint to `tasksService`.
-- [ ] `routes/(app)/graph/+page.svelte`. Repoint to `graphService`/`tagsService`.
-- [ ] `routes/quick/+page.svelte` (quick capture window). Repoint.
+- [x] `routes/(app)/+page.svelte` (main note editor host). Repointed `notesService`/`uiState`
+      to `core`; landed with the notes-editor slice so the `NoteListItem` it passes into
+      `NoteEditor` matches the new prop shape.
+- [x] `routes/(app)/journal/+page.svelte`. Repointed `uiState`/`notesService`/`eventBus`
+      to `core`; `journalNoteDates()` now from `journalService`; `{#key uiState.activeDesk}`
+      now `desksService.activeDesk`.
+- [x] `routes/(app)/tasks/+page.svelte`. Repointed `tasksService`/`uiState` to `core`;
+      `uiState.activeDesk` (desk-change effect) now `desksService.activeDesk`.
+- [x] `routes/(app)/graph/+page.svelte`. Repointed `graphService`/`themeService`/`uiState`
+      to `core`; `tagDisplayName` + `type Tag` now from `core/domain/tag`; `assignGraphColors`
+      + `DEFAULT_TAG_COLOR` from `core/domain/graph`; `uiState.activeDesk` now `desksService`.
+- [ ] `routes/quick/+page.svelte` (quick capture window). Repoint. **Deferred:** the
+      quick window boots via the still-old `init-quick` (initialises the old singletons),
+      and the draft note uses the old `Note` shape, so cut it over together with its
+      bootstrap and `NoteEditor`, not in isolation.
 - [ ] `routes/(app)/+layout.svelte` and `routes/+layout.svelte`. Repoint bootstrap to
-      `core/services/app-bootstrap`.
+      `core/services/app-bootstrap`. **Do this last:** old and new services are separate
+      stateful singletons, so the app only becomes runnable once the bootstrap flip and the
+      whole `(app)` consumer tree have been repointed together.
 
 ### Component groups (repoint imports; rewrite only if the layering forces it)
 - [ ] `components/sidebar/*` (notes panel, tags card, tag filter, desk sheets): heaviest
       group; repoint to `notesService`/`tagsService`/`desksService`/`uiState`.
-- [ ] `components/notes/*` (NoteEditor, EditorHeader, NotePreview, TagNavigator, dialogs):
+- [~] `components/notes/*` (NoteEditor, EditorHeader, NotePreview, TagNavigator, dialogs):
       repoint. NoteEditor wraps the out-of-scope editor; use the Tags compatibility method.
+      **Done:** `NoteEditor`, `EditorView`, `EditorHeader`, `NoteDeleteDialog`, `JournalDay`
+      repointed to `core`. Editor prop type is now `NoteListItem & { content?: string }` (the
+      `content` optional covers the journal in-memory draft); note date reads moved to
+      `createdAt`/`updatedAt`; `EditorView` uses `tagsService.tagsForNote(content)` (the Tags
+      compatibility method) instead of `getTagsForNote`; `parseDbTimestamp` from
+      `core/domain/shared/time`; `JournalDay` now calls `journalService.createForDate`/
+      `queryForDate`. (Removed a pre-existing unused `fade` import in `EditorView` since it sat
+      in the import block being rewritten.) `NoteSummarySheet` + `TagNavigator` needed no change
+      (only `utils/cm` / `TagChip` imports, both staying). **Deferred:** `NotePreview` → moves
+      with the **sidebar** slice (its only consumer is `sidebar/NoteCard`, and its `fsService`
+      import needs the presentation→backend layering decision shared with `cm/EmbedImageViewer`).
+      `notes/Editor.svelte` → moves with the **Editor (cm)** slice (no `Note`-type coupling with
+      `EditorView`; only its own `settingsService`/`activeEditorService` imports).
 - [ ] `components/settings/*`: repoint to `core/services/settings/*`.
-- [ ] `components/graph/*`, `components/tasks/*`: repoint; pull pure geometry from
-      `core/domain/graph.ts` / `core/domain/task.ts`. **Note:** the graph geometry move was
-      deferred from Concept 06 — the pure parts of `components/graph/sunburst.ts` and
-      `force-graph.ts` (arc/chord/sunburst math, node-radius/adjacency/transform helpers)
-      still need to be moved into `core/domain/graph.ts` here before the components repoint;
-      leave `force-sim.ts`/`force-render.ts` (d3 + canvas) in the components.
+- [x] `components/graph/*`, `components/tasks/*`: repoint; pull pure geometry from
+      `core/domain/graph.ts` / `core/domain/task.ts`. **Tasks done:** `tasks/TaskBoard.svelte`
+      + `tasks/TaskBoardCard.svelte` repointed (`tasksService`/`toasterService`/`uiState` →
+      `core`; `TaskItem`/`TaskStatus`/`TASK_STATUS_COLOR` → `core/domain/task`). **Graph done:**
+      the geometry move (below) landed and every `graph/*` consumer (`Sunburst`, `Arc`, `Center`,
+      `Chord`, `RelatedDot`, `ForceGraph`, `force-sim.ts`, `force-render.ts`) + the graph route now
+      import the math from `core/domain/graph`. (Dropped a pre-existing unused `polar` import in
+      `Sunburst.svelte` while repointing that line.) **Still pending:** editor `cm/TaskCard.svelte`'s
+      `TASK_STATUS_COLOR` import, left for the Editor repoint pass. **Geometry move (was deferred from
+      Concept 06) — DONE:** the pure parts of `components/graph/sunburst.ts` and `force-graph.ts`
+      (arc/chord/sunburst math, node-radius/adjacency/transform helpers) were moved into
+      `core/domain/graph.ts` and their unit tests into `core/domain/graph.test.ts`; the four old files
+      were deleted; `force-sim.ts`/`force-render.ts` (d3 + canvas) stay in the components. `ForceNode`/
+      `ForceLink` brought a **type-only** `d3-force` import into the domain (runtime stays in the
+      components); `buildForceGraph` now takes the existing domain `WeightedEdge` instead of a
+      duplicate local type. Full unit suite green (564 tests).
 - [ ] `components/*` top-level (CommandPalette, TitleBar, wizard, modals): repoint.
 
 ### Out-of-scope subsystems (repoint only)

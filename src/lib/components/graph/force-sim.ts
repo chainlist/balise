@@ -7,7 +7,7 @@ import {
 	forceCollide,
 	type Simulation
 } from 'd3-force';
-import type { ForceNode, ForceLink } from './force-graph';
+import type { ForceNode, ForceLink } from '$lib/core/domain/graph';
 
 type Sim = Simulation<ForceNode, ForceLink>;
 

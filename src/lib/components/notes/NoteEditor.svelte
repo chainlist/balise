@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Note } from '$lib/services/content/notes.svelte';
-	import { eventBus } from '$lib/services/events/event-bus';
+	import type { NoteListItem } from '$lib/core/domain/note';
+	import { eventBus } from '$lib/core/services/events/event-bus';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
 	import { EllipsisVerticalIcon, Trash2Icon, PinIcon, ListTreeIcon } from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
@@ -20,7 +20,7 @@
 		floating = true,
 		showHeader = true
 	}: {
-		note: Note;
+		note: NoteListItem & { content?: string };
 		onSave?: (content: string) => Promise<void>;
 		pinnable?: boolean;
 		persistFolds?: boolean;

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
-	import type { Note } from '$lib/models/note';
-	import { notesService } from '$lib/services/content/notes.svelte';
-	import { settingsService } from '$lib/services/settings/settings.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import type { NoteListItem } from '$lib/core/domain/note';
+	import { journalService } from '$lib/core/services/journal.svelte';
+	import { settingsService } from '$lib/core/services/settings/settings.svelte';
+	import { uiState } from '$lib/core/services/ui-state.svelte';
 	import { formatDate } from '$lib/utils/date-format';
-	import { eventBus } from '$lib/services/events/event-bus';
+	import { eventBus } from '$lib/core/services/events/event-bus';
 	import { ChevronRightIcon, PanelLeftIcon } from '@lucide/svelte';
 	import NoteEditor from './NoteEditor.svelte';
 	import * as m from '$paraglide/messages.js';
@@ -20,8 +20,8 @@
 		settingsService.journal.state.collapseByDefault && untrack(() => !isSameDay(date, new Date()))
 	);
 
-	let notes = $state<Note[]>([]);
-	let draft = $state<Note | null>(null);
+	let notes = $state<NoteListItem[]>([]);
+	let draft = $state<(NoteListItem & { content?: string }) | null>(null);
 	// Cleared once the draft is persisted, so later edits flow through the normal update path.
 	let draftSave = $state<((content: string) => Promise<void>) | undefined>(undefined);
 
@@ -54,7 +54,7 @@
 		const id = crypto.randomUUID();
 		const stamp = `${dateStr(date)} 00:00:00`;
 		draftSave = async (content) => {
-			await notesService.createForDate(id, content, date);
+			await journalService.createForDate(id, content, date);
 			draftSave = undefined;
 			// The note now lives in the DB. Drop the in-memory seed so that if this day is
 			// recycled while off-screen, it reloads the persisted content on remount.
@@ -67,13 +67,13 @@
 			preview: '',
 			pinned: false,
 			archived: false,
-			created_at: stamp,
-			updated_at: stamp
+			createdAt: stamp,
+			updatedAt: stamp
 		};
 	}
 
 	onMount(() => {
-		void notesService.queryForDate(date).then((res) => (notes = res));
+		void journalService.queryForDate(date).then((res) => (notes = res));
 		// Drop a note that gets deleted elsewhere, reverting the day to its empty state.
 		const offDeleted = eventBus.notes.deleted.on((id) => {
 			notes = notes.filter((n) => n.id !== id);

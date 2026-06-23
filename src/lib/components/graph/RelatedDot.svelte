@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ra } from './sunburst';
+	import { ra } from '$lib/core/domain/graph';
 
 	let {
 		cx,

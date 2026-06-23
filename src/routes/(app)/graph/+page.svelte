@@ -2,30 +2,34 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { tagDisplayName } from '$lib/services/content/tags.svelte';
-	import { graphService } from '$lib/services/content/graph.svelte';
-	import { themeService } from '$lib/services/app/theme.svelte';
-	import type { Tag } from '$lib/models/tag';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { tagDisplayName } from '$lib/core/domain/tag';
+	import { graphService } from '$lib/core/services/graph.svelte';
+	import { themeService } from '$lib/core/services/theme.svelte';
+	import type { Tag } from '$lib/core/domain/tag';
+	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { desksService } from '$lib/core/services/desks.svelte';
 	import Sunburst from '$lib/components/graph/Sunburst.svelte';
 	import ForceGraph from '$lib/components/graph/ForceGraph.svelte';
 	import GraphSettings from '$lib/components/graph/GraphSettings.svelte';
 	import ForceGraphSettings from '$lib/components/graph/ForceGraphSettings.svelte';
-	import type { SunburstArc } from '$lib/components/graph/sunburst';
-	import { buildForceGraph } from '$lib/components/graph/force-graph';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { ArrowLeftIcon, SettingsIcon, ChartPieIcon, NetworkIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
-	import { assignGraphColors, DEFAULT_TAG_COLOR } from '$lib/utils/graph-colors';
+	import {
+		assignGraphColors,
+		DEFAULT_TAG_COLOR,
+		buildForceGraph,
+		type SunburstArc
+	} from '$lib/core/domain/graph';
 
 	let loaded = $state(false);
 	const mode = $derived(uiState.graphMode);
 	const selected = $derived(uiState.activeTag);
 	const isDark = $derived(themeService.isDark);
 
-	let prevDesk = uiState.activeDesk;
+	let prevDesk = desksService.activeDesk;
 	$effect(() => {
-		const desk = uiState.activeDesk;
+		const desk = desksService.activeDesk;
 		if (desk !== prevDesk) {
 			prevDesk = desk;
 			graphService.load();
@@ -193,7 +197,7 @@
 			{#if mode === 'sunburst'}
 				<Sunburst
 					{centerLabel}
-					fallbackLabel={uiState.activeDesk}
+					fallbackLabel={desksService.activeDesk}
 					{arcs}
 					onArcClick={handleArc}
 					onCenterClick={openSelectedNotes}

@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { tasksService } from '$lib/services/content/tasks.svelte';
-	import { uiState } from '$lib/services/app/ui-state.svelte';
+	import { tasksService } from '$lib/core/services/tasks.svelte';
+	import { uiState } from '$lib/core/services/ui-state.svelte';
+	import { desksService } from '$lib/core/services/desks.svelte';
 	import TaskBoard from '$lib/components/tasks/TaskBoard.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	let loaded = $state(false);
 
-	let prevDesk = uiState.activeDesk;
+	let prevDesk = desksService.activeDesk;
 	$effect(() => {
-		const desk = uiState.activeDesk;
+		const desk = desksService.activeDesk;
 		if (desk !== prevDesk) {
 			prevDesk = desk;
 			tasksService.load();

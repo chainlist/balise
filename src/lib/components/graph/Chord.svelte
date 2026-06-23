@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cubicOut } from 'svelte/easing';
-	import { C } from './sunburst';
+	import { C } from '$lib/core/domain/graph';
 
 	let {
 		id,

@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { notesService, type Note } from '$lib/services/content/notes.svelte';
-	import { toasterService, errorMessage } from '$lib/services/app/toaster';
+	import { notesService } from '$lib/core/services/notes.svelte';
+	import type { NoteListItem } from '$lib/core/domain/note';
+	import { toasterService, errorMessage } from '$lib/core/services/toaster';
 	import * as Dialog from '$lib/components/shadcn/dialog/index.js';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import * as m from '$paraglide/messages.js';
 
-	let { note, open = $bindable() }: { note: Note; open: boolean } = $props();
+	let { note, open = $bindable() }: { note: NoteListItem; open: boolean } = $props();
 </script>
 
 <Dialog.Root bind:open>

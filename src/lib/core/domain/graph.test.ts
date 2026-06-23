@@ -8,7 +8,20 @@ import {
 	rankTags,
 	weightedEdges,
 	neighborsOf,
-	type TagCooccurrence
+	buildLayout,
+	GAP,
+	MAX_DOTS,
+	buildForceGraph,
+	nodeRadiusFor,
+	findNodeAt,
+	buildAdjacency,
+	screenToWorld,
+	worldToScreen,
+	type TagCooccurrence,
+	type WeightedEdge,
+	type SunburstArc,
+	type ForceNode,
+	type ForceLink
 } from './graph';
 import type { Tag } from './tag';
 
@@ -187,5 +200,235 @@ describe('weightedEdges', () => {
 
 	it('returns an empty array when there are no cooccurrences', () => {
 		expect(weightedEdges([])).toEqual([]);
+	});
+});
+
+// ─── Sunburst geometry ────────────────────────────────────────────────────────
+
+function makeArc(label: string, relatedTags: { label: string; weight: number }[] = []): SunburstArc {
+	return {
+		label,
+		noteCount: 1,
+		color: '#aaaaaa',
+		relatedTags: relatedTags.map((r) => ({ ...r, color: '#bbbbbb' }))
+	};
+}
+
+describe('buildLayout', () => {
+	it('returns an empty array when given no arcs', () => {
+		expect(buildLayout([], 1)).toHaveLength(0);
+	});
+
+	it('returns one item per arc', () => {
+		const arcs = [makeArc('a'), makeArc('b'), makeArc('c')];
+		expect(buildLayout(arcs, 1)).toHaveLength(3);
+	});
+
+	it('assigns sequential indices', () => {
+		const arcs = [makeArc('x'), makeArc('y')];
+		const layout = buildLayout(arcs, 1);
+		expect(layout[0].i).toBe(0);
+		expect(layout[1].i).toBe(1);
+	});
+
+	it('preserves the arc reference in each item', () => {
+		const arcs = [makeArc('foo')];
+		const layout = buildLayout(arcs, 1);
+		expect(layout[0].arc).toBe(arcs[0]);
+	});
+
+	it('a0 for the first arc starts just after the top (-π/2)', () => {
+		const arcs = [makeArc('a'), makeArc('b')];
+		const layout = buildLayout(arcs, 1);
+		const expected = 0 * (((Math.PI * 2 - GAP * 2) / 2) + GAP) - Math.PI / 2 + GAP / 2;
+		expect(layout[0].a0).toBeCloseTo(expected, 10);
+	});
+
+	it('a1 equals a0 + span for each arc', () => {
+		const arcs = [makeArc('a'), makeArc('b'), makeArc('c')];
+		const layout = buildLayout(arcs, 1);
+		for (const l of layout) {
+			expect(l.a1).toBeCloseTo(l.a0 + l.span, 10);
+		}
+	});
+
+	it('mid is the midpoint of a0 and a1', () => {
+		const arcs = [makeArc('a'), makeArc('b')];
+		const layout = buildLayout(arcs, 1);
+		for (const l of layout) {
+			expect(l.mid).toBeCloseTo((l.a0 + l.a1) / 2, 10);
+		}
+	});
+
+	it('generates dots for each related tag up to MAX_DOTS', () => {
+		const related = Array.from({ length: MAX_DOTS + 2 }, (_, i) => ({
+			label: `t${i}`,
+			weight: 1
+		}));
+		const arcs = [makeArc('main', related)];
+		const layout = buildLayout(arcs, 1);
+		expect(layout[0].dots).toHaveLength(MAX_DOTS);
+	});
+
+	it('creates a badge when related tags exceed MAX_DOTS', () => {
+		const related = Array.from({ length: MAX_DOTS + 3 }, (_, i) => ({
+			label: `t${i}`,
+			weight: 1
+		}));
+		const arcs = [makeArc('main', related)];
+		const layout = buildLayout(arcs, 1);
+		expect(layout[0].badge).not.toBeNull();
+		expect(layout[0].badge?.count).toBe(3);
+	});
+
+	it('badge is null when related tags do not exceed MAX_DOTS', () => {
+		const arcs = [makeArc('a', [{ label: 'b', weight: 2 }])];
+		const layout = buildLayout(arcs, 1);
+		expect(layout[0].badge).toBeNull();
+	});
+
+	it('dot radius grows with weight relative to maxWeight', () => {
+		const arcs = [makeArc('a', [{ label: 'light', weight: 1 }, { label: 'heavy', weight: 10 }])];
+		const layout = buildLayout(arcs, 10);
+		const [heavy, light] = layout[0].dots; // sorted descending by weight
+		expect(heavy.r).toBeGreaterThan(light.r);
+	});
+
+	it('all arcs together span 2π minus the gaps', () => {
+		const arcs = [makeArc('a'), makeArc('b'), makeArc('c'), makeArc('d')];
+		const layout = buildLayout(arcs, 1);
+		const totalSpan = layout.reduce((sum, l) => sum + l.span, 0);
+		const expectedSpan = Math.PI * 2 - GAP * arcs.length;
+		expect(totalSpan).toBeCloseTo(expectedSpan, 10);
+	});
+});
+
+// ─── Force-graph geometry ─────────────────────────────────────────────────────
+
+const forceOpts = {
+	colorFor: () => '#abcdef',
+	labelFor: (t: Tag) => t.tag.toUpperCase()
+};
+
+describe('nodeRadiusFor', () => {
+	it('returns the minimum radius when maxCount is zero', () => {
+		expect(nodeRadiusFor(0, 0)).toBe(5);
+	});
+
+	it('grows with count', () => {
+		expect(nodeRadiusFor(10, 10)).toBeGreaterThan(nodeRadiusFor(1, 10));
+	});
+
+	it('caps at the maximum radius for the largest count', () => {
+		expect(nodeRadiusFor(10, 10)).toBe(22);
+	});
+});
+
+describe('buildForceGraph', () => {
+	it('creates one node per tag', () => {
+		const tags = [makeTag('a'), makeTag('b'), makeTag('c')];
+		const { nodes } = buildForceGraph(tags, [], forceOpts);
+		expect(nodes).toHaveLength(3);
+	});
+
+	it('lowercases ids but keeps the original tag and applies label/color', () => {
+		const { nodes } = buildForceGraph([makeTag('JavaScript', null, 4)], [], forceOpts);
+		expect(nodes[0].id).toBe('javascript');
+		expect(nodes[0].tag).toBe('JavaScript');
+		expect(nodes[0].label).toBe('JAVASCRIPT');
+		expect(nodes[0].color).toBe('#abcdef');
+		expect(nodes[0].count).toBe(4);
+	});
+
+	it('keeps links whose endpoints are known tags', () => {
+		const tags = [makeTag('a'), makeTag('b')];
+		const edges: WeightedEdge[] = [{ a: 'A', b: 'b', weight: 0.3 }];
+		const { links } = buildForceGraph(tags, edges, forceOpts);
+		expect(links).toHaveLength(1);
+		expect(links[0]).toMatchObject({ source: 'a', target: 'b', weight: 0.3 });
+	});
+
+	it('drops links whose endpoints are not known tags', () => {
+		const tags = [makeTag('a')];
+		const edges: WeightedEdge[] = [{ a: 'a', b: 'ghost', weight: 0.2 }];
+		const { links } = buildForceGraph(tags, edges, forceOpts);
+		expect(links).toHaveLength(0);
+	});
+
+	it('drops self-links', () => {
+		const tags = [makeTag('a')];
+		const edges: WeightedEdge[] = [{ a: 'a', b: 'A', weight: 0.5 }];
+		const { links } = buildForceGraph(tags, edges, forceOpts);
+		expect(links).toHaveLength(0);
+	});
+
+	it('keeps all nodes by default even when isolated', () => {
+		const tags = [makeTag('a'), makeTag('b'), makeTag('lonely')];
+		const edges: WeightedEdge[] = [{ a: 'a', b: 'b', weight: 0.1 }];
+		const { nodes } = buildForceGraph(tags, edges, forceOpts);
+		expect(nodes.map((n) => n.id)).toContain('lonely');
+	});
+
+	it('drops isolated nodes when hideIsolated is set', () => {
+		const tags = [makeTag('a'), makeTag('b'), makeTag('lonely')];
+		const edges: WeightedEdge[] = [{ a: 'a', b: 'b', weight: 0.1 }];
+		const { nodes } = buildForceGraph(tags, edges, { ...forceOpts, hideIsolated: true });
+		expect(nodes.map((n) => n.id).sort()).toEqual(['a', 'b']);
+	});
+});
+
+describe('buildAdjacency', () => {
+	it('records both directions of each link', () => {
+		const links: ForceLink[] = [{ source: 'a', target: 'b', weight: 1 }];
+		const adj = buildAdjacency(links);
+		expect(adj.get('a')?.has('b')).toBe(true);
+		expect(adj.get('b')?.has('a')).toBe(true);
+	});
+
+	it('handles endpoints already resolved to node refs', () => {
+		const a = { id: 'a' } as ForceNode;
+		const b = { id: 'b' } as ForceNode;
+		const adj = buildAdjacency([{ source: a, target: b, weight: 1 }]);
+		expect(adj.get('a')?.has('b')).toBe(true);
+	});
+});
+
+describe('coordinate transforms', () => {
+	it('worldToScreen and screenToWorld are inverses', () => {
+		const t = { k: 2, x: 30, y: -10 };
+		const s = worldToScreen(5, 7, t);
+		const w = screenToWorld(s.x, s.y, t);
+		expect(w.x).toBeCloseTo(5, 10);
+		expect(w.y).toBeCloseTo(7, 10);
+	});
+});
+
+describe('findNodeAt', () => {
+	const nodes: ForceNode[] = [
+		{ id: 'a', tag: 'a', label: 'a', color: '#000', count: 1, r: 10, x: 0, y: 0 },
+		{ id: 'b', tag: 'b', label: 'b', color: '#000', count: 1, r: 10, x: 100, y: 0 }
+	];
+
+	it('returns the node whose circle contains the point', () => {
+		expect(findNodeAt(nodes, 3, 3)?.id).toBe('a');
+	});
+
+	it('returns null when the point is outside every node', () => {
+		expect(findNodeAt(nodes, 50, 50)).toBeNull();
+	});
+
+	it('returns the topmost node when circles overlap', () => {
+		const overlapping: ForceNode[] = [
+			{ id: 'under', tag: 'under', label: '', color: '#000', count: 1, r: 20, x: 0, y: 0 },
+			{ id: 'over', tag: 'over', label: '', color: '#000', count: 1, r: 20, x: 0, y: 0 }
+		];
+		expect(findNodeAt(overlapping, 0, 0)?.id).toBe('over');
+	});
+
+	it('skips nodes without a position', () => {
+		const unplaced: ForceNode[] = [
+			{ id: 'a', tag: 'a', label: '', color: '#000', count: 1, r: 10 }
+		];
+		expect(findNodeAt(unplaced, 0, 0)).toBeNull();
 	});
 });
