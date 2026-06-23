@@ -27,6 +27,14 @@ export interface NoteListItem {
 
 export type NoteSearchResult = { id: string; title: string; excerpt: string | null };
 
+/** A note's id, title, and raw content — the projection the task board parses its
+ *  task lines out of (it needs the body, which {@link NoteListItem} omits). */
+export interface NoteContentItem {
+	id: string;
+	title: string;
+	content: string;
+}
+
 /** A note's persisted column shape, ready for SQL params (flags as 0/1,
  *  snake_case dates). The repo decides column order; this just projects. */
 export interface NoteRow {

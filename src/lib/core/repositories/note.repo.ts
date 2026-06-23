@@ -3,7 +3,12 @@ import { fsService } from './backend/fs';
 import { setDeskFileMtime } from './backend/tauri';
 import { parseDbTimestamp } from '$lib/core/domain/shared/time';
 import { SYSTEM_TAGS } from '$lib/core/domain/tag';
-import { Note, type NoteListItem, type NoteSearchResult } from '$lib/core/domain/note';
+import {
+	Note,
+	type NoteListItem,
+	type NoteSearchResult,
+	type NoteContentItem
+} from '$lib/core/domain/note';
 
 // Data access for notes: both the SQLite rows and the `.md` file mirror live
 // behind this one layer, speaking `Note` / `NoteListItem`. SQL lives only here,
@@ -25,6 +30,9 @@ interface RawNoteRow {
 
 const LIST_COLS = 'id, title, preview, pinned, archived, created_at, updated_at';
 const LIST_COLS_N = 'n.id, n.title, n.preview, n.pinned, n.archived, n.created_at, n.updated_at';
+
+/** Cap on the `done` notes the task board pulls, so a long history stays cheap. */
+const DONE_NOTES_LIMIT = 50;
 
 function toListItem(raw: RawNoteRow): NoteListItem {
 	return {
@@ -191,6 +199,28 @@ export const noteRepo = {
 			[SYSTEM_TAGS.JOURNAL]
 		);
 		return rows.map((r) => r.created_at);
+	},
+
+	/** Notes carrying the `todo` or `inprogress` system tag — the active columns of
+	 *  the task board, with content so the service can parse their task lines. */
+	async findActiveTaskNotes(): Promise<NoteContentItem[]> {
+		return getDb().select<NoteContentItem[]>(
+			`SELECT n.id, n.title, n.content FROM notes n
+       WHERE EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) IN ($1, $2))
+       ORDER BY n.updated_at DESC`,
+			[SYSTEM_TAGS.TODO, SYSTEM_TAGS.INPROGRESS]
+		);
+	},
+
+	/** The most recently updated `done` notes (capped), for the board's done column. */
+	async findRecentDoneNotes(): Promise<NoteContentItem[]> {
+		return getDb().select<NoteContentItem[]>(
+			`SELECT n.id, n.title, n.content FROM notes n
+       WHERE EXISTS (SELECT 1 FROM note_tags WHERE note_id = n.id AND LOWER(tag) = $1)
+       ORDER BY n.updated_at DESC
+       LIMIT $2`,
+			[SYSTEM_TAGS.DONE, DONE_NOTES_LIMIT]
+		);
 	},
 
 	/** Id + updated_at of every note, for the sync diff. */

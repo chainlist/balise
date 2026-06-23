@@ -29,36 +29,42 @@ domain; the board orchestration is application.
 ## Todos
 
 ### Domain (`core/domain/task.ts`)
-- [ ] Move `parseTasksFromNote(noteId, title, content)` and the regexes; types `TaskItem`,
-      `TaskStatus`. Pure.
-- [ ] Move `rewriteHashtagLine(line, status)` and `rewriteChecklistLine(line, status)`.
+- [x] Move `parseTasksFromNote(noteId, title, content)` and the regexes; types `TaskItem`,
+      `TaskStatus`. Pure. — ported verbatim; `HASHTAG_RE`/`HASHTAG_STRIP_RE`/`CHECKLIST_RE`
+      now live here (no `$lib/utils` import), `SYSTEM_TAGS` from `./tag`.
+- [x] Move `rewriteHashtagLine(line, status)` and `rewriteChecklistLine(line, status)`.
       Pure: given a line and target status, return the new line. Include the rule that a
-      checklist task cannot move to `inprogress`.
-- [ ] Move task color mapping.
+      checklist task cannot move to `inprogress`. — `rewriteChecklistLine` returns the line
+      unchanged for `inprogress` (the no-op rule now lives in the domain).
+- [x] Move task color mapping. — `TASK_STATUS_COLOR` in `task.ts` (task-specific, not shared).
 
 ### Data Access (`core/repositories/note.repo.ts`)
-- [ ] Add `queryActiveTaskNotes` and `queryRecentDoneNotes` (system tags TODO, INPROGRESS,
-      DONE; DONE limited). `getDb()` internal.
+- [x] Add `queryActiveTaskNotes` and `queryRecentDoneNotes` (system tags TODO, INPROGRESS,
+      DONE; DONE limited). `getDb()` internal. — named `findActiveTaskNotes` /
+      `findRecentDoneNotes` to match the repo's `find*` convention; return the new
+      `NoteContentItem` (id/title/content) domain projection; `DONE_NOTES_LIMIT = 50`.
 
 ### Application (`core/services/tasks.svelte.ts`)
-- [ ] `$state tasks`. `load()`: read active + done task notes, parse each via domain,
-      dedupe by note id, flatten.
-- [ ] `moveTask(task, newStatus)`: re-read content via `notesService.loadContent`, guard
+- [x] `$state tasks`. `load()`: read active + done task notes, parse each via domain,
+      dedupe by note id, flatten. — `Promise.all` over both repo reads, `Map` dedupe by id.
+- [x] `moveTask(task, newStatus)`: re-read content via `notesService.loadContent`, guard
       against a stale line (reload if the line moved), compute the new line via domain,
-      persist via `notesService.update`, update local state.
+      persist via `notesService.update`, update local state. — ported verbatim; writes go
+      through `notesService.update`, never the repo.
 
 ### Tests (`core/domain/task.test.ts`)
-- [ ] Port and extend `utils/task-parser.test.ts`: hashtag and checklist parsing, line
-      indices, status detection.
-- [ ] `rewriteHashtagLine`/`rewriteChecklistLine`: each status transition; the
-      checklist-to-inprogress no-op rule.
+- [x] Port and extend `utils/task-parser.test.ts`: hashtag and checklist parsing, line
+      indices, status detection. — all parse cases ported.
+- [x] `rewriteHashtagLine`/`rewriteChecklistLine`: each status transition; the
+      checklist-to-inprogress no-op rule. — added (transitions, case-variant, indentation,
+      same-status no-op, checklist-to-inprogress no-op).
 
 ## Definition of Done
-- [ ] Todos ticked; `pnpm test:unit -- --run src/lib/core/domain/task.test.ts` passes.
-- [ ] `pnpm lint` passes.
-- [ ] Self-audit: parsing/rewrite are pure; the service goes through `notesService`, not the
-      repo, for writes (so the tag and file invariants hold).
-- [ ] Dashboard updated.
+- [x] Todos ticked; `pnpm test:unit -- --run src/lib/core/domain/task.test.ts` passes. — 518 passed.
+- [x] `pnpm lint` passes. — prettier + eslint clean on all five changed files.
+- [x] Self-audit: parsing/rewrite are pure; the service goes through `notesService`, not the
+      repo, for writes (so the tag and file invariants hold). — confirmed.
+- [x] Dashboard updated.
 
 ## Notes
 - `moveTask` must write through `notesService.update` (not `note.repo` directly) so tag
