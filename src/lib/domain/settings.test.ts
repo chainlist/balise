@@ -7,6 +7,7 @@ import {
 	normalizeLanguage,
 	normalizeMagicRules,
 	MAGIC_TAG_MATCH_TYPES,
+	DEFAULT_MAGIC_TAGS,
 	type LegacySettings
 } from './settings';
 
@@ -49,7 +50,34 @@ describe('migrateLegacySettings', () => {
 			},
 			shortcuts: { customBindings: { save: 'mod+s' } }
 		});
-		expect(result!.deleteKeys).toEqual([...LEGACY_SETTING_KEYS]);
+		// `magicTags` aliases the live section key, so it is migrated in place and
+		// must not be deleted; every other flat key is.
+		expect(result!.deleteKeys).toEqual(LEGACY_SETTING_KEYS.filter((key) => key !== 'magicTags'));
+	});
+
+	it('does not treat a section-shaped magicTags as legacy (it aliases the section key)', () => {
+		// The store seeds `magicTags` from the section default, so reading it for the
+		// legacy probe returns `{ tags: [...] }`, not the old flat array. That must not
+		// look like legacy data, otherwise the one-time migration re-runs every startup.
+		expect(
+			migrateLegacySettings({ magicTags: { tags: [] } } as unknown as LegacySettings)
+		).toBeNull();
+		expect(
+			migrateLegacySettings({
+				magicTags: { tags: DEFAULT_MAGIC_TAGS }
+			} as unknown as LegacySettings)
+		).toBeNull();
+	});
+
+	it('migrates a flat-array magicTags without deleting the aliased section key', () => {
+		const result = migrateLegacySettings({
+			magicTags: [{ tag: 'idea', pattern: 'idea:', matchType: MAGIC_TAG_MATCH_TYPES.CONTAINS }]
+		});
+
+		expect(result!.sections.magicTags).toEqual({
+			tags: [{ tag: 'idea', pattern: 'idea:', matchType: MAGIC_TAG_MATCH_TYPES.CONTAINS }]
+		});
+		expect(result!.deleteKeys).not.toContain('magicTags');
 	});
 
 	it('omits undefined legacy values so defaults are preserved on load', () => {
