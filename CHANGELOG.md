@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.1](https://github.com/chainlist/balise/compare/v0.35.0...v0.35.1) (2026-06-24)
+
+
+### Bug Fixes
+
+* **settings:** settings reseting to default when opening to app ([#109](https://github.com/chainlist/balise/issues/109)) ([15b7faf](https://github.com/chainlist/balise/commit/15b7fafd2e7947fa98844b5591feb29b9354a0e2))
+
 ## [0.35.0](https://github.com/chainlist/balise/compare/v0.34.1...v0.35.0) (2026-06-24)
 
 
