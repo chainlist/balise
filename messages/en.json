@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Failed to switch desk.",
 	"task_update_error_failed": "Failed to update task.",
 	"updater_install_error_failed": "Failed to install update.",
+	"attachment_import_error_failed": "Failed to add image.",
 	"insert_date_no_editor": "Open a note to insert the date.",
 
 	"sync_external_changes": "{count} notes updated from changes made outside the app",
@@ -265,6 +266,10 @@
 	"slash_date_now_desc": "Insert today's date",
 	"slash_insert_date_label": "Insert a date",
 	"slash_insert_date_desc": "Pick a date from a calendar",
+	"slash_image_label": "Image",
+	"slash_image_desc": "Pick an image to embed",
+	"slash_cover_label": "Cover",
+	"slash_cover_desc": "Pick a full-width cover image",
 
 	"editor_placeholder": "Write something, or type '/' for commands",
 	"editor_reading_time": "{minutes} min read",

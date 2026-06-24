@@ -16,11 +16,13 @@
 	let {
 		path,
 		alt,
+		cover = false,
 		onAltChange,
 		onToggleEmbed
 	}: {
 		path: string;
 		alt: string;
+		cover?: boolean;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
 	} = $props();
@@ -53,13 +55,17 @@
 	});
 </script>
 
-<div class="image-wrapper relative grid w-full place-items-center py-2">
+<div class="image-wrapper relative {cover ? 'cover-bleed' : 'grid w-full place-items-center py-2'}">
 	{#if src}
-		<div class="group relative flex">
-			<img {src} {alt} class="block max-h-96 max-w-full rounded" />
+		<div class="group relative {cover ? 'h-full w-full' : 'flex'}">
+			<img
+				{src}
+				{alt}
+				class={cover ? 'block h-full w-full object-cover' : 'block max-h-96 max-w-full rounded'}
+			/>
 			<EmbedControls {alt} {onAltChange} {onToggleEmbed} />
 		</div>
-		{#if alt}
+		{#if alt && !cover}
 			<span
 				class="absolute -bottom-3 left-1/2 max-w-full -translate-x-1/2 truncate px-2 py-0.5 text-sm text-muted-foreground italic"
 			>
@@ -70,3 +76,19 @@
 		<span class="text-sm text-muted-foreground italic">{m.image_not_found()}</span>
 	{/if}
 </div>
+
+<style>
+	/* Break out of the centred editor column to the full note-pane width.
+	   `--cover-width` is the pane's client width, set on the scroll container in
+	   EditorView. The widget lives inside `.cm-content`, which is the column width
+	   (not the pane width) and grows with its content, so a percentage offset has
+	   no stable base. Instead, shift left by the column's inset in absolute units:
+	   the column is `max-w-175` (43.75rem) centred in the pane, plus the editor's
+	   1.5rem scroller padding. Keep these in sync with Editor.svelte / theme.ts. */
+	.cover-bleed {
+		width: var(--cover-width, 100%);
+		margin-left: calc(-4rem - max(0px, var(--cover-width, 100%) - 45rem) / 2);
+		height: 280px;
+		overflow: hidden;
+	}
+</style>

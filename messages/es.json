@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Error al cambiar de escritorio.",
 	"task_update_error_failed": "Error al actualizar la tarea.",
 	"updater_install_error_failed": "Error al instalar la actualización.",
+	"attachment_import_error_failed": "Error al añadir la imagen.",
 	"insert_date_no_editor": "Abre una nota para insertar la fecha.",
 
 	"sync_external_changes": "{count} notas actualizadas por cambios realizados fuera de la aplicación",
@@ -265,6 +266,10 @@
 	"slash_date_now_desc": "Insertar la fecha de hoy",
 	"slash_insert_date_label": "Insertar una fecha",
 	"slash_insert_date_desc": "Elegir una fecha en un calendario",
+	"slash_image_label": "Imagen",
+	"slash_image_desc": "Elegir una imagen para insertar",
+	"slash_cover_label": "Portada",
+	"slash_cover_desc": "Elegir una imagen de portada a todo el ancho",
 
 	"editor_placeholder": "Escribe algo o escribe «/» para ver comandos",
 	"editor_reading_time": "{minutes} min de lectura",

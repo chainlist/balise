@@ -29,6 +29,17 @@ function bracketTextRange(node: SyntaxNode): { from: number; to: number } | null
 	return null;
 }
 
+// The start offset of the first non-blank line, or -1 when the doc is all blank.
+// An image opening the note (alt `cover`) on this line renders as a full-bleed
+// cover banner instead of an inline image.
+function firstNonEmptyLineFrom(state: EditorState): number {
+	for (let i = 1; i <= state.doc.lines; i++) {
+		const line = state.doc.line(i);
+		if (line.text.trim() !== '') return line.from;
+	}
+	return -1;
+}
+
 // Find the first Image node overlapping [from, to]. Positions captured at widget
 // build time go stale as the doc changes, so the alt/toggle actions re-resolve
 // the node from the widget's live line.
@@ -66,6 +77,7 @@ function demoteToLink(view: EditorView, el: HTMLElement): void {
 type EmbedProps = {
 	url: string;
 	alt: string;
+	cover: boolean;
 	onAltChange: (alt: string) => void;
 	onToggleEmbed: () => void;
 };
@@ -77,7 +89,8 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 
 	constructor(
 		readonly url: string,
-		readonly alt: string
+		readonly alt: string,
+		readonly cover: boolean
 	) {
 		super();
 	}
@@ -90,6 +103,7 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 		return {
 			url: this.url,
 			alt: this.alt,
+			cover: this.cover,
 			onAltChange: (alt: string) => {
 				if (this.#el) updateAlt(view, this.#el, alt);
 			},
@@ -100,7 +114,7 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 	}
 
 	eq(other: EmbedWidget): boolean {
-		return other.url === this.url && other.alt === this.alt;
+		return other.url === this.url && other.alt === this.alt && other.cover === this.cover;
 	}
 
 	// Let the editor ignore events from the overlay buttons/input so clicks
@@ -199,7 +213,8 @@ function pushBlockEmbed(
 	from: number,
 	to: number,
 	url: string,
-	alt: string
+	alt: string,
+	cover: boolean
 ): void {
 	const line = state.doc.lineAt(to);
 	const lineFrom = state.doc.lineAt(from).from;
@@ -207,7 +222,7 @@ function pushBlockEmbed(
 		Decoration.line({ attributes: { style: 'display:none' } }).range(lineFrom),
 		Decoration.replace({}).range(lineFrom, line.to),
 		Decoration.widget({
-			widget: new EmbedWidget(url, alt),
+			widget: new EmbedWidget(url, alt, cover),
 			block: true,
 			side: -1
 		}).range(lineFrom)
@@ -223,6 +238,7 @@ function pushBlockEmbed(
 // cursor entry makes the document jump.
 function buildDecos(state: EditorState): DecorationSet {
 	const ranges: Range<Decoration>[] = [];
+	const coverFrom = firstNonEmptyLineFrom(state);
 
 	syntaxTree(state).iterate({
 		enter(node) {
@@ -231,7 +247,9 @@ function buildDecos(state: EditorState): DecorationSet {
 			if (!url) return false;
 			const textRange = bracketTextRange(node.node);
 			const alt = textRange ? state.doc.sliceString(textRange.from, textRange.to) : '';
-			pushBlockEmbed(ranges, state, node.from, node.to, url, alt);
+			const cover =
+				state.doc.lineAt(node.from).from === coverFrom && alt.trim().toLowerCase() === 'cover';
+			pushBlockEmbed(ranges, state, node.from, node.to, url, alt, cover);
 			return false;
 		}
 	});

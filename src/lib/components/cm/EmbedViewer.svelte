@@ -8,11 +8,13 @@
 	let {
 		url,
 		alt,
+		cover = false,
 		onAltChange,
 		onToggleEmbed
 	}: {
 		url: string;
 		alt: string;
+		cover?: boolean;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
 	} = $props();
@@ -48,7 +50,7 @@
 		{onToggleEmbed}
 	/>
 {:else if isImageUrl(url)}
-	<EmbedImageViewer path={url} {alt} {onAltChange} {onToggleEmbed} />
+	<EmbedImageViewer path={url} {alt} {cover} {onAltChange} {onToggleEmbed} />
 {:else}
 	<EmbedLinkViewer raw={url} {alt} {onAltChange} {onToggleEmbed} />
 {/if}

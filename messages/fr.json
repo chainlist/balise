@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Impossible de changer de bureau.",
 	"task_update_error_failed": "Impossible de mettre à jour la tâche.",
 	"updater_install_error_failed": "Impossible d'installer la mise à jour.",
+	"attachment_import_error_failed": "Impossible d'ajouter l'image.",
 	"insert_date_no_editor": "Ouvrez une note pour insérer la date.",
 
 	"sync_external_changes": "{count} notes mises à jour suite à des modifications faites hors de l'application",
@@ -265,6 +266,10 @@
 	"slash_date_now_desc": "Insérer la date du jour",
 	"slash_insert_date_label": "Insérer une date",
 	"slash_insert_date_desc": "Choisir une date dans un calendrier",
+	"slash_image_label": "Image",
+	"slash_image_desc": "Choisir une image à insérer",
+	"slash_cover_label": "Couverture",
+	"slash_cover_desc": "Choisir une image de couverture pleine largeur",
 
 	"editor_placeholder": "Écrivez quelque chose, ou tapez « / » pour les commandes",
 	"editor_reading_time": "{minutes} min de lecture",

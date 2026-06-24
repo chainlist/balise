@@ -21,6 +21,7 @@
 		"sql:allow-load",
 		"store:default",
 		"fs:default",
+		"dialog:allow-open",
 		"opener:allow-default-urls",
 		{
 			"identifier": "fs:allow-exists",

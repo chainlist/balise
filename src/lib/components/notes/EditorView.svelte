@@ -31,6 +31,9 @@
 	let pending: string | null = null;
 	let liveContent = $state<string | null>(null);
 	let editor = $state<ReturnType<typeof Editor>>();
+	// Pane width, exposed to descendants so a `[cover]` image embed can bleed past
+	// the centred editor column to the full note-pane width.
+	let paneWidth = $state(0);
 
 	// Resolve the content source once: the editor owns its document after mount, so a
 	// later note.content change (e.g. a recycled journal draft) must not reload it.
@@ -73,7 +76,11 @@
 
 <!-- Consumers remount this component per note (keyed by note.id), so the
      debounce timer, pending flush, and loaded content all belong to one note. -->
-<div class="relative scrollbar-thin h-full overflow-y-auto">
+<div
+	class="relative scrollbar-thin h-full overflow-y-auto"
+	bind:clientWidth={paneWidth}
+	style="--cover-width: {paneWidth}px"
+>
 	{#await initialContent then content}
 		{#if showHeader}
 			<EditorHeader

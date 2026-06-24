@@ -1,7 +1,15 @@
 import { fsService } from '$lib/repositories/backend/fs';
+import { openImageFile } from '$lib/repositories/backend/dialog';
+import { copyAttachment } from '$lib/repositories/backend/tauri';
 
 function extFromMime(mimeType: string): string {
 	return (mimeType.split('/')[1] ?? 'png').replace(/\+.*$/, '');
+}
+
+function extFromPath(path: string): string {
+	const base = path.split(/[\\/]/).pop() ?? '';
+	const dot = base.lastIndexOf('.');
+	return dot > 0 ? base.slice(dot + 1).toLowerCase() : 'png';
 }
 
 // Application seam for desk-local binary assets (embedded note images). The import
@@ -21,6 +29,16 @@ class AssetsService {
 		await fsService.mkdir('attachments');
 		const buffer = await blob.arrayBuffer();
 		await fsService.writeFile(`attachments/${filename}`, new Uint8Array(buffer));
+		return filename;
+	}
+
+	/** Open the native file picker, copy the chosen image into `attachments/`,
+	 *  and return its filename. null when the user cancels the dialog. */
+	async pickAndImportImage(): Promise<string | null> {
+		const srcPath = await openImageFile();
+		if (!srcPath) return null;
+		const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${extFromPath(srcPath)}`;
+		await copyAttachment(fsService.currentDesk, srcPath, filename);
 		return filename;
 	}
 }

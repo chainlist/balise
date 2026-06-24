@@ -26,6 +26,7 @@
 	"desk_switch_error_failed": "Schreibtisch konnte nicht gewechselt werden.",
 	"task_update_error_failed": "Aufgabe konnte nicht aktualisiert werden.",
 	"updater_install_error_failed": "Update konnte nicht installiert werden.",
+	"attachment_import_error_failed": "Bild konnte nicht hinzugefügt werden.",
 	"insert_date_no_editor": "Öffne eine Notiz, um das Datum einzufügen.",
 
 	"sync_external_changes": "{count} Notizen durch Änderungen außerhalb der App aktualisiert",
@@ -265,6 +266,10 @@
 	"slash_date_now_desc": "Heutiges Datum einfügen",
 	"slash_insert_date_label": "Datum einfügen",
 	"slash_insert_date_desc": "Ein Datum aus einem Kalender wählen",
+	"slash_image_label": "Bild",
+	"slash_image_desc": "Ein Bild zum Einbetten auswählen",
+	"slash_cover_label": "Titelbild",
+	"slash_cover_desc": "Ein Titelbild in voller Breite auswählen",
 
 	"editor_placeholder": "Schreibe etwas oder tippe „/“ für Befehle",
 	"editor_reading_time": "{minutes} Min. Lesezeit",
