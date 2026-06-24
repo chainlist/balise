@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.35.0](https://github.com/chainlist/balise/compare/v0.34.1...v0.35.0) (2026-06-24)
+
+
+### Features
+
+* **appearance:** better dark mode handling when the application is booting up to avoid white flashbang ([#105](https://github.com/chainlist/balise/issues/105)) ([d880dbe](https://github.com/chainlist/balise/commit/d880dbe3bf886fe15bcef0217d360ffcd027b92d))
+* **date:** added clickable date in the editor ([#106](https://github.com/chainlist/balise/issues/106)) ([035db7e](https://github.com/chainlist/balise/commit/035db7e63c6c6b71eb231e533d63dc3118e743e6))
+* **journal:** you can now filter on notes created for a specific dates ([#102](https://github.com/chainlist/balise/issues/102)) ([81f00d3](https://github.com/chainlist/balise/commit/81f00d3cb57a2f426f96c116159b3559665d802c))
+* **navbar:** added a navbor for windows and linux ([#107](https://github.com/chainlist/balise/issues/107)) ([3eb509f](https://github.com/chainlist/balise/commit/3eb509f45e6a37d144a58ff5050ce59f50ff8c81))
+
+
+### Bug Fixes
+
+* **navar:** fix navbar colors ([#108](https://github.com/chainlist/balise/issues/108)) ([2b8848a](https://github.com/chainlist/balise/commit/2b8848a676ab759fd86a8595f6c2e466af257891))
+
 ## [0.34.1](https://github.com/chainlist/balise/compare/v0.34.0...v0.34.1) (2026-06-22)
 
 
