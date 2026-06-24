@@ -79,7 +79,15 @@ class SlashPluginClass implements PluginValue {
 
 	private applyAction(action: SlashAction, slashFrom: number) {
 		const to = this.view.state.selection.main.from;
-		const insert = typeof action.insert === 'function' ? action.insert() : action.insert;
+		// `run` actions own the editing themselves (async file picks, custom
+		// placement); close the menu first, then hand them the slash range.
+		if (action.run) {
+			const view = this.view;
+			this.close();
+			action.run(view, { from: slashFrom, to });
+			return;
+		}
+		const insert = typeof action.insert === 'function' ? action.insert() : (action.insert ?? '');
 		this.view.dispatch({
 			changes: { from: slashFrom, to, insert },
 			selection: { anchor: slashFrom + insert.length }

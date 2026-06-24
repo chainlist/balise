@@ -8,13 +8,17 @@
 	let {
 		url,
 		alt,
+		cover = false,
 		onAltChange,
-		onToggleEmbed
+		onToggleEmbed,
+		onDelete
 	}: {
 		url: string;
 		alt: string;
+		cover?: boolean;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
+		onDelete: () => void;
 	} = $props();
 
 	// Props every embed-kind component receives: the raw URL, the transformed
@@ -27,6 +31,7 @@
 		alt: string;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
+		onDelete: () => void;
 	};
 
 	// kind → component. Add an entry here when adding a new kind in embeds.config.ts.
@@ -46,9 +51,10 @@
 		{alt}
 		{onAltChange}
 		{onToggleEmbed}
+		{onDelete}
 	/>
 {:else if isImageUrl(url)}
-	<EmbedImageViewer path={url} {alt} {onAltChange} {onToggleEmbed} />
+	<EmbedImageViewer path={url} {alt} {cover} {onAltChange} {onToggleEmbed} {onDelete} />
 {:else}
-	<EmbedLinkViewer raw={url} {alt} {onAltChange} {onToggleEmbed} />
+	<EmbedLinkViewer raw={url} {alt} {onAltChange} {onToggleEmbed} {onDelete} />
 {/if}

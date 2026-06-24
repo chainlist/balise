@@ -1,14 +1,21 @@
+import type { EditorView } from '@codemirror/view';
 import * as m from '$paraglide/messages.js';
 import { settingsService } from '$lib/services/settings/settings.svelte';
 import { formatDate } from '$lib/domain/datetime';
+import { insertImageAtCursor, insertOrReplaceCover } from '$lib/utils/cm/imageActions';
 
 export interface SlashAction {
 	id: string;
 	label: string;
 	description: string;
 	/** Text to insert in place of the slash command. A function is evaluated at
-	 *  selection time (e.g. for a date that depends on the current settings). */
-	insert: string | (() => string);
+	 *  selection time (e.g. for a date that depends on the current settings).
+	 *  Omit when the action drives the editor itself via `run`. */
+	insert?: string | (() => string);
+	/** Imperative handler for actions that need the editor view and async work
+	 *  (e.g. picking a file). Receives the range of the typed `/command` to
+	 *  replace; the handler owns every edit from there. */
+	run?: (view: EditorView, range: { from: number; to: number }) => void;
 	keywords: string[];
 	icon: string;
 }
@@ -109,6 +116,22 @@ export const SLASH_ACTIONS: SlashAction[] = [
 		insert: '---\n',
 		keywords: ['divider', 'separator', 'hr'],
 		icon: '—'
+	},
+	{
+		id: 'image',
+		label: m.slash_image_label(),
+		description: m.slash_image_desc(),
+		run: insertImageAtCursor,
+		keywords: ['image', 'img', 'picture', 'photo'],
+		icon: '🖼'
+	},
+	{
+		id: 'cover',
+		label: m.slash_cover_label(),
+		description: m.slash_cover_desc(),
+		run: insertOrReplaceCover,
+		keywords: ['cover', 'banner', 'header', 'hero'],
+		icon: '📸'
 	},
 	{
 		id: 'date-now',

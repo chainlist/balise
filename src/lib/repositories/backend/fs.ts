@@ -10,6 +10,8 @@ import {
 	readDir as fsReadDir,
 	stat as fsStat
 } from '@tauri-apps/plugin-fs';
+import { documentDir, join } from '@tauri-apps/api/path';
+import { openPath } from '@tauri-apps/plugin-opener';
 
 // Desk-scoped filesystem adapter: the only module importing `@tauri-apps/plugin-fs`
 // for note files. `DESKS_ROOT_DIR` is the single storage-root detail shared by the
@@ -69,6 +71,11 @@ class FsService {
 
 	async stat(path: string) {
 		return fsStat(this.#resolve(path), { baseDir: BaseDirectory.Document });
+	}
+
+	/** Open a desk file in the OS default application for its file type. */
+	async openInDefaultApp(path: string) {
+		await openPath(await join(await documentDir(), DESKS_ROOT_DIR, this.#desk, path));
 	}
 }
 

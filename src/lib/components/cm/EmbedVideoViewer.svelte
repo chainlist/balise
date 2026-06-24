@@ -6,13 +6,15 @@
 		transformed,
 		alt,
 		onAltChange,
-		onToggleEmbed
+		onToggleEmbed,
+		onDelete
 	}: {
 		raw: string;
 		transformed: string;
 		alt: string;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
+		onDelete: () => void;
 	} = $props();
 </script>
 
@@ -25,6 +27,6 @@
 			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 			allowfullscreen
 		></iframe>
-		<EmbedControls {alt} {onAltChange} {onToggleEmbed} />
+		<EmbedControls {alt} {onAltChange} {onToggleEmbed} {onDelete} />
 	</div>
 </div>

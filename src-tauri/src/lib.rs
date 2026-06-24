@@ -13,6 +13,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_sql::Builder::new().build());
 
@@ -32,6 +33,7 @@ pub fn run() {
     builder
         .invoke_handler(tauri::generate_handler![
             commands::file_sync::set_desk_file_mtime,
+            commands::attachments::copy_attachment,
             sync::sync_desk_files,
             sync::migrate_desk_db,
             commands::device::device_id,

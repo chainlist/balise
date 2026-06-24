@@ -20,3 +20,14 @@ export async function setDeskFileMtime(
 ): Promise<void> {
 	await invoke('set_desk_file_mtime', { deskName, name, mtimeMs });
 }
+
+/** Copy a user-picked file into the desk's `attachments/` folder under the given
+ *  filename. The picked file can live anywhere on disk, so the copy runs in Rust
+ *  (full disk access) rather than the scope-limited fs plugin. */
+export async function copyAttachment(
+	deskName: string,
+	srcPath: string,
+	filename: string
+): Promise<void> {
+	await invoke('copy_attachment', { deskName, srcPath, filename });
+}

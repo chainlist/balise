@@ -21,7 +21,24 @@
 		"sql:allow-load",
 		"store:default",
 		"fs:default",
+		"dialog:allow-open",
 		"opener:allow-default-urls",
+		{
+			"identifier": "opener:allow-open-path",
+			"allow": [
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-open",
+			"allow": [
+				{
+					"path": "$DOCUMENT/**/*"
+				}
+			]
+		},
 		{
 			"identifier": "fs:allow-exists",
 			"allow": [

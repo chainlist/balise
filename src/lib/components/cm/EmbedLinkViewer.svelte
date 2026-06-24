@@ -8,12 +8,14 @@
 		raw,
 		alt,
 		onAltChange,
-		onToggleEmbed
+		onToggleEmbed,
+		onDelete
 	}: {
 		raw: string;
 		alt: string;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
+		onDelete: () => void;
 	} = $props();
 </script>
 
@@ -26,6 +28,6 @@
 		>
 			<OgCard url={raw} label={alt} />
 		</button>
-		<EmbedControls {alt} {onAltChange} {onToggleEmbed} />
+		<EmbedControls {alt} {onAltChange} {onToggleEmbed} {onDelete} />
 	</div>
 </div>

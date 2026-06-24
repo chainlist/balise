@@ -326,5 +326,10 @@ export const noteRepo = {
 	async deleteFile(id: string): Promise<void> {
 		if (!fsService.currentDesk) return;
 		await fsService.remove(`${id}.md`);
+	},
+
+	/** Open the note's backing `{id}.md` file in the OS default application. */
+	async openOriginalFile(id: string): Promise<void> {
+		await fsService.openInDefaultApp(`${id}.md`);
 	}
 };
