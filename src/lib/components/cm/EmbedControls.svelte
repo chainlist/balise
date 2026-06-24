@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Pencil, Link2 } from '@lucide/svelte';
+	import { Pencil, Link2, Trash2 } from '@lucide/svelte';
 	import { Input } from '$lib/components/shadcn/input';
 	import { Button } from '$lib/components/shadcn/button';
 	import * as m from '$paraglide/messages.js';
@@ -12,11 +12,13 @@
 	let {
 		alt,
 		onAltChange,
-		onToggleEmbed
+		onToggleEmbed,
+		onDelete
 	}: {
 		alt: string;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
+		onDelete: () => void;
 	} = $props();
 
 	let editing = $state(false);
@@ -101,6 +103,13 @@
 			aria-label={m.image_add_description()}
 		>
 			<Pencil class="size-3.5" />
+		</button>
+		<button
+			class="rounded bg-background/70 p-1.5 text-muted-foreground hover:text-destructive"
+			onclick={onDelete}
+			aria-label={m.action_delete()}
+		>
+			<Trash2 class="size-3.5" />
 		</button>
 	</div>
 {/if}

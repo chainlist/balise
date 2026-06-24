@@ -18,13 +18,15 @@
 		alt,
 		cover = false,
 		onAltChange,
-		onToggleEmbed
+		onToggleEmbed,
+		onDelete
 	}: {
 		path: string;
 		alt: string;
 		cover?: boolean;
 		onAltChange: (alt: string) => void;
 		onToggleEmbed: () => void;
+		onDelete: () => void;
 	} = $props();
 
 	let src = $state('');
@@ -63,7 +65,7 @@
 				{alt}
 				class={cover ? 'block h-full w-full object-cover' : 'block max-h-96 max-w-full rounded'}
 			/>
-			<EmbedControls {alt} {onAltChange} {onToggleEmbed} />
+			<EmbedControls {alt} {onAltChange} {onToggleEmbed} {onDelete} />
 		</div>
 		{#if alt && !cover}
 			<span

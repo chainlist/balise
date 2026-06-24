@@ -72,6 +72,16 @@ function demoteToLink(view: EditorView, el: HTMLElement): void {
 	if (image) view.dispatch({ changes: { from: image.from, to: image.from + 1 } });
 }
 
+// Remove the embed entirely. Embeds occupy their own line, so we drop the whole
+// line plus one adjacent newline to avoid leaving a blank line where it sat.
+function deleteEmbed(view: EditorView, el: HTMLElement): void {
+	const { doc } = view.state;
+	const line = doc.lineAt(view.posAtDOM(el));
+	const from = line.number === doc.lines && line.number > 1 ? line.from - 1 : line.from;
+	const to = line.number < doc.lines ? line.to + 1 : line.to;
+	view.dispatch({ changes: { from, to } });
+}
+
 // --- Widget ---
 
 type EmbedProps = {
@@ -80,6 +90,7 @@ type EmbedProps = {
 	cover: boolean;
 	onAltChange: (alt: string) => void;
 	onToggleEmbed: () => void;
+	onDelete: () => void;
 };
 
 class EmbedWidget extends SvelteWidget<EmbedProps> {
@@ -109,6 +120,9 @@ class EmbedWidget extends SvelteWidget<EmbedProps> {
 			},
 			onToggleEmbed: () => {
 				if (this.#el) demoteToLink(view, this.#el);
+			},
+			onDelete: () => {
+				if (this.#el) deleteEmbed(view, this.#el);
 			}
 		};
 	}
