@@ -76,6 +76,11 @@ class NotesService {
 		return noteRepo.loadContent(id);
 	}
 
+	/** Open the note's backing `.md` file in the OS default application. */
+	async openOriginalFile(id: string): Promise<void> {
+		await noteRepo.openOriginalFile(id);
+	}
+
 	/** Full-text + title search for the command palette. The length gating (FTS vs.
 	 *  title LIKE vs. empty) lives in the repo, so callers just pass the raw query. */
 	async search(query: string): Promise<NoteSearchResult[]> {

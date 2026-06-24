@@ -2,8 +2,16 @@
 	import { onMount } from 'svelte';
 	import type { NoteListItem } from '$lib/domain/note';
 	import { eventBus } from '$lib/services/events/event-bus';
+	import { notesService } from '$lib/services/notes.svelte';
+	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import * as DropdownMenu from '$lib/components/shadcn/dropdown-menu/index.js';
-	import { EllipsisVerticalIcon, Trash2Icon, PinIcon, ListTreeIcon } from '@lucide/svelte';
+	import {
+		EllipsisVerticalIcon,
+		Trash2Icon,
+		PinIcon,
+		ListTreeIcon,
+		ExternalLinkIcon
+	} from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
 	import NoteSummarySheet from './NoteSummarySheet.svelte';
 	import EditorView from './EditorView.svelte';
@@ -98,6 +106,19 @@
 					{/snippet}
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end" class="rounded">
+					<DropdownMenu.Item
+						class="rounded"
+						onclick={async () => {
+							try {
+								await notesService.openOriginalFile(note.id);
+							} catch (e) {
+								toasterService.error(m.note_open_file_error_failed(), errorMessage(e));
+							}
+						}}
+					>
+						<ExternalLinkIcon class="size-4" />
+						{m.editor_open_original_file()}
+					</DropdownMenu.Item>
 					<DropdownMenu.Item
 						class="rounded text-destructive focus:text-destructive"
 						onclick={() => (confirmOpen = true)}
