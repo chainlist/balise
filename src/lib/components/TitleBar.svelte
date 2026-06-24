@@ -25,21 +25,21 @@
 			<button
 				onclick={() => void win.minimize()}
 				aria-label="Minimize"
-				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-white focus:outline-none"
+				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-black focus:outline-none"
 			>
 				<Minus class="size-3.5" />
 			</button>
 			<button
 				onclick={() => void win.toggleMaximize()}
 				aria-label="Maximize"
-				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-white focus:outline-none"
+				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-muted hover:text-black focus:outline-none"
 			>
 				<Square class="size-3.5" />
 			</button>
 			<button
 				onclick={() => void win.close()}
 				aria-label="Close"
-				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-destructive hover:text-white focus:outline-none"
+				class="flex h-9 w-11 items-center justify-center text-foreground/50 transition-colors hover:bg-[#ba1a1a] hover:text-white focus:outline-none"
 			>
 				<X class="size-3.5" />
 			</button>
