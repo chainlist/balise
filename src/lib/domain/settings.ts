@@ -255,9 +255,19 @@ function definedOnly<T extends object>(obj: T): Partial<T> {
  * Map the legacy flat keys (`theme`, `fontSize`, ...) into grouped section objects
  * plus the keys to delete. Returns `null` when no legacy key is present (a fresh
  * install or an already-migrated store), so the caller does nothing.
+ *
+ * `magicTags` is special: the flat key name equals the new section key, and the
+ * store seeds it from the section default, so the legacy probe reads back the
+ * section object `{ tags: [...] }`, never `undefined`. Only a flat array is genuine
+ * legacy data; treating the section object as legacy would re-run this "one-time"
+ * migration on every startup and wipe the other sections.
  */
 export function migrateLegacySettings(raw: LegacySettings): SettingsMigration | null {
-	const hasLegacy = Object.values(raw).some((value) => value !== undefined);
+	const legacyMagicTags = Array.isArray(raw.magicTags) ? raw.magicTags : undefined;
+
+	const hasLegacy =
+		legacyMagicTags !== undefined ||
+		Object.entries(raw).some(([key, value]) => key !== 'magicTags' && value !== undefined);
 	if (!hasLegacy) return null;
 
 	return {
@@ -277,9 +287,11 @@ export function migrateLegacySettings(raw: LegacySettings): SettingsMigration | 
 				lineHeight: raw.lineHeight,
 				markdownMarks: raw.markdownMarks
 			}),
-			magicTags: raw.magicTags !== undefined ? { tags: raw.magicTags } : {},
+			magicTags: legacyMagicTags !== undefined ? { tags: legacyMagicTags } : {},
 			shortcuts: raw.customBindings !== undefined ? { customBindings: raw.customBindings } : {}
 		},
-		deleteKeys: [...LEGACY_SETTING_KEYS]
+		// `magicTags` aliases the live section key, so the section write above replaces
+		// the flat array in place; deleting it would wipe the just-migrated section.
+		deleteKeys: LEGACY_SETTING_KEYS.filter((key) => key !== 'magicTags')
 	};
 }
