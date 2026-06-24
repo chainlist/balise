@@ -2,7 +2,7 @@
 	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
 	"productName": "Balise",
 	"mainBinaryName": "Balise",
-	"version": "0.35.1",
+	"version": "0.36.0",
 	"identifier": "com.balise.md",
 	"build": {
 		"frontendDist": "../build",

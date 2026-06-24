@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/chainlist/balise/compare/v0.35.1...v0.36.0) (2026-06-24)
+
+
+### Features
+
+* **editor:** added cover, image and cover commands, delete button on embeds ([#111](https://github.com/chainlist/balise/issues/111)) ([733db61](https://github.com/chainlist/balise/commit/733db616d9d21b9c23f52a6ffcc7cff03600923d))
+
 ## [0.35.1](https://github.com/chainlist/balise/compare/v0.35.0...v0.35.1) (2026-06-24)
 
 
