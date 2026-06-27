@@ -31,3 +31,17 @@ export async function copyAttachment(
 ): Promise<void> {
 	await invoke('copy_attachment', { deskName, srcPath, filename });
 }
+
+/** List the font families installed on the OS, sorted, for the editor
+ *  font-family setting. Resolved in Rust so it works on every platform.
+ *  Memoized: enumerating the OS fonts has a cold-start cost and the installed
+ *  set does not change while the app runs, so the first call is shared by every
+ *  later one. A failed call clears the cache so a reopen can retry. */
+let fontsPromise: Promise<string[]> | null = null;
+export function listFonts(): Promise<string[]> {
+	fontsPromise ??= invoke<string[]>('list_fonts').catch((e) => {
+		fontsPromise = null;
+		throw e;
+	});
+	return fontsPromise;
+}

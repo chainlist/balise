@@ -34,13 +34,18 @@ interface RawCooccurrenceRow {
 
 export const tagRepo = {
 	async withCounts(): Promise<Tag[]> {
+		// Counts come straight from `note_tags` (one GROUP BY over `idx_note_tags_tag`),
+		// not via the `tags` view + a `LOWER()`-wrapped self-join, which defeated the
+		// index and re-materialised the view's DISTINCT on every call. Tag casing is
+		// canonicalised on every write path (`setNoteTags` here, `set_note_tags` in the
+		// Rust sync import), so grouping on the raw `tag` is equivalent to the old
+		// case-insensitive join.
 		const rows = await getDb().select<RawTagRow[]>(`
-      SELECT t.tag, ts.color, ts.display_name, COALESCE(ts.pinned, 0) AS pinned, COUNT(nt.note_id) AS count
-      FROM tags t
-      LEFT JOIN note_tags nt ON LOWER(nt.tag) = LOWER(t.tag)
-      LEFT JOIN tag_settings ts ON ts.tag = t.tag
-      GROUP BY t.tag
-      ORDER BY COALESCE(ts.pinned, 0) DESC, t.tag COLLATE NOCASE
+      SELECT nt.tag, ts.color, ts.display_name, COALESCE(ts.pinned, 0) AS pinned, COUNT(*) AS count
+      FROM note_tags nt
+      LEFT JOIN tag_settings ts ON ts.tag = nt.tag
+      GROUP BY nt.tag
+      ORDER BY COALESCE(ts.pinned, 0) DESC, nt.tag COLLATE NOCASE
     `);
 		return rows.map((r) => ({
 			tag: r.tag,

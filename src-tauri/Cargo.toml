@@ -26,6 +26,7 @@ blake3 = "1"
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio"] }
 regex = "1"
 chrono = "0.4"
+font-kit = "0.14"
 ed25519-dalek = "2"
 getrandom = "0.2"
 iroh = "0.98"

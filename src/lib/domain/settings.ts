@@ -65,6 +65,8 @@ export interface EditorSettings {
 	fontSize: number;
 	lineHeight: number;
 	markdownMarks: MarkMode;
+	/** Installed OS font-family name for the editor text. Empty = app default. */
+	fontFamily: string;
 }
 
 export interface JournalSettings {
@@ -116,7 +118,8 @@ export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
 	fontSize: 16,
 	lineHeight: 1.75,
-	markdownMarks: 'cursor'
+	markdownMarks: 'cursor',
+	fontFamily: ''
 };
 
 export const DEFAULT_JOURNAL_SETTINGS: JournalSettings = {

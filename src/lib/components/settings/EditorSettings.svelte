@@ -7,6 +7,7 @@
 	import Stepper from '$lib/components/Stepper.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingRow from './SettingRow.svelte';
+	import FontPicker from './FontPicker.svelte';
 
 	const FONT_MIN = 12;
 	const FONT_MAX = 42;
@@ -31,6 +32,13 @@
 	description={m.settings_editor_description()}
 	bodyClass="space-y-6"
 >
+	<SettingRow title={m.settings_font_family_label()} description={m.settings_font_family_helper()}>
+		<FontPicker
+			value={settingsService.editor.state.fontFamily}
+			onValueChange={(v) => settingsService.editor.setFontFamily(v)}
+		/>
+	</SettingRow>
+
 	<SettingRow title={m.settings_font_size_label()} description={m.settings_font_size_helper()}>
 		<Stepper
 			value={settingsService.editor.state.fontSize}
