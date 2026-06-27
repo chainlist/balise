@@ -283,9 +283,13 @@ export const noteEditorTheme = EditorView.theme({
 		position: 'absolute',
 		top: '0',
 		left: '0',
+		right: '0',
 		color: 'var(--muted-foreground)',
 		opacity: '0.5',
 		pointerEvents: 'none',
-		userSelect: 'none'
+		userSelect: 'none',
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	}
 });
