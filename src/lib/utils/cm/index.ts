@@ -4,6 +4,7 @@ export { mdBulletPlugin } from './bulletPlugin';
 export { mdHrPlugin } from './hrPlugin';
 export { mdHeaderPlugin } from './headerPlugin';
 export { mdQuotePlugin, quoteExitKeymap } from './quotePlugin';
+export { mdSignalPlugin } from './signalPlugin';
 export { mdCodePlugin } from './codePlugin';
 export { codeFenceAutoClose } from './codeFencePlugin';
 export { mdLinkPlugin } from './linkPlugin';

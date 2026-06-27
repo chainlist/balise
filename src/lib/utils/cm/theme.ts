@@ -184,6 +184,33 @@ export const noteEditorTheme = EditorView.theme({
 		paddingLeft: '0.75rem',
 		color: 'var(--muted-foreground)'
 	},
+
+	// Signals (GitHub-style alerts). Each line of a signal carries a per-type
+	// `--signal-color`; the shared rule paints the left bar and tinted background.
+	'.cm-md-signal': {
+		borderLeft: '3px solid var(--signal-color)',
+		background: 'color-mix(in oklch, var(--signal-color) 12%, transparent)',
+		paddingLeft: '0.75rem'
+	},
+	'.cm-md-signal-note': { '--signal-color': 'var(--signal-note)' },
+	'.cm-md-signal-tip': { '--signal-color': 'var(--signal-tip)' },
+	'.cm-md-signal-important': { '--signal-color': 'var(--signal-important)' },
+	'.cm-md-signal-warning': { '--signal-color': 'var(--signal-warning)' },
+	'.cm-md-signal-caution': { '--signal-color': 'var(--signal-caution)' },
+	'.cm-md-signal-first': {
+		borderTopLeftRadius: '6px',
+		borderTopRightRadius: '6px'
+	},
+	'.cm-md-signal-last': {
+		paddingBottom: '0.4em',
+		borderBottomLeftRadius: '6px',
+		borderBottomRightRadius: '6px'
+	},
+	// Collapse the concealed header row to the label height and pull the body up
+	// so it sits tight under the title instead of a full line-height below.
+	'.cm-md-signal-marker': {
+		lineHeight: '1'
+	},
 	'.cm-md-list-item': { paddingLeft: '1.5em', textIndent: '-1.5em' },
 	'.cm-md-bullet': { color: 'var(--primary)' },
 	'.cm-md-number': { color: 'var(--primary)' },

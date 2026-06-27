@@ -115,6 +115,14 @@ pub fn run() {
                 );
             }
 
+            // The quick window draws its own in-app title bar like the main
+            // window, so strip the OS frame off-macOS. macOS keeps its native
+            // decorations for the HUD-window vibrancy above.
+            #[cfg(not(target_os = "macos"))]
+            if let Some(quick_window) = app.get_webview_window("quick") {
+                let _ = quick_window.set_decorations(false);
+            }
+
             Ok(())
         })
         .run(tauri::generate_context!())

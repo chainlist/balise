@@ -102,6 +102,46 @@ export const SLASH_ACTIONS: SlashAction[] = [
 		icon: '"'
 	},
 	{
+		id: 'signal-note',
+		label: m.slash_signal_note_label(),
+		description: m.slash_signal_note_desc(),
+		insert: '> [!NOTE]\n> ',
+		keywords: ['signal', 'note', 'callout', 'info'],
+		icon: 'ℹ'
+	},
+	{
+		id: 'signal-tip',
+		label: m.slash_signal_tip_label(),
+		description: m.slash_signal_tip_desc(),
+		insert: '> [!TIP]\n> ',
+		keywords: ['signal', 'tip', 'callout', 'hint'],
+		icon: '💡'
+	},
+	{
+		id: 'signal-important',
+		label: m.slash_signal_important_label(),
+		description: m.slash_signal_important_desc(),
+		insert: '> [!IMPORTANT]\n> ',
+		keywords: ['signal', 'important', 'callout'],
+		icon: '❗'
+	},
+	{
+		id: 'signal-warning',
+		label: m.slash_signal_warning_label(),
+		description: m.slash_signal_warning_desc(),
+		insert: '> [!WARNING]\n> ',
+		keywords: ['signal', 'warning', 'callout', 'warn'],
+		icon: '⚠'
+	},
+	{
+		id: 'signal-caution',
+		label: m.slash_signal_caution_label(),
+		description: m.slash_signal_caution_desc(),
+		insert: '> [!CAUTION]\n> ',
+		keywords: ['signal', 'caution', 'callout', 'danger'],
+		icon: '🛑'
+	},
+	{
 		id: 'code',
 		label: m.slash_code_label(),
 		description: m.slash_code_desc(),
