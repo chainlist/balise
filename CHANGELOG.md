@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.37.0](https://github.com/chainlist/balise/compare/v0.36.0...v0.37.0) (2026-06-27)
+
+
+### Features
+
+* **editor:** list bullets and numbers use the primary color ([#115](https://github.com/chainlist/balise/issues/115)) ([d41ebe1](https://github.com/chainlist/balise/commit/d41ebe19379b5103f404b27b1775acf16c810498))
+* **settings:** you can now change the editor's font in the settings ([#113](https://github.com/chainlist/balise/issues/113)) ([3c30333](https://github.com/chainlist/balise/commit/3c30333ab6b2b0d9dfff7b46fe75d334b721cd48))
+
 ## [0.36.0](https://github.com/chainlist/balise/compare/v0.35.1...v0.36.0) (2026-06-24)
 
 
