@@ -44,7 +44,7 @@ export const noteEditorTheme = EditorView.theme({
 	},
 	'&.cm-focused': { outline: 'none' },
 	'.cm-scroller': {
-		fontFamily: 'var(--font-sans)',
+		fontFamily: 'var(--editor-font-family, var(--font-sans))',
 		fontSize: 'var(--editor-font-size, 16px)',
 		overflow: 'visible',
 		padding: '1.5rem',

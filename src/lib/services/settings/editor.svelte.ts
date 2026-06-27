@@ -31,9 +31,20 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		this.persist();
 	}
 
+	setFontFamily(family: string): void {
+		this.state.fontFamily = family;
+		this.applyVars();
+		this.persist();
+	}
+
 	applyVars(): void {
 		const style = document.documentElement.style;
 		style.setProperty('--editor-font-size', `${this.state.fontSize}px`);
 		style.setProperty('--editor-line-height', `${this.state.lineHeight}`);
+		if (this.state.fontFamily) {
+			style.setProperty('--editor-font-family', `"${this.state.fontFamily}", var(--font-sans)`);
+		} else {
+			style.removeProperty('--editor-font-family');
+		}
 	}
 }

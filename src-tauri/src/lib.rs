@@ -34,6 +34,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::file_sync::set_desk_file_mtime,
             commands::attachments::copy_attachment,
+            commands::fonts::list_fonts,
             sync::sync_desk_files,
             sync::migrate_desk_db,
             commands::device::device_id,
