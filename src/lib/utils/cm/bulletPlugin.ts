@@ -17,24 +17,26 @@ class BulletWidget extends WidgetType {
 }
 
 const bulletWidget = new BulletWidget();
+const numberMark = Decoration.mark({ class: 'cm-md-number' });
 
 function buildBulletDecos(mode: MarkMode) {
 	return (view: EditorView): DecorationSet => {
-		if (mode === 'always') return Decoration.none;
-
 		const ranges: Range<Decoration>[] = [];
 
 		syntaxTree(view.state).iterate({
 			enter(node) {
 				if (node.name !== 'ListMark') return;
-				const isBullet = node.node.parent?.parent?.name === 'BulletList';
-				if (isBullet) {
+				const listName = node.node.parent?.parent?.name;
+				if (listName === 'BulletList') {
+					if (mode === 'always') return;
 					ranges.push(Decoration.replace({ widget: bulletWidget }).range(node.from, node.to));
+				} else if (listName === 'OrderedList') {
+					ranges.push(numberMark.range(node.from, node.to));
 				}
 			}
 		});
 
-		return Decoration.set(ranges);
+		return Decoration.set(ranges, true);
 	};
 }
 
