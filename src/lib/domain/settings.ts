@@ -72,6 +72,11 @@ export interface EditorSettings {
 	heading2Color: string | null;
 	heading3Color: string | null;
 	heading4Color: string | null;
+	/** Whether each heading level is underlined. */
+	heading1Underline: boolean;
+	heading2Underline: boolean;
+	heading3Underline: boolean;
+	heading4Underline: boolean;
 	/** Default editor text color; `null` falls back to `--foreground`. */
 	textColor: string | null;
 }
@@ -131,6 +136,10 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
 	heading2Color: null,
 	heading3Color: null,
 	heading4Color: null,
+	heading1Underline: false,
+	heading2Underline: false,
+	heading3Underline: false,
+	heading4Underline: false,
 	textColor: null
 };
 

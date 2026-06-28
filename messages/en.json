@@ -162,6 +162,7 @@
 	"settings_editor_colors_label": "Colors",
 	"settings_editor_colors_helper": "Customize heading and text colors in the editor.",
 	"settings_editor_heading_color_helper": "Defaults to the primary color.",
+	"settings_editor_underline": "Underline",
 	"settings_editor_h1_label": "Heading 1",
 	"settings_editor_h1_aria": "Change heading 1 color",
 	"settings_editor_h2_label": "Heading 2",

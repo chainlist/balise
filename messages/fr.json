@@ -162,6 +162,7 @@
 	"settings_editor_colors_label": "Couleurs",
 	"settings_editor_colors_helper": "Personnalisez les couleurs des titres et du texte dans l'éditeur.",
 	"settings_editor_heading_color_helper": "Par défaut, la couleur principale.",
+	"settings_editor_underline": "Souligné",
 	"settings_editor_h1_label": "Titre 1",
 	"settings_editor_h1_aria": "Changer la couleur du titre 1",
 	"settings_editor_h2_label": "Titre 2",

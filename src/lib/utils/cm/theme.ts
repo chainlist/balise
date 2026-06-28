@@ -38,6 +38,15 @@ const mdHighlightStyle = HighlightStyle.define([
 
 export const mdSyntaxHighlighting = syntaxHighlighting(mdHighlightStyle);
 
+/** Per-level heading metrics, shared by the editor theme and the settings preview
+ *  so the live preview can't drift from how the editor actually renders headings. */
+export const HEADING_METRICS = {
+	1: { fontSize: '1.602em', fontWeight: '700', lineHeight: '1.2' },
+	2: { fontSize: '1.4602em', fontWeight: '600', lineHeight: '1.4' },
+	3: { fontSize: '1.224em', fontWeight: '600', lineHeight: '1.5' },
+	4: { fontSize: '1.1em', fontWeight: '600', lineHeight: '1.5' }
+} as const;
+
 export const noteEditorTheme = EditorView.theme({
 	'&': {
 		color: 'var(--editor-text-color, var(--foreground))',
@@ -152,10 +161,9 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-codeblock .cm-tok-property': { color: 'var(--cm-t-property)' },
 	'.cm-md-codeblock .cm-tok-meta': { color: 'var(--cm-t-meta)' },
 	'.cm-md-h1': {
-		fontSize: '1.602em',
-		fontWeight: '700',
-		lineHeight: '1.2',
-		color: 'var(--editor-h1-color, var(--primary))'
+		...HEADING_METRICS[1],
+		color: 'var(--editor-h1-color, var(--primary))',
+		textDecoration: 'var(--editor-h1-underline, none)'
 	},
 	// Full-width title underline lives on the line (see headerPlugin), so the `#`
 	// mark and the heading text stay on one line.
@@ -163,28 +171,25 @@ export const noteEditorTheme = EditorView.theme({
 		paddingTop: '0.75em'
 	},
 	'.cm-md-h2': {
-		fontSize: '1.4602em',
-		fontWeight: '600',
-		lineHeight: '1.4',
-		color: 'var(--editor-h2-color, var(--primary))'
+		...HEADING_METRICS[2],
+		color: 'var(--editor-h2-color, var(--primary))',
+		textDecoration: 'var(--editor-h2-underline, none)'
 	},
 	'.cm-md-h2-line': {
 		paddingTop: '0.5em'
 	},
 	'.cm-md-h3': {
-		fontSize: '1.224em',
-		fontWeight: '600',
-		lineHeight: '1.5',
-		color: 'var(--editor-h3-color, var(--primary))'
+		...HEADING_METRICS[3],
+		color: 'var(--editor-h3-color, var(--primary))',
+		textDecoration: 'var(--editor-h3-underline, none)'
 	},
 	'.cm-md-h3-line': {
 		paddingTop: '0.35em'
 	},
 	'.cm-md-h4': {
-		fontSize: '1.1em',
-		fontWeight: '600',
-		lineHeight: '1.5',
-		color: 'var(--editor-h4-color, var(--primary))'
+		...HEADING_METRICS[4],
+		color: 'var(--editor-h4-color, var(--primary))',
+		textDecoration: 'var(--editor-h4-underline, none)'
 	},
 	'.cm-md-h4-line': {
 		paddingTop: '0.3em'

@@ -3,6 +3,7 @@
 	import * as m from '$paraglide/messages.js';
 	import SettingsSection from './SettingsSection.svelte';
 	import ColorSettingRow from './ColorSettingRow.svelte';
+	import HeadingColorRow from './HeadingColorRow.svelte';
 
 	const headings = [
 		{ level: 1, title: m.settings_editor_h1_label, aria: m.settings_editor_h1_aria },
@@ -15,17 +16,19 @@
 <SettingsSection
 	title={m.settings_editor_colors_label()}
 	description={m.settings_editor_colors_helper()}
-	bodyClass="space-y-4"
+	bodyClass="space-y-6"
 >
 	{#each headings as heading (heading.level)}
-		<ColorSettingRow
+		<HeadingColorRow
+			level={heading.level}
 			title={heading.title()}
-			description={m.settings_editor_heading_color_helper()}
 			ariaLabel={heading.aria()}
 			value={settingsService.editor.state[`heading${heading.level}Color`]}
-			defaultClass="bg-primary"
+			underline={settingsService.editor.state[`heading${heading.level}Underline`]}
 			onpick={(color) => settingsService.editor.setHeadingColor(heading.level, color)}
 			onreset={() => settingsService.editor.setHeadingColor(heading.level, null)}
+			onToggleUnderline={(value) =>
+				settingsService.editor.setHeadingUnderline(heading.level, value)}
 		/>
 	{/each}
 

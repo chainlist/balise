@@ -43,6 +43,12 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		this.persist();
 	}
 
+	setHeadingUnderline(level: 1 | 2 | 3 | 4, underline: boolean): void {
+		this.state[`heading${level}Underline`] = underline;
+		this.applyVars();
+		this.persist();
+	}
+
 	setTextColor(color: string | null): void {
 		this.state.textColor = color;
 		this.applyVars();
@@ -58,16 +64,20 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		} else {
 			style.removeProperty('--editor-font-family');
 		}
-		setOrRemove(style, '--editor-h1-color', this.state.heading1Color);
-		setOrRemove(style, '--editor-h2-color', this.state.heading2Color);
-		setOrRemove(style, '--editor-h3-color', this.state.heading3Color);
-		setOrRemove(style, '--editor-h4-color', this.state.heading4Color);
+		([1, 2, 3, 4] as const).forEach((level) => {
+			setOrRemove(style, `--editor-h${level}-color`, this.state[`heading${level}Color`]);
+			setOrRemove(
+				style,
+				`--editor-h${level}-underline`,
+				this.state[`heading${level}Underline`] ? 'underline' : null
+			);
+		});
 		setOrRemove(style, '--editor-text-color', this.state.textColor);
 	}
 }
 
-/** Set a CSS var to `color`, or remove it so the theme's fallback applies again. */
-function setOrRemove(style: CSSStyleDeclaration, name: string, color: string | null): void {
-	if (color) style.setProperty(name, color);
+/** Set a CSS var to `value`, or remove it so the theme's fallback applies again. */
+function setOrRemove(style: CSSStyleDeclaration, name: string, value: string | null): void {
+	if (value) style.setProperty(name, value);
 	else style.removeProperty(name);
 }
