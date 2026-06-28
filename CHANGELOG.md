@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.0](https://github.com/chainlist/balise/compare/v0.37.0...v0.38.0) (2026-06-28)
+
+
+### Features
+
+* **editor:** added personalization options for headings ([#116](https://github.com/chainlist/balise/issues/116)) ([c2d637f](https://github.com/chainlist/balise/commit/c2d637f58738247815c5c6843e5a33fccc5c6ac2))
+
 ## [0.37.0](https://github.com/chainlist/balise/compare/v0.36.0...v0.37.0) (2026-06-27)
 
 
