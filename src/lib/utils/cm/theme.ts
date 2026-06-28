@@ -10,6 +10,7 @@ const mdHighlightStyle = HighlightStyle.define([
 	{ tag: t.heading1, class: 'cm-md-h1' },
 	{ tag: t.heading2, class: 'cm-md-h2' },
 	{ tag: t.heading3, class: 'cm-md-h3' },
+	{ tag: t.heading4, class: 'cm-md-h4' },
 
 	// Code tokens (scoped to fenced blocks via the `.cm-md-codeblock` line class in CSS).
 	{
@@ -39,7 +40,7 @@ export const mdSyntaxHighlighting = syntaxHighlighting(mdHighlightStyle);
 
 export const noteEditorTheme = EditorView.theme({
 	'&': {
-		color: 'var(--foreground)',
+		color: 'var(--editor-text-color, var(--foreground))',
 		background: 'transparent'
 	},
 	'&.cm-focused': { outline: 'none' },
@@ -154,7 +155,7 @@ export const noteEditorTheme = EditorView.theme({
 		fontSize: '1.602em',
 		fontWeight: '700',
 		lineHeight: '1.2',
-		color: 'var(--primary)'
+		color: 'var(--editor-h1-color, var(--primary))'
 	},
 	// Full-width title underline lives on the line (see headerPlugin), so the `#`
 	// mark and the heading text stay on one line.
@@ -165,7 +166,7 @@ export const noteEditorTheme = EditorView.theme({
 		fontSize: '1.4602em',
 		fontWeight: '600',
 		lineHeight: '1.4',
-		color: 'var(--primary)'
+		color: 'var(--editor-h2-color, var(--primary))'
 	},
 	'.cm-md-h2-line': {
 		paddingTop: '0.5em'
@@ -174,10 +175,19 @@ export const noteEditorTheme = EditorView.theme({
 		fontSize: '1.224em',
 		fontWeight: '600',
 		lineHeight: '1.5',
-		color: 'var(--primary)'
+		color: 'var(--editor-h3-color, var(--primary))'
 	},
 	'.cm-md-h3-line': {
 		paddingTop: '0.35em'
+	},
+	'.cm-md-h4': {
+		fontSize: '1.1em',
+		fontWeight: '600',
+		lineHeight: '1.5',
+		color: 'var(--editor-h4-color, var(--primary))'
+	},
+	'.cm-md-h4-line': {
+		paddingTop: '0.3em'
 	},
 	'.cm-md-quote': {
 		borderLeft: '3px solid color-mix(in oklch, var(--primary) 45%, transparent)',

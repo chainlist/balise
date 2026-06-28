@@ -11,7 +11,8 @@ import { makePlugin, hideMark, isMarkRevealed, type MarkMode } from './shared';
 const headingLines: Record<string, Decoration> = {
 	ATXHeading1: Decoration.line({ class: 'cm-md-h1-line' }),
 	ATXHeading2: Decoration.line({ class: 'cm-md-h2-line' }),
-	ATXHeading3: Decoration.line({ class: 'cm-md-h3-line' })
+	ATXHeading3: Decoration.line({ class: 'cm-md-h3-line' }),
+	ATXHeading4: Decoration.line({ class: 'cm-md-h4-line' })
 };
 
 function buildHeaderDecos(mode: MarkMode) {

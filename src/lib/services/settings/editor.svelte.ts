@@ -37,6 +37,18 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		this.persist();
 	}
 
+	setHeadingColor(level: 1 | 2 | 3 | 4, color: string | null): void {
+		this.state[`heading${level}Color`] = color;
+		this.applyVars();
+		this.persist();
+	}
+
+	setTextColor(color: string | null): void {
+		this.state.textColor = color;
+		this.applyVars();
+		this.persist();
+	}
+
 	applyVars(): void {
 		const style = document.documentElement.style;
 		style.setProperty('--editor-font-size', `${this.state.fontSize}px`);
@@ -46,5 +58,16 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		} else {
 			style.removeProperty('--editor-font-family');
 		}
+		setOrRemove(style, '--editor-h1-color', this.state.heading1Color);
+		setOrRemove(style, '--editor-h2-color', this.state.heading2Color);
+		setOrRemove(style, '--editor-h3-color', this.state.heading3Color);
+		setOrRemove(style, '--editor-h4-color', this.state.heading4Color);
+		setOrRemove(style, '--editor-text-color', this.state.textColor);
 	}
+}
+
+/** Set a CSS var to `color`, or remove it so the theme's fallback applies again. */
+function setOrRemove(style: CSSStyleDeclaration, name: string, color: string | null): void {
+	if (color) style.setProperty(name, color);
+	else style.removeProperty(name);
 }

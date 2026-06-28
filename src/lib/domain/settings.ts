@@ -67,6 +67,13 @@ export interface EditorSettings {
 	markdownMarks: MarkMode;
 	/** Installed OS font-family name for the editor text. Empty = app default. */
 	fontFamily: string;
+	/** Heading colors; `null` falls back to the primary color. */
+	heading1Color: string | null;
+	heading2Color: string | null;
+	heading3Color: string | null;
+	heading4Color: string | null;
+	/** Default editor text color; `null` falls back to `--foreground`. */
+	textColor: string | null;
 }
 
 export interface JournalSettings {
@@ -119,7 +126,12 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
 	fontSize: 16,
 	lineHeight: 1.75,
 	markdownMarks: 'cursor',
-	fontFamily: ''
+	fontFamily: '',
+	heading1Color: null,
+	heading2Color: null,
+	heading3Color: null,
+	heading4Color: null,
+	textColor: null
 };
 
 export const DEFAULT_JOURNAL_SETTINGS: JournalSettings = {
