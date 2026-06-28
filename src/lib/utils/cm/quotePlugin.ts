@@ -3,6 +3,7 @@ import type { Command, DecorationSet } from '@codemirror/view';
 import { EditorSelection, Prec, type Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { makePlugin, hideMark, isRevealed, type MarkMode } from './shared';
+import { signalType } from '../markdown-patterns';
 
 const quoteLine = Decoration.line({ class: 'cm-md-quote' });
 
@@ -12,11 +13,18 @@ function buildQuoteDecos(mode: MarkMode) {
 		const cursorLine = state.doc.lineAt(state.selection.main.head).number;
 		const ranges: Range<Decoration>[] = [];
 		const seenLines = new Set<number>();
+		// Blockquotes that are signals (`> [!NOTE]`) are owned by the signal plugin;
+		// recorded here so their `>` marks are left alone too.
+		const signalRanges: [number, number][] = [];
 
 		syntaxTree(state).iterate({
 			enter(node) {
 				// Style every line the blockquote spans (continuous left bar).
 				if (node.name === 'Blockquote') {
+					if (signalType(state.doc.lineAt(node.from).text)) {
+						signalRanges.push([node.from, node.to]);
+						return;
+					}
 					let pos = node.from;
 					while (pos <= node.to) {
 						const line = state.doc.lineAt(pos);
@@ -31,6 +39,7 @@ function buildQuoteDecos(mode: MarkMode) {
 
 				// Hide the `>` mark (and its trailing space) unless the cursor reveals it.
 				if (node.name === 'QuoteMark' && mode !== 'always') {
+					if (signalRanges.some(([f, t]) => node.from >= f && node.from <= t)) return;
 					const line = state.doc.lineAt(node.from);
 					if (isRevealed(mode, line.number, cursorLine)) return;
 					ranges.push(hideMark.range(node.from, Math.min(node.to + 1, line.to)));

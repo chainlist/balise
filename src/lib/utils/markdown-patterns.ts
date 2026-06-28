@@ -52,6 +52,22 @@ export const HEADING_PREFIX_RE = /^#{1,6}\s+/;
  */
 export const CHECKLIST_RE = /^([ \t]*- \[)( |[xX]|~)(\]\s*)(.+)$/;
 
+/** The five signal kinds (GitHub-style alerts), in display order. */
+export const SIGNAL_TYPES = ['note', 'tip', 'important', 'warning', 'caution'] as const;
+export type SignalType = (typeof SIGNAL_TYPES)[number];
+
+/**
+ * A "signal" is a blockquote whose first line is a GitHub-style alert marker,
+ * e.g. `> [!NOTE]`. The marker must be the only content on that line.
+ */
+export const SIGNAL_MARKER_RE = /^\s*>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i;
+
+/** Returns the signal type when `lineText` is a signal marker line, else null. */
+export function signalType(lineText: string): SignalType | null {
+	const m = SIGNAL_MARKER_RE.exec(lineText);
+	return m ? (m[1].toLowerCase() as SignalType) : null;
+}
+
 /**
  * Checkbox at start of line: "- [ ]" / "- [x]". Group 1 = marker, group 2 = text.
  * Intentionally separate from CHECKLIST_RE: no `~` marker, different capture shape.

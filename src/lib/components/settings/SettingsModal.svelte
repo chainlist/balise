@@ -18,6 +18,7 @@
 	import ShortcutsSettings from './ShortcutsSettings.svelte';
 	import AppearanceSettings from './AppearanceSettings.svelte';
 	import EditorSettings from './EditorSettings.svelte';
+	import EditorColorsSettings from './EditorColorsSettings.svelte';
 	import JournalSettings from './JournalSettings.svelte';
 	import AboutSettings from './AboutSettings.svelte';
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
@@ -72,7 +73,14 @@
 					id: 'editor',
 					label: m.settings_editor_heading(),
 					icon: TypeIcon,
-					component: EditorSettings
+					component: EditorSettings,
+					children: [
+						{
+							id: 'editor-colors',
+							label: m.settings_editor_colors_label(),
+							component: EditorColorsSettings
+						}
+					]
 				},
 				{
 					id: 'journal',

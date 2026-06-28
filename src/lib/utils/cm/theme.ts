@@ -10,6 +10,7 @@ const mdHighlightStyle = HighlightStyle.define([
 	{ tag: t.heading1, class: 'cm-md-h1' },
 	{ tag: t.heading2, class: 'cm-md-h2' },
 	{ tag: t.heading3, class: 'cm-md-h3' },
+	{ tag: t.heading4, class: 'cm-md-h4' },
 
 	// Code tokens (scoped to fenced blocks via the `.cm-md-codeblock` line class in CSS).
 	{
@@ -37,9 +38,18 @@ const mdHighlightStyle = HighlightStyle.define([
 
 export const mdSyntaxHighlighting = syntaxHighlighting(mdHighlightStyle);
 
+/** Per-level heading metrics, shared by the editor theme and the settings preview
+ *  so the live preview can't drift from how the editor actually renders headings. */
+export const HEADING_METRICS = {
+	1: { fontSize: '1.602em', fontWeight: '700', lineHeight: '1.2' },
+	2: { fontSize: '1.4602em', fontWeight: '600', lineHeight: '1.4' },
+	3: { fontSize: '1.224em', fontWeight: '600', lineHeight: '1.5' },
+	4: { fontSize: '1.1em', fontWeight: '600', lineHeight: '1.5' }
+} as const;
+
 export const noteEditorTheme = EditorView.theme({
 	'&': {
-		color: 'var(--foreground)',
+		color: 'var(--editor-text-color, var(--foreground))',
 		background: 'transparent'
 	},
 	'&.cm-focused': { outline: 'none' },
@@ -151,10 +161,9 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-codeblock .cm-tok-property': { color: 'var(--cm-t-property)' },
 	'.cm-md-codeblock .cm-tok-meta': { color: 'var(--cm-t-meta)' },
 	'.cm-md-h1': {
-		fontSize: '1.602em',
-		fontWeight: '700',
-		lineHeight: '1.2',
-		color: 'var(--primary)'
+		...HEADING_METRICS[1],
+		color: 'var(--editor-h1-color, var(--primary))',
+		textDecoration: 'var(--editor-h1-underline, none)'
 	},
 	// Full-width title underline lives on the line (see headerPlugin), so the `#`
 	// mark and the heading text stay on one line.
@@ -162,27 +171,60 @@ export const noteEditorTheme = EditorView.theme({
 		paddingTop: '0.75em'
 	},
 	'.cm-md-h2': {
-		fontSize: '1.4602em',
-		fontWeight: '600',
-		lineHeight: '1.4',
-		color: 'var(--primary)'
+		...HEADING_METRICS[2],
+		color: 'var(--editor-h2-color, var(--primary))',
+		textDecoration: 'var(--editor-h2-underline, none)'
 	},
 	'.cm-md-h2-line': {
 		paddingTop: '0.5em'
 	},
 	'.cm-md-h3': {
-		fontSize: '1.224em',
-		fontWeight: '600',
-		lineHeight: '1.5',
-		color: 'var(--primary)'
+		...HEADING_METRICS[3],
+		color: 'var(--editor-h3-color, var(--primary))',
+		textDecoration: 'var(--editor-h3-underline, none)'
 	},
 	'.cm-md-h3-line': {
 		paddingTop: '0.35em'
+	},
+	'.cm-md-h4': {
+		...HEADING_METRICS[4],
+		color: 'var(--editor-h4-color, var(--primary))',
+		textDecoration: 'var(--editor-h4-underline, none)'
+	},
+	'.cm-md-h4-line': {
+		paddingTop: '0.3em'
 	},
 	'.cm-md-quote': {
 		borderLeft: '3px solid color-mix(in oklch, var(--primary) 45%, transparent)',
 		paddingLeft: '0.75rem',
 		color: 'var(--muted-foreground)'
+	},
+
+	// Signals (GitHub-style alerts). Each line of a signal carries a per-type
+	// `--signal-color`; the shared rule paints the left bar and tinted background.
+	'.cm-md-signal': {
+		borderLeft: '3px solid var(--signal-color)',
+		background: 'color-mix(in oklch, var(--signal-color) 12%, transparent)',
+		paddingLeft: '0.75rem'
+	},
+	'.cm-md-signal-note': { '--signal-color': 'var(--signal-note)' },
+	'.cm-md-signal-tip': { '--signal-color': 'var(--signal-tip)' },
+	'.cm-md-signal-important': { '--signal-color': 'var(--signal-important)' },
+	'.cm-md-signal-warning': { '--signal-color': 'var(--signal-warning)' },
+	'.cm-md-signal-caution': { '--signal-color': 'var(--signal-caution)' },
+	'.cm-md-signal-first': {
+		borderTopLeftRadius: '6px',
+		borderTopRightRadius: '6px'
+	},
+	'.cm-md-signal-last': {
+		paddingBottom: '0.4em',
+		borderBottomLeftRadius: '6px',
+		borderBottomRightRadius: '6px'
+	},
+	// Collapse the concealed header row to the label height and pull the body up
+	// so it sits tight under the title instead of a full line-height below.
+	'.cm-md-signal-marker': {
+		lineHeight: '1'
 	},
 	'.cm-md-list-item': { paddingLeft: '1.5em', textIndent: '-1.5em' },
 	'.cm-md-bullet': { color: 'var(--primary)' },
@@ -256,9 +298,13 @@ export const noteEditorTheme = EditorView.theme({
 		position: 'absolute',
 		top: '0',
 		left: '0',
+		right: '0',
 		color: 'var(--muted-foreground)',
 		opacity: '0.5',
 		pointerEvents: 'none',
-		userSelect: 'none'
+		userSelect: 'none',
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis'
 	}
 });

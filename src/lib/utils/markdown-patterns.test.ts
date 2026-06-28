@@ -7,7 +7,8 @@ import {
 	IMAGE_SOURCE,
 	HEADING_PREFIX_RE,
 	CHECKLIST_RE,
-	CHECKBOX_RE
+	CHECKBOX_RE,
+	signalType
 } from './markdown-patterns';
 
 // These source strings/regexes are the single source of truth for what the editor
@@ -119,5 +120,24 @@ describe('CHECKLIST_RE (lenient, includes ~ in-progress)', () => {
 	});
 	it('accepts the ~ in-progress marker', () => {
 		expect(CHECKLIST_RE.exec('- [~] wip')?.[2]).toBe('~');
+	});
+});
+
+describe('signalType (GitHub-style alert marker)', () => {
+	it('recognises each of the five types, case-insensitively', () => {
+		expect(signalType('> [!NOTE]')).toBe('note');
+		expect(signalType('> [!tip]')).toBe('tip');
+		expect(signalType('> [!Important]')).toBe('important');
+		expect(signalType('> [!WARNING]')).toBe('warning');
+		expect(signalType('> [!caution]')).toBe('caution');
+	});
+	it('returns null for a plain blockquote', () => {
+		expect(signalType('> just a quote')).toBeNull();
+	});
+	it('requires the marker to be the only content on the line', () => {
+		expect(signalType('> [!NOTE] with trailing text')).toBeNull();
+	});
+	it('rejects an unknown type', () => {
+		expect(signalType('> [!HEADSUP]')).toBeNull();
 	});
 });

@@ -24,7 +24,9 @@
 		settingsService.editor.setFontSize(Math.min(FONT_MAX, Math.max(FONT_MIN, Math.round(v))));
 
 	const setLineHeight = (v: number) =>
-		settingsService.editor.setLineHeight(Math.min(LH_MAX, Math.max(LH_MIN, Math.round(v * 20) / 20)));
+		settingsService.editor.setLineHeight(
+			Math.min(LH_MAX, Math.max(LH_MIN, Math.round(v * 20) / 20))
+		);
 </script>
 
 <SettingsSection

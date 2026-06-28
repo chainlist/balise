@@ -37,6 +37,24 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		this.persist();
 	}
 
+	setHeadingColor(level: 1 | 2 | 3 | 4, color: string | null): void {
+		this.state[`heading${level}Color`] = color;
+		this.applyVars();
+		this.persist();
+	}
+
+	setHeadingUnderline(level: 1 | 2 | 3 | 4, underline: boolean): void {
+		this.state[`heading${level}Underline`] = underline;
+		this.applyVars();
+		this.persist();
+	}
+
+	setTextColor(color: string | null): void {
+		this.state.textColor = color;
+		this.applyVars();
+		this.persist();
+	}
+
 	applyVars(): void {
 		const style = document.documentElement.style;
 		style.setProperty('--editor-font-size', `${this.state.fontSize}px`);
@@ -46,5 +64,20 @@ export class EditorSettingsSection extends SettingsSection<EditorSettings> {
 		} else {
 			style.removeProperty('--editor-font-family');
 		}
+		([1, 2, 3, 4] as const).forEach((level) => {
+			setOrRemove(style, `--editor-h${level}-color`, this.state[`heading${level}Color`]);
+			setOrRemove(
+				style,
+				`--editor-h${level}-underline`,
+				this.state[`heading${level}Underline`] ? 'underline' : null
+			);
+		});
+		setOrRemove(style, '--editor-text-color', this.state.textColor);
 	}
+}
+
+/** Set a CSS var to `value`, or remove it so the theme's fallback applies again. */
+function setOrRemove(style: CSSStyleDeclaration, name: string, value: string | null): void {
+	if (value) style.setProperty(name, value);
+	else style.removeProperty(name);
 }

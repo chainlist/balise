@@ -12,7 +12,8 @@ import {
 	markPlugins
 } from './editor-harness';
 import { mdPlaceholderPlugin } from './placeholderPlugin';
-import { quoteExitKeymap } from './quotePlugin';
+import { mdQuotePlugin, quoteExitKeymap } from './quotePlugin';
+import { mdSignalPlugin } from './signalPlugin';
 import type { MarkMode } from './shared';
 
 // Block-level rendering: heading/quote line decorations, bullet & HR widgets, fenced
@@ -59,6 +60,51 @@ describe('blockquote', () => {
 	it('shows the > marker when the cursor is on the quote line', () => {
 		const v = open('> hi\n\nbody', 0);
 		expect(renderedLines(v)[0]).toBe('> hi');
+	});
+});
+
+describe('signals', () => {
+	// Signals run alongside the quote plugin (which owns plain blockquotes and must
+	// defer on signal ones). The marker line is replaced by a Svelte icon+label
+	// widget when the cursor is off it; like the other widget-backed plugins, that
+	// header isn't exercised here (see the harness note) — these tests keep the
+	// cursor on the marker line and assert line classes + the body `>` concealment.
+	function openSignal(doc: string, cursor: number, mode: MarkMode = 'cursor'): EditorView {
+		view = mountEditor(doc, {
+			mode,
+			cursor,
+			extensions: [mdQuotePlugin(mode), mdSignalPlugin(mode)]
+		});
+		return view;
+	}
+
+	it('classes each signal line by type and never as a plain quote', () => {
+		const v = openSignal('> [!NOTE]\n> body\n\nx', 0); // cursor on the marker line
+		expect(lineClasses(v, 1)).toEqual(
+			expect.arrayContaining(['cm-md-signal', 'cm-md-signal-note', 'cm-md-signal-first'])
+		);
+		expect(lineClasses(v, 1)).not.toContain('cm-md-quote');
+		expect(lineClasses(v, 2)).toEqual(
+			expect.arrayContaining(['cm-md-signal', 'cm-md-signal-note', 'cm-md-signal-last'])
+		);
+	});
+
+	it('shows the raw marker on the cursor line and hides the > on the body line', () => {
+		const v = openSignal('> [!NOTE]\n> body\n\nx', 0);
+		const lines = renderedLines(v);
+		expect(lines[0]).toBe('> [!NOTE]'); // raw marker shown for editing
+		expect(lines[1]).toBe('body'); // "> " concealed on the off-cursor body line
+	});
+
+	it('maps each marker to its own type class', () => {
+		const v = openSignal('> [!CAUTION]\n> stop\n\nx', 0);
+		expect(lineClasses(v, 1)).toContain('cm-md-signal-caution');
+	});
+
+	it('leaves a plain blockquote to the quote plugin', () => {
+		const v = openSignal('> just a quote\n\nx', 0);
+		expect(lineClasses(v, 1)).toContain('cm-md-quote');
+		expect(lineClasses(v, 1)).not.toContain('cm-md-signal');
 	});
 });
 
