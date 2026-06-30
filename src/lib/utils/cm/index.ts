@@ -6,6 +6,7 @@ export { mdHeaderPlugin } from './headerPlugin';
 export { mdQuotePlugin, quoteExitKeymap } from './quotePlugin';
 export { mdSignalPlugin } from './signalPlugin';
 export { mdCodePlugin } from './codePlugin';
+export { mdTablePlugin } from './tablePlugin';
 export { codeFenceAutoClose } from './codeFencePlugin';
 export { mdLinkPlugin } from './linkPlugin';
 export { mdTagPlugin } from './tagPlugin';

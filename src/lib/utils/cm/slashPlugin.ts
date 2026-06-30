@@ -143,6 +143,22 @@ const slashKeymap = keymap.of([
 		}
 	},
 	{
+		key: 'ArrowLeft',
+		run: (view) => {
+			const plugin = view.plugin(slashViewPlugin);
+			if (!plugin?.active) return false;
+			return plugin.controls.prevTab?.() ?? false;
+		}
+	},
+	{
+		key: 'ArrowRight',
+		run: (view) => {
+			const plugin = view.plugin(slashViewPlugin);
+			if (!plugin?.active) return false;
+			return plugin.controls.nextTab?.() ?? false;
+		}
+	},
+	{
 		key: 'Enter',
 		run: (view) => {
 			const plugin = view.plugin(slashViewPlugin);

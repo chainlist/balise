@@ -237,6 +237,42 @@ export const noteEditorTheme = EditorView.theme({
 		verticalAlign: 'middle',
 		margin: '2em 0'
 	},
+	// GFM tables (GitHub style). The wrapper spans the full editor width and
+	// scrolls horizontally if the table overflows; the table itself stretches to
+	// fill that width.
+	'.cm-md-table-wrap': {
+		width: '100%',
+		margin: '0.5em 0',
+		overflowX: 'auto'
+	},
+	// Separated borders (not collapsed) so the outer border-radius is honored;
+	// inner grid lines come from per-cell top/left borders, with overflow:hidden
+	// clipping the cell backgrounds to the rounded corners.
+	'.cm-md-table': {
+		borderCollapse: 'separate',
+		borderSpacing: '0',
+		border: '1px solid var(--outline-variant)',
+		borderRadius: '6px',
+		overflow: 'hidden',
+		width: '100%',
+		fontSize: '0.9em',
+		lineHeight: '1.5'
+	},
+	'.cm-md-table th, .cm-md-table td': {
+		borderTop: '1px solid var(--outline-variant)',
+		borderLeft: '1px solid var(--outline-variant)',
+		padding: '6px 13px',
+		textAlign: 'left'
+	},
+	'.cm-md-table thead th': { borderTop: 'none' },
+	'.cm-md-table th:first-child, .cm-md-table td:first-child': { borderLeft: 'none' },
+	'.cm-md-table th': {
+		fontWeight: '600',
+		background: 'color-mix(in oklch, var(--muted-foreground) 8%, transparent)'
+	},
+	'.cm-md-table tr:nth-child(2n) td': {
+		background: 'color-mix(in oklch, var(--muted-foreground) 4%, transparent)'
+	},
 	'.cm-widgetBuffer': { lineHeight: '0' },
 	'.cm-md-code-block': {
 		display: 'flex',

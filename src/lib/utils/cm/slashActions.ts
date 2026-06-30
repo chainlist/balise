@@ -4,10 +4,31 @@ import { settingsService } from '$lib/services/settings/settings.svelte';
 import { formatDate } from '$lib/domain/datetime';
 import { insertImageAtCursor, insertOrReplaceCover } from '$lib/utils/cm/imageActions';
 
+export const SlashCategory = {
+	Headings: 'headings',
+	Lists: 'lists',
+	Tags: 'tags',
+	Callouts: 'callouts',
+	Insert: 'insert',
+	Date: 'date'
+} as const;
+export type SlashCategory = (typeof SlashCategory)[keyof typeof SlashCategory];
+
+/** Ordered tabs shown at the top of the slash menu. */
+export const SLASH_CATEGORIES: { id: SlashCategory; label: string }[] = [
+	{ id: SlashCategory.Headings, label: m.slash_cat_headings() },
+	{ id: SlashCategory.Lists, label: m.slash_cat_lists() },
+	{ id: SlashCategory.Tags, label: m.slash_cat_tags() },
+	{ id: SlashCategory.Callouts, label: m.slash_cat_callouts() },
+	{ id: SlashCategory.Insert, label: m.slash_cat_insert() },
+	{ id: SlashCategory.Date, label: m.slash_cat_date() }
+];
+
 export interface SlashAction {
 	id: string;
 	label: string;
 	description: string;
+	category: SlashCategory;
 	/** Text to insert in place of the slash command. A function is evaluated at
 	 *  selection time (e.g. for a date that depends on the current settings).
 	 *  Omit when the action drives the editor itself via `run`. */
@@ -23,6 +44,7 @@ export interface SlashAction {
 export const SLASH_ACTIONS: SlashAction[] = [
 	{
 		id: 'h1',
+		category: SlashCategory.Headings,
 		label: m.slash_h1_label(),
 		description: m.slash_h1_desc(),
 		insert: '# ',
@@ -31,6 +53,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'h2',
+		category: SlashCategory.Headings,
 		label: m.slash_h2_label(),
 		description: m.slash_h2_desc(),
 		insert: '## ',
@@ -39,6 +62,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'h3',
+		category: SlashCategory.Headings,
 		label: m.slash_h3_label(),
 		description: m.slash_h3_desc(),
 		insert: '### ',
@@ -47,6 +71,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'bullet',
+		category: SlashCategory.Lists,
 		label: m.slash_bullet_label(),
 		description: m.slash_bullet_desc(),
 		insert: '- ',
@@ -55,6 +80,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'numbered',
+		category: SlashCategory.Lists,
 		label: m.slash_numbered_label(),
 		description: m.slash_numbered_desc(),
 		insert: '1. ',
@@ -63,6 +89,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'checklist',
+		category: SlashCategory.Lists,
 		label: m.slash_checklist_label(),
 		description: m.slash_checklist_desc(),
 		insert: '- [ ] ',
@@ -71,6 +98,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'todo',
+		category: SlashCategory.Tags,
 		label: m.slash_todo_label(),
 		description: m.slash_todo_desc(),
 		insert: '#todo ',
@@ -79,6 +107,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'inprogress',
+		category: SlashCategory.Tags,
 		label: m.slash_inprogress_label(),
 		description: m.slash_inprogress_desc(),
 		insert: '#inprogress ',
@@ -87,6 +116,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'done',
+		category: SlashCategory.Tags,
 		label: m.slash_done_label(),
 		description: m.slash_done_desc(),
 		insert: '#done ',
@@ -95,6 +125,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'quote',
+		category: SlashCategory.Callouts,
 		label: m.slash_quote_label(),
 		description: m.slash_quote_desc(),
 		insert: '> ',
@@ -103,6 +134,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'signal-note',
+		category: SlashCategory.Callouts,
 		label: m.slash_signal_note_label(),
 		description: m.slash_signal_note_desc(),
 		insert: '> [!NOTE]\n> ',
@@ -111,6 +143,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'signal-tip',
+		category: SlashCategory.Callouts,
 		label: m.slash_signal_tip_label(),
 		description: m.slash_signal_tip_desc(),
 		insert: '> [!TIP]\n> ',
@@ -119,6 +152,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'signal-important',
+		category: SlashCategory.Callouts,
 		label: m.slash_signal_important_label(),
 		description: m.slash_signal_important_desc(),
 		insert: '> [!IMPORTANT]\n> ',
@@ -127,6 +161,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'signal-warning',
+		category: SlashCategory.Callouts,
 		label: m.slash_signal_warning_label(),
 		description: m.slash_signal_warning_desc(),
 		insert: '> [!WARNING]\n> ',
@@ -135,6 +170,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'signal-caution',
+		category: SlashCategory.Callouts,
 		label: m.slash_signal_caution_label(),
 		description: m.slash_signal_caution_desc(),
 		insert: '> [!CAUTION]\n> ',
@@ -143,6 +179,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'code',
+		category: SlashCategory.Insert,
 		label: m.slash_code_label(),
 		description: m.slash_code_desc(),
 		insert: '```\n',
@@ -151,6 +188,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'divider',
+		category: SlashCategory.Insert,
 		label: m.slash_divider_label(),
 		description: m.slash_divider_desc(),
 		insert: '---\n',
@@ -159,6 +197,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'image',
+		category: SlashCategory.Insert,
 		label: m.slash_image_label(),
 		description: m.slash_image_desc(),
 		run: insertImageAtCursor,
@@ -167,6 +206,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'cover',
+		category: SlashCategory.Insert,
 		label: m.slash_cover_label(),
 		description: m.slash_cover_desc(),
 		run: insertOrReplaceCover,
@@ -175,6 +215,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	},
 	{
 		id: 'date-now',
+		category: SlashCategory.Date,
 		label: m.slash_date_now_label(),
 		description: m.slash_date_now_desc(),
 		insert: () =>
@@ -189,6 +230,7 @@ export const SLASH_ACTIONS: SlashAction[] = [
 	{
 		// Inserts `@`, which the date-picker plugin reacts to by opening the calendar.
 		id: 'insert-date',
+		category: SlashCategory.Date,
 		label: m.slash_insert_date_label(),
 		description: m.slash_insert_date_desc(),
 		insert: '@',
