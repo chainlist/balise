@@ -4,6 +4,7 @@ import {
 	serializeTable,
 	withColumnInserted,
 	withColumnRemoved,
+	withColumnAligned,
 	withRowInserted,
 	withRowRemoved
 } from './tablePlugin';
@@ -107,5 +108,21 @@ describe('row mutations', () => {
 	it('removes the data row at the given index', () => {
 		const t = withRowRemoved(parseTable(TABLE)!, 0);
 		expect(serializeTable(t)).toBe(['| a | b |', '| :--- | ---: |', '| 3 | 4 |'].join('\n'));
+	});
+});
+
+describe('column alignment', () => {
+	it('sets the alignment of the column at the given index', () => {
+		const t = withColumnAligned(parseTable(TABLE)!, 0, 'center');
+		expect(serializeTable(t)).toBe(
+			['| a | b |', '| :---: | ---: |', '| 1 | 2 |', '| 3 | 4 |'].join('\n')
+		);
+	});
+
+	it('clears alignment back to default with null', () => {
+		const t = withColumnAligned(parseTable(TABLE)!, 1, null);
+		expect(serializeTable(t)).toBe(
+			['| a | b |', '| :--- | --- |', '| 1 | 2 |', '| 3 | 4 |'].join('\n')
+		);
 	});
 });

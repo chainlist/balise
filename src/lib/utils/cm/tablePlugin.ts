@@ -133,6 +133,18 @@ export function withRowRemoved(t: ParsedTable, at: number): ParsedTable {
 	return { headers: t.headers.slice(), align: t.align.slice(), rows };
 }
 
+export function withColumnAligned(t: ParsedTable, at: number, align: ColumnAlign): ParsedTable {
+	const cols = t.headers.length;
+	const next = Array.from({ length: cols }, (_, i) => t.align[i] ?? null);
+	next[at] = align;
+	return { headers: t.headers.slice(), align: next, rows: t.rows.map((r) => r.slice()) };
+}
+
+// Cell to focus once a structural edit rebuilds the widget (visual row 0 = the
+// header). Set right before dispatching; consumed by the next table toDOM (only
+// the edited table redraws — unchanged sources are reused via eq()).
+let pendingFocus: { col: number; row: number } | null = null;
+
 class TableWidget extends WidgetType {
 	constructor(
 		readonly source: string,
@@ -226,6 +238,15 @@ class TableWidget extends WidgetType {
 		scroll.appendChild(table);
 		wrap.appendChild(scroll);
 
+		// Restore focus into the freshly rebuilt table after a structural edit.
+		if (pendingFocus) {
+			const pf = pendingFocus;
+			pendingFocus = null;
+			const tr = pf.row === 0 ? headRow : tbody.rows[Math.min(pf.row - 1, tbody.rows.length - 1)];
+			const area = tr?.cells[Math.min(pf.col, tr.cells.length - 1)]?.querySelector('textarea');
+			if (area) requestAnimationFrame(() => area.focus());
+		}
+
 		// Read the live table contents back out of the inputs. Alignment isn't
 		// editable inline, so it's carried over from the parsed source.
 		const cellValue = (cell: Element) =>
@@ -238,8 +259,13 @@ class TableWidget extends WidgetType {
 
 		// Replace the table's source in the document. Editing the inputs doesn't move
 		// the cursor (it stays outside the table), so the widget rebuilds in place.
+		// After one dispatch this instance is stale (from/source no longer match the
+		// doc), so further dispatches from it are dropped — e.g. the focusout commit
+		// that fires when the rebuild detaches a focused cell.
+		let dispatched = false;
 		const dispatchMarkdown = (md: string) => {
-			if (md === this.source) return;
+			if (dispatched || md === this.source) return;
+			dispatched = true;
 			const to = this.from + this.source.length;
 			view.dispatch({ changes: { from: this.from, to, insert: md } });
 		};
@@ -248,115 +274,328 @@ class TableWidget extends WidgetType {
 		const structural = (mutate: (t: ParsedTable) => ParsedTable) =>
 			dispatchMarkdown(serializeTable(mutate(readDOM())));
 
-		const BTN = 16;
+		const HANDLE = 16;
 		let hoverCol = 0;
 		let hoverRow = 0; // visual row: 0 = header, 1.. = data rows
+		let menuOpen = false;
 
-		const makeBtn = (label: string, title: string, onActivate: () => void) => {
-			const b = document.createElement('button');
-			b.type = 'button';
-			b.className = 'cm-md-table-ctl';
-			b.textContent = label;
-			b.title = title;
-			b.style.display = 'none';
-			// preventDefault keeps focus on the active cell, so `structural` reads its
-			// current text; stopPropagation keeps the click off the table below.
-			b.addEventListener('mousedown', (e) => {
+		// A popup menu shared by both handles, positioned against `wrap`. The handle
+		// grips reveal on hover and open the menu with per-axis actions.
+		const menu = document.createElement('div');
+		menu.className = 'cm-md-table-menu';
+		menu.style.display = 'none';
+		wrap.appendChild(menu);
+
+		const onDocDown = (e: MouseEvent) => {
+			if (!menu.contains(e.target as Node)) closeMenu();
+		};
+		const onDocKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') closeMenu();
+		};
+		function closeMenu() {
+			if (!menuOpen) return;
+			menu.style.display = 'none';
+			menuOpen = false;
+			document.removeEventListener('mousedown', onDocDown, true);
+			document.removeEventListener('keydown', onDocKey, true);
+		}
+		// Exposed so the widget can tear the listeners down if it's destroyed while open.
+		(wrap as unknown as { _closeMenu?: () => void })._closeMenu = closeMenu;
+
+		type MenuItem = 'sep' | { label: string; action: () => void };
+		const openMenu = (items: MenuItem[], x: number, y: number) => {
+			menu.replaceChildren();
+			for (const item of items) {
+				if (item === 'sep') {
+					const sep = document.createElement('div');
+					sep.className = 'cm-md-table-menu-sep';
+					menu.appendChild(sep);
+					continue;
+				}
+				const b = document.createElement('button');
+				b.type = 'button';
+				b.className = 'cm-md-table-menu-item';
+				b.textContent = item.label;
+				b.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					const run = item.action;
+					closeMenu();
+					run();
+				});
+				menu.appendChild(b);
+			}
+			menu.style.left = `${x}px`;
+			menu.style.top = `${y}px`;
+			menu.style.display = 'block';
+			menuOpen = true;
+			document.addEventListener('mousedown', onDocDown, true);
+			document.addEventListener('keydown', onDocKey, true);
+		};
+
+		// The handle menus carry the non-insert actions (insertion is done with the
+		// boundary + buttons below, like the reference design).
+		const columnItems = (): MenuItem[] => {
+			const items: MenuItem[] = [
+				{
+					label: 'Align left',
+					action: () => structural((t) => withColumnAligned(t, hoverCol, 'left'))
+				},
+				{
+					label: 'Align center',
+					action: () => structural((t) => withColumnAligned(t, hoverCol, 'center'))
+				},
+				{
+					label: 'Align right',
+					action: () => structural((t) => withColumnAligned(t, hoverCol, 'right'))
+				}
+			];
+			if (parsed.headers.length > 1)
+				items.push('sep', {
+					label: 'Delete column',
+					action: () => structural((t) => withColumnRemoved(t, hoverCol))
+				});
+			return items;
+		};
+		const rowItems = (): MenuItem[] => [
+			{
+				label: 'Delete row',
+				action: () => structural((t) => withRowRemoved(t, hoverRow - 1))
+			}
+		];
+
+		const makeHandle = (title: string, glyph: string, itemsFor: () => MenuItem[]) => {
+			const h = document.createElement('button');
+			h.type = 'button';
+			h.className = 'cm-md-table-handle';
+			h.title = title;
+			h.textContent = glyph;
+			h.style.display = 'none';
+			h.addEventListener('mousedown', (e) => {
 				e.preventDefault();
 				e.stopPropagation();
-				onActivate();
+				if (menuOpen) {
+					closeMenu();
+					return;
+				}
+				const wr = wrap.getBoundingClientRect();
+				const hr = h.getBoundingClientRect();
+				openMenu(itemsFor(), hr.left - wr.left, hr.bottom - wr.top + 2);
 			});
-			wrap.appendChild(b);
-			return b;
+			wrap.appendChild(h);
+			return h;
 		};
+		const colHandle = makeHandle('Column options', '⌄', columnItems);
+		const rowHandle = makeHandle('Row options', '⋮', rowItems);
 
-		const colPlusRight = makeBtn('+', 'Add column right', () =>
-			structural((t) => withColumnInserted(t, hoverCol + 1))
-		);
-		const colPlusLeft = makeBtn('+', 'Add column left', () =>
-			structural((t) => withColumnInserted(t, 0))
-		);
-		const colDel = makeBtn('×', 'Delete column', () =>
-			structural((t) => withColumnRemoved(t, hoverCol))
-		);
-		const rowPlus = makeBtn('+', 'Add row below', () =>
-			structural((t) => withRowInserted(t, hoverRow))
-		);
-		const rowDel = makeBtn('×', 'Delete row', () =>
-			structural((t) => withRowRemoved(t, hoverRow - 1))
-		);
+		// Boundary insert affordance: hovering near a grid line shows a round + at
+		// the boundary (top for columns, left for rows); hovering the + previews the
+		// insertion point with a full-length accent line and a shortcut tooltip.
+		const colInsert = document.createElement('button');
+		colInsert.type = 'button';
+		colInsert.className = 'cm-md-table-insert';
+		// A drawn cross instead of a "+" glyph: text sits on a font baseline and is
+		// not optically centered in the circle, while the SVG centers exactly.
+		colInsert.innerHTML =
+			'<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">' +
+			'<path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+			'</svg>';
+		colInsert.style.display = 'none';
+		const rowInsert = colInsert.cloneNode(true) as HTMLButtonElement;
+		const colLine = document.createElement('div');
+		colLine.className = 'cm-md-table-insert-line';
+		const rowLine = document.createElement('div');
+		rowLine.className = 'cm-md-table-insert-line';
+		const tip = document.createElement('div');
+		tip.className = 'cm-md-table-tip';
+		for (const el of [colInsert, rowInsert, colLine, rowLine, tip]) wrap.appendChild(el);
 
-		const place = (btn: HTMLElement, centerX: number, centerY: number) => {
-			btn.style.left = `${centerX - BTN / 2}px`;
-			btn.style.top = `${centerY - BTN / 2}px`;
-			btn.style.display = 'flex';
-		};
+		let colBoundary = 0; // insert index for withColumnInserted
+		let rowBoundary = 0; // insert index for withRowInserted
+		let colBoundaryX = 0;
+		let rowBoundaryY = 0;
 
-		const hideAll = () => {
-			for (const b of [colPlusRight, colPlusLeft, colDel, rowPlus, rowDel])
-				b.style.display = 'none';
-		};
-
-		// Geometry is measured relative to `wrap`. The controls sit just inside the
-		// table edges (clamped to its bounds) rather than floating outside it: that
-		// keeps them over the table so the pointer never leaves the widget to reach
-		// them, and they stay clickable.
-		const positionControls = () => {
+		const tableRect = () => {
 			const wr = wrap.getBoundingClientRect();
 			const tbl = table.getBoundingClientRect();
-			const top = tbl.top - wr.top;
-			const bottom = tbl.bottom - wr.top;
-			const left = tbl.left - wr.left;
-			const right = tbl.right - wr.left;
-			const clampX = (x: number) => Math.max(left + BTN / 2, Math.min(x, right - BTN / 2));
-			const clampY = (y: number) => Math.max(top + BTN / 2, Math.min(y, bottom - BTN / 2));
-			const topStrip = top + BTN / 2 + 1; // inside the header
-			const leftStrip = left + BTN / 2 + 1; // inside the first column
+			return {
+				top: tbl.top - wr.top,
+				bottom: tbl.bottom - wr.top,
+				left: tbl.left - wr.left,
+				right: tbl.right - wr.left,
+				wr
+			};
+		};
 
-			const col = colCells[hoverCol].getBoundingClientRect();
-			const colLeft = col.left - wr.left;
-			const colRight = col.right - wr.left;
+		colInsert.addEventListener('mouseenter', () => {
+			const t = tableRect();
+			colLine.style.left = `${colBoundaryX - 1}px`;
+			colLine.style.top = `${t.top}px`;
+			colLine.style.width = '2px';
+			colLine.style.height = `${t.bottom - t.top}px`;
+			colLine.style.display = 'block';
+			tip.textContent = 'Insert column  Ctrl+Alt+→';
+			// Anchored by its bottom edge so it always clears the + button (top edge
+			// of the button is at t.top - 8), whatever height the tip renders at.
+			tip.style.left = `${colBoundaryX}px`;
+			tip.style.top = `${t.top - 12}px`;
+			tip.style.transform = 'translate(-50%, -100%)';
+			tip.style.display = 'block';
+		});
+		colInsert.addEventListener('mouseleave', () => {
+			colLine.style.display = 'none';
+			tip.style.display = 'none';
+		});
+		rowInsert.addEventListener('mouseenter', () => {
+			const t = tableRect();
+			rowLine.style.left = `${t.left}px`;
+			rowLine.style.top = `${rowBoundaryY - 1}px`;
+			rowLine.style.width = `${t.right - t.left}px`;
+			rowLine.style.height = '2px';
+			rowLine.style.display = 'block';
+			tip.textContent = 'Insert row  Ctrl+Alt+↓';
+			// Bottom-anchored above the + button (button top is rowBoundaryY - 8),
+			// shifted right so it doesn't cover the button either.
+			tip.style.left = `${t.left + 12}px`;
+			tip.style.top = `${rowBoundaryY - 12}px`;
+			tip.style.transform = 'translateY(-100%)';
+			tip.style.display = 'block';
+		});
+		rowInsert.addEventListener('mouseleave', () => {
+			rowLine.style.display = 'none';
+			tip.style.display = 'none';
+		});
 
-			const rowR = rowCells[hoverRow].getBoundingClientRect();
-			const rowTop = rowR.top - wr.top;
-			const rowBottom = rowR.bottom - wr.top;
+		colInsert.addEventListener('mousedown', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			pendingFocus = { col: colBoundary, row: 0 };
+			structural((t) => withColumnInserted(t, colBoundary));
+		});
+		rowInsert.addEventListener('mousedown', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			pendingFocus = { col: 0, row: rowBoundary + 1 };
+			structural((t) => withRowInserted(t, rowBoundary));
+		});
 
-			// Column inserts sit at the column's left/right grid lines along the top.
-			place(colPlusRight, clampX(colRight), topStrip);
-			if (hoverCol === 0) place(colPlusLeft, clampX(colLeft), topStrip);
-			else colPlusLeft.style.display = 'none';
-			// Delete sits at the top of the column (its start). The last column can't go.
-			if (parsed.headers.length > 1) place(colDel, clampX((colLeft + colRight) / 2), topStrip);
-			else colDel.style.display = 'none';
-
-			// Row insert sits at the row's bottom grid line, on the left.
-			place(rowPlus, leftStrip, clampY(rowBottom));
-			// Delete sits at the start (left) of the row. The header row can't be deleted.
-			if (hoverRow >= 1) place(rowDel, leftStrip, clampY((rowTop + rowBottom) / 2));
-			else rowDel.style.display = 'none';
+		const SNAP = 9; // px distance from a grid line that reveals the + button
+		const place = (btn: HTMLElement, centerX: number, centerY: number) => {
+			btn.style.left = `${centerX - HANDLE / 2}px`;
+			btn.style.top = `${centerY - HANDLE / 2}px`;
+			btn.style.display = 'flex';
+		};
+		const hideAll = () => {
+			for (const el of [colHandle, rowHandle, colInsert, rowInsert, colLine, rowLine, tip])
+				el.style.display = 'none';
 		};
 
 		scroll.addEventListener('mousemove', (e) => {
-			const wr = wrap.getBoundingClientRect();
-			const x = e.clientX - wr.left;
-			const y = e.clientY - wr.top;
+			if (menuOpen) return;
+			const t = tableRect();
+			const x = e.clientX - t.wr.left;
+			const y = e.clientY - t.wr.top;
+
+			// Hovered column/row (for the handles).
 			let c = 0;
 			for (let i = 0; i < colCells.length; i++) {
-				if (x >= colCells[i].getBoundingClientRect().left - wr.left) c = i;
+				if (x >= colCells[i].getBoundingClientRect().left - t.wr.left) c = i;
 				else break;
 			}
 			let r = 0;
 			for (let i = 0; i < rowCells.length; i++) {
-				if (y >= rowCells[i].getBoundingClientRect().top - wr.top) r = i;
+				if (y >= rowCells[i].getBoundingClientRect().top - t.wr.top) r = i;
 				else break;
 			}
 			hoverCol = c;
 			hoverRow = r;
-			positionControls();
+
+			// Handles: column chevron at the top of the column, row grip at its left
+			// (the header row has no row actions, so no handle there).
+			const col = colCells[hoverCol].getBoundingClientRect();
+			const colCenter = (col.left + col.right) / 2 - t.wr.left;
+			place(colHandle, colCenter, t.top + HANDLE / 2 + 1);
+			if (hoverRow >= 1) {
+				const rowR = rowCells[hoverRow].getBoundingClientRect();
+				place(rowHandle, t.left + HANDLE / 2 + 1, (rowR.top + rowR.bottom) / 2 - t.wr.top);
+			} else rowHandle.style.display = 'none';
+
+			// Nearest column boundary (grid lines incl. both outer edges).
+			let bestC = -1;
+			let bestCDist = SNAP + 1;
+			for (let i = 0; i <= colCells.length; i++) {
+				const bx =
+					i < colCells.length ? colCells[i].getBoundingClientRect().left - t.wr.left : t.right;
+				const d = Math.abs(x - bx);
+				if (d < bestCDist) {
+					bestCDist = d;
+					bestC = i;
+					colBoundaryX = bx;
+				}
+			}
+			if (bestC >= 0) {
+				colBoundary = bestC;
+				place(colInsert, colBoundaryX, t.top);
+			} else {
+				colInsert.style.display = 'none';
+			}
+
+			// Nearest row boundary. Boundary above the header is skipped (a table
+			// can't grow a row above its header), so boundaries start under it.
+			let bestR = -1;
+			let bestRDist = SNAP + 1;
+			for (let i = 1; i <= rowCells.length; i++) {
+				const by =
+					i < rowCells.length ? rowCells[i].getBoundingClientRect().top - t.wr.top : t.bottom;
+				const d = Math.abs(y - by);
+				if (d < bestRDist) {
+					bestRDist = d;
+					bestR = i;
+					rowBoundaryY = by;
+				}
+			}
+			if (bestR >= 0) {
+				rowBoundary = bestR - 1;
+				place(rowInsert, t.left, rowBoundaryY);
+			} else {
+				rowInsert.style.display = 'none';
+			}
 		});
-		// Keep controls visible while the pointer is over them (they sit on `wrap`),
-		// hiding only when it leaves the whole widget.
-		wrap.addEventListener('mouseleave', hideAll);
+		// Keep controls visible while a menu is open; otherwise hide on leaving the widget.
+		wrap.addEventListener('mouseleave', () => {
+			if (!menuOpen) hideAll();
+		});
+
+		// Track the focused cell so the keyboard shortcuts know where to insert.
+		let focusCol = 0;
+		let focusRow = 0; // visual row: 0 = header
+		wrap.addEventListener('focusin', (e) => {
+			const cell = (e.target as HTMLElement).closest('th,td');
+			if (!cell) return;
+			const tr = cell.parentElement as HTMLTableRowElement;
+			focusCol = Array.prototype.indexOf.call(tr.cells, cell);
+			focusRow = tr.parentElement === tbody ? 1 + Array.prototype.indexOf.call(tbody.rows, tr) : 0;
+		});
+		// Ctrl+Alt+Arrow inserts a column/row next to the focused cell (as advertised
+		// by the insert tooltips) and moves editing into the new cell.
+		wrap.addEventListener('keydown', (e) => {
+			if (!e.ctrlKey || !e.altKey) return;
+			if (e.key === 'ArrowRight') {
+				pendingFocus = { col: focusCol + 1, row: focusRow };
+				structural((t) => withColumnInserted(t, focusCol + 1));
+			} else if (e.key === 'ArrowLeft') {
+				pendingFocus = { col: focusCol, row: focusRow };
+				structural((t) => withColumnInserted(t, focusCol));
+			} else if (e.key === 'ArrowDown') {
+				pendingFocus = { col: focusCol, row: focusRow + 1 };
+				structural((t) => withRowInserted(t, focusRow));
+			} else if (e.key === 'ArrowUp' && focusRow >= 1) {
+				pendingFocus = { col: focusCol, row: focusRow };
+				structural((t) => withRowInserted(t, focusRow - 1));
+			} else return;
+			e.preventDefault();
+			e.stopPropagation();
+		});
 
 		// Clicking a cell's padding (outside the textarea) still focuses it for editing.
 		table.addEventListener('mousedown', (e) => {
@@ -377,6 +616,11 @@ class TableWidget extends WidgetType {
 		});
 
 		return wrap;
+	}
+
+	destroy(dom: HTMLElement): void {
+		// If the menu was open when the widget is replaced, drop its document listeners.
+		(dom as unknown as { _closeMenu?: () => void })._closeMenu?.();
 	}
 
 	ignoreEvent(): boolean {

@@ -248,8 +248,33 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-table-scroll': {
 		overflowX: 'auto'
 	},
-	// Add/delete buttons floated on the table edges; shown on hover via JS.
-	'.cm-md-table-ctl': {
+	// Subtle handles seated on the table's top (columns) and left (rows) edges,
+	// shown on hover via JS. Clicking one opens the actions menu below.
+	'.cm-md-table-handle': {
+		position: 'absolute',
+		width: '16px',
+		height: '16px',
+		padding: '0',
+		display: 'none',
+		alignItems: 'center',
+		justifyContent: 'center',
+		borderRadius: '4px',
+		border: 'none',
+		background: 'transparent',
+		color: 'var(--muted-foreground)',
+		fontSize: '11px',
+		lineHeight: '1',
+		cursor: 'pointer',
+		userSelect: 'none',
+		zIndex: '2'
+	},
+	'.cm-md-table-handle:hover': {
+		background: 'color-mix(in oklch, var(--muted-foreground) 15%, transparent)',
+		color: 'var(--foreground)'
+	},
+	// Boundary insert affordance: accent-colored + circle at a grid line, with the
+	// full-length insertion-preview line and the shortcut tooltip on hover.
+	'.cm-md-table-insert': {
 		position: 'absolute',
 		width: '16px',
 		height: '16px',
@@ -258,19 +283,70 @@ export const noteEditorTheme = EditorView.theme({
 		alignItems: 'center',
 		justifyContent: 'center',
 		borderRadius: '50%',
-		border: '1px solid var(--outline-variant)',
-		background: 'var(--background)',
-		color: 'var(--muted-foreground)',
+		border: 'none',
+		background: 'var(--primary)',
+		color: 'var(--on-primary)',
 		fontSize: '13px',
 		lineHeight: '1',
 		cursor: 'pointer',
 		userSelect: 'none',
+		boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+		zIndex: '3'
+	},
+	'.cm-md-table-insert svg': { display: 'block' },
+	'.cm-md-table-insert-line': {
+		position: 'absolute',
+		display: 'none',
+		background: 'var(--primary)',
+		borderRadius: '1px',
+		pointerEvents: 'none',
 		zIndex: '2'
 	},
-	'.cm-md-table-ctl:hover': {
-		background: 'var(--primary)',
-		color: 'var(--on-primary)',
-		borderColor: 'var(--primary)'
+	'.cm-md-table-tip': {
+		position: 'absolute',
+		display: 'none',
+		whiteSpace: 'nowrap',
+		padding: '3px 8px',
+		lineHeight: '1.3',
+		borderRadius: '5px',
+		border: '1px solid var(--outline-variant)',
+		background: 'var(--popover, var(--background))',
+		color: 'var(--foreground)',
+		fontSize: '0.75em',
+		pointerEvents: 'none',
+		boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+		zIndex: '4'
+	},
+	'.cm-md-table-menu': {
+		position: 'absolute',
+		zIndex: '10',
+		minWidth: '168px',
+		padding: '4px',
+		borderRadius: '8px',
+		border: '1px solid var(--outline-variant)',
+		background: 'var(--popover, var(--background))',
+		boxShadow: '0 6px 24px rgba(0, 0, 0, 0.18)'
+	},
+	'.cm-md-table-menu-item': {
+		display: 'block',
+		width: '100%',
+		textAlign: 'left',
+		padding: '6px 10px',
+		border: 'none',
+		background: 'transparent',
+		color: 'var(--foreground)',
+		font: 'inherit',
+		fontSize: '0.85em',
+		borderRadius: '4px',
+		cursor: 'pointer'
+	},
+	'.cm-md-table-menu-item:hover': {
+		background: 'color-mix(in oklch, var(--muted-foreground) 12%, transparent)'
+	},
+	'.cm-md-table-menu-sep': {
+		height: '1px',
+		margin: '4px 2px',
+		background: 'var(--outline-variant)'
 	},
 	// The cell holds the padding and auto-grows in height: its ::after mirrors the
 	// textarea's text (via data-value) so the grid row is as tall as the wrapped
