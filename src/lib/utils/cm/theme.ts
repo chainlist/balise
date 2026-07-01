@@ -237,13 +237,74 @@ export const noteEditorTheme = EditorView.theme({
 		verticalAlign: 'middle',
 		margin: '2em 0'
 	},
-	// GFM tables (GitHub style). The wrapper spans the full editor width and
-	// scrolls horizontally if the table overflows; the table itself stretches to
-	// fill that width.
+	// GFM tables (GitHub style). The wrapper is the positioned host for the hover
+	// controls (overflow visible so they can float just outside the table); the
+	// inner `scroll` element carries the horizontal scrollbar for wide tables.
 	'.cm-md-table-wrap': {
+		position: 'relative',
 		width: '100%',
-		margin: '0.5em 0',
+		margin: '0.5em 0'
+	},
+	'.cm-md-table-scroll': {
 		overflowX: 'auto'
+	},
+	// Add/delete buttons floated on the table edges; shown on hover via JS.
+	'.cm-md-table-ctl': {
+		position: 'absolute',
+		width: '16px',
+		height: '16px',
+		padding: '0',
+		display: 'none',
+		alignItems: 'center',
+		justifyContent: 'center',
+		borderRadius: '50%',
+		border: '1px solid var(--outline-variant)',
+		background: 'var(--background)',
+		color: 'var(--muted-foreground)',
+		fontSize: '13px',
+		lineHeight: '1',
+		cursor: 'pointer',
+		userSelect: 'none',
+		zIndex: '2'
+	},
+	'.cm-md-table-ctl:hover': {
+		background: 'var(--primary)',
+		color: 'var(--on-primary)',
+		borderColor: 'var(--primary)'
+	},
+	// The cell holds the padding and auto-grows in height: its ::after mirrors the
+	// textarea's text (via data-value) so the grid row is as tall as the wrapped
+	// content, and the textarea is stretched over it.
+	'.cm-md-table-cell': {
+		display: 'grid',
+		padding: '6px 13px'
+	},
+	'.cm-md-table-cell::after': {
+		content: "attr(data-value) ' '",
+		visibility: 'hidden',
+		whiteSpace: 'pre-wrap',
+		overflowWrap: 'anywhere',
+		font: 'inherit',
+		gridArea: '1 / 1 / 2 / 2'
+	},
+	// The textarea overlays the sizing pseudo-element; it wraps the same way and is
+	// otherwise invisible, inheriting the cell's typography. A click anywhere edits.
+	'.cm-md-table-cell-input': {
+		gridArea: '1 / 1 / 2 / 2',
+		boxSizing: 'border-box',
+		minWidth: '0',
+		padding: '0',
+		margin: '0',
+		resize: 'none',
+		overflow: 'hidden',
+		border: 'none',
+		outline: 'none',
+		background: 'transparent',
+		color: 'inherit',
+		font: 'inherit',
+		whiteSpace: 'pre-wrap',
+		overflowWrap: 'anywhere',
+		textAlign: 'inherit'
 	},
 	// Separated borders (not collapsed) so the outer border-radius is honored;
 	// inner grid lines come from per-cell top/left borders, with overflow:hidden
@@ -261,7 +322,7 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-table th, .cm-md-table td': {
 		borderTop: '1px solid var(--outline-variant)',
 		borderLeft: '1px solid var(--outline-variant)',
-		padding: '6px 13px',
+		padding: '0',
 		textAlign: 'left'
 	},
 	'.cm-md-table thead th': { borderTop: 'none' },
