@@ -306,6 +306,12 @@
 	"slash_image_desc": "Pick an image to embed",
 	"slash_cover_label": "Cover",
 	"slash_cover_desc": "Pick a full-width cover image",
+	"slash_cat_headings": "Headings",
+	"slash_cat_lists": "Lists",
+	"slash_cat_tags": "Tags",
+	"slash_cat_callouts": "Callouts",
+	"slash_cat_insert": "Insert",
+	"slash_cat_date": "Date",
 
 	"editor_placeholder": "Write something, or type '/' for commands",
 	"editor_reading_time": "{minutes} min read",

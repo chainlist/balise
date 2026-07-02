@@ -237,6 +237,208 @@ export const noteEditorTheme = EditorView.theme({
 		verticalAlign: 'middle',
 		margin: '2em 0'
 	},
+	// GFM tables (GitHub style). The wrapper is the positioned host for the hover
+	// controls (overflow visible so they can float just outside the table); the
+	// inner `scroll` element carries the horizontal scrollbar for wide tables.
+	'.cm-md-table-wrap': {
+		position: 'relative',
+		width: '100%',
+		margin: '0.5em 0'
+	},
+	'.cm-md-table-scroll': {
+		overflowX: 'auto'
+	},
+	// Subtle handles seated on the table's top (columns) and left (rows) edges,
+	// shown on hover via JS. Clicking one opens the actions menu below.
+	'.cm-md-table-handle': {
+		position: 'absolute',
+		width: '16px',
+		height: '16px',
+		padding: '0',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		borderRadius: '4px',
+		border: 'none',
+		background: 'transparent',
+		color: 'var(--muted-foreground)',
+		cursor: 'pointer',
+		userSelect: 'none',
+		zIndex: '2'
+	},
+	'.cm-md-table-handle svg': { display: 'block' },
+	'.cm-md-table-handle:hover': {
+		background: 'color-mix(in oklch, var(--muted-foreground) 15%, transparent)',
+		color: 'var(--foreground)'
+	},
+	// Boundary insert affordance: accent-colored + circle at a grid line, with the
+	// full-length insertion-preview line and the shortcut tooltip on hover.
+	'.cm-md-table-insert': {
+		position: 'absolute',
+		width: '16px',
+		height: '16px',
+		padding: '0',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		borderRadius: '50%',
+		border: 'none',
+		// --primary-500 (exact pick) + --on-primary is the pairing shadcn buttons
+		// use (bg-primary/text-primary-foreground); --primary is the darkened
+		// foreground variant, and --on-primary is not tuned for contrast against it.
+		background: 'var(--primary-500)',
+		color: 'var(--on-primary)',
+		fontSize: '13px',
+		lineHeight: '1',
+		cursor: 'pointer',
+		userSelect: 'none',
+		boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+		zIndex: '3'
+	},
+	'.cm-md-table-insert svg': { display: 'block' },
+	'.cm-md-table-insert-line': {
+		position: 'absolute',
+		background: 'var(--primary)',
+		borderRadius: '1px',
+		pointerEvents: 'none',
+		zIndex: '2'
+	},
+	'.cm-md-table-tip': {
+		position: 'absolute',
+		whiteSpace: 'nowrap',
+		padding: '3px 8px',
+		lineHeight: '1.3',
+		borderRadius: '5px',
+		border: '1px solid var(--outline-variant)',
+		background: 'var(--popover, var(--background))',
+		color: 'var(--foreground)',
+		fontSize: '0.75em',
+		pointerEvents: 'none',
+		boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+		zIndex: '4'
+	},
+	'.cm-md-table-menu': {
+		position: 'absolute',
+		zIndex: '10',
+		minWidth: '168px',
+		padding: '4px',
+		borderRadius: '8px',
+		border: '1px solid var(--outline-variant)',
+		background: 'var(--popover, var(--background))',
+		boxShadow: '0 6px 24px rgba(0, 0, 0, 0.18)'
+	},
+	'.cm-md-table-menu-item': {
+		display: 'block',
+		width: '100%',
+		textAlign: 'left',
+		padding: '6px 10px',
+		border: 'none',
+		background: 'transparent',
+		color: 'var(--foreground)',
+		font: 'inherit',
+		fontSize: '0.85em',
+		borderRadius: '4px',
+		cursor: 'pointer'
+	},
+	'.cm-md-table-menu-item:hover': {
+		background: 'color-mix(in oklch, var(--muted-foreground) 12%, transparent)'
+	},
+	'.cm-md-table-menu-sep': {
+		height: '1px',
+		margin: '4px 2px',
+		background: 'var(--outline-variant)'
+	},
+	// The cell holds the padding and auto-grows in height: its ::after mirrors the
+	// textarea's text (via data-value) so the grid row is as tall as the wrapped
+	// content, and the textarea is stretched over it.
+	'.cm-md-table-cell': {
+		display: 'grid',
+		padding: '6px 13px'
+	},
+	'.cm-md-table-cell::after': {
+		content: "attr(data-value) ' '",
+		visibility: 'hidden',
+		whiteSpace: 'pre-wrap',
+		overflowWrap: 'anywhere',
+		font: 'inherit',
+		gridArea: '1 / 1 / 2 / 2'
+	},
+	// The textarea overlays the sizing pseudo-element; it wraps the same way and is
+	// otherwise invisible, inheriting the cell's typography. A click anywhere edits.
+	// Its text is transparent while unfocused so the rendered markdown layer below
+	// shows through; focusing swaps back to the raw text.
+	'.cm-md-table-cell-input': {
+		gridArea: '1 / 1 / 2 / 2',
+		boxSizing: 'border-box',
+		minWidth: '0',
+		padding: '0',
+		margin: '0',
+		resize: 'none',
+		overflow: 'hidden',
+		border: 'none',
+		outline: 'none',
+		background: 'transparent',
+		color: 'transparent',
+		font: 'inherit',
+		whiteSpace: 'pre-wrap',
+		overflowWrap: 'anywhere',
+		textAlign: 'inherit'
+	},
+	'.cm-md-table-cell-input:focus': { color: 'inherit' },
+	// Rendered inline markdown for the cell, stacked under the textarea. Inert to
+	// pointers so clicks land on the textarea for editing.
+	'.cm-md-table-cell-rendered': {
+		gridArea: '1 / 1 / 2 / 2',
+		minWidth: '0',
+		whiteSpace: 'pre-wrap',
+		overflowWrap: 'anywhere',
+		pointerEvents: 'none'
+	},
+	'.cm-md-table-cell:focus-within .cm-md-table-cell-rendered': { visibility: 'hidden' },
+	// Inline marks inside rendered cells, matching the editor mark styles above.
+	'.cm-md-table-cell-rendered strong': { fontWeight: '600' },
+	'.cm-md-table-cell-rendered em': { fontStyle: 'italic', color: 'var(--primary)' },
+	'.cm-md-table-cell-rendered del': { textDecoration: 'line-through', opacity: '0.7' },
+	'.cm-md-table-cell-rendered code': {
+		fontFamily: 'var(--md-font-mono)',
+		fontSize: '0.875em',
+		background: 'var(--md-code-bg)',
+		borderRadius: '3px',
+		padding: '1px 3px'
+	},
+	'.cm-md-table-cell-rendered a': {
+		color: 'var(--primary)',
+		textDecoration: 'underline',
+		textDecorationColor: 'var(--md-link-decoration)'
+	},
+	// Separated borders (not collapsed) so the outer border-radius is honored;
+	// inner grid lines come from per-cell top/left borders, with overflow:hidden
+	// clipping the cell backgrounds to the rounded corners.
+	'.cm-md-table': {
+		borderCollapse: 'separate',
+		borderSpacing: '0',
+		border: '1px solid var(--outline-variant)',
+		borderRadius: '6px',
+		overflow: 'hidden',
+		width: '100%',
+		fontSize: '0.9em',
+		lineHeight: '1.5'
+	},
+	'.cm-md-table th, .cm-md-table td': {
+		borderTop: '1px solid var(--outline-variant)',
+		borderLeft: '1px solid var(--outline-variant)',
+		padding: '0',
+		textAlign: 'left'
+	},
+	'.cm-md-table thead th': { borderTop: 'none' },
+	'.cm-md-table th:first-child, .cm-md-table td:first-child': { borderLeft: 'none' },
+	'.cm-md-table th': {
+		fontWeight: '600',
+		background: 'color-mix(in oklch, var(--muted-foreground) 8%, transparent)'
+	},
+	'.cm-md-table tr:nth-child(2n) td': {
+		background: 'color-mix(in oklch, var(--muted-foreground) 4%, transparent)'
+	},
 	'.cm-widgetBuffer': { lineHeight: '0' },
 	'.cm-md-code-block': {
 		display: 'flex',

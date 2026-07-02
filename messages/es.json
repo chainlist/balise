@@ -306,6 +306,12 @@
 	"slash_image_desc": "Elegir una imagen para insertar",
 	"slash_cover_label": "Portada",
 	"slash_cover_desc": "Elegir una imagen de portada a todo el ancho",
+	"slash_cat_headings": "Encabezados",
+	"slash_cat_lists": "Listas",
+	"slash_cat_tags": "Etiquetas",
+	"slash_cat_callouts": "Avisos",
+	"slash_cat_insert": "Insertar",
+	"slash_cat_date": "Fecha",
 
 	"editor_placeholder": "Escribe algo o escribe «/» para ver comandos",
 	"editor_reading_time": "{minutes} min de lectura",

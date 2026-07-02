@@ -306,6 +306,12 @@
 	"slash_image_desc": "Ein Bild zum Einbetten auswählen",
 	"slash_cover_label": "Titelbild",
 	"slash_cover_desc": "Ein Titelbild in voller Breite auswählen",
+	"slash_cat_headings": "Überschriften",
+	"slash_cat_lists": "Listen",
+	"slash_cat_tags": "Tags",
+	"slash_cat_callouts": "Hinweise",
+	"slash_cat_insert": "Einfügen",
+	"slash_cat_date": "Datum",
 
 	"editor_placeholder": "Schreibe etwas oder tippe „/“ für Befehle",
 	"editor_reading_time": "{minutes} Min. Lesezeit",
