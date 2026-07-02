@@ -255,19 +255,18 @@ export const noteEditorTheme = EditorView.theme({
 		width: '16px',
 		height: '16px',
 		padding: '0',
-		display: 'none',
+		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
 		borderRadius: '4px',
 		border: 'none',
 		background: 'transparent',
 		color: 'var(--muted-foreground)',
-		fontSize: '11px',
-		lineHeight: '1',
 		cursor: 'pointer',
 		userSelect: 'none',
 		zIndex: '2'
 	},
+	'.cm-md-table-handle svg': { display: 'block' },
 	'.cm-md-table-handle:hover': {
 		background: 'color-mix(in oklch, var(--muted-foreground) 15%, transparent)',
 		color: 'var(--foreground)'
@@ -279,12 +278,15 @@ export const noteEditorTheme = EditorView.theme({
 		width: '16px',
 		height: '16px',
 		padding: '0',
-		display: 'none',
+		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
 		borderRadius: '50%',
 		border: 'none',
-		background: 'var(--primary)',
+		// --primary-500 (exact pick) + --on-primary is the pairing shadcn buttons
+		// use (bg-primary/text-primary-foreground); --primary is the darkened
+		// foreground variant, and --on-primary is not tuned for contrast against it.
+		background: 'var(--primary-500)',
 		color: 'var(--on-primary)',
 		fontSize: '13px',
 		lineHeight: '1',
@@ -296,7 +298,6 @@ export const noteEditorTheme = EditorView.theme({
 	'.cm-md-table-insert svg': { display: 'block' },
 	'.cm-md-table-insert-line': {
 		position: 'absolute',
-		display: 'none',
 		background: 'var(--primary)',
 		borderRadius: '1px',
 		pointerEvents: 'none',
@@ -304,7 +305,6 @@ export const noteEditorTheme = EditorView.theme({
 	},
 	'.cm-md-table-tip': {
 		position: 'absolute',
-		display: 'none',
 		whiteSpace: 'nowrap',
 		padding: '3px 8px',
 		lineHeight: '1.3',
@@ -365,6 +365,8 @@ export const noteEditorTheme = EditorView.theme({
 	},
 	// The textarea overlays the sizing pseudo-element; it wraps the same way and is
 	// otherwise invisible, inheriting the cell's typography. A click anywhere edits.
+	// Its text is transparent while unfocused so the rendered markdown layer below
+	// shows through; focusing swaps back to the raw text.
 	'.cm-md-table-cell-input': {
 		gridArea: '1 / 1 / 2 / 2',
 		boxSizing: 'border-box',
@@ -376,11 +378,38 @@ export const noteEditorTheme = EditorView.theme({
 		border: 'none',
 		outline: 'none',
 		background: 'transparent',
-		color: 'inherit',
+		color: 'transparent',
 		font: 'inherit',
 		whiteSpace: 'pre-wrap',
 		overflowWrap: 'anywhere',
 		textAlign: 'inherit'
+	},
+	'.cm-md-table-cell-input:focus': { color: 'inherit' },
+	// Rendered inline markdown for the cell, stacked under the textarea. Inert to
+	// pointers so clicks land on the textarea for editing.
+	'.cm-md-table-cell-rendered': {
+		gridArea: '1 / 1 / 2 / 2',
+		minWidth: '0',
+		whiteSpace: 'pre-wrap',
+		overflowWrap: 'anywhere',
+		pointerEvents: 'none'
+	},
+	'.cm-md-table-cell:focus-within .cm-md-table-cell-rendered': { visibility: 'hidden' },
+	// Inline marks inside rendered cells, matching the editor mark styles above.
+	'.cm-md-table-cell-rendered strong': { fontWeight: '600' },
+	'.cm-md-table-cell-rendered em': { fontStyle: 'italic', color: 'var(--primary)' },
+	'.cm-md-table-cell-rendered del': { textDecoration: 'line-through', opacity: '0.7' },
+	'.cm-md-table-cell-rendered code': {
+		fontFamily: 'var(--md-font-mono)',
+		fontSize: '0.875em',
+		background: 'var(--md-code-bg)',
+		borderRadius: '3px',
+		padding: '1px 3px'
+	},
+	'.cm-md-table-cell-rendered a': {
+		color: 'var(--primary)',
+		textDecoration: 'underline',
+		textDecorationColor: 'var(--md-link-decoration)'
 	},
 	// Separated borders (not collapsed) so the outer border-radius is honored;
 	// inner grid lines come from per-cell top/left borders, with overflow:hidden

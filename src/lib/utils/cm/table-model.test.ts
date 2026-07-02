@@ -7,7 +7,7 @@ import {
 	withColumnAligned,
 	withRowInserted,
 	withRowRemoved
-} from './tablePlugin';
+} from './table-model';
 
 describe('parseTable', () => {
 	it('returns null when there is no delimiter row', () => {
