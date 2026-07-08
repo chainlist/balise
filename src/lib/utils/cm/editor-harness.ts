@@ -12,7 +12,6 @@ import { ensureSyntaxTree } from '@codemirror/language';
 import { mdHidePlugin } from './hidePlugin';
 import { mdMarkNavPlugin } from './markNavPlugin';
 import { mdCodePlugin } from './codePlugin';
-import { mdTablePlugin } from './tablePlugin';
 import { mdBulletPlugin } from './bulletPlugin';
 import { mdHrPlugin } from './hrPlugin';
 import { mdHeaderPlugin } from './headerPlugin';
@@ -38,7 +37,6 @@ export function markPlugins(mode: MarkMode): Extension[] {
 		mdHidePlugin(mode),
 		mdMarkNavPlugin(mode),
 		mdCodePlugin(mode),
-		mdTablePlugin(mode),
 		mdBulletPlugin(mode),
 		mdHrPlugin(mode),
 		mdHeaderPlugin(mode),
