@@ -196,6 +196,26 @@ export const SLASH_ACTIONS: SlashAction[] = [
 		icon: '—'
 	},
 	{
+		id: 'table',
+		category: SlashCategory.Insert,
+		label: m.slash_table_label(),
+		description: m.slash_table_desc(),
+		// Named headers, not empty ones: all-empty header cells are the "no
+		// header row" convention (see table-model.ts), and a fresh table should
+		// start with a header row. The trailing newline drops the cursor below
+		// the table so the widget renders immediately.
+		insert: () =>
+			[
+				`| ${m.slash_table_column({ n: 1 })} | ${m.slash_table_column({ n: 2 })} |`,
+				'| --- | --- |',
+				'|  |  |',
+				'|  |  |',
+				''
+			].join('\n'),
+		keywords: ['table', 'grid', 'rows', 'columns'],
+		icon: '▦'
+	},
+	{
 		id: 'image',
 		category: SlashCategory.Insert,
 		label: m.slash_image_label(),

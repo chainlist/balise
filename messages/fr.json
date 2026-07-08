@@ -306,6 +306,9 @@
 	"slash_image_desc": "Choisir une image à insérer",
 	"slash_cover_label": "Couverture",
 	"slash_cover_desc": "Choisir une image de couverture pleine largeur",
+	"slash_table_label": "Tableau",
+	"slash_table_desc": "Insérer un tableau",
+	"slash_table_column": "Colonne {n}",
 	"slash_cat_headings": "Titres",
 	"slash_cat_lists": "Listes",
 	"slash_cat_tags": "Tags",
@@ -325,6 +328,8 @@
 	"editor_format_underline": "Souligné",
 	"editor_format_strikethrough": "Barré",
 	"editor_format_color": "Couleur du texte",
+	"editor_table_header_row": "Ligne d'en-tête",
+	"editor_table_header_col": "Colonne d'en-tête",
 	"color_picker_custom": "Couleur personnalisée",
 
 	"image_add_description": "Ajouter une description",
