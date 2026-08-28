@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.40.0](https://github.com/chainlist/balise/compare/v0.39.0...v0.40.0) (2026-08-28)
+
+
+### Features
+
+* **note:** added drawing editor ([#120](https://github.com/chainlist/balise/issues/120)) ([72279ba](https://github.com/chainlist/balise/commit/72279ba7b47651652c772ec1391f6abdee0dc129))
+
+
+### Bug Fixes
+
+* **chore:** Fix release-please auth by switching to GitHub-provided workflow token ([#121](https://github.com/chainlist/balise/issues/121)) ([95a9c4b](https://github.com/chainlist/balise/commit/95a9c4b1924826c654b8f806443bcd99f179c1fd))
+
 ## [0.39.0](https://github.com/chainlist/balise/compare/v0.38.0...v0.39.0) (2026-07-09)
 
 
