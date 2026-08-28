@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/chainlist/balise/compare/v0.40.0...v0.40.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **notes:** clear in-progress stroke when draw mode exits mid-gesture ([#123](https://github.com/chainlist/balise/issues/123)) ([0c955ff](https://github.com/chainlist/balise/commit/0c955ff86226ce3ecc7bd54b680ef9fedac7cb55))
+
 ## [0.40.0](https://github.com/chainlist/balise/compare/v0.39.0...v0.40.0) (2026-08-28)
 
 
