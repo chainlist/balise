@@ -24,6 +24,15 @@
 		if (active && root) height = root.parentElement?.scrollHeight ?? 0;
 	});
 
+	// Escape (or the cancel button) can end draw mode mid-gesture; drop the
+	// in-progress stroke so it doesn't linger painted over the note.
+	$effect(() => {
+		if (active) return;
+		drawing = false;
+		erasing = false;
+		current = [];
+	});
+
 	// Capture phase so Escape / undo / redo don't also reach the text editor
 	// while draw mode is on.
 	$effect(() => {
