@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.0](https://github.com/chainlist/balise/compare/v0.38.0...v0.39.0) (2026-07-09)
+
+
+### Features
+
+* **editor:** added table feature ([#118](https://github.com/chainlist/balise/issues/118)) ([929203e](https://github.com/chainlist/balise/commit/929203ed9f328403854a34a2277b033a25262a67))
+
 ## [0.38.0](https://github.com/chainlist/balise/compare/v0.37.0...v0.38.0) (2026-06-28)
 
 
