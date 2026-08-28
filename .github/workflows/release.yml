@@ -3,12 +3,6 @@ name: Release
 on:
   release:
     types: [created]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag to build (e.g. v0.40.1)'
-        required: true
-        type: string
 
 jobs:
   release:
@@ -20,16 +14,12 @@ jobs:
         include:
           - platform: macos-latest
             args: --target aarch64-apple-darwin
-            cacheKey: macos-aarch64
           - platform: macos-latest
             args: --target x86_64-apple-darwin
-            cacheKey: macos-x86_64
           - platform: ubuntu-22.04
             args: ''
-            cacheKey: linux
           - platform: windows-latest
             args: ''
-            cacheKey: windows
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -51,7 +41,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
-          shared-key: ${{ matrix.cacheKey }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
@@ -67,7 +56,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
-          tagName: ${{ inputs.tag || github.event.release.tag_name }}
-          releaseName: ${{ inputs.tag || github.event.release.tag_name }}
+          releaseId: ${{ github.event.release.id }}
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
