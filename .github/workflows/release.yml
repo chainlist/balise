@@ -3,6 +3,12 @@ name: Release
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build (e.g. v0.40.1)'
+        required: true
+        type: string
 
 jobs:
   release:
@@ -61,6 +67,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
-          releaseId: ${{ github.event.release.id }}
+          tagName: ${{ inputs.tag || github.event.release.tag_name }}
+          releaseName: ${{ inputs.tag || github.event.release.tag_name }}
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
