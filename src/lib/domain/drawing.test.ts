@@ -1,15 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import {
 	createDrawing,
+	createShapeDrawing,
 	withStroke,
 	drawingBounds,
 	strokeJoinsDrawing,
 	eraseAt,
 	type Stroke
 } from './drawing';
+import type { Shape } from './shape';
 
 function stroke(coords: [number, number][], size = 6): Stroke {
 	return { size, points: coords.map(([x, y]) => ({ x, y, p: 0.5 })) };
+}
+
+function shape(overrides: Partial<Shape> = {}): Shape {
+	return {
+		kind: 'square',
+		x: 0,
+		y: 0,
+		w: 100,
+		h: 100,
+		color: '#abc',
+		fill: 'transparent',
+		size: 4,
+		...overrides
+	};
 }
 
 describe('drawing', () => {
@@ -86,5 +102,37 @@ describe('drawing', () => {
 	it('eraseAt returns the same array reference on a miss', () => {
 		const drawings = [createDrawing(stroke([[0, 0]]), '#abc')];
 		expect(eraseAt(drawings, { x: 999, y: 999 }, 10)).toBe(drawings);
+	});
+
+	it('createShapeDrawing starts untranslated and its bounds follow a move', () => {
+		const d = createShapeDrawing(shape());
+		expect(drawingBounds(d)).toEqual({ left: 0, top: 0, right: 100, bottom: 100 });
+		expect(drawingBounds({ ...d, x: 10, y: 20 })).toEqual({
+			left: 10,
+			top: 20,
+			right: 110,
+			bottom: 120
+		});
+	});
+
+	it('a stroke drawn near a shape joins its drawing', () => {
+		const d = createShapeDrawing(shape());
+		expect(strokeJoinsDrawing(d, stroke([[110, 50]]).points)).toBe(true);
+		expect(strokeJoinsDrawing(d, stroke([[300, 300]]).points)).toBe(false);
+	});
+
+	it('eraseAt removes a hit shape and drops the emptied drawing', () => {
+		const d = { ...createShapeDrawing(shape()), x: 100, y: 0 };
+		// Hollow interior misses (same reference), outline hits.
+		expect(eraseAt([d], { x: 150, y: 50 }, 4)).toEqual([d]);
+		expect(eraseAt([d], { x: 150, y: 0 }, 4)).toHaveLength(0);
+	});
+
+	it('eraseAt keeps a drawing whose strokes are gone but shape remains', () => {
+		const d = withStroke(createShapeDrawing(shape()), stroke([[50, 50]]));
+		const result = eraseAt([d], { x: 50, y: 50 }, 4);
+		expect(result).toHaveLength(1);
+		expect(result[0].strokes).toHaveLength(0);
+		expect(result[0].shapes).toHaveLength(1);
 	});
 });

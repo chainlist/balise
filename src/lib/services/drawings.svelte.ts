@@ -1,15 +1,17 @@
 import { drawingRepo } from '$lib/repositories/drawing.repo';
 import {
 	createDrawing,
+	createShapeDrawing,
 	withStroke,
 	strokeJoinsDrawing,
 	eraseAt,
 	type Drawing,
 	type StrokePoint
 } from '$lib/domain/drawing';
+import { TRANSPARENT, type Shape, type ShapeKind } from '$lib/domain/shape';
 import { COLOR_PALETTE } from '$lib/utils/color-palette';
 
-export type DrawingTool = 'brush' | 'eraser';
+export type DrawingTool = 'brush' | 'eraser' | 'shape';
 
 // Application layer: the draw-mode session for the open note. `drawings` is the
 // committed set loaded from the repo; entering draw mode copies it into
@@ -29,6 +31,9 @@ class DrawingsService {
 	color = $state(COLOR_PALETTE[0]);
 	tool = $state<DrawingTool>('brush');
 	width = $state(7);
+	shape = $state<ShapeKind>('square');
+	shapeFill = $state<string>(TRANSPARENT);
+	shapeColor = $state<string>(COLOR_PALETTE[0]);
 
 	async load(noteId: string): Promise<void> {
 		this.#noteId = noteId;
@@ -73,13 +78,19 @@ class DrawingsService {
 	/** Append a finished stroke: it joins a nearby drawing, else starts a new one. */
 	addStroke(points: StrokePoint[]): void {
 		this.#push($state.snapshot(this.working));
-		const stroke = { size: this.width, points };
+		const stroke = { size: this.width, color: this.color, points };
 		const target = this.working.find((d) => strokeJoinsDrawing(d, points));
 		if (target) {
 			this.working = this.working.map((d) => (d === target ? withStroke(d, stroke) : d));
 		} else {
 			this.working = [...this.working, createDrawing(stroke, this.color)];
 		}
+	}
+
+	/** Append a dragged-out shape as its own drawing. */
+	addShape(shape: Shape): void {
+		this.#push($state.snapshot(this.working));
+		this.working = [...this.working, createShapeDrawing(shape)];
 	}
 
 	/** Arm the history snapshot for a drag gesture (move or erase). */

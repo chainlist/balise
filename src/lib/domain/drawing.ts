@@ -1,4 +1,5 @@
 import { newId } from './shared/id';
+import { shapeHit, shapeVertices, type Shape } from './shape';
 
 // Freehand drawings overlaid on a note. Pure rules only: coordinate space,
 // grouping of strokes into drawings, bounds, and erasing. Capturing pointer
@@ -14,21 +15,24 @@ export interface StrokePoint {
 	p: number;
 }
 
-/** One brush stroke: its base width and the captured points. */
+/** One brush stroke: its base width and the captured points. `color` falls
+ *  back to the owning drawing's color for strokes saved before it existed. */
 export interface Stroke {
 	size: number;
+	color?: string;
 	points: StrokePoint[];
 }
 
-/** One or more brush strokes moved and deleted as a unit. `x`/`y` is the
- *  translation applied when the drawing is moved; stroke points keep the
- *  coordinates they were captured with. */
+/** Brush strokes and placed shapes moved and deleted as a unit. `x`/`y` is the
+ *  translation applied when the drawing is moved; stroke points and shapes keep
+ *  the coordinates they were captured with. */
 export interface Drawing {
 	id: string;
 	color: string;
 	x: number;
 	y: number;
 	strokes: Stroke[];
+	shapes: Shape[];
 }
 
 export interface Bounds {
@@ -43,7 +47,12 @@ export interface Bounds {
 const GROUP_MARGIN = 40;
 
 export function createDrawing(stroke: Stroke, color: string): Drawing {
-	return { id: newId(), color, x: 0, y: 0, strokes: [stroke] };
+	return { id: newId(), color, x: 0, y: 0, strokes: [stroke], shapes: [] };
+}
+
+/** A placed shape starts as its own drawing; nearby strokes may join it later. */
+export function createShapeDrawing(shape: Shape): Drawing {
+	return { id: newId(), color: shape.color, x: 0, y: 0, strokes: [], shapes: [shape] };
 }
 
 /** Append a stroke to an existing drawing, re-expressing its points in the
@@ -56,7 +65,7 @@ export function withStroke(drawing: Drawing, stroke: Stroke): Drawing {
 	return { ...drawing, strokes: [...drawing.strokes, local] };
 }
 
-function pointsBounds(points: StrokePoint[]): Bounds {
+function pointsBounds(points: { x: number; y: number }[]): Bounds {
 	let left = Infinity;
 	let top = Infinity;
 	let right = -Infinity;
@@ -72,7 +81,10 @@ function pointsBounds(points: StrokePoint[]): Bounds {
 
 /** Bounding box of a drawing in pane coordinates (translation applied). */
 export function drawingBounds(drawing: Drawing): Bounds {
-	const b = pointsBounds(drawing.strokes.flatMap((s) => s.points));
+	const b = pointsBounds([
+		...drawing.strokes.flatMap((s) => s.points),
+		...drawing.shapes.flatMap(shapeVertices)
+	]);
 	return {
 		left: b.left + drawing.x,
 		top: b.top + drawing.y,
@@ -103,9 +115,9 @@ function strokeHit(stroke: Stroke, x: number, y: number, radius: number): boolea
 	return stroke.points.some((p) => (p.x - x) ** 2 + (p.y - y) ** 2 <= r2);
 }
 
-/** Remove every stroke within `radius` of the point (pane coordinates) and drop
- *  drawings left empty. Returns the input array unchanged when nothing is hit,
- *  so callers can detect a no-op by reference. */
+/** Remove every stroke or shape within `radius` of the point (pane coordinates)
+ *  and drop drawings left empty. Returns the input array unchanged when nothing
+ *  is hit, so callers can detect a no-op by reference. */
 export function eraseAt(
 	drawings: Drawing[],
 	point: { x: number; y: number },
@@ -114,11 +126,14 @@ export function eraseAt(
 	let changed = false;
 	const result = drawings
 		.map((d) => {
-			const kept = d.strokes.filter((s) => !strokeHit(s, point.x - d.x, point.y - d.y, radius));
-			if (kept.length === d.strokes.length) return d;
+			const x = point.x - d.x;
+			const y = point.y - d.y;
+			const strokes = d.strokes.filter((s) => !strokeHit(s, x, y, radius));
+			const shapes = d.shapes.filter((s) => !shapeHit(s, x, y, radius));
+			if (strokes.length === d.strokes.length && shapes.length === d.shapes.length) return d;
 			changed = true;
-			return { ...d, strokes: kept };
+			return { ...d, strokes, shapes };
 		})
-		.filter((d) => d.strokes.length > 0);
+		.filter((d) => d.strokes.length > 0 || d.shapes.length > 0);
 	return changed ? result : drawings;
 }
