@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.41.0](https://github.com/chainlist/balise/compare/v0.40.2...v0.41.0) (2026-08-28)
+
+
+### Features
+
+* **drawing:** add predefined shapes with fill and outline colors ([#130](https://github.com/chainlist/balise/issues/130)) ([34b0241](https://github.com/chainlist/balise/commit/34b0241715693b454a4a3cab93ac59792a8dcc83))
+
+
+### Bug Fixes
+
+* **ci:** revert release pipeline to pre-warmup state ([#128](https://github.com/chainlist/balise/issues/128)) ([2527b45](https://github.com/chainlist/balise/commit/2527b451bb7bb09719d9eca1e77648cfc49ee1cd))
+
 ## [0.40.2](https://github.com/chainlist/balise/compare/v0.40.1...v0.40.2) (2026-08-28)
 
 
