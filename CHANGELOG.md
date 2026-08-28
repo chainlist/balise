@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.2](https://github.com/chainlist/balise/compare/v0.40.1...v0.40.2) (2026-08-28)
+
+
+### Bug Fixes
+
+* **ci:** dispatch release build after release-please creates a release ([#126](https://github.com/chainlist/balise/issues/126)) ([e488ebe](https://github.com/chainlist/balise/commit/e488ebe51aaa694364626727de8e8b965cfa2976))
+
 ## [0.40.1](https://github.com/chainlist/balise/compare/v0.40.0...v0.40.1) (2026-08-28)
 
 
