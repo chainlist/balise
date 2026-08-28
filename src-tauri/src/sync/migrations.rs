@@ -75,6 +75,25 @@ const MIGRATIONS: &[(i64, &[&str])] = &[
             )",
         ],
     ),
+    // Version 4 is deliberately skipped: pre-release desk DBs in the wild already
+    // recorded a 4 for a since-removed local index experiment
+    // (idx_notes_pinned_updated_id), so reusing the number would be a no-op there.
+    (
+        5,
+        &[
+            "CREATE TABLE IF NOT EXISTS note_drawings (
+                id         TEXT PRIMARY KEY,
+                note_id    TEXT NOT NULL,
+                color      TEXT NOT NULL,
+                x          REAL NOT NULL DEFAULT 0,
+                y          REAL NOT NULL DEFAULT 0,
+                strokes    TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+            )",
+            "CREATE INDEX IF NOT EXISTS idx_note_drawings_note ON note_drawings(note_id)",
+        ],
+    ),
 ];
 
 pub(crate) async fn migrate(conn: &mut SqliteConnection) -> Result<(), String> {
@@ -139,10 +158,14 @@ mod tests {
         let mut conn = mem_db().await;
         migrate(&mut conn).await.unwrap();
 
-        assert_eq!(applied_versions(&mut conn).await, vec![1, 2, 3]);
-        // migration 2 adds `preview`; migration 3 adds `deletions`.
+        assert_eq!(applied_versions(&mut conn).await, vec![1, 2, 3, 5]);
+        // migration 2 adds `preview`; migration 3 adds `deletions`; migration 5 adds `note_drawings`.
         sqlx::query("SELECT preview FROM notes").fetch_all(&mut conn).await.unwrap();
         sqlx::query("SELECT id, deleted_at FROM deletions").fetch_all(&mut conn).await.unwrap();
+        sqlx::query("SELECT id, note_id, color, x, y, strokes FROM note_drawings")
+            .fetch_all(&mut conn)
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
@@ -151,6 +174,6 @@ mod tests {
         migrate(&mut conn).await.unwrap();
         // A second run must apply nothing and must not error.
         migrate(&mut conn).await.unwrap();
-        assert_eq!(applied_versions(&mut conn).await, vec![1, 2, 3]);
+        assert_eq!(applied_versions(&mut conn).await, vec![1, 2, 3, 5]);
     }
 }
