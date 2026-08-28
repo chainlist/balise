@@ -1,5 +1,6 @@
 import { getDb } from './backend/db';
 import type { Drawing, Stroke, StrokePoint } from '$lib/domain/drawing';
+import type { Shape } from '$lib/domain/shape';
 
 // Data access for note drawings. `note_drawings` rows are deleted with their
 // note via the FOREIGN KEY ... ON DELETE CASCADE in migration 4.
@@ -10,6 +11,20 @@ interface RawDrawingRow {
 	x: number;
 	y: number;
 	strokes: string;
+}
+
+/** Strokes and shapes share the `strokes` JSON column: shapes carry a `kind`
+ *  discriminator, strokes carry `points`, and rows written before strokes had
+ *  a width stored bare point arrays. */
+function parseElements(json: string): { strokes: Stroke[]; shapes: Shape[] } {
+	const strokes: Stroke[] = [];
+	const shapes: Shape[] = [];
+	for (const item of JSON.parse(json) as (Stroke | StrokePoint[] | Shape)[]) {
+		if (Array.isArray(item)) strokes.push({ size: 6, points: item });
+		else if ('kind' in item) shapes.push(item);
+		else strokes.push(item);
+	}
+	return { strokes, shapes };
 }
 
 export const drawingRepo = {
@@ -23,11 +38,7 @@ export const drawingRepo = {
 			color: r.color,
 			x: r.x,
 			y: r.y,
-			// Rows written before strokes carried a width stored bare point arrays;
-			// wrap them with the then-fixed brush size.
-			strokes: (JSON.parse(r.strokes) as (Stroke | StrokePoint[])[]).map((s) =>
-				Array.isArray(s) ? { size: 6, points: s } : s
-			)
+			...parseElements(r.strokes)
 		}));
 	},
 
@@ -39,7 +50,7 @@ export const drawingRepo = {
 			await db.execute(
 				`INSERT INTO note_drawings (id, note_id, color, x, y, strokes)
          VALUES ($1, $2, $3, $4, $5, $6)`,
-				[d.id, noteId, d.color, d.x, d.y, JSON.stringify(d.strokes)]
+				[d.id, noteId, d.color, d.x, d.y, JSON.stringify([...d.strokes, ...d.shapes])]
 			);
 		}
 	}

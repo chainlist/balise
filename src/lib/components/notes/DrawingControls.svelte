@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { CheckIcon, EraserIcon, XIcon } from '@lucide/svelte';
 	import DrawingBrushIcon from './DrawingBrushIcon.svelte';
+	import DrawingShapeSelect from './DrawingShapeSelect.svelte';
+	import DrawingColorPick from './DrawingColorPick.svelte';
 	import { drawingsService } from '$lib/services/drawings.svelte';
 	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { COLOR_PALETTE } from '$lib/utils/color-palette';
@@ -28,26 +30,42 @@
 		<div
 			class="frost-surface! mb-5 flex items-center gap-1.5 rounded-full px-2.5 py-1.5 shadow-lg select-none"
 		>
-			{#each BRUSH_COLORS as color (color)}
-				<button
-					type="button"
-					aria-label="{m.editor_draw_color()} {color}"
-					aria-pressed={drawingsService.color === color}
-					class="flex size-5 items-center justify-center rounded-full transition-transform hover:scale-110 {drawingsService.color ===
-					color
-						? 'scale-110'
-						: ''}"
-					style="background: {color}"
-					onclick={() => {
-						drawingsService.color = color;
-						drawingsService.tool = 'brush';
-					}}
-				>
-					{#if drawingsService.color === color && drawingsService.tool === 'brush'}
-						<CheckIcon class="size-3 text-white drop-shadow-sm" strokeWidth={3} />
-					{/if}
-				</button>
-			{/each}
+			{#if drawingsService.tool === 'shape'}
+				<DrawingColorPick
+					label={m.editor_draw_fill()}
+					value={drawingsService.shapeFill}
+					onselect={(c) => (drawingsService.shapeFill = c)}
+				/>
+				<DrawingColorPick
+					label={m.editor_draw_outline()}
+					value={drawingsService.shapeColor}
+					ring
+					onselect={(c) => (drawingsService.shapeColor = c)}
+				/>
+			{:else}
+				{#each BRUSH_COLORS as color (color)}
+					<button
+						type="button"
+						aria-label="{m.editor_draw_color()} {color}"
+						aria-pressed={drawingsService.color === color}
+						class="flex size-5 items-center justify-center rounded-full transition-transform hover:scale-110 {drawingsService.color ===
+						color
+							? 'scale-110'
+							: ''}"
+						style="background: {color}"
+						onclick={() => {
+							drawingsService.color = color;
+							drawingsService.tool = 'brush';
+						}}
+					>
+						{#if drawingsService.color === color && drawingsService.tool === 'brush'}
+							<CheckIcon class="size-3 text-white drop-shadow-sm" strokeWidth={3} />
+						{/if}
+					</button>
+				{/each}
+			{/if}
+			<div class="mx-0.5 h-4 w-px bg-border"></div>
+			<DrawingShapeSelect />
 			<div class="mx-0.5 h-4 w-px bg-border"></div>
 			{#each BRUSH_WIDTHS as w (w)}
 				<button

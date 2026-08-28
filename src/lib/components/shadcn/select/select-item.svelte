@@ -6,7 +6,7 @@
 	let {
 		ref = $bindable(null),
 		class: className,
-		children,
+		children: childrenProp,
 		...restProps
 	}: SelectPrimitive.ItemProps = $props();
 </script>
@@ -15,7 +15,7 @@
 	bind:ref
 	data-slot="select-item"
 	class={cn(
-		'relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none',
+		'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none',
 		'data-highlighted:bg-accent data-highlighted:text-accent-foreground',
 		'data-disabled:pointer-events-none data-disabled:opacity-50',
 		'data-[state=checked]:font-medium',
@@ -23,12 +23,16 @@
 	)}
 	{...restProps}
 >
-	{#snippet children({ isSelected })}
+	{#snippet children({ selected, highlighted })}
 		<span class="absolute right-2 flex size-3.5 items-center justify-center">
-			{#if isSelected}
+			{#if selected}
 				<CheckIcon size={12} />
 			{/if}
 		</span>
-		{restProps.label}
+		{#if childrenProp}
+			{@render childrenProp({ selected, highlighted })}
+		{:else}
+			{restProps.label}
+		{/if}
 	{/snippet}
 </SelectPrimitive.Item>
