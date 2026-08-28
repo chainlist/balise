@@ -109,9 +109,9 @@
 	<svg class="pointer-events-none block w-full overflow-visible" height="1" aria-hidden="true">
 		<g transform="translate({centerX} 0)">
 			{#each shown as d (d.id)}
-				<g transform="translate({d.x} {d.y})" fill={d.color}>
+				<g transform="translate({d.x} {d.y})">
 					{#each d.strokes as stroke, i (i)}
-						<path d={strokePath(stroke.points, stroke.size)} />
+						<path d={strokePath(stroke.points, stroke.size)} fill={stroke.color ?? d.color} />
 					{/each}
 				</g>
 			{/each}

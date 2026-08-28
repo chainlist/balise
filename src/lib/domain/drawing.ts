@@ -14,9 +14,11 @@ export interface StrokePoint {
 	p: number;
 }
 
-/** One brush stroke: its base width and the captured points. */
+/** One brush stroke: its base width and the captured points. `color` falls
+ *  back to the owning drawing's color for strokes saved before it existed. */
 export interface Stroke {
 	size: number;
+	color?: string;
 	points: StrokePoint[];
 }
 

@@ -73,7 +73,7 @@ class DrawingsService {
 	/** Append a finished stroke: it joins a nearby drawing, else starts a new one. */
 	addStroke(points: StrokePoint[]): void {
 		this.#push($state.snapshot(this.working));
-		const stroke = { size: this.width, points };
+		const stroke = { size: this.width, color: this.color, points };
 		const target = this.working.find((d) => strokeJoinsDrawing(d, points));
 		if (target) {
 			this.working = this.working.map((d) => (d === target ? withStroke(d, stroke) : d));

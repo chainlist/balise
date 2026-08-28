@@ -31,12 +31,14 @@
 	}
 </script>
 
-<!-- Dashed outline showing the drawing's extent while in draw mode. -->
-<div
-	class="pointer-events-none absolute rounded border border-dashed border-muted-foreground/40"
-	style="left: {centerX + bounds.left - 6}px; top: {bounds.top - 6}px;
-	       width: {bounds.right - bounds.left + 12}px; height: {bounds.bottom - bounds.top + 12}px"
-></div>
+<!-- Dashed outline showing the drawing's extent, only while it is being moved. -->
+{#if dragging}
+	<div
+		class="pointer-events-none absolute rounded border border-dashed border-muted-foreground/40"
+		style="left: {centerX + bounds.left - 6}px; top: {bounds.top - 6}px;
+		       width: {bounds.right - bounds.left + 12}px; height: {bounds.bottom - bounds.top + 12}px"
+	></div>
+{/if}
 
 <!-- Edit chip pinned above the drawing: drag the grip to move it, trash deletes. -->
 <div
