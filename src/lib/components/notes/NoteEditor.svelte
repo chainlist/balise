@@ -15,6 +15,9 @@
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
 	import NoteSummarySheet from './NoteSummarySheet.svelte';
 	import EditorView from './EditorView.svelte';
+	import DrawingOverlay from './DrawingOverlay.svelte';
+	import DrawingControls from './DrawingControls.svelte';
+	import { drawingsService } from '$lib/services/drawings.svelte';
 	import type { OutlineItem } from '$lib/utils/cm';
 	import * as m from '$paraglide/messages.js';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -26,7 +29,8 @@
 		persistFolds = true,
 		autofocus = true,
 		floating = true,
-		showHeader = true
+		showHeader = true,
+		drawable = false
 	}: {
 		note: NoteListItem & { content?: string };
 		onSave?: (content: string) => Promise<void>;
@@ -40,12 +44,25 @@
 		/** Set false to hide the per-note header (date, reading time, tags), e.g. in the
 		 *  journal where each day already shows its own date heading. */
 		showHeader?: boolean;
+		/** Enable the freehand drawing overlay. Only the main note view sets this —
+		 *  the singleton draw session assumes one drawable editor at a time. */
+		drawable?: boolean;
 	} = $props();
 
 	let alwaysOnTop = $state(false);
 
 	onMount(async () => {
 		if (pinnable) alwaysOnTop = await getCurrentWindow().isAlwaysOnTop();
+	});
+
+	// The component remounts per note (keyed by note.id), so one load per mount.
+	onMount(async () => {
+		if (!drawable) return;
+		try {
+			await drawingsService.load(note.id);
+		} catch (e) {
+			toasterService.warning(m.drawing_load_error_failed(), errorMessage(e));
+		}
 	});
 
 	async function toggleAlwaysOnTop() {
@@ -72,6 +89,10 @@
 </script>
 
 <EditorView bind:this={editorView} {note} {onSave} {persistFolds} {autofocus} {showHeader}>
+	{#if drawable}
+		<DrawingOverlay />
+		<DrawingControls {floating} />
+	{/if}
 	<div
 		class="z-20 flex items-center gap-1 {floating
 			? 'fixed top-15 right-5 -translate-y-1/2'
