@@ -1,4 +1,4 @@
-import { open } from '@tauri-apps/plugin-dialog';
+import { open, save } from '@tauri-apps/plugin-dialog';
 
 // Backend seam for the native file dialog: the only module importing
 // `@tauri-apps/plugin-dialog`. Mirrors how `fs.ts` is the sole importer of the
@@ -15,4 +15,18 @@ export async function openImageFile(): Promise<string | null> {
 		filters: [{ name: 'Image', extensions: IMAGE_EXTENSIONS }]
 	});
 	return typeof selected === 'string' ? selected : null;
+}
+
+/** Open the native save dialog for an exported note, seeded with `defaultName`
+ *  and filtered to the one extension being written. Returns the chosen absolute
+ *  path, or null when the user cancels. */
+export async function saveExportFile(
+	defaultName: string,
+	filterName: string,
+	extension: string
+): Promise<string | null> {
+	return save({
+		defaultPath: defaultName,
+		filters: [{ name: filterName, extensions: [extension] }]
+	});
 }

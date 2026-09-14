@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import type { NoteListItem } from '$lib/domain/note';
 	import { eventBus } from '$lib/services/events/event-bus';
 	import { notesService } from '$lib/services/notes.svelte';
@@ -9,11 +9,17 @@
 		EllipsisVerticalIcon,
 		Trash2Icon,
 		PinIcon,
+		PinOffIcon,
 		ListTreeIcon,
-		ExternalLinkIcon
+		ExternalLinkIcon,
+		DownloadIcon
 	} from '@lucide/svelte';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
 	import NoteSummarySheet from './NoteSummarySheet.svelte';
+	import NoteExportView from './NoteExportView.svelte';
+	import { rasterizeNode } from './note-raster';
+	import { exportService } from '$lib/services/export';
+	import { EXPORT_FORMATS, type ExportFormat } from '$lib/domain/export';
 	import EditorView from './EditorView.svelte';
 	import DrawingOverlay from './DrawingOverlay.svelte';
 	import DrawingControls from './DrawingControls.svelte';
@@ -30,7 +36,8 @@
 		autofocus = true,
 		floating = true,
 		showHeader = true,
-		drawable = false
+		drawable = false,
+		canPin = false
 	}: {
 		note: NoteListItem & { content?: string };
 		onSave?: (content: string) => Promise<void>;
@@ -47,6 +54,11 @@
 		/** Enable the freehand drawing overlay. Only the main note view sets this —
 		 *  the singleton draw session assumes one drawable editor at a time. */
 		drawable?: boolean;
+		/** Offer "pin to top" in the overflow menu. Only the main note view sets this:
+		 *  pinning reorders the sidebar list, and `notesService` owns that list, so an
+		 *  editor fed from elsewhere (the journal's per-day buckets) would show a
+		 *  stale label after a toggle. */
+		canPin?: boolean;
 	} = $props();
 
 	let alwaysOnTop = $state(false);
@@ -85,6 +97,44 @@
 	function openSummary() {
 		outline = editorView?.getOutline() ?? [];
 		summaryOpen = true;
+	}
+
+	// Mounting the offscreen export view is deferred until an export is asked for,
+	// so every open note does not carry a second rendered copy of itself.
+	let exportView = $state<ReturnType<typeof NoteExportView>>();
+	let exportContent = $state<string | null>(null);
+	let exporting = $state(false);
+
+	async function handleExport(format: ExportFormat) {
+		if (exporting) return;
+		exporting = true;
+		try {
+			exportContent = await notesService.loadContent(note.id);
+			await tick();
+			await exportView?.whenReady();
+			const node = exportView?.getNode();
+			if (!node) throw new Error('export view did not render');
+
+			const saved = await exportService.exportNote(
+				(encoding) => rasterizeNode(node, encoding),
+				format,
+				note.title
+			);
+			if (saved) toasterService.success(m.note_export_success());
+		} catch (e) {
+			toasterService.error(m.note_export_error_failed(), errorMessage(e));
+		} finally {
+			exportContent = null;
+			exporting = false;
+		}
+	}
+
+	async function togglePinned() {
+		try {
+			await notesService.setPinned(note.id, !note.pinned);
+		} catch (e) {
+			toasterService.error(m.note_pin_error_failed(), errorMessage(e));
+		}
 	}
 </script>
 
@@ -127,6 +177,17 @@
 					{/snippet}
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end" class="rounded">
+					{#if canPin}
+						<DropdownMenu.Item class="rounded" onclick={togglePinned}>
+							{#if note.pinned}
+								<PinOffIcon class="size-4" />
+								{m.note_unpin()}
+							{:else}
+								<PinIcon class="size-4" />
+								{m.note_pin()}
+							{/if}
+						</DropdownMenu.Item>
+					{/if}
 					<DropdownMenu.Item
 						class="rounded"
 						onclick={async () => {
@@ -140,6 +201,23 @@
 						<ExternalLinkIcon class="size-4" />
 						{m.editor_open_original_file()}
 					</DropdownMenu.Item>
+					<DropdownMenu.Sub>
+						<DropdownMenu.SubTrigger class="rounded">
+							<DownloadIcon class="size-4" />
+							{m.note_export()}
+						</DropdownMenu.SubTrigger>
+						<DropdownMenu.SubContent class="rounded">
+							<DropdownMenu.Item class="rounded" onclick={() => handleExport(EXPORT_FORMATS.PDF)}>
+								{m.note_export_pdf()}
+							</DropdownMenu.Item>
+							<DropdownMenu.Item class="rounded" onclick={() => handleExport(EXPORT_FORMATS.PNG)}>
+								{m.note_export_png()}
+							</DropdownMenu.Item>
+							<DropdownMenu.Item class="rounded" onclick={() => handleExport(EXPORT_FORMATS.JPEG)}>
+								{m.note_export_jpeg()}
+							</DropdownMenu.Item>
+						</DropdownMenu.SubContent>
+					</DropdownMenu.Sub>
 					<DropdownMenu.Item
 						class="rounded text-destructive focus:text-destructive"
 						onclick={() => (confirmOpen = true)}
@@ -161,5 +239,9 @@
 		editorView?.goToPosition(pos, 'start');
 	}}
 />
+
+{#if exportContent !== null}
+	<NoteExportView bind:this={exportView} content={exportContent} title={note.title} />
+{/if}
 
 <NoteDeleteDialog {note} bind:open={confirmOpen} />

@@ -6,9 +6,10 @@
 // Tags here, never the reverse.
 
 import { MAGIC_TAG_MATCH_TYPES, type MagicTagRule, type MagicTagMatchType } from './tag';
+import type { NoteTemplate } from './template';
 
 export { MAGIC_TAG_MATCH_TYPES };
-export type { MagicTagRule, MagicTagMatchType };
+export type { MagicTagRule, MagicTagMatchType, NoteTemplate };
 
 // ─── Shared value types ──────────────────────────────────────────────────────
 // These unions are owned by other layers (the CodeMirror editor's `MarkMode`, the
@@ -89,6 +90,13 @@ export interface MagicTagsSettings {
 	tags: MagicTagRule[];
 }
 
+export interface NoteTemplatesSettings {
+	templates: NoteTemplate[];
+	/** Template seeded into every new note; `null` keeps the plain heading stub.
+	 *  Cleared when the template it points at is deleted. */
+	defaultTemplateId: string | null;
+}
+
 export interface ShortcutsSettings {
 	customBindings: Record<string, string>;
 }
@@ -154,6 +162,11 @@ export const DEFAULT_MAGIC_TAGS: MagicTagRule[] = [
 
 export const DEFAULT_MAGIC_TAGS_SETTINGS: MagicTagsSettings = { tags: DEFAULT_MAGIC_TAGS };
 
+export const DEFAULT_NOTE_TEMPLATES_SETTINGS: NoteTemplatesSettings = {
+	templates: [],
+	defaultTemplateId: null
+};
+
 export const DEFAULT_SHORTCUTS_SETTINGS: ShortcutsSettings = { customBindings: {} };
 
 export const DEFAULT_SYNC_SETTINGS: SyncSettings = {
@@ -176,6 +189,7 @@ export const DEFAULT_SETTINGS = {
 	editor: DEFAULT_EDITOR_SETTINGS,
 	journal: DEFAULT_JOURNAL_SETTINGS,
 	magicTags: DEFAULT_MAGIC_TAGS_SETTINGS,
+	noteTemplates: DEFAULT_NOTE_TEMPLATES_SETTINGS,
 	shortcuts: DEFAULT_SHORTCUTS_SETTINGS,
 	sync: DEFAULT_SYNC_SETTINGS
 };

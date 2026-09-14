@@ -52,6 +52,16 @@ export type SystemTag = (typeof SYSTEM_TAGS)[keyof typeof SYSTEM_TAGS];
 /** Sentinel filter value for "notes with no tags". */
 export const UNTAGGED_FILTER = '__untagged__' as const;
 
+/** Sentinel filter value for "pinned notes only". Not a tag: it filters on the
+ *  note's `pinned` column, and no note ever carries it as a hashtag. */
+export const PINNED_FILTER = '__pinned__' as const;
+
+/** Filter values that look like a tag to the sidebar but are not one, so they
+ *  must never be written into note content or looked up in `note_tags`. */
+export function isFilterSentinel(tag: string | null): boolean {
+	return tag === UNTAGGED_FILTER || tag === PINNED_FILTER;
+}
+
 // ─── Naming ───────────────────────────────────────────────────────────────────
 
 export function tagDisplayName(tag: { display_name: string | null; tag: string }): string {

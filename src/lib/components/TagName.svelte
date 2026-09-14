@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { tagsService } from '$lib/services/tags.svelte';
 	import { tagDisplayName, type Tag, type RelatedTag } from '$lib/domain/tag';
+	import { PinIcon } from '@lucide/svelte';
 
-	let { tag, untagged }: { tag: string | Tag | RelatedTag; untagged?: boolean } = $props();
+	let {
+		tag,
+		untagged,
+		pinned
+	}: { tag: string | Tag | RelatedTag; untagged?: boolean; pinned?: boolean } = $props();
 
 	const tagObj = $derived(
 		typeof tag === 'string'
@@ -16,7 +21,9 @@
 </script>
 
 <span class="inline-flex min-w-0 items-center gap-1.5">
-	{#if untagged}
+	{#if pinned}
+		<PinIcon class="size-2.5 shrink-0 fill-current text-sidebar-foreground/50" />
+	{:else if untagged}
 		<span class="size-2 shrink-0 rounded-full border border-dashed border-sidebar-foreground/30"
 		></span>
 	{:else if tagObj.color}

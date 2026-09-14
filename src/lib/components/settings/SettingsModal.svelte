@@ -11,7 +11,8 @@
 		RefreshCwIcon,
 		LayoutListIcon,
 		TagsIcon,
-		NotebookIcon
+		NotebookIcon,
+		LayoutTemplateIcon
 	} from '@lucide/svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
 	import { cn } from '$lib/utils.js';
@@ -22,6 +23,7 @@
 	import JournalSettings from './JournalSettings.svelte';
 	import AboutSettings from './AboutSettings.svelte';
 	import MagicTagsSettings from './MagicTagsSettings.svelte';
+	import NoteTemplatesSettings from './NoteTemplatesSettings.svelte';
 	import TagsSettings from './TagsSettings.svelte';
 	import GeneralSettings from './GeneralSettings.svelte';
 	import DesksSettings from './DesksSettings.svelte';
@@ -87,6 +89,12 @@
 					label: m.settings_journal_heading(),
 					icon: NotebookIcon,
 					component: JournalSettings
+				},
+				{
+					id: 'templates',
+					label: m.settings_templates_heading(),
+					icon: LayoutTemplateIcon,
+					component: NoteTemplatesSettings
 				},
 				{
 					id: 'shortcuts',
@@ -191,53 +199,54 @@
 			)}
 		>
 			<!-- Left sidebar -->
-			<div class="flex w-48 shrink-0 flex-col gap-1 rounded border-r bg-muted/30 p-3">
-				{#each navGroups as group, groupIndex (group.id)}
-					{#if groupIndex === 0}
-						<Dialog.Title class={cn(GROUP_TITLE_CLASS, 'mb-1')}>{group.title}</Dialog.Title>
-					{:else}
-						<h3 class={cn(GROUP_TITLE_CLASS, 'mt-4 mb-1')}>{group.title}</h3>
-					{/if}
-					{#each group.items as item (item.id)}
-						<button
-							onclick={() => selectItem(item)}
-							disabled={item.comingSoon}
-							class={cn(
-								'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
-								item.comingSoon
-									? DISABLED_CLASS
-									: isItemActive(item)
-										? ACTIVE_CLASS
-										: INACTIVE_CLASS
-							)}
-						>
-							<item.icon size="15" class="shrink-0" />
-							<span class="truncate">{item.label}</span>
-							{#if item.comingSoon}
-								<Badge class="ml-auto">{m.settings_sync_soon()}</Badge>
-							{/if}
-						</button>
-						{#if item.children && !item.comingSoon}
-							<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
-								{#each item.children as child (child.id)}
-									<button
-										onclick={() => (activeView = child)}
-										class={cn(
-											'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
-											activeView.id === child.id ? ACTIVE_CLASS : INACTIVE_CLASS
-										)}
-									>
-										<span class="truncate">{child.label}</span>
-									</button>
-								{/each}
-							</div>
+			<div class="flex w-48 shrink-0 flex-col rounded border-r bg-muted/30 p-3">
+				<div class="flex scrollbar-thin min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+					{#each navGroups as group, groupIndex (group.id)}
+						{#if groupIndex === 0}
+							<Dialog.Title class={cn(GROUP_TITLE_CLASS, 'mb-1')}>{group.title}</Dialog.Title>
+						{:else}
+							<h3 class={cn(GROUP_TITLE_CLASS, 'mt-4 mb-1')}>{group.title}</h3>
 						{/if}
+						{#each group.items as item (item.id)}
+							<button
+								onclick={() => selectItem(item)}
+								disabled={item.comingSoon}
+								class={cn(
+									'flex w-full min-w-0 items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm transition-colors',
+									item.comingSoon
+										? DISABLED_CLASS
+										: isItemActive(item)
+											? ACTIVE_CLASS
+											: INACTIVE_CLASS
+								)}
+							>
+								<item.icon size="15" class="shrink-0" />
+								<span class="truncate">{item.label}</span>
+								{#if item.comingSoon}
+									<Badge class="ml-auto">{m.settings_sync_soon()}</Badge>
+								{/if}
+							</button>
+							{#if item.children && !item.comingSoon}
+								<div class="my-0.5 ml-[1.1875rem] flex flex-col gap-1 border-l pl-2">
+									{#each item.children as child (child.id)}
+										<button
+											onclick={() => (activeView = child)}
+											class={cn(
+												'flex w-full min-w-0 items-center rounded px-2 py-1 text-left text-[13px] transition-colors',
+												activeView.id === child.id ? ACTIVE_CLASS : INACTIVE_CLASS
+											)}
+										>
+											<span class="truncate">{child.label}</span>
+										</button>
+									{/each}
+								</div>
+							{/if}
+						{/each}
 					{/each}
-				{/each}
-				<div class="flex-1"></div>
+				</div>
 				<button
 					onclick={runWizard}
-					class="flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					class="mt-1 flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 				>
 					<WandSparklesIcon size="15" />
 					{m.wizard_run_again()}

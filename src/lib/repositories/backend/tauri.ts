@@ -32,6 +32,13 @@ export async function copyAttachment(
 	await invoke('copy_attachment', { deskName, srcPath, filename });
 }
 
+/** Write exported note bytes to a user-chosen absolute path. The destination
+ *  comes from the native save dialog and can be anywhere on disk, so the write
+ *  runs in Rust (full disk access) rather than the scope-limited fs plugin. */
+export async function writeExportFile(path: string, bytes: Uint8Array): Promise<void> {
+	await invoke('write_export_file', { path, bytes: Array.from(bytes) });
+}
+
 /** List the font families installed on the OS, sorted, for the editor
  *  font-family setting. Resolved in Rust so it works on every platform.
  *  Memoized: enumerating the OS fonts has a cold-start cost and the installed

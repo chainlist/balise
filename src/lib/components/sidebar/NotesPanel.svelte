@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { notesService, newNoteContent } from '$lib/services/notes.svelte';
+	import { notesService } from '$lib/services/notes.svelte';
+	import { templatesService } from '$lib/services/templates';
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { settingsService } from '$lib/services/settings/settings.svelte';
 	import { formatDate } from '$lib/domain/datetime';
@@ -11,10 +12,33 @@
 	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import TagName from '$lib/components/TagName.svelte';
 	import NoteCard from '$lib/components/sidebar/NoteCard.svelte';
+	import type { NoteListItem } from '$lib/domain/note';
+	import type { NoteTemplate } from '$lib/domain/template';
+	import { PINNED_FILTER, UNTAGGED_FILTER } from '$lib/domain/tag';
 	import TagFilterDropdown from '$lib/components/sidebar/TagFilterDropdown.svelte';
+	import NewNoteButton from '$lib/components/sidebar/NewNoteButton.svelte';
 	import { Button } from '$lib/components/shadcn/button/index.js';
-	import { PlusIcon, XIcon } from '@lucide/svelte';
+	import { XIcon } from '@lucide/svelte';
 	import * as m from '$paraglide/messages.js';
+
+	// Pinned notes get their own group at the top; the rest follow. The service
+	// already sorts pinned-first, so each filter keeps its group's order.
+	const pinnedNotes = $derived(notesService.notes.filter((n) => n.pinned));
+	const otherNotes = $derived(notesService.notes.filter((n) => !n.pinned));
+
+	// A sentinel filter is not a real tag, so it has no display name to look up.
+	const panelTitle = $derived(
+		uiState.activeTag === PINNED_FILTER
+			? m.nav_pinned()
+			: uiState.activeTag === UNTAGGED_FILTER
+				? m.nav_untagged()
+				: uiState.activeTag
+	);
+
+	// Matches the group headings in Sidebar.svelte, minus the horizontal padding
+	// the list container already applies.
+	const SECTION_LABEL =
+		'pt-2 pb-1 text-[11px] font-semibold tracking-wider text-sidebar-foreground/60 uppercase';
 
 	function tagColor(t: string): string | null {
 		return tagsService.tags.find((tag) => tag.tag === t)?.color ?? null;
@@ -30,10 +54,10 @@
 			: null
 	);
 
-	async function handleCreate() {
+	async function handleCreate(template: NoteTemplate | null) {
 		let id: string;
 		try {
-			id = await notesService.create(newNoteContent(uiState.activeTag));
+			id = await templatesService.create(uiState.activeTag, template);
 		} catch (e) {
 			toasterService.error(m.note_create_error_failed(), errorMessage(e));
 			return;
@@ -73,19 +97,11 @@
 			</span>
 		{:else}
 			<span class="text-md flex h-6 min-w-0 items-center font-medium text-on-surface">
-				<TagName tag={uiState.activeTag || m.all_notes()} />
+				<TagName tag={panelTitle || m.all_notes()} />
 			</span>
 		{/if}
 		<div class="flex items-center">
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onclick={handleCreate}
-				aria-label={m.shortcut_new_note_name()}
-				class="h-6 w-6 text-sidebar-foreground/60 hover:text-on-surface"
-			>
-				<PlusIcon class="size-4" />
-			</Button>
+			<NewNoteButton oncreate={handleCreate} />
 			<TagFilterDropdown />
 		</div>
 	</div>
@@ -106,17 +122,26 @@
 		</div>
 	{/if}
 
+	{#snippet noteCards(items: NoteListItem[])}
+		{#each items as note (note.id)}
+			<NoteCard
+				{note}
+				active={uiState.activeNoteId === note.id}
+				onclick={() => handleSelect(note.id)}
+			/>
+		{/each}
+	{/snippet}
+
 	<div class="flex scrollbar-thin flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3">
 		{#if notesService.notes.length === 0}
 			<p class="px-2 py-6 text-center text-sm text-muted-foreground">{m.no_notes_yet()}</p>
+		{:else if pinnedNotes.length > 0 && otherNotes.length > 0}
+			<p class={SECTION_LABEL}>{m.notes_section_pinned()}</p>
+			{@render noteCards(pinnedNotes)}
+			<p class={SECTION_LABEL}>{m.notes_section_other()}</p>
+			{@render noteCards(otherNotes)}
 		{:else}
-			{#each notesService.notes as note (note.id)}
-				<NoteCard
-					{note}
-					active={uiState.activeNoteId === note.id}
-					onclick={() => handleSelect(note.id)}
-				/>
-			{/each}
+			{@render noteCards(notesService.notes)}
 		{/if}
 	</div>
 </div>

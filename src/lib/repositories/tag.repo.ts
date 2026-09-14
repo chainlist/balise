@@ -63,6 +63,15 @@ export const tagRepo = {
 		return rows[0]?.count ?? 0;
 	},
 
+	/** How many notes are pinned — the count beside the sidebar's Pinned filter,
+	 *  which also decides whether that filter is shown at all. */
+	async pinnedCount(): Promise<number> {
+		const rows = await getDb().select<{ count: number }[]>(
+			'SELECT COUNT(*) AS count FROM notes WHERE pinned = 1'
+		);
+		return rows[0]?.count ?? 0;
+	},
+
 	async related(tags: string[]): Promise<RelatedTag[]> {
 		const db = getDb();
 		if (tags.length === 0) {
