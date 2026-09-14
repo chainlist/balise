@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Note, newNoteContent } from './note';
+import { Note, newNoteContent, sortNoteList, type NoteListItem } from './note';
 import { UNTAGGED_FILTER } from './tag';
 
 const SQLITE_UTC = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -68,6 +68,101 @@ describe('Note.withContent', () => {
 		const edited = original.withContent('b', []);
 		expect(edited.updatedAt).not.toBe('2020-01-01 00:00:00');
 		expect(edited.updatedAt).toMatch(SQLITE_UTC);
+	});
+});
+
+// ─── withPinned ───────────────────────────────────────────────────────────────
+
+describe('Note.withPinned', () => {
+	it('flips the flag and preserves content, derivations, and creation time', () => {
+		const original = Note.create('### A\n\nbody #work', [], {
+			id: 'n1',
+			createdAt: '2020-01-01 00:00:00'
+		});
+		const pinned = original.withPinned(true);
+		expect(pinned.pinned).toBe(true);
+		expect(pinned.id).toBe('n1');
+		expect(pinned.content).toBe('### A\n\nbody #work');
+		expect(pinned.title).toBe('A');
+		expect(pinned.tags).toEqual(['work']);
+		expect(pinned.createdAt).toBe('2020-01-01 00:00:00');
+	});
+
+	it('unpins just as well', () => {
+		const original = Note.create('a', [], { pinned: true });
+		expect(original.withPinned(false).pinned).toBe(false);
+	});
+
+	it('bumps updatedAt so the sync diff sees the change', () => {
+		const original = Note.create('a', [], { updatedAt: '2020-01-01 00:00:00' });
+		const pinned = original.withPinned(true);
+		expect(pinned.updatedAt).not.toBe('2020-01-01 00:00:00');
+		expect(pinned.updatedAt).toMatch(SQLITE_UTC);
+	});
+});
+
+// ─── sortNoteList ─────────────────────────────────────────────────────────────
+
+describe('sortNoteList', () => {
+	function item(over: Partial<NoteListItem> & { id: string }): NoteListItem {
+		return {
+			title: '',
+			preview: '',
+			pinned: false,
+			archived: false,
+			createdAt: '2025-01-01 00:00:00',
+			updatedAt: '2025-01-01 00:00:00',
+			...over
+		};
+	}
+
+	it('floats every pinned note above every unpinned one', () => {
+		const sorted = sortNoteList([
+			item({ id: 'loose', updatedAt: '2025-06-01 00:00:00' }),
+			item({ id: 'stuck', title: 'zzz', pinned: true, updatedAt: '2020-01-01 00:00:00' })
+		]);
+		expect(sorted.map((n) => n.id)).toEqual(['stuck', 'loose']);
+	});
+
+	it('orders pinned notes alphabetically, ignoring case', () => {
+		const sorted = sortNoteList([
+			item({ id: 'c', title: 'cherry', pinned: true }),
+			item({ id: 'a', title: 'Apple', pinned: true }),
+			item({ id: 'b', title: 'banana', pinned: true })
+		]);
+		expect(sorted.map((n) => n.id)).toEqual(['a', 'b', 'c']);
+	});
+
+	it('sorts accented titles next to their base letter', () => {
+		const sorted = sortNoteList([
+			item({ id: 'f', title: 'fig', pinned: true }),
+			item({ id: 'e', title: 'Éclair', pinned: true }),
+			item({ id: 'd', title: 'date', pinned: true })
+		]);
+		expect(sorted.map((n) => n.id)).toEqual(['d', 'e', 'f']);
+	});
+
+	it('keeps unpinned notes most-recently-updated first', () => {
+		const sorted = sortNoteList([
+			item({ id: 'old', updatedAt: '2020-01-01 00:00:00' }),
+			item({ id: 'new', updatedAt: '2025-01-01 00:00:00' }),
+			item({ id: 'mid', updatedAt: '2022-01-01 00:00:00' })
+		]);
+		expect(sorted.map((n) => n.id)).toEqual(['new', 'mid', 'old']);
+	});
+
+	it('falls back to recency for pinned notes sharing a title', () => {
+		const sorted = sortNoteList([
+			item({ id: 'older', title: 'same', pinned: true, updatedAt: '2020-01-01 00:00:00' }),
+			item({ id: 'newer', title: 'same', pinned: true, updatedAt: '2025-01-01 00:00:00' })
+		]);
+		expect(sorted.map((n) => n.id)).toEqual(['newer', 'older']);
+	});
+
+	it('does not mutate the input array', () => {
+		const input = [item({ id: 'a' }), item({ id: 'b', pinned: true })];
+		sortNoteList(input);
+		expect(input.map((n) => n.id)).toEqual(['a', 'b']);
 	});
 });
 

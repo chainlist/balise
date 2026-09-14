@@ -35,6 +35,7 @@ pub fn run() {
             commands::file_sync::set_desk_file_mtime,
             commands::attachments::copy_attachment,
             commands::fonts::list_fonts,
+            commands::export::write_export_file,
             sync::sync_desk_files,
             sync::migrate_desk_db,
             commands::device::device_id,

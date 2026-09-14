@@ -1,7 +1,7 @@
 import { tagRepo } from '$lib/repositories/tag.repo';
 import {
 	getTagsForNote,
-	UNTAGGED_FILTER,
+	isFilterSentinel,
 	type Tag,
 	type RelatedTag,
 	type TagOccurrences,
@@ -18,14 +18,21 @@ export { getTagsForNote, extractTags } from '$lib/domain/tag';
 class TagsService {
 	tags = $state<Tag[]>([]);
 	untaggedCount = $state(0);
+	/** Drives the sidebar's Pinned filter: its badge, and whether it appears. */
+	pinnedCount = $state(0);
 	relatedTags = $state<RelatedTag[]>([]);
 	/** Wired from settings by Concept 07; empty until then (no magic tags). */
 	magicRules = $state<MagicTagRule[]>([]);
 
 	async load(): Promise<void> {
-		const [tags, count] = await Promise.all([tagRepo.withCounts(), tagRepo.untaggedCount()]);
+		const [tags, count, pinned] = await Promise.all([
+			tagRepo.withCounts(),
+			tagRepo.untaggedCount(),
+			tagRepo.pinnedCount()
+		]);
 		this.tags = tags;
 		this.untaggedCount = count;
+		this.pinnedCount = pinned;
 	}
 
 	async setSettings(
@@ -49,7 +56,8 @@ class TagsService {
 	}
 
 	async loadRelated(activeTag: string | null, composedTags: string[] = []): Promise<void> {
-		if (activeTag === UNTAGGED_FILTER) {
+		// A sentinel filter is not a tag, so nothing co-occurs with it.
+		if (isFilterSentinel(activeTag)) {
 			this.relatedTags = [];
 			return;
 		}

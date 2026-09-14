@@ -22,6 +22,7 @@
 		"store:default",
 		"fs:default",
 		"dialog:allow-open",
+		"dialog:allow-save",
 		"opener:allow-default-urls",
 		{
 			"identifier": "opener:allow-open-path",

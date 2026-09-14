@@ -84,6 +84,7 @@
 		"@tauri-apps/plugin-window-state": "~2.4.1",
 		"codemirror": "^6.0.2",
 		"d3-force": "^3.0.0",
+		"html-to-image": "^1.11.13",
 		"marked": "^18.0.3",
 		"nanoid": "^5.1.11",
 		"perfect-freehand": "^1.2.3",

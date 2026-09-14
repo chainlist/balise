@@ -4,10 +4,11 @@ import { eventBus } from '$lib/services/events/event-bus';
 import {
 	Note,
 	newNoteContent as buildNewNoteContent,
+	sortNoteList,
 	type NoteListItem,
 	type NoteSearchResult
 } from '$lib/domain/note';
-import { UNTAGGED_FILTER } from '$lib/domain/tag';
+import { PINNED_FILTER, UNTAGGED_FILTER } from '$lib/domain/tag';
 import { dayRange } from '$lib/domain/journal';
 import { toLocalDayKeys, toLocalDayCounts } from '$lib/domain/shared/time';
 import * as m from '$paraglide/messages.js';
@@ -36,10 +37,16 @@ class NotesService {
 
 	async load(tag?: string | null, composedTags: string[] = []): Promise<void> {
 		if (tag === UNTAGGED_FILTER) {
-			this.notes = await noteRepo.findUntagged();
+			this.notes = sortNoteList(await noteRepo.findUntagged());
 			return;
 		}
-		this.notes = await noteRepo.findByTags(tag ? [tag, ...composedTags] : composedTags);
+		if (tag === PINNED_FILTER) {
+			this.notes = sortNoteList(await noteRepo.findPinned());
+			return;
+		}
+		this.notes = sortNoteList(
+			await noteRepo.findByTags(tag ? [tag, ...composedTags] : composedTags)
+		);
 	}
 
 	async create(content = ''): Promise<string> {
@@ -85,6 +92,25 @@ class NotesService {
 	 *  title LIKE vs. empty) lives in the repo, so callers just pass the raw query. */
 	async search(query: string): Promise<NoteSearchResult[]> {
 		return noteRepo.search(query);
+	}
+
+	/** Pin or unpin a note, then re-order the visible list so it moves to (or out
+	 *  of) the pinned block. Needs the content the `.md` mirror is rewritten from,
+	 *  which the list item does not carry, hence the content read. */
+	async setPinned(id: string, pinned: boolean): Promise<void> {
+		const meta = this.notes.find((n) => n.id === id) ?? (await noteRepo.findById(id));
+		if (!meta) return;
+		const content = await noteRepo.loadContent(id);
+		const note = Note.fromListItem(meta)
+			.withContent(content, tagsService.magicRules)
+			.withPinned(pinned);
+		await noteRepo.setPinned(note);
+		// Refreshes the sidebar's pinned count, which decides whether the Pinned
+		// filter is offered at all.
+		await tagsService.load();
+		const item = note.toListItem();
+		this.notes = sortNoteList(this.notes.map((n) => (n.id === id ? item : n)));
+		eventBus.sync.localChange.emit();
 	}
 
 	async delete(id: string): Promise<void> {

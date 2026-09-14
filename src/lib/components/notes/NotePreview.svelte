@@ -1,31 +1,9 @@
 ﻿<script lang="ts">
-	import {
-		marked,
-		type MarkedExtension,
-		type TokenizerAndRendererExtension,
-		type Tokens
-	} from 'marked';
+	import { marked, type Tokens } from 'marked';
 	import { assetsService } from '$lib/services/assets';
-	import { HIGHLIGHT_SOURCE } from '$lib/utils/markdown-patterns';
+	import { highlightExtension } from '$lib/utils/markdown-render';
 
 	let { content }: { content: string } = $props();
-
-	// =text= highlight extension — anchored variant of the shared CM highlight pattern
-	const HIGHLIGHT_TOKEN_RE = new RegExp(`^${HIGHLIGHT_SOURCE}`);
-	const highlightToken: TokenizerAndRendererExtension = {
-		name: 'highlight',
-		level: 'inline',
-		start: (src: string) => src.indexOf('='),
-		tokenizer(src: string) {
-			const match = HIGHLIGHT_TOKEN_RE.exec(src);
-			if (match) return { type: 'highlight', raw: match[0], text: match[1] };
-		},
-		renderer(token: Tokens.Generic) {
-			return `<mark>${token.text}</mark>`;
-		}
-	};
-
-	const highlightExtension: MarkedExtension = { extensions: [highlightToken] };
 
 	const renderer = new marked.Renderer();
 	renderer.image = ({ href, text }: Tokens.Image) => {

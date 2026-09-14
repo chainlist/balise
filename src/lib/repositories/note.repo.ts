@@ -146,6 +146,15 @@ export const noteRepo = {
 		return rows.map(toListItem);
 	},
 
+	/** Pinned notes only — the sidebar's Pinned filter. Ordering is finished by
+	 *  `sortNoteList` in the service, as for every other list. */
+	async findPinned(): Promise<NoteListItem[]> {
+		const rows = await getDb().select<RawNoteRow[]>(
+			`SELECT ${LIST_COLS} FROM notes WHERE pinned = 1 ORDER BY updated_at DESC`
+		);
+		return rows.map(toListItem);
+	},
+
 	async findById(id: string): Promise<NoteListItem | null> {
 		const rows = await getDb().select<RawNoteRow[]>(
 			`SELECT ${LIST_COLS} FROM notes WHERE id = $1`,
@@ -271,6 +280,18 @@ export const noteRepo = {
 	async importNote(note: Note): Promise<void> {
 		await upsertNote(note, true);
 		await setNoteTags(note.id, note.tags);
+	},
+
+	/** Flip a note's pinned flag: the column, the bumped `updated_at`, and the
+	 *  `.md` mirror whose frontmatter carries the flag. No tag rewrite — the
+	 *  content is untouched, so the derived tags cannot have changed. */
+	async setPinned(note: Note): Promise<void> {
+		await getDb().execute('UPDATE notes SET pinned = $1, updated_at = $2 WHERE id = $3', [
+			note.pinned ? 1 : 0,
+			note.updatedAt,
+			note.id
+		]);
+		await this.writeFile(note);
 	},
 
 	/** Tombstone (so the deletion propagates to peers) + row + `.md` file. */

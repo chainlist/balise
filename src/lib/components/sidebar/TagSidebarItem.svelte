@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { uiState } from '$lib/services/ui-state.svelte';
-	import { UNTAGGED_FILTER } from '$lib/domain/tag';
+	import { PINNED_FILTER, UNTAGGED_FILTER } from '$lib/domain/tag';
 	import type { Tag } from '$lib/domain/tag';
 	import { Settings2Icon, PinIcon, HashIcon } from '@lucide/svelte';
 	import TagName from '../TagName.svelte';
@@ -30,7 +30,7 @@
 	class="group/tag-item relative inline-flex w-full items-center justify-between rounded px-2 py-1.5 text-sm text-on-surface-variant transition-all select-none hover:bg-sidebar-accent hover:text-on-surface data-active:rounded-l-none data-active:border-l-[3px] data-active:border-primary-container data-active:bg-sidebar-accent data-active:font-medium data-active:text-on-surface"
 >
 	<div class="flex min-w-0 items-center gap-2">
-		<TagName {tag} untagged={tag.tag === UNTAGGED_FILTER} />
+		<TagName {tag} untagged={tag.tag === UNTAGGED_FILTER} pinned={tag.tag === PINNED_FILTER} />
 	</div>
 	<div
 		role="button"

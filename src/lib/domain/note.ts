@@ -8,7 +8,7 @@
 import { newId } from './shared/id';
 import { toSqliteUtc } from './shared/time';
 import { extractTitle, notePreview } from './shared/markdown';
-import { extractTags, UNTAGGED_FILTER, type MagicTagRule } from './tag';
+import { extractTags, isFilterSentinel, type MagicTagRule } from './tag';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -90,6 +90,23 @@ export class Note {
 			opts.archived ?? false,
 			opts.createdAt ?? now,
 			opts.updatedAt ?? now
+		);
+	}
+
+	/** Flip the pinned flag, bumping `updatedAt` so the change reaches peers — the
+	 *  sync diff keys off `updated_at`, so a silent flag write would never
+	 *  propagate. Content and its derivations are untouched. */
+	withPinned(pinned: boolean): Note {
+		return new Note(
+			this.id,
+			this.content,
+			this.title,
+			this.preview,
+			this.tags,
+			pinned,
+			this.archived,
+			this.createdAt,
+			toSqliteUtc(new Date())
 		);
 	}
 
@@ -187,6 +204,28 @@ export class Note {
 	}
 }
 
+// ─── List ordering (pure) ─────────────────────────────────────────────────────
+
+/**
+ * Display order for the sidebar list: pinned notes first, alphabetical among
+ * themselves, then everything else most-recently-updated first.
+ *
+ * This is the authority on order, not the repo's `ORDER BY`. SQLite's `LOWER()`
+ * is ASCII-only over a BINARY collation, so it cannot sort `Éclair` next to
+ * `eclair` the way a reader expects; `localeCompare` can. The SQL ordering stays
+ * as a cheap pre-sort, and the service applies this on top.
+ */
+export function sortNoteList(items: NoteListItem[]): NoteListItem[] {
+	return [...items].sort((a, b) => {
+		if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+		if (a.pinned) {
+			const byTitle = a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+			if (byTitle !== 0) return byTitle;
+		}
+		return b.updatedAt.localeCompare(a.updatedAt);
+	});
+}
+
 // ─── New-note template (pure) ────────────────────────────────────────────────
 
 /** Seed content for a new note: an `### ` heading and, when a real tag is active,
@@ -194,7 +233,7 @@ export class Note {
  *  domain stays framework-free. */
 export function newNoteContent(titleText: string, activeTag: string | null): string {
 	return (
-		`### ${titleText}\n\n` + (activeTag && activeTag !== UNTAGGED_FILTER ? `#${activeTag}\n\n` : '')
+		`### ${titleText}\n\n` + (activeTag && !isFilterSentinel(activeTag) ? `#${activeTag}\n\n` : '')
 	);
 }
 
