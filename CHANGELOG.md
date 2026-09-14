@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.1](https://github.com/chainlist/balise/compare/v0.42.0...v0.42.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* note export render ([#133](https://github.com/chainlist/balise/issues/133)) ([aa1c93e](https://github.com/chainlist/balise/commit/aa1c93e0491f5447bbd39700a4661134965804d2))
+
 ## [0.42.0](https://github.com/chainlist/balise/compare/v0.41.0...v0.42.0) (2026-09-14)
 
 
