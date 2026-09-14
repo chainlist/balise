@@ -32,6 +32,7 @@
 	"note_export_pdf": "PDF",
 	"note_export_png": "PNG image",
 	"note_export_jpeg": "JPEG image",
+	"note_export_in_progress": "Exporting the note...",
 	"note_export_success": "Note exported.",
 	"note_export_error_failed": "Failed to export the note.",
 	"note_pin_error_failed": "Failed to change the pinned state.",

@@ -1,6 +1,7 @@
 import { fsService } from '$lib/repositories/backend/fs';
 import { openImageFile } from '$lib/repositories/backend/dialog';
 import { copyAttachment } from '$lib/repositories/backend/tauri';
+import { httpClient } from './system/http';
 
 function extFromMime(mimeType: string): string {
 	return (mimeType.split('/')[1] ?? 'png').replace(/\+.*$/, '');
@@ -20,6 +21,13 @@ class AssetsService {
 	/** Read a desk-relative file as bytes (e.g. an embedded image referenced by a note). */
 	readImage(path: string): Promise<Uint8Array> {
 		return fsService.readFile(path);
+	}
+
+	/** Fetch a remote image as bytes. The export rasteriser reads an image back to
+	 *  inline it, which a cross-origin <img> the webview loaded does not allow, so
+	 *  the request goes out over the Rust-side HTTP client instead. */
+	readRemoteImage(url: string): Promise<{ bytes: Uint8Array; mime: string }> {
+		return httpClient.fetchBytes(url);
 	}
 
 	/** Persist a pasted/dropped image under `attachments/` and return its filename. */

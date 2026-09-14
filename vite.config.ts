@@ -8,7 +8,11 @@ export default defineConfig({
 	plugins: [paraglideVitePlugin({ project: './project.inlang', outdir: './src/paraglide' }),tailwindcss(), sveltekit()],
 	server: {
 		watch: {
-			ignored: ['**/src-tauri/**']
+			// The paraglide plugin watches every file its compile reads, and its own
+			// compile rewrites the lix store on each run, so watching it makes each
+			// compile trigger the next one. Its sibling `cache/` is already ignored
+			// by the plugin itself; this covers the rest.
+			ignored: ['**/src-tauri/**', '**/project.inlang/.lix/**']
 		}
 	},
 	test: {

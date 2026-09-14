@@ -70,7 +70,7 @@ export function tagDisplayName(tag: { display_name: string | null; tag: string }
 
 // ─── Hashtag parsing (with positions) ───────────────────────────────────────────
 
-const TAG_PATTERN_SOURCE = String.raw`#([a-zA-Z0-9/]{2,})(?:\(([^)]+)\))?`;
+export const TAG_PATTERN_SOURCE = String.raw`#([a-zA-Z0-9/]{2,})(?:\(([^)]+)\))?`;
 
 export interface HashtagMatch {
 	name: string;
