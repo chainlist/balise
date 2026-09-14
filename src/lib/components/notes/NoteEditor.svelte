@@ -12,8 +12,10 @@
 		PinOffIcon,
 		ListTreeIcon,
 		ExternalLinkIcon,
-		DownloadIcon
+		DownloadIcon,
+		LoaderCircleIcon
 	} from '@lucide/svelte';
+	import { fade } from 'svelte/transition';
 	import NoteDeleteDialog from './NoteDeleteDialog.svelte';
 	import NoteSummarySheet from './NoteSummarySheet.svelte';
 	import NoteExportView from './NoteExportView.svelte';
@@ -242,6 +244,21 @@
 
 {#if exportContent !== null}
 	<NoteExportView bind:this={exportView} content={exportContent} title={note.title} />
+{/if}
+
+<!-- An export draws the note offscreen and fetches what its link cards need
+     before the save dialog can open, which takes long enough to look like a
+     click that did nothing. -->
+{#if exporting}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center gap-3 bg-background/70 backdrop-blur-sm"
+		role="status"
+		aria-live="polite"
+		out:fade={{ duration: 150 }}
+	>
+		<span class="text-sm">{m.note_export_in_progress()}</span>
+		<LoaderCircleIcon class="size-4 animate-spin text-muted-foreground" />
+	</div>
 {/if}
 
 <NoteDeleteDialog {note} bind:open={confirmOpen} />
