@@ -29,7 +29,9 @@ export async function rasterizeNode(
 	encoding: 'png' | 'jpeg'
 ): Promise<RasterImage> {
 	const backgroundColor = getComputedStyle(node).backgroundColor;
-	const options = { pixelRatio: PIXEL_RATIO, backgroundColor, cacheBust: true };
+	// No cache busting: every image in the export view is a freshly created blob
+	// URL, and appending a query string to one makes it unresolvable.
+	const options = { pixelRatio: PIXEL_RATIO, backgroundColor };
 
 	const dataUrl =
 		encoding === 'jpeg'
