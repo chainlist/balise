@@ -32,6 +32,7 @@
 	"note_export_pdf": "PDF",
 	"note_export_png": "Image PNG",
 	"note_export_jpeg": "Image JPEG",
+	"note_export_in_progress": "Export de la note...",
 	"note_export_success": "Note exportée.",
 	"note_export_error_failed": "Échec de l'export de la note.",
 	"note_pin_error_failed": "Échec de la modification de l'épinglage.",

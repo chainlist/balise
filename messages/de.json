@@ -32,6 +32,7 @@
 	"note_export_pdf": "PDF",
 	"note_export_png": "PNG-Bild",
 	"note_export_jpeg": "JPEG-Bild",
+	"note_export_in_progress": "Notiz wird exportiert…",
 	"note_export_success": "Notiz exportiert.",
 	"note_export_error_failed": "Notiz konnte nicht exportiert werden.",
 	"note_pin_error_failed": "Anheftstatus konnte nicht geändert werden.",
