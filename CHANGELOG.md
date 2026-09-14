@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/chainlist/balise/compare/v0.41.0...v0.42.0) (2026-09-14)
+
+
+### Features
+
+* pinned notes export and templating ([#131](https://github.com/chainlist/balise/issues/131)) ([61afc7e](https://github.com/chainlist/balise/commit/61afc7e7da220ef758cee9348d993087af5f6d9c))
+
 ## [0.41.0](https://github.com/chainlist/balise/compare/v0.40.2...v0.41.0) (2026-08-28)
 
 
