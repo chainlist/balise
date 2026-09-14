@@ -35,8 +35,11 @@ class NotesService {
 		);
 	}
 
-	async create(content = ''): Promise<string> {
-		const note = Note.create(content, tagsService.magicRules);
+	/** `id` lets the caller mint the id up front, for anything that must be keyed
+	 *  to the note before it reaches the list (the list drives the open editor, so
+	 *  a claim staked afterwards arrives too late). */
+	async create(content = '', id?: string): Promise<string> {
+		const note = Note.create(content, tagsService.magicRules, { id });
 		await noteRepo.save(note);
 		await tagsService.load();
 		this.notes = [note.toListItem(), ...this.notes];

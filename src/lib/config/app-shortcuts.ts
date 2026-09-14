@@ -55,7 +55,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		defaultBinding: '$mod+n',
 		run: async () => {
 			try {
-				const id = await notesService.create(templatesService.defaultContent(uiState.activeTag));
+				const id = await templatesService.createDefault(uiState.activeTag);
 				eventBus.notes.select.emit(id);
 			} catch (e) {
 				toasterService.error(m.note_create_error_failed(), errorMessage(e));

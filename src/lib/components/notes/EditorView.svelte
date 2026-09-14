@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, untrack, type Snippet } from 'svelte';
 	import { notesService } from '$lib/services/notes.svelte';
+	import { templatesService } from '$lib/services/templates';
 	import type { NoteListItem } from '$lib/domain/note';
 	import { tagsService } from '$lib/services/tags.svelte';
 	import { uiState } from '$lib/services/ui-state.svelte';
@@ -38,6 +39,9 @@
 	// Resolve the content source once: the editor owns its document after mount, so a
 	// later note.content change (e.g. a recycled journal draft) must not reload it.
 	const initialContent = untrack(() => note.content ?? notesService.loadContent(note.id));
+	// A note just created from a template can ask for the caret to land on its
+	// `{{cursor}}` marker. Read once, here, since the claim is consumed.
+	const initialCursor = untrack(() => templatesService.takeCursor(note.id));
 
 	export function getOutline() {
 		return editor?.getOutline() ?? [];
@@ -94,6 +98,7 @@
 			bind:this={editor}
 			{content}
 			{autofocus}
+			{initialCursor}
 			initialFolds={persistFolds ? uiState.getNoteFolds(note.id) : []}
 			onchange={handleChange}
 			onfoldchange={persistFolds ? (folds) => uiState.setNoteFolds(note.id, folds) : undefined}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { EditorView, keymap } from '@codemirror/view';
-	import { Compartment } from '@codemirror/state';
+	import { Compartment, type Extension } from '@codemirror/state';
 	import { history, defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands';
 	import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 	import { GFM } from '@lezer/markdown';
@@ -14,7 +14,7 @@
 		unfoldEffect
 	} from '@codemirror/language';
 	import { untrack } from 'svelte';
-	import { closeBrackets, completionKeymap } from '@codemirror/autocomplete';
+	import { closeBrackets, completionKeymap, type CompletionSource } from '@codemirror/autocomplete';
 	import {
 		mdSyntaxHighlighting,
 		mdHidePlugin,
@@ -43,7 +43,7 @@
 		mdPlaceholderPlugin,
 		mdMarkNavPlugin,
 		mdEmbedPlugin,
-		mdTagCompletion,
+		mdCompletion,
 		spaceRequiredHeadings,
 		getHeadingOutline,
 		noteEditorTheme,
@@ -61,6 +61,9 @@
 		content,
 		autofocus = false,
 		initialFolds = [],
+		initialCursor = null,
+		completionSources = [],
+		extraExtensions = [],
 		onchange,
 		onfoldchange,
 		onfocus,
@@ -69,6 +72,13 @@
 		content: string;
 		autofocus?: boolean;
 		initialFolds?: FoldRange[];
+		/** Caret offset to open on, for a document seeded elsewhere (a template's
+		 *  `{{cursor}}`). `null` keeps the default start-of-document position. */
+		initialCursor?: number | null;
+		/** Completion sources merged with the built-in `#tag` one. */
+		completionSources?: CompletionSource[];
+		/** Extensions only some hosts need, appended last so they can override. */
+		extraExtensions?: Extension[];
 		onchange?: (val: string) => void;
 		onfoldchange?: (folds: FoldRange[]) => void;
 		onfocus?: () => void;
@@ -163,7 +173,7 @@
 					// Editing helpers
 					closeBrackets(),
 					codeFenceAutoClose,
-					mdTagCompletion,
+					mdCompletion(completionSources),
 					mdSlashPlugin,
 					mdTextToolbarPlugin,
 					mdDatePicker,
@@ -205,7 +215,8 @@
 								onfoldchange?.(folds);
 							}
 						}
-					})
+					}),
+					extraExtensions
 				],
 				parent: container
 			});
@@ -215,6 +226,8 @@
 			// saved folds doesn't immediately echo back through onfoldchange.
 			lastFoldKey = JSON.stringify(initialFolds);
 			restoreFolds(view, initialFolds);
+			if (initialCursor !== null)
+				view.dispatch({ selection: { anchor: Math.min(initialCursor, view.state.doc.length) } });
 			if (autofocus) view.focus();
 
 			return () => {

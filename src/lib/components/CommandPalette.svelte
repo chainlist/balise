@@ -109,9 +109,7 @@
 	async function createFromTemplate(template: NoteTemplate) {
 		uiState.modal.isCommandPaletteOpen = false;
 		try {
-			const id = await notesService.create(
-				templatesService.buildContent(uiState.activeTag, template)
-			);
+			const id = await templatesService.create(uiState.activeTag, template);
 			eventBus.notes.select.emit(id);
 		} catch (e) {
 			toasterService.error(m.note_create_error_failed(), errorMessage(e));

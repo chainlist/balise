@@ -57,7 +57,7 @@
 	async function handleCreate(template: NoteTemplate | null) {
 		let id: string;
 		try {
-			id = await notesService.create(templatesService.buildContent(uiState.activeTag, template));
+			id = await templatesService.create(uiState.activeTag, template);
 		} catch (e) {
 			toasterService.error(m.note_create_error_failed(), errorMessage(e));
 			return;
