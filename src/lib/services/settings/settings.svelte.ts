@@ -20,6 +20,7 @@ import { AppearanceSettingsSection } from './appearance.svelte';
 import { EditorSettingsSection } from './editor.svelte';
 import { JournalSettingsSection } from './journal.svelte';
 import { MagicTagsSettingsSection } from './magic-tags.svelte';
+import { NoteTemplatesSettingsSection } from './note-templates.svelte';
 import { ShortcutsSettingsSection } from './shortcuts.svelte';
 import { SyncSettingsSection } from './sync.svelte';
 
@@ -38,6 +39,7 @@ class SettingsService {
 	editor!: EditorSettingsSection;
 	journal!: JournalSettingsSection;
 	magicTags!: MagicTagsSettingsSection;
+	noteTemplates!: NoteTemplatesSettingsSection;
 	shortcuts!: ShortcutsSettingsSection;
 	sync!: SyncSettingsSection;
 
@@ -50,6 +52,7 @@ class SettingsService {
 		this.editor = new EditorSettingsSection();
 		this.journal = new JournalSettingsSection();
 		this.magicTags = new MagicTagsSettingsSection();
+		this.noteTemplates = new NoteTemplatesSettingsSection();
 		this.shortcuts = new ShortcutsSettingsSection();
 		this.sync = new SyncSettingsSection();
 
@@ -65,6 +68,7 @@ class SettingsService {
 			this.editor.load(),
 			this.journal.load(),
 			this.magicTags.load(),
+			this.noteTemplates.load(),
 			this.shortcuts.load(),
 			this.sync.load()
 		]);

@@ -49,6 +49,7 @@
 	"command_palette_group_tags": "Tags",
 	"command_palette_group_commands": "Commands",
 	"command_palette_group_desks": "Desks",
+	"command_palette_group_templates": "Templates",
 	"command_palette_switch_desk": "Switch desk",
 
 	"desk_create_title": "Create a new desk",
@@ -472,5 +473,19 @@
 	"settings_sync_share_settings_label": "Share settings",
 	"settings_sync_share_settings_helper": "Sync your app settings, except sync settings, to paired devices.",
 	"settings_sync_share_desks_label": "Shared desks",
-	"settings_sync_share_desks_helper": "Turn a desk off to keep it on this device only."
+	"settings_sync_share_desks_helper": "Turn a desk off to keep it on this device only.",
+
+	"settings_templates_heading": "Note Templates",
+	"settings_templates_description": "Start new notes from a predefined body.",
+	"settings_templates_placeholders_hint": "Replaced when the note is created:",
+	"settings_templates_name_placeholder": "Template name",
+	"settings_templates_body_placeholder": "Template body",
+	"settings_templates_add": "Add template",
+	"settings_templates_delete": "Delete template",
+	"settings_templates_set_default": "Use for new notes",
+	"settings_templates_default_badge": "Default",
+	"settings_templates_untitled": "Untitled template",
+	"settings_templates_empty": "No template yet. Create one to get started.",
+	"note_new_from_template": "New note from a template",
+	"note_template_blank": "Blank note"
 }

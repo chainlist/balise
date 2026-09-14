@@ -1,24 +1,10 @@
 import { noteRepo } from '$lib/repositories/note.repo';
 import { tagsService } from '$lib/services/tags.svelte';
 import { eventBus } from '$lib/services/events/event-bus';
-import {
-	Note,
-	newNoteContent as buildNewNoteContent,
-	sortNoteList,
-	type NoteListItem,
-	type NoteSearchResult
-} from '$lib/domain/note';
+import { Note, sortNoteList, type NoteListItem, type NoteSearchResult } from '$lib/domain/note';
 import { PINNED_FILTER, UNTAGGED_FILTER } from '$lib/domain/tag';
 import { dayRange } from '$lib/domain/journal';
 import { toLocalDayKeys, toLocalDayCounts } from '$lib/domain/shared/time';
-import * as m from '$paraglide/messages.js';
-
-// Convenience wrapper over the pure domain template, so callers (NotesPanel,
-// shortcuts) keep the no-extra-argument `newNoteContent(activeTag)` call site at
-// cutover while the domain function stays framework-free (title injected here).
-export function newNoteContent(activeTag: string | null): string {
-	return buildNewNoteContent(m.note_new_title(), activeTag);
-}
 
 /** Fields carried by a note imported from a file or peer during sync. */
 export interface ImportOptions {

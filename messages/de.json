@@ -49,6 +49,7 @@
 	"command_palette_group_tags": "Tags",
 	"command_palette_group_commands": "Befehle",
 	"command_palette_group_desks": "Schreibtische",
+	"command_palette_group_templates": "Vorlagen",
 	"command_palette_switch_desk": "Schreibtisch wechseln",
 
 	"desk_create_title": "Neuen Schreibtisch erstellen",
@@ -472,5 +473,19 @@
 	"settings_sync_share_settings_label": "Einstellungen teilen",
 	"settings_sync_share_settings_helper": "Synchronisiere deine App-Einstellungen, außer den Sync-Einstellungen, mit gekoppelten Geräten.",
 	"settings_sync_share_desks_label": "Geteilte Schreibtische",
-	"settings_sync_share_desks_helper": "Schalte einen Schreibtisch aus, um ihn nur auf diesem Gerät zu behalten."
+	"settings_sync_share_desks_helper": "Schalte einen Schreibtisch aus, um ihn nur auf diesem Gerät zu behalten.",
+
+	"settings_templates_heading": "Notizvorlagen",
+	"settings_templates_description": "Neue Notizen mit einem vordefinierten Inhalt beginnen.",
+	"settings_templates_placeholders_hint": "Beim Erstellen der Notiz ersetzt:",
+	"settings_templates_name_placeholder": "Vorlagenname",
+	"settings_templates_body_placeholder": "Vorlageninhalt",
+	"settings_templates_add": "Vorlage hinzufügen",
+	"settings_templates_delete": "Vorlage löschen",
+	"settings_templates_set_default": "Für neue Notizen verwenden",
+	"settings_templates_default_badge": "Standard",
+	"settings_templates_untitled": "Unbenannte Vorlage",
+	"settings_templates_empty": "Noch keine Vorlage. Erstellen Sie eine, um zu beginnen.",
+	"note_new_from_template": "Neue Notiz aus einer Vorlage",
+	"note_template_blank": "Leere Notiz"
 }

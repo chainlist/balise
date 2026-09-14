@@ -49,6 +49,7 @@
 	"command_palette_group_tags": "Tags",
 	"command_palette_group_commands": "Commandes",
 	"command_palette_group_desks": "Bureaux",
+	"command_palette_group_templates": "Modèles",
 	"command_palette_switch_desk": "Changer de bureau",
 
 	"desk_create_title": "Créer un bureau",
@@ -472,5 +473,19 @@
 	"settings_sync_share_settings_label": "Partager les paramètres",
 	"settings_sync_share_settings_helper": "Synchronisez vos paramètres, hors paramètres de synchronisation, vers les appareils associés.",
 	"settings_sync_share_desks_label": "Bureaux partagés",
-	"settings_sync_share_desks_helper": "Désactivez un bureau pour le garder uniquement sur cet appareil."
+	"settings_sync_share_desks_helper": "Désactivez un bureau pour le garder uniquement sur cet appareil.",
+
+	"settings_templates_heading": "Modèles de note",
+	"settings_templates_description": "Démarrer les nouvelles notes à partir d’un contenu prédéfini.",
+	"settings_templates_placeholders_hint": "Remplacés à la création de la note :",
+	"settings_templates_name_placeholder": "Nom du modèle",
+	"settings_templates_body_placeholder": "Contenu du modèle",
+	"settings_templates_add": "Ajouter un modèle",
+	"settings_templates_delete": "Supprimer le modèle",
+	"settings_templates_set_default": "Utiliser pour les nouvelles notes",
+	"settings_templates_default_badge": "Par défaut",
+	"settings_templates_untitled": "Modèle sans nom",
+	"settings_templates_empty": "Aucun modèle pour le moment. Créez-en un pour commencer.",
+	"note_new_from_template": "Nouvelle note à partir d’un modèle",
+	"note_template_blank": "Note vierge"
 }

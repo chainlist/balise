@@ -228,13 +228,15 @@ export function sortNoteList(items: NoteListItem[]): NoteListItem[] {
 
 // ─── New-note template (pure) ────────────────────────────────────────────────
 
-/** Seed content for a new note: an `### ` heading and, when a real tag is active,
- *  its hashtag. The service injects `titleText` (a paraglide message) so the
- *  domain stays framework-free. */
-export function newNoteContent(titleText: string, activeTag: string | null): string {
-	return (
-		`### ${titleText}\n\n` + (activeTag && !isFilterSentinel(activeTag) ? `#${activeTag}\n\n` : '')
-	);
+/** Seed content for a new note: a rendered template `body` when one applies,
+ *  otherwise an `### ` heading, followed by the active tag's hashtag when a real
+ *  tag is active. A template replaces the heading and keeps the tag. The service
+ *  injects `titleText` (a paraglide message) so the domain stays framework-free. */
+export function newNoteContent(titleText: string, activeTag: string | null, body?: string): string {
+	// Only trailing newlines are normalized: a trailing space can be meaningful
+	// (a `- [ ] ` checklist seed), so it is preserved.
+	const head = body?.trim() ? `${body.replace(/\n+$/, '')}\n\n` : `### ${titleText}\n\n`;
+	return head + (activeTag && !isFilterSentinel(activeTag) ? `#${activeTag}\n\n` : '');
 }
 
 // ─── Frontmatter parsing (mirrors the Rust reader) ────────────────────────────

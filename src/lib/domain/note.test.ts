@@ -264,4 +264,18 @@ describe('newNoteContent', () => {
 	it('does not append the untagged sentinel as a tag', () => {
 		expect(newNoteContent('New Note', UNTAGGED_FILTER)).toBe('### New Note\n\n');
 	});
+
+	it('replaces the heading with a template body, keeping the active tag', () => {
+		expect(newNoteContent('New Note', 'work', '## Agenda\n\n- ')).toBe(
+			'## Agenda\n\n- \n\n#work\n\n'
+		);
+	});
+
+	it('normalizes a template body trailing blank lines', () => {
+		expect(newNoteContent('New Note', null, '## Agenda\n\n\n')).toBe('## Agenda\n\n');
+	});
+
+	it('falls back to the heading for an empty template body', () => {
+		expect(newNoteContent('New Note', 'work', '   ')).toBe('### New Note\n\n#work\n\n');
+	});
 });

@@ -49,6 +49,7 @@
 	"command_palette_group_tags": "Etiquetas",
 	"command_palette_group_commands": "Comandos",
 	"command_palette_group_desks": "Escritorios",
+	"command_palette_group_templates": "Plantillas",
 	"command_palette_switch_desk": "Cambiar de escritorio",
 
 	"desk_create_title": "Crear un nuevo escritorio",
@@ -472,5 +473,19 @@
 	"settings_sync_share_settings_label": "Compartir ajustes",
 	"settings_sync_share_settings_helper": "Sincroniza tus ajustes, salvo los de sincronización, con los dispositivos emparejados.",
 	"settings_sync_share_desks_label": "Escritorios compartidos",
-	"settings_sync_share_desks_helper": "Desactiva un escritorio para mantenerlo solo en este dispositivo."
+	"settings_sync_share_desks_helper": "Desactiva un escritorio para mantenerlo solo en este dispositivo.",
+
+	"settings_templates_heading": "Plantillas de nota",
+	"settings_templates_description": "Iniciar las notas nuevas con un contenido predefinido.",
+	"settings_templates_placeholders_hint": "Se sustituyen al crear la nota:",
+	"settings_templates_name_placeholder": "Nombre de la plantilla",
+	"settings_templates_body_placeholder": "Contenido de la plantilla",
+	"settings_templates_add": "Añadir plantilla",
+	"settings_templates_delete": "Eliminar plantilla",
+	"settings_templates_set_default": "Usar para las notas nuevas",
+	"settings_templates_default_badge": "Predeterminada",
+	"settings_templates_untitled": "Plantilla sin nombre",
+	"settings_templates_empty": "Todavía no hay plantillas. Cree una para empezar.",
+	"note_new_from_template": "Nueva nota a partir de una plantilla",
+	"note_template_blank": "Nota en blanco"
 }

@@ -1,5 +1,6 @@
 import type { ShortcutDefinition } from '$lib/services/shortcuts.svelte';
-import { notesService, newNoteContent } from '$lib/services/notes.svelte';
+import { notesService } from '$lib/services/notes.svelte';
+import { templatesService } from '$lib/services/templates';
 import { uiState } from '$lib/services/ui-state.svelte';
 import { activeEditorService } from '$lib/services/active-editor';
 import { settingsService } from '$lib/services/settings/settings.svelte';
@@ -54,7 +55,7 @@ export const APP_SHORTCUTS: ShortcutDefinition[] = [
 		defaultBinding: '$mod+n',
 		run: async () => {
 			try {
-				const id = await notesService.create(newNoteContent(uiState.activeTag));
+				const id = await notesService.create(templatesService.defaultContent(uiState.activeTag));
 				eventBus.notes.select.emit(id);
 			} catch (e) {
 				toasterService.error(m.note_create_error_failed(), errorMessage(e));

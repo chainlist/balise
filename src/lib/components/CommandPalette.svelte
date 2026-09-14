@@ -3,15 +3,23 @@
 	import { uiState } from '$lib/services/ui-state.svelte';
 	import { desksService } from '$lib/services/desks.svelte';
 	import { notesService } from '$lib/services/notes.svelte';
+	import { templatesService } from '$lib/services/templates';
 	import { toasterService, errorMessage } from '$lib/services/toaster';
 	import { tagsService } from '$lib/services/tags.svelte';
 	import { tagDisplayName } from '$lib/domain/tag';
 	import { APP_SHORTCUTS } from '$lib/config/app-shortcuts';
 	import type { NoteSearchResult } from '$lib/domain/note';
+	import type { NoteTemplate } from '$lib/domain/template';
 	import { eventBus } from '$lib/services/events/event-bus';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { FileTextIcon, TagIcon, ZapIcon, LayoutListIcon } from '@lucide/svelte';
+	import {
+		FileTextIcon,
+		TagIcon,
+		ZapIcon,
+		LayoutListIcon,
+		LayoutTemplateIcon
+	} from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 
@@ -48,6 +56,19 @@
 			.slice(0, 3)
 	);
 
+	// A template's name may be empty while it is being written, so it is matched
+	// (and listed) under the same fallback label the settings list shows.
+	const templateLabel = (t: NoteTemplate) => t.name.trim() || m.settings_templates_untitled();
+
+	let filteredTemplates = $derived(
+		(query.trim()
+			? templatesService.templates.filter((t) =>
+					templateLabel(t).toLowerCase().includes(query.toLowerCase())
+				)
+			: templatesService.templates
+		).slice(0, 3)
+	);
+
 	async function handleInput(value: string) {
 		query = value;
 		noteResults = await notesService.search(value);
@@ -80,6 +101,20 @@
 			await goto(resolve('/'));
 		} catch (e) {
 			toasterService.error(m.desk_switch_error_failed(), errorMessage(e));
+		}
+	}
+
+	/** Create a note seeded by the picked template and open it. Mirrors the
+	 *  new-note shortcut: the sidebar's `notes.select` subscriber navigates. */
+	async function createFromTemplate(template: NoteTemplate) {
+		uiState.modal.isCommandPaletteOpen = false;
+		try {
+			const id = await notesService.create(
+				templatesService.buildContent(uiState.activeTag, template)
+			);
+			eventBus.notes.select.emit(id);
+		} catch (e) {
+			toasterService.error(m.note_create_error_failed(), errorMessage(e));
 		}
 	}
 
@@ -140,6 +175,25 @@
 							class="shrink-0 text-xs text-muted-foreground opacity-0 group-data-[selected]/command-item:opacity-100"
 						>
 							{m.command_palette_switch_desk()}
+						</span>
+					</Command.Item>
+				{/each}
+			</Command.Group>
+		{/if}
+
+		{#if filteredTemplates.length > 0}
+			<Command.Group heading={m.command_palette_group_templates()}>
+				{#each filteredTemplates as template (template.id)}
+					<Command.Item
+						value={`template:${template.id}`}
+						onSelect={() => createFromTemplate(template)}
+					>
+						<LayoutTemplateIcon />
+						<span class="min-w-0 flex-1 truncate">{templateLabel(template)}</span>
+						<span
+							class="shrink-0 text-xs text-muted-foreground opacity-0 group-data-[selected]/command-item:opacity-100"
+						>
+							{m.shortcut_new_note_name()}
 						</span>
 					</Command.Item>
 				{/each}
